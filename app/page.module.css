@@ -25,7 +25,6 @@
   font-weight: var(--font-medium);
   color: var(--accent-primary);
   margin-bottom: var(--space-8);
-  animation: fadeInDown 0.6s ease forwards;
 }
 
 .heroTagDot {
@@ -42,9 +41,6 @@
   line-height: 1.05;
   letter-spacing: -0.035em;
   margin-bottom: var(--space-6);
-  animation: fadeInUp 0.7s ease forwards;
-  animation-delay: 100ms;
-  opacity: 0;
 }
 
 .strikethrough {
@@ -70,18 +66,12 @@
   max-width: 600px;
   line-height: 1.6;
   margin-bottom: var(--space-10);
-  animation: fadeInUp 0.7s ease forwards;
-  animation-delay: 200ms;
-  opacity: 0;
 }
 
 .heroCtas {
   display: flex;
   gap: var(--space-4);
   margin-bottom: var(--space-16);
-  animation: fadeInUp 0.7s ease forwards;
-  animation-delay: 300ms;
-  opacity: 0;
 }
 
 .heroCtas .btn {
@@ -94,9 +84,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-10);
-  animation: fadeInUp 0.7s ease forwards;
-  animation-delay: 400ms;
-  opacity: 0;
 }
 
 .stat {
@@ -169,21 +156,16 @@
 .card1 {
   top: 18%;
   right: 8%;
-  animation: float 5s ease-in-out infinite;
 }
 
 .card2 {
   top: 55%;
   left: 5%;
-  animation: float 5s ease-in-out infinite;
-  animation-delay: 1.5s;
 }
 
 .card3 {
   bottom: 25%;
   right: 12%;
-  animation: float 5s ease-in-out infinite;
-  animation-delay: 3s;
 }
 
 .features {

@@ -78,7 +78,3 @@ git push
 ## License
 
 MIT
-# test
-
-# auto-deploy test
-

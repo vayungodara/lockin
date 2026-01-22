@@ -140,6 +140,8 @@
   color: var(--text-primary);
   white-space: nowrap;
   backdrop-filter: blur(8px);
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .cardIcon {
@@ -205,9 +207,11 @@
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-2xl);
-  transition: all var(--transition-base);
+  transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
   position: relative;
   overflow: hidden;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .featureCard::before {
@@ -225,7 +229,6 @@
 .featureCard:hover {
   background: var(--surface-2);
   border-color: var(--border-default);
-  transform: translateY(-4px);
   box-shadow: var(--shadow-xl);
 }
 
@@ -281,13 +284,14 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-2xl);
   text-align: center;
-  transition: all var(--transition-base);
+  transition: background var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base);
   position: relative;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
 }
 
 .step:hover {
   background: var(--surface-2);
-  transform: translateY(-6px);
   box-shadow: var(--shadow-xl);
   border-color: var(--border-default);
 }

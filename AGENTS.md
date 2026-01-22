@@ -434,6 +434,23 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
   - Added text truncation to TaskCard owner names (prevents wrapping)
   - ThemeProvider now always sets `data-theme` attribute (fixes system theme in dark mode)
 
+#### Checkpoint 10 — Production Deployment & Bug Fixes (Jan 22, 2026)
+- **Deployed to Vercel** with GitHub integration
+- **SQL Security Fixes:**
+  - Fixed `mark_overdue_pacts` search_path vulnerability
+  - Created `profiles` table with proper RLS (replaces view)
+  - Secured `activity_log` and `activity_reactions` RLS policies
+  - Created `/supabase/security_fixes_final.sql` (run this for all fixes)
+- **Bug Fixes:**
+  - Added Toast notification system for user error feedback
+  - Fixed N+1 reaction fetching with batch queries
+  - Fixed setTimeout memory leak in GroupDetailClient
+  - Fixed HeatmapCalendar keys issue
+  - Added aria-labels for accessibility
+  - Added error states with retry buttons to DashboardClient
+  - Fixed empty catch block in layout.js
+- **Updated checkpoint8_complete.sql** with secure RLS policies
+
 ### Security Notes (IMPORTANT)
 
 **Run `/supabase/security_patch.sql` before launching to production!**
@@ -463,16 +480,38 @@ GRANT SELECT ON public.user_profiles TO authenticated;
 
 ### Pending / Future Work
 
-#### Pre-Launch (Ready for Vercel)
-- [x] ESLint: 0 errors (13 warnings - non-blocking)
+#### Deployment Status
+- [x] **DEPLOYED TO PRODUCTION** — Vercel
+- [x] ESLint: 0 errors
 - [x] Build: Passes
-- [x] Security: SQL patch created
-- [ ] Run security_patch.sql in Supabase (manual step)
+- [x] Security: All SQL patches applied
+- [x] Google OAuth: Working
+- [x] GitHub repo: github.com/vayungodara/lockin
+
+#### Deployment Workflow
+```bash
+# To deploy changes:
+git add .
+git commit -m "description of changes"
+git push
+# Vercel auto-deploys from main branch
+```
+
+#### Supabase Warnings (Can Ignore)
+- Performance suggestions (43) — These are optimization hints, not errors
+- user_profiles SECURITY DEFINER — Run this SQL if warning persists:
+  ```sql
+  DROP VIEW IF EXISTS public.user_profiles;
+  CREATE VIEW public.user_profiles WITH (security_invoker = true) AS
+  SELECT id, full_name, avatar_url, created_at FROM public.profiles;
+  GRANT SELECT ON public.user_profiles TO authenticated;
+  ```
 
 #### Testing & Launch
 - [x] Bug fixes and edge case handling
-- [ ] Landing page finalization
+- [x] Vercel deployment
 - [ ] Soft launch with classmates for feedback
+- [ ] Gather user feedback and iterate
 
 #### Known Issues (Low Priority - Not Blocking Launch)
 These were identified in final audit but are low-risk for MVP:

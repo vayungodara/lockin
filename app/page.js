@@ -6,13 +6,15 @@ import Navbar from '@/components/Navbar';
 import ParticleBackground from '@/components/ParticleBackground';
 import styles from './page.module.css';
 import { 
-  fadeInUp, 
-  fadeInDown, 
-  staggerContainer, 
-  staggerItem,
-  heroText,
   floatAnimation,
+  buttonHover,
+  buttonTap,
+  cardHoverLift,
+  smoothTransition,
+  iconHover,
 } from '@/lib/animations';
+
+const easeOutQuint = [0.22, 1, 0.36, 1];
 
 const features = [
   {
@@ -98,7 +100,7 @@ const steps = [
 export default function HomePage() {
   return (
     <>
-      <ParticleBackground particleCount={60} speed={0.3} connectDistance={100} />
+      <ParticleBackground particleCount={50} speed={0.25} connectDistance={90} />
       <Navbar />
       
       <main className={styles.main}>
@@ -107,17 +109,16 @@ export default function HomePage() {
             className={styles.heroVisual}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 1, delay: 0.5 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: easeOutQuint }}
           >
             <motion.div 
               className={`${styles.floatingCard} ${styles.card1}`}
-              {...floatAnimation}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
+              initial={{ opacity: 0, x: 30, y: 10 }}
+              animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
               transition={{ 
-                opacity: { delay: 0.8, duration: 0.5 },
-                x: { delay: 0.8, duration: 0.5 },
-                y: { delay: 1.3, duration: 4, repeat: Infinity, ease: "easeInOut" }
+                opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
+                x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
+                y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" }
               }}
             >
               <div className={styles.cardIcon}>
@@ -131,12 +132,12 @@ export default function HomePage() {
             
             <motion.div 
               className={`${styles.floatingCard} ${styles.card2}`}
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0, y: [0, -12, 0] }}
+              initial={{ opacity: 0, x: -30, y: 10 }}
+              animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
               transition={{ 
-                opacity: { delay: 1, duration: 0.5 },
-                x: { delay: 1, duration: 0.5 },
-                y: { delay: 1.5, duration: 5, repeat: Infinity, ease: "easeInOut" }
+                opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
+                x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
+                y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" }
               }}
             >
               <div className={styles.cardIcon} style={{ background: 'var(--warning-light)', color: 'var(--warning)' }}>
@@ -150,12 +151,12 @@ export default function HomePage() {
             
             <motion.div 
               className={`${styles.floatingCard} ${styles.card3}`}
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
+              initial={{ opacity: 0, x: 30, y: -10 }}
+              animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
               transition={{ 
-                opacity: { delay: 1.2, duration: 0.5 },
-                x: { delay: 1.2, duration: 0.5 },
-                y: { delay: 1.7, duration: 4.5, repeat: Infinity, ease: "easeInOut" }
+                opacity: { delay: 1, duration: 0.5, ease: easeOutQuint },
+                x: { delay: 1, duration: 0.5, ease: easeOutQuint },
+                y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" }
               }}
             >
               <div className={styles.cardIcon} style={{ background: 'var(--info-light)', color: 'var(--info)' }}>
@@ -172,30 +173,30 @@ export default function HomePage() {
 
           <motion.div 
             className={styles.heroTag}
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <motion.span 
               className={styles.heroTagDot}
-              animate={{ scale: [1, 1.2, 1], opacity: [1, 0.7, 1] }}
-              transition={{ duration: 2, repeat: Infinity }}
+              animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             />
             Built for students who mean business
           </motion.div>
           
           <motion.h1 
             className={styles.heroTitle}
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, type: "spring", stiffness: 100 }}
+            transition={{ duration: 0.6, delay: 0.15, ease: easeOutQuint }}
           >
             <span className={styles.titleLine}>
               Stop saying <motion.span 
                 className={styles.strikethrough}
-                initial={{ backgroundSize: "0% 4px" }}
-                animate={{ backgroundSize: "100% 4px" }}
-                transition={{ delay: 1, duration: 0.8 }}
+                initial={{ backgroundSize: "0% 3px" }}
+                animate={{ backgroundSize: "100% 3px" }}
+                transition={{ delay: 0.8, duration: 0.6, ease: easeOutQuint }}
               >tomorrow</motion.span>
             </span>
             <br />
@@ -203,7 +204,7 @@ export default function HomePage() {
               className="text-gradient"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6, duration: 0.8 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
             >
               Start locking in today
             </motion.span>
@@ -211,9 +212,9 @@ export default function HomePage() {
           
           <motion.p 
             className={styles.heroDescription}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
           >
             The accountability app that uses social pressure to help you actually follow through. 
             Track commitments, keep your group honest, and finally stop procrastinating.
@@ -221,11 +222,11 @@ export default function HomePage() {
           
           <motion.div 
             className={styles.heroCtas}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
           >
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={buttonHover} whileTap={buttonTap}>
               <Link href="/dashboard" className={`btn btn-primary ${styles.ctaButton}`}>
                 Start Locking In
                 <motion.svg 
@@ -234,14 +235,14 @@ export default function HomePage() {
                   viewBox="0 0 24 24" 
                   fill="none"
                   initial={{ x: 0 }}
-                  whileHover={{ x: 4 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+                  whileHover={{ x: 3 }}
+                  transition={{ duration: 0.2, ease: easeOutQuint }}
                 >
                   <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </motion.svg>
               </Link>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <motion.div whileHover={buttonHover} whileTap={buttonTap}>
               <Link href="#how-it-works" className="btn btn-secondary">
                 See How It Works
               </Link>
@@ -250,9 +251,9 @@ export default function HomePage() {
           
           <motion.div 
             className={styles.heroStats}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.7 }}
+            transition={{ duration: 0.5, delay: 0.55, ease: easeOutQuint }}
           >
             {[
               { number: "100%", label: "Free forever" },
@@ -262,15 +263,15 @@ export default function HomePage() {
               <motion.div 
                 key={stat.label} 
                 className={styles.stat}
-                initial={{ opacity: 0, y: 20 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 + i * 0.1 }}
+                transition={{ delay: 0.65 + i * 0.08, duration: 0.4, ease: easeOutQuint }}
               >
                 <motion.span 
                   className={styles.statNumber}
-                  initial={{ scale: 0.5 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.9 + i * 0.1, type: "spring", stiffness: 200 }}
+                  initial={{ scale: 0.85, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.7 + i * 0.08, duration: 0.35, ease: easeOutQuint }}
                 >
                   {stat.number}
                 </motion.span>
@@ -283,33 +284,29 @@ export default function HomePage() {
         <section id="features" className={styles.features}>
           <motion.div 
             className={styles.sectionHeader}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>Everything you need to <span className="text-gradient">get stuff done</span></h2>
             <p>No more empty promises. LockIn gives you the tools and the social pressure to follow through.</p>
           </motion.div>
           
-          <motion.div 
-            className={styles.featureGrid}
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, margin: "-50px" }}
-          >
+          <div className={styles.featureGrid}>
             {features.map((feature, index) => (
               <motion.div 
                 key={feature.title}
                 className={styles.featureCard}
-                variants={staggerItem}
-                whileHover={{ y: -8, transition: { type: "spring", stiffness: 300 } }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.06, ease: easeOutQuint }}
+                whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
                 <motion.div 
                   className={styles.featureIcon}
-                  whileHover={{ scale: 1.1, rotate: 5 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+                  whileHover={iconHover}
                 >
                   {feature.icon}
                 </motion.div>
@@ -317,41 +314,38 @@ export default function HomePage() {
                 <p>{feature.description}</p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </section>
         
         <section id="how-it-works" className={styles.howItWorks}>
           <motion.div 
             className={styles.sectionHeader}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
+            viewport={{ once: true, amount: 0.5 }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>Get started in <span className="text-gradient">3 simple steps</span></h2>
             <p>No complicated setup. No learning curve. Just accountability.</p>
           </motion.div>
           
-          <motion.div 
-            className={styles.steps}
-            variants={staggerContainer}
-            initial="initial"
-            whileInView="animate"
-            viewport={{ once: true, margin: "-50px" }}
-          >
+          <div className={styles.steps}>
             {steps.map((step, index) => (
               <motion.div 
                 key={step.number}
                 className={styles.step}
-                variants={staggerItem}
-                whileHover={{ y: -8, transition: { type: "spring", stiffness: 300 } }}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.1, ease: easeOutQuint }}
+                whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
                 <motion.div 
                   className={styles.stepNumber}
-                  initial={{ scale: 0 }}
-                  whileInView={{ scale: 1 }}
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
                   viewport={{ once: true }}
-                  transition={{ delay: 0.2 + index * 0.1, type: "spring", stiffness: 200 }}
+                  transition={{ delay: 0.15 + index * 0.08, duration: 0.35, ease: easeOutQuint }}
                 >
                   {step.number}
                 </motion.div>
@@ -359,40 +353,40 @@ export default function HomePage() {
                 <p>{step.description}</p>
               </motion.div>
             ))}
-          </motion.div>
+          </div>
         </section>
         
         <section className={styles.ctaSection}>
           <motion.div 
             className={styles.ctaCard}
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.8, type: "spring" }}
+            viewport={{ once: true, amount: 0.4 }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <motion.h2
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 0.1, duration: 0.4, ease: easeOutQuint }}
             >
               Ready to stop making excuses?
             </motion.h2>
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
+              transition={{ delay: 0.15, duration: 0.4, ease: easeOutQuint }}
             >
               Join students who are finally getting things done. Free, simple, and it works.
             </motion.p>
             <motion.div 
-              whileHover={{ scale: 1.02 }} 
-              whileTap={{ scale: 0.98 }}
-              initial={{ opacity: 0, y: 20 }}
+              whileHover={buttonHover}
+              whileTap={buttonTap}
+              initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.4 }}
+              transition={{ delay: 0.2, duration: 0.4, ease: easeOutQuint }}
             >
               <Link href="/dashboard" className={`btn btn-primary ${styles.ctaButton}`}>
                 Start Locking In
@@ -409,7 +403,7 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.5, ease: easeOutQuint }}
         >
           <div className={styles.footerContent}>
             <div className={styles.footerLogo}>

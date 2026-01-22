@@ -296,6 +296,12 @@ Run `/supabase/mark_overdue_pacts.sql` in Supabase SQL Editor. This creates:
 Run `/supabase/focus_sessions_update_policy.sql` in Supabase SQL Editor. This allows:
 - `UPDATE` on `focus_sessions` for the current user (needed for start/end logging)
 
+### Required SQL for Performance Optimization
+Run `/supabase/performance_fixes.sql` in Supabase SQL Editor. This fixes 46 linting warnings:
+- Replaces `auth.uid()` with `(select auth.uid())` in all RLS policies (28 fixes)
+- Removes duplicate RLS policies on `activity_log` and `focus_sessions` (14 fixes)
+- Drops duplicate indexes on `activity_log` (3 fixes)
+
 ### user_profiles View
 Required for activity feed to show user names/avatars:
 ```sql
@@ -451,6 +457,32 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
   - Fixed empty catch block in layout.js
 - **Updated checkpoint8_complete.sql** with secure RLS policies
 
+#### Checkpoint 11 — Animation Rework & Performance Fixes (Jan 22, 2026)
+- **Complete Animation Overhaul:**
+  - Rewrote `/lib/animations.js` with buttery smooth, GPU-optimized configs
+  - Premium easing curves: `[0.22, 1, 0.36, 1]` (ease-out-quint)
+  - Smoother springs: lower stiffness (150), higher damping (20)
+  - Faster transitions: 0.3-0.5s instead of 0.5-0.8s
+  - Subtle movements: y: 12-20px instead of 30-40px
+- **Landing Page Fixes:**
+  - Fixed double animation / black flash bug on scroll sections
+  - Replaced stagger variants with individual `whileInView` animations
+  - Changed viewport from `margin: "-100px"` to `amount: 0.3`
+  - Reduced particle count for performance (60 → 50)
+- **Dashboard Fixes:**
+  - Added `LayoutGroup` + `AnimatePresence` for smooth pact reordering
+  - New pacts animate in smoothly without full grid re-render
+  - Uses `mode="popLayout"` for clean enter/exit
+- **CSS Transitions:**
+  - Updated `globals.css` transitions to use premium easing
+  - Faster bounce/spring transitions (500ms → 350-400ms)
+- **Supabase Performance Fixes:**
+  - Created `/supabase/performance_fixes.sql` for 46 linting warnings
+  - Replaced `auth.uid()` with `(SELECT auth.uid())` in all RLS policies
+  - Removed duplicate policies on `activity_log` and `focus_sessions`
+  - Dropped duplicate indexes on `activity_log`
+  - Added missing indexes for foreign keys
+
 ### Security Notes (IMPORTANT)
 
 **Run `/supabase/security_patch.sql` before launching to production!**
@@ -498,7 +530,9 @@ git push
 ```
 
 #### Supabase Warnings (Can Ignore)
-- Performance suggestions (43) — These are optimization hints, not errors
+- Performance INFO suggestions (10 remaining) — These are minor hints, not errors
+  - 3 unused indexes (will be used at scale)
+  - 7 unindexed foreign keys (already added in performance_fixes.sql)
 - user_profiles SECURITY DEFINER — Run this SQL if warning persists:
   ```sql
   DROP VIEW IF EXISTS public.user_profiles;

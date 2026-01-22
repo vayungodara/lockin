@@ -132,12 +132,12 @@
   --radius-3xl: 1.5rem;    /* 24px */
   --radius-full: 9999px;
   
-  /* Transitions - Smooth and satisfying */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
-  --transition-spring: 500ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  /* Transitions - Buttery smooth */
+  --transition-fast: 150ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-base: 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-slow: 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  --transition-bounce: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --transition-spring: 350ms cubic-bezier(0.175, 0.885, 0.32, 1.1);
   
   /* Z-index scale */
   --z-base: 0;

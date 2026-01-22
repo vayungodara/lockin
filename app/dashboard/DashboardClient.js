@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap } from '@/lib/animations';
+import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition, layoutSmooth } from '@/lib/animations';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
 import CreatePactModal from '@/components/CreatePactModal';
@@ -172,9 +172,9 @@ export default function DashboardClient({ user }) {
     <>
       <motion.header 
         className={styles.header}
-        initial={{ opacity: 0, y: -20 }}
+        initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
+        transition={smoothTransition}
       >
           <div>
             <h1 className={styles.greeting}>
@@ -315,30 +315,36 @@ export default function DashboardClient({ user }) {
               <h2>Your Pacts</h2>
               <span className={styles.pactCount}>{activePacts.length} active</span>
             </div>
-            <motion.div 
-              className={styles.pactsGrid}
-              variants={staggerContainer}
-              initial="initial"
-              animate="animate"
-            >
-              {pacts.map((pact, index) => (
-                <motion.div key={pact.id} variants={staggerItem}>
-                  <PactCard 
-                    pact={pact} 
-                    onUpdate={handlePactUpdate}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
+            <LayoutGroup>
+              <motion.div className={styles.pactsGrid}>
+                <AnimatePresence mode="popLayout">
+                  {pacts.map((pact) => (
+                    <motion.div 
+                      key={pact.id} 
+                      layout
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.9 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    >
+                      <PactCard 
+                        pact={pact} 
+                        onUpdate={handlePactUpdate}
+                      />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+            </LayoutGroup>
           </motion.div>
         )}
 
         {!isLoading && pacts.length > 0 && (
           <motion.div 
             className={styles.activitySection}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ ...smoothTransition, delay: 0.3 }}
           >
             <HeatmapCalendar userId={user?.id} />
           </motion.div>
@@ -347,9 +353,9 @@ export default function DashboardClient({ user }) {
         {!isLoading && pacts.length > 0 && (
           <motion.div 
             className={styles.activitySection}
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ ...smoothTransition, delay: 0.4 }}
           >
             <ActivityFeed limit={10} />
           </motion.div>

@@ -76,7 +76,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
     () => true
   );
   
-  const [isHovering, setIsHovering] = useState(false);
+    const [hoveredItem, setHoveredItem] = useState(null);
 
   const handleCollapseToggle = useCallback(() => {
     const newState = !isCollapsed;
@@ -140,20 +140,25 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
 
   return (
     <motion.aside
-      className={`${styles.sidebar} ${isExpanded ? styles.expanded : styles.collapsed}`}
+      className={styles.sidebar}
       onMouseEnter={() => setIsHovering(true)}
       onMouseLeave={() => setIsHovering(false)}
       animate={{ width: isExpanded ? 260 : 72 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+      transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
     >
       <div className={styles.header}>
-        <div className={styles.logoIcon}>
+        <motion.div 
+          className={styles.logoIcon}
+          whileHover={{ scale: 1.1, rotate: 5 }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ type: "spring", stiffness: 400, damping: 17 }}
+        >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-        </div>
+        </motion.div>
         <AnimatePresence>
           {isExpanded && (
             <motion.span
@@ -161,7 +166,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.15 }}
+              transition={{ duration: 0.2 }}
             >
               LockIn
             </motion.span>
@@ -170,29 +175,52 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
       </div>
 
       <nav className={styles.nav}>
-        {navItems.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={`${styles.navItem} ${isActive(item.href) ? styles.active : ''}`}
-            title={isExpanded ? undefined : item.label}
-          >
-            <span className={styles.navIcon}>{item.icon}</span>
-            <AnimatePresence>
-              {isExpanded && (
-                <motion.span
-                  className={styles.navLabel}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {item.label}
-                </motion.span>
+        {navItems.map((item) => {
+          const active = isActive(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`${styles.navItem} ${active ? styles.active : ''}`}
+              title={isExpanded ? undefined : item.label}
+              onMouseEnter={() => setHoveredItem(item.href)}
+              onMouseLeave={() => setHoveredItem(null)}
+            >
+              {hoveredItem === item.href && !active && (
+                <motion.div
+                  className={styles.navItemHoverBg}
+                  layoutId="navHover"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                />
               )}
-            </AnimatePresence>
-          </Link>
-        ))}
+              <motion.span 
+                className={styles.navIcon}
+                animate={{ 
+                  scale: active ? 1.1 : 1,
+                  color: active ? 'var(--accent-primary)' : 'currentColor'
+                }}
+              >
+                {item.icon}
+              </motion.span>
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.span
+                    className={styles.navLabel}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </Link>
+          );
+        })}
       </nav>
 
       <div className={styles.footer}>
@@ -217,7 +245,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.15 }}
+                transition={{ duration: 0.2 }}
               >
                 <span className={styles.userName}>
                   {user?.user_metadata?.full_name || 'User'}
@@ -232,7 +260,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           onClick={cycleTheme}
           className={styles.themeBtn}
           aria-label={`Change theme. Current: ${getThemeLabel()}`}
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.1, backgroundColor: 'var(--surface-2)' }}
           whileTap={{ scale: 0.9 }}
         >
           {getThemeIcon()}
@@ -242,7 +270,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           onClick={onSignOut}
           className={styles.signOutBtn}
           aria-label="Sign out"
-          whileHover={{ scale: 1.1 }}
+          whileHover={{ scale: 1.1, backgroundColor: 'var(--danger-bg)', color: 'var(--danger)' }}
           whileTap={{ scale: 0.9 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -253,10 +281,12 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         </motion.button>
       </div>
 
-      <button
+      <motion.button
         className={styles.collapseBtn}
         onClick={handleCollapseToggle}
         aria-label={isCollapsed ? 'Pin sidebar' : 'Collapse sidebar'}
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
       >
         <motion.svg
           width="16"
@@ -265,11 +295,12 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           animate={{ rotate: isCollapsed ? 0 : 180 }}
-          transition={{ duration: 0.2 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
         >
           <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </motion.svg>
-      </button>
+      </motion.button>
     </motion.aside>
   );
 }
+

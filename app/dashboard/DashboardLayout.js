@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { FocusProvider } from '@/lib/FocusContext';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -28,17 +29,19 @@ export default function DashboardLayout({ user, children }) {
   }, []);
 
   return (
-    <div className={styles.layout}>
-      <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
-      <MobileNav />
-      <main 
-        className={styles.main}
-        style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
-      >
-        <ErrorBoundary message="Something went wrong loading this page.">
-          {children}
-        </ErrorBoundary>
-      </main>
-    </div>
+    <FocusProvider>
+      <div className={styles.layout}>
+        <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
+        <MobileNav />
+        <main 
+          className={styles.main}
+          style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
+        >
+          <ErrorBoundary message="Something went wrong loading this page.">
+            {children}
+          </ErrorBoundary>
+        </main>
+      </div>
+    </FocusProvider>
   );
 }

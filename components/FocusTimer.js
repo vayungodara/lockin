@@ -1,165 +1,35 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { createClient } from '@/lib/supabase/client';
+import { useFocus } from '@/lib/FocusContext';
 import { fireSideConfetti } from '@/lib/confetti';
-import { logActivity } from '@/lib/activity';
 import { buttonHover, buttonTap, pulseGlow } from '@/lib/animations';
 import styles from './FocusTimer.module.css';
-
-const WORK_DURATION = 25 * 60;
-const BREAK_DURATION = 5 * 60;
+import { useEffect, useRef } from 'react';
 
 export default function FocusTimer() {
-  const [timeLeft, setTimeLeft] = useState(WORK_DURATION);
-  const [isRunning, setIsRunning] = useState(false);
-  const [mode, setMode] = useState('work');
-  const [sessionsCompleted, setSessionsCompleted] = useState(0);
-  const intervalRef = useRef(null);
-  const startTimeRef = useRef(null);
-  const sessionIdRef = useRef(null);
-  const supabase = createClient();
+  const {
+    timeLeft,
+    isRunning,
+    mode,
+    sessionsCompleted,
+    progress,
+    formatTime,
+    toggleTimer,
+    resetTimer,
+    skipToNext,
+    WORK_DURATION,
+    BREAK_DURATION,
+  } = useFocus();
 
-  const startFocusSession = useCallback(async () => {
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      const user = authData?.user;
-      if (!user) return;
+  const prevSessionsRef = useRef(sessionsCompleted);
 
-      const startedAt = new Date().toISOString();
-      startTimeRef.current = startedAt;
-
-      const { data, error } = await supabase
-        .from('focus_sessions')
-        .insert({
-          user_id: user.id,
-          duration_minutes: 25,
-          started_at: startedAt,
-          ended_at: null
-        })
-        .select('id')
-        .single();
-
-      if (error) throw error;
-
-      sessionIdRef.current = data?.id || null;
-      await logActivity(supabase, 'focus_session_started', null, { duration_minutes: 25 });
-    } catch (err) {
-      console.error('Error starting focus session:', err);
-    }
-  }, [supabase]);
-
-  const endFocusSession = useCallback(async (endTime) => {
-    try {
-      if (!sessionIdRef.current || !startTimeRef.current) return;
-
-      const startedAt = new Date(startTimeRef.current);
-      const endedAt = endTime || new Date();
-      const durationMinutes = Math.max(1, Math.round((endedAt - startedAt) / 60000));
-
-      const { error } = await supabase
-        .from('focus_sessions')
-        .update({
-          ended_at: endedAt.toISOString(),
-          duration_minutes: durationMinutes
-        })
-        .eq('id', sessionIdRef.current);
-
-      if (error) throw error;
-
-      await logActivity(supabase, 'focus_session_completed', null, { duration_minutes: durationMinutes });
-    } catch (err) {
-      console.error('Error ending focus session:', err);
-    } finally {
-      sessionIdRef.current = null;
-      startTimeRef.current = null;
-    }
-  }, [supabase]);
-
-  const handleTimerComplete = useCallback(async () => {
-    setIsRunning(false);
-    
-    if (mode === 'work') {
-      setSessionsCompleted((prev) => prev + 1);
-      
+  useEffect(() => {
+    if (sessionsCompleted > prevSessionsRef.current) {
       fireSideConfetti();
-      
-      await endFocusSession(new Date());
-
-      setMode('break');
-      setTimeLeft(BREAK_DURATION);
-    } else {
-      setMode('work');
-      setTimeLeft(WORK_DURATION);
     }
-  }, [mode, endFocusSession]);
-
-  useEffect(() => {
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isRunning) {
-      intervalRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            handleTimerComplete();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    } else {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    }
-
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current);
-    };
-  }, [isRunning, handleTimerComplete]);
-
-  const toggleTimer = async () => {
-    if (!isRunning && mode === 'work') {
-      await startFocusSession();
-    } else if (isRunning && mode === 'work') {
-      await endFocusSession(new Date());
-    }
-    setIsRunning(!isRunning);
-  };
-
-  const resetTimer = async () => {
-    setIsRunning(false);
-    if (mode === 'work') {
-      await endFocusSession(new Date());
-    }
-    setMode('work');
-    setTimeLeft(WORK_DURATION);
-  };
-
-  const skipToNext = async () => {
-    setIsRunning(false);
-    if (mode === 'work') {
-      await endFocusSession(new Date());
-      setMode('break');
-      setTimeLeft(BREAK_DURATION);
-    } else {
-      setMode('work');
-      setTimeLeft(WORK_DURATION);
-    }
-  };
-
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  const progress = mode === 'work' 
-    ? ((WORK_DURATION - timeLeft) / WORK_DURATION) * 100
-    : ((BREAK_DURATION - timeLeft) / BREAK_DURATION) * 100;
+    prevSessionsRef.current = sessionsCompleted;
+  }, [sessionsCompleted]);
 
   return (
     <div className={styles.container}>

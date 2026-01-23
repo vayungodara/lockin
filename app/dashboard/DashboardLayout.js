@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Sidebar from '@/components/Sidebar';
+import MobileNav from '@/components/MobileNav';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
@@ -28,6 +29,7 @@ export default function DashboardLayout({ user, children }) {
   return (
     <div className={styles.layout}>
       <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
+      <MobileNav />
       <main 
         className={styles.main}
         style={{ marginLeft: sidebarExpanded ? 260 : 72 }}

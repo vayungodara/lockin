@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from './ThemeProvider';
+import { useFocusSafe } from '@/lib/FocusContext';
 import styles from './Sidebar.module.css';
 
 function getSidebarCollapsed() {
@@ -69,6 +70,7 @@ const navItems = [
 export default function Sidebar({ user, onSignOut, onExpandChange }) {
   const pathname = usePathname();
   const { theme, setTheme, resolvedTheme, mounted } = useTheme();
+  const focusContext = useFocusSafe();
   
   const isCollapsed = useSyncExternalStore(
     subscribeToSidebarStorage,
@@ -223,6 +225,30 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           );
         })}
       </nav>
+
+      {focusContext?.isRunning && (
+        <Link href="/dashboard/focus" className={styles.miniTimer}>
+          <motion.div 
+            className={styles.miniTimerPulse}
+            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          />
+          <span className={styles.miniTimerTime}>{focusContext.formatTime(focusContext.timeLeft)}</span>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.span
+                className={styles.miniTimerLabel}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
+              </motion.span>
+            )}
+          </AnimatePresence>
+        </Link>
+      )}
 
       <div className={styles.footer}>
         <div className={styles.userInfo}>

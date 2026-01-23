@@ -158,9 +158,10 @@ export default function GroupDetailClient({ user, group, userRole }) {
     fetchData();
   }, [fetchData]);
 
-  const handleCopyInviteCode = async () => {
+  const handleCopyInviteLink = async () => {
     try {
-      await navigator.clipboard.writeText(group.invite_code);
+      const inviteUrl = `${window.location.origin}/join/${group.invite_code}`;
+      await navigator.clipboard.writeText(inviteUrl);
       setCopiedCode(true);
       if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
       copyTimeoutRef.current = setTimeout(() => setCopiedCode(false), 2000);
@@ -221,12 +222,12 @@ export default function GroupDetailClient({ user, group, userRole }) {
           </div>
         </div>
         <div className={styles.headerActions}>
-          <button className={styles.inviteBtn} onClick={handleCopyInviteCode}>
+          <button className={styles.inviteBtn} onClick={handleCopyInviteLink}>
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" strokeWidth="2"/>
-              <path d="M5 15H4C2.89543 15 2 14.1046 2 13V4C2 2.89543 2.89543 2 4 2H13C14.1046 2 15 2.89543 15 4V5" stroke="currentColor" strokeWidth="2"/>
+              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {copiedCode ? 'Copied!' : group.invite_code}
+            {copiedCode ? 'Copied!' : 'Copy Invite Link'}
           </button>
           <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

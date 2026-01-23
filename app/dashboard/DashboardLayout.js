@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useCallback } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
+import ErrorBoundary from '@/components/ErrorBoundary';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
@@ -34,7 +35,9 @@ export default function DashboardLayout({ user, children }) {
         className={styles.main}
         style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
       >
-        {children}
+        <ErrorBoundary message="Something went wrong loading this page.">
+          {children}
+        </ErrorBoundary>
       </main>
     </div>
   );

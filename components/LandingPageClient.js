@@ -1,9 +1,12 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ParticleBackground from '@/components/ParticleBackground';
+import { createClient } from '@/lib/supabase/client';
 import styles from '../app/page.module.css';
 import { 
   buttonHover,
@@ -95,6 +98,24 @@ const steps = [
 ];
 
 export default function LandingPageClient() {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user) {
+        router.replace('/dashboard');
+      } else {
+        setIsLoading(false);
+      }
+    });
+  }, [router]);
+
+  if (isLoading) {
+    return null;
+  }
+
   return (
     <>
       <ParticleBackground particleCount={50} speed={0.25} connectDistance={90} />

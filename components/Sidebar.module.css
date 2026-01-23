@@ -221,3 +221,10 @@
   color: var(--text-primary);
   border-color: var(--border-strong);
 }
+
+/* Hide sidebar on mobile - use MobileNav instead */
+@media (max-width: 767px) {
+  .sidebar {
+    display: none;
+  }
+}

@@ -9,6 +9,13 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: 'cover',
+};
+
 export const metadata = {
   title: "LockIn - Student Accountability App",
   description: "The app that makes sure tomorrow actually comes — for you and your group. Stop procrastinating, start achieving.",

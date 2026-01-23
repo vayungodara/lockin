@@ -77,6 +77,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
   );
   
     const [hoveredItem, setHoveredItem] = useState(null);
+  const [isHovering, setIsHovering] = useState(false);
 
   const handleCollapseToggle = useCallback(() => {
     const newState = !isCollapsed;

@@ -124,6 +124,8 @@ export default function FocusTimer() {
   const toggleTimer = async () => {
     if (!isRunning && mode === 'work') {
       await startFocusSession();
+    } else if (isRunning && mode === 'work') {
+      await endFocusSession(new Date());
     }
     setIsRunning(!isRunning);
   };

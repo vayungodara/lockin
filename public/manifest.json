@@ -1,0 +1,36 @@
+{
+  "name": "LockIn - Student Accountability",
+  "short_name": "LockIn",
+  "description": "The app that makes sure tomorrow actually comes. Stop procrastinating, start achieving.",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#0a0a0f",
+  "theme_color": "#6366F1",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["productivity", "education"],
+  "shortcuts": [
+    {
+      "name": "Dashboard",
+      "url": "/dashboard",
+      "description": "Go to your dashboard"
+    },
+    {
+      "name": "Focus Timer",
+      "url": "/dashboard/focus",
+      "description": "Start a focus session"
+    },
+    {
+      "name": "Groups",
+      "url": "/dashboard/groups",
+      "description": "View your groups"
+    }
+  ]
+}

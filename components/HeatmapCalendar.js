@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
@@ -12,6 +13,7 @@ export default function HeatmapCalendar({ userId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredDay, setHoveredDay] = useState(null);
   const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
 
   const fetchData = useCallback(async () => {
     try {
@@ -118,6 +120,17 @@ export default function HeatmapCalendar({ userId }) {
             <span className={styles.streakValue}>{streakData.longestStreak}</span>
             <span className={styles.streakLabel}>best</span>
           </div>
+          <button 
+            className={styles.shareBtn}
+            onClick={() => router.push('/share/streak')}
+            title="Share your streak"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+              <path d="M4 12V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <polyline points="16,6 12,2 8,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
 

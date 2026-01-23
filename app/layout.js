@@ -21,6 +21,16 @@ export const metadata = {
   description: "The app that makes sure tomorrow actually comes — for you and your group. Stop procrastinating, start achieving.",
   keywords: ["productivity", "student", "accountability", "group projects", "study", "focus"],
   authors: [{ name: "LockIn" }],
+  manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon.svg",
+    apple: "/icons/icon.svg",
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "LockIn",
+  },
   openGraph: {
     title: "LockIn - Student Accountability App",
     description: "The app that makes sure tomorrow actually comes — for you and your group.",

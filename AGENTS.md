@@ -141,7 +141,24 @@ Run these in Supabase SQL Editor (in order):
 2. `/supabase/security_fixes_final.sql` — Security hardening
 3. `/supabase/performance_fixes.sql` — RLS optimization (46 fixes)
 
-## Recent Changes (Checkpoint 11 — Jan 22, 2026)
+## Recent Changes (Checkpoint 12 — Jan 23, 2026)
+
+**Growth & Sharing Features:**
+- Added `/join/[code]` route for shareable group invite links
+- Updated invite button to copy full URL instead of just code
+- Added `/share/streak` page for shareable streak cards with social share support
+- Added share button to HeatmapCalendar component
+
+**PWA Support:**
+- Added `manifest.json` with app shortcuts
+- Added SVG icon in `/public/icons/`
+- Configured metadata for Apple Web App support
+
+**Stability:**
+- Added `ErrorBoundary` component for graceful error handling
+- Wrapped dashboard content with error boundary
+
+**Previous (Checkpoint 11 — Jan 22, 2026):**
 
 **Animation Rework:**
 - Rewrote `lib/animations.js` with GPU-optimized, buttery smooth configs
@@ -162,7 +179,6 @@ Run these in Supabase SQL Editor (in order):
 ## Pending Features
 
 - [ ] Email reminders for deadlines
-- [ ] Mobile-responsive tuning
 - [ ] Group activity notifications
 - [ ] iOS app (post-MVP)
 

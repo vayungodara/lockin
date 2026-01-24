@@ -151,42 +151,33 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
     >
       <div className={styles.header}>
         <Link href="/dashboard" className={styles.logoLink}>
-          {isExpanded ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.2 }}
-            >
-              <Image
-                src="/logo.png"
-                alt="LockIn"
-                width={143}
-                height={50}
-                priority
-                style={{ width: 'auto', height: '32px' }}
-              />
-            </motion.div>
-          ) : (
-            <motion.div 
-              className={styles.logoIcon}
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="4" y="11" width="16" height="11" rx="2" stroke="url(#lockGradient)" strokeWidth="2"/>
-                <path d="M8 11V7C8 4.79086 9.79086 3 12 3C14.2091 3 16 4.79086 16 7V11" stroke="url(#lockGradient)" strokeWidth="2" strokeLinecap="round"/>
-                <circle cx="12" cy="16" r="2" fill="url(#lockGradient)"/>
-                <defs>
-                  <linearGradient id="lockGradient" x1="4" y1="3" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-                    <stop stopColor="#6366F1"/>
-                    <stop offset="0.5" stopColor="#8B5CF6"/>
-                    <stop offset="1" stopColor="#D946EF"/>
-                  </linearGradient>
-                </defs>
-              </svg>
-            </motion.div>
-          )}
+          <motion.div
+            className={styles.logoIcon}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <Image
+              src="/lock-icon.png"
+              alt="LockIn"
+              width={40}
+              height={40}
+              priority
+              style={{ width: '36px', height: '36px', objectFit: 'contain' }}
+            />
+          </motion.div>
+          <AnimatePresence>
+            {isExpanded && (
+              <motion.span
+                className={styles.logoText}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                transition={{ duration: 0.2, delay: 0.05 }}
+              >
+                LockIn
+              </motion.span>
+            )}
+          </AnimatePresence>
         </Link>
       </div>
 
@@ -343,4 +334,3 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
     </motion.aside>
   );
 }
-

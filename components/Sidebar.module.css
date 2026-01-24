@@ -14,9 +14,8 @@
 .header {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-6);
-  min-height: 80px;
+  padding: var(--space-5) var(--space-4);
+  min-height: 72px;
   overflow: hidden;
   border-bottom: 1px solid transparent;
 }
@@ -25,25 +24,34 @@
   display: flex;
   align-items: center;
   text-decoration: none;
+  height: 40px;
+  gap: var(--space-2);
 }
 
 .logoIcon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  background: var(--surface-2);
-  border-radius: var(--radius-lg);
+  flex-shrink: 0;
+}
+
+.logoFull {
+  display: flex;
+  align-items: center;
 }
 
 .logoText {
-  font-size: var(--text-lg);
+  font-size: var(--text-2xl); /* 24px */
   font-weight: 800;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.04em;
   white-space: nowrap;
+  
+  /* Gradient Text */
+  background: var(--gradient-primary);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent; /* Fallback */
 }
 
 .nav {

@@ -234,8 +234,8 @@ export default function LandingPageClient() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
           >
-            The accountability app that uses social pressure to help you actually follow through. 
-            Track commitments, keep your group honest, and finally stop procrastinating.
+            The app that makes sure tomorrow actually comes.
+            {' '}Track commitments, keep your group honest, and finally stop procrastinating.
           </motion.p>
           
           <motion.div 

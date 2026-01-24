@@ -2,6 +2,7 @@
 
 > **IMPORTANT:** Update this file with significant changes before ending a session.
 
+> **Slogan:** "The app that makes sure tomorrow actually comes."
 > Student accountability app using social pressure to combat procrastination.
 > Built with Next.js 16 (App Router), Supabase, Framer Motion, CSS Modules.
 >
@@ -20,6 +21,7 @@ npm run lint     # ESLint
 /components       # React components (*.js + *.module.css)
 /lib              # Supabase clients, animations, helpers
 /supabase         # SQL schema files
+/public           # Static assets (logo.png, icons/, manifest.json)
 ```
 
 ## Tech Stack
@@ -100,9 +102,11 @@ All tables use RLS. Users access only their own data or group data.
 ## Design System
 
 - **Aesthetic:** Clean, modern. Inspired by Notion, Figma, Arc Browser
+- **Brand Colors:** `#6366F1` (indigo) → `#8B5CF6` (purple) → `#D946EF` (magenta)
 - **Gradient:** `linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)`
+- **Logo:** `/public/logo.png` — padlock icon + "LockIn" wordmark with gradient
 - **Sidebar:** 72px collapsed / 260px expanded (Arc-style)
-- **Theme:** Light-first, dark mode via `data-theme` attribute
+- **Theme:** Dark-first, light mode via `data-theme` attribute
 
 ## Environment Variables
 
@@ -117,6 +121,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 2. **Framer Motion:** Requires `'use client'`
 3. **Theme:** Uses `data-theme` attribute on `<html>`
 4. **Auth:** Google OAuth redirects through `/auth/callback`
+5. **Logo:** Use `next/image` with `style={{ width: 'auto', height: 'Xpx' }}` for proper sizing
 
 ---
 
@@ -128,10 +133,9 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 |------|--------|
 | Build | Passing |
 | ESLint | 0 errors |
-| Security patches | Applied |
+| Logo/Branding | Complete |
+| Mobile Support | Complete |
 | Google OAuth | Working |
-
-**Supabase:** 10 INFO-level warnings remaining (can ignore — minor hints, not errors)
 
 ## SQL Files to Run
 
@@ -139,42 +143,21 @@ Run these in Supabase SQL Editor (in order):
 
 1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies
 2. `/supabase/security_fixes_final.sql` — Security hardening
-3. `/supabase/performance_fixes.sql` — RLS optimization (46 fixes)
+3. `/supabase/performance_fixes.sql` — RLS optimization
 
-## Recent Changes (Checkpoint 12 — Jan 23, 2026)
+## Recent Changes (Checkpoint 13 — Jan 24, 2026)
 
-**Growth & Sharing Features:**
-- Added `/join/[code]` route for shareable group invite links
-- Updated invite button to copy full URL instead of just code
-- Added `/share/streak` page for shareable streak cards with social share support
-- Added share button to HeatmapCalendar component
+**Branding:**
+- Added custom logo (`/public/logo.png`) — padlock with target + "LockIn" wordmark
+- Updated Navbar to use logo image (56px desktop, 40px mobile)
+- Updated Sidebar to show full logo when expanded, padlock icon when collapsed
+- Updated hero slogan: "The app that makes sure tomorrow actually comes."
 
-**PWA Support:**
-- Added `manifest.json` with app shortcuts
-- Added SVG icon in `/public/icons/`
-- Configured metadata for Apple Web App support
-
-**Stability:**
-- Added `ErrorBoundary` component for graceful error handling
-- Wrapped dashboard content with error boundary
-
-**Previous (Checkpoint 11 — Jan 22, 2026):**
-
-**Animation Rework:**
-- Rewrote `lib/animations.js` with GPU-optimized, buttery smooth configs
-- Fixed landing page double animation bug (replaced stagger with `whileInView`)
-- Added `LayoutGroup` + `AnimatePresence` for smooth pact grid reordering
-
-**Performance:**
-- Created `performance_fixes.sql` for 46 Supabase linting warnings
-- Replaced `auth.uid()` with `(SELECT auth.uid())` in all RLS policies
-- Removed duplicate policies and indexes
-
-**Previous (Checkpoint 10):**
-- Deployed to Vercel
-- Added Toast notification system
-- Fixed N+1 reaction fetching
-- Security hardening for RLS policies
+**Previous (Checkpoint 12):**
+- Shareable group invite links (`/join/[code]`)
+- Shareable streak cards (`/share/streak`)
+- PWA manifest with app shortcuts
+- ErrorBoundary component
 
 ## Pending Features
 

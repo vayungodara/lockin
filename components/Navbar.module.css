@@ -4,7 +4,7 @@
   left: 0;
   right: 0;
   z-index: var(--z-sticky);
-  padding: var(--space-4) 0;
+  padding: var(--space-3) 0;
   background: rgba(255, 255, 255, 0.7);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
@@ -107,5 +107,9 @@
   
   .container {
     padding: 0 var(--space-4);
+  }
+
+  .logo img {
+    height: 40px !important;
   }
 }

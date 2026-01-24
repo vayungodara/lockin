@@ -21,6 +21,12 @@
   border-bottom: 1px solid transparent;
 }
 
+.logoLink {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .logoIcon {
   display: flex;
   align-items: center;
@@ -28,10 +34,8 @@
   width: 40px;
   height: 40px;
   min-width: 40px;
-  background: var(--gradient-primary);
+  background: var(--surface-2);
   border-radius: var(--radius-lg);
-  color: white;
-  box-shadow: var(--shadow-glow);
 }
 
 .logoText {

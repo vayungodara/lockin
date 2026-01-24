@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import styles from './Navbar.module.css';
@@ -30,19 +31,20 @@ export default function Navbar() {
     >
       <div className={styles.container}>
         <Link href="/" className={styles.logo}>
-          <motion.span 
-            className={styles.logoIcon}
-            whileHover={{ scale: 1.1, rotate: 5 }}
-            whileTap={{ scale: 0.9 }}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
             transition={smoothSpring}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.span>
-          <span className={styles.logoText}>LockIn</span>
+            <Image
+              src="/logo.png"
+              alt="LockIn"
+              width={200}
+              height={70}
+              priority
+              style={{ width: 'auto', height: '56px' }}
+            />
+          </motion.div>
         </Link>
         
         <div className={styles.navLinks}>

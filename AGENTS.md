@@ -104,7 +104,10 @@ All tables use RLS. Users access only their own data or group data.
 - **Aesthetic:** Clean, modern. Inspired by Notion, Figma, Arc Browser
 - **Brand Colors:** `#6366F1` (indigo) → `#8B5CF6` (purple) → `#D946EF` (magenta)
 - **Gradient:** `linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)`
-- **Logo:** `/public/logo.png` — padlock icon + "LockIn" wordmark with gradient
+- **Logo Assets:**
+  - `/public/logo.png` — Full logo (padlock + "LockIn" wordmark)
+  - `/public/lock-icon.png` — Padlock icon only (transparent)
+  - `/public/logo-text.png` — "LockIn" text only (transparent)
 - **Sidebar:** 72px collapsed / 260px expanded (Arc-style)
 - **Theme:** Dark-first, light mode via `data-theme` attribute
 
@@ -149,8 +152,10 @@ Run these in Supabase SQL Editor (in order):
 
 **Branding:**
 - Added custom logo (`/public/logo.png`) — padlock with target + "LockIn" wordmark
-- Updated Navbar to use logo image (56px desktop, 40px mobile)
-- Updated Sidebar to show full logo when expanded, padlock icon when collapsed
+- Added separate assets: `lock-icon.png` (icon only), `logo-text.png` (text only)
+- Updated Navbar to use full logo image (56px desktop, 40px mobile)
+- Updated Sidebar: lock icon always visible, "LockIn" text fades in on expand
+- Smooth AnimatePresence transition for sidebar logo
 - Updated hero slogan: "The app that makes sure tomorrow actually comes."
 
 **Previous (Checkpoint 12):**

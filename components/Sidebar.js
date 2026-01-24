@@ -159,23 +159,30 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             <Image
               src="/lock-icon.png"
               alt="LockIn"
-              width={40}
-              height={40}
+              width={26}
+              height={32}
               priority
-              style={{ width: '36px', height: '36px', objectFit: 'contain' }}
+              style={{ width: 'auto', height: '32px' }}
             />
           </motion.div>
           <AnimatePresence>
             {isExpanded && (
-              <motion.span
-                className={styles.logoText}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2, delay: 0.05 }}
+              <motion.div
+                className={styles.logoTextWrapper}
+                initial={{ opacity: 0, width: 0 }}
+                animate={{ opacity: 1, width: 'auto' }}
+                exit={{ opacity: 0, width: 0 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
-                LockIn
-              </motion.span>
+                <Image
+                  src="/logo-text.png"
+                  alt="LockIn"
+                  width={107}
+                  height={32}
+                  priority
+                  style={{ width: 'auto', height: '28px' }}
+                />
+              </motion.div>
             )}
           </AnimatePresence>
         </Link>

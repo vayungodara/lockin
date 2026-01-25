@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
 import styles from './HeatmapCalendar.module.css';
@@ -95,12 +94,7 @@ export default function HeatmapCalendar({ userId }) {
   const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   return (
-    <motion.div 
-      className={styles.container}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
+    <div className={styles.container}>
       <div className={styles.header}>
         <h3 className={styles.title}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -188,6 +182,6 @@ export default function HeatmapCalendar({ userId }) {
         <div className={`${styles.legendDay} ${styles.level4}`}></div>
         <span className={styles.legendLabel}>More</span>
       </div>
-    </motion.div>
+    </div>
   );
 }

@@ -254,7 +254,6 @@
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    scroll-snap-type: x mandatory;
     scroll-behavior: smooth;
     margin: 0 calc(-1 * var(--space-6));
     padding: 0 var(--space-6);
@@ -294,7 +293,6 @@
   
   .week {
     flex-shrink: 0;
-    scroll-snap-align: start;
   }
 
   .scrollHint {
@@ -306,17 +304,12 @@
     margin-top: var(--space-3);
     font-size: var(--text-sm);
     color: var(--text-tertiary);
-    animation: pulse 2s ease-in-out infinite;
+    white-space: nowrap;
   }
 
   .scrollHint svg {
     width: 16px;
     height: 16px;
-  }
-
-  @keyframes pulse {
-    0%, 100% { opacity: 0.5; }
-    50% { opacity: 1; }
   }
 }
 

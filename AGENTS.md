@@ -104,19 +104,27 @@ All tables use RLS. Users access only their own data or group data.
 - **Aesthetic:** Clean, modern. Inspired by Notion, Figma, Arc Browser
 - **Brand Colors:** `#6366F1` (indigo) → `#8B5CF6` (purple) → `#D946EF` (magenta)
 - **Gradient:** `linear-gradient(135deg, #6366F1, #8B5CF6, #D946EF)`
-- **Logo Assets:**
-  - `/public/logo.png` — Full logo (padlock + "LockIn" wordmark)
-  - `/public/lock-icon.png` — Padlock icon only (transparent)
-  - `/public/logo-text.png` — "LockIn" text only (transparent)
+- **Logo:** `/public/logo.png` (full), `/public/lock-icon.png` (icon), `/public/logo-text.png` (text)
 - **Sidebar:** 72px collapsed / 260px expanded (Arc-style)
-- **Theme:** Dark-first, light mode via `data-theme` attribute
+- **Theme:** Light-first, dark mode via `data-theme="dark"` on `<html>`
 
-## Environment Variables
+## Mobile Support
 
-```
-NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
-```
+**Status:** Complete ✅
+
+- Responsive breakpoints at 768px and 480px
+- Mobile bottom navigation (`MobileNav.js`) replaces sidebar on mobile
+- Safe area insets for notched devices
+- Touch-friendly 44px minimum tap targets
+- **Global overflow protection** in `globals.css`:
+  ```css
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  body { max-width: 100vw; }
+  ```
+- HeatmapCalendar has intentional horizontal scroll inside `.calendarWrapper`
 
 ## Common Gotchas
 
@@ -124,7 +132,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 2. **Framer Motion:** Requires `'use client'`
 3. **Theme:** Uses `data-theme` attribute on `<html>`
 4. **Auth:** Google OAuth redirects through `/auth/callback`
-5. **Logo:** Use `next/image` with `style={{ width: 'auto', height: 'Xpx' }}` for proper sizing
+5. **Mobile overflow:** Don't add `overflow-x: hidden` to scroll containers like HeatmapCalendar
 
 ---
 
@@ -136,40 +144,28 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 |------|--------|
 | Build | Passing |
 | ESLint | 0 errors |
-| Logo/Branding | Complete |
 | Mobile Support | Complete |
 | Google OAuth | Working |
 
 ## SQL Files to Run
 
-Run these in Supabase SQL Editor (in order):
+Run in Supabase SQL Editor (in order):
 
 1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies
 2. `/supabase/security_fixes_final.sql` — Security hardening
 3. `/supabase/performance_fixes.sql` — RLS optimization
 
-## Recent Changes (Checkpoint 13 — Jan 24, 2026)
+## Recent Changes (Checkpoint 14 — Jan 25, 2026)
 
-**Branding:**
-- Added custom logo (`/public/logo.png`) — padlock with target + "LockIn" wordmark
-- Added separate assets: `lock-icon.png` (icon only), `logo-text.png` (text only)
-- Updated Navbar to use full logo image (56px desktop, 40px mobile)
-- Updated Sidebar: lock icon always visible, "LockIn" text fades in on expand
-- Smooth AnimatePresence transition for sidebar logo
-- Updated hero slogan: "The app that makes sure tomorrow actually comes."
+**Mobile:**
+- Fixed horizontal scrolling on mobile by adding `overflow-x: hidden` to html/body in `globals.css`
+- Added `width: 100%` and `max-width: 100vw` to prevent viewport overflow
 
-**Previous (Checkpoint 12):**
-- Shareable group invite links (`/join/[code]`)
-- Shareable streak cards (`/share/streak`)
-- PWA manifest with app shortcuts
-- ErrorBoundary component
+**Previous checkpoint (13):**
+- Custom logo branding, shareable invite links, PWA manifest
 
 ## Pending Features
 
 - [ ] Email reminders for deadlines
 - [ ] Group activity notifications
 - [ ] iOS app (post-MVP)
-
-## Known Issues
-
-- **Low priority:** `streaks.js`, `activity.js` rely on RLS only (no client-side auth checks)

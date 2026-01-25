@@ -221,7 +221,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@media (max-width: 768px) {
   .modal {
     max-width: calc(100vw - var(--space-8));
   }
@@ -238,22 +238,18 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
   }
   
   .deadlineRow .inputGroup {
     width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
   }
   
   .deadlineRow .input {
     width: 100%;
     max-width: 100%;
     min-width: 0;
-    box-sizing: border-box;
+    -webkit-appearance: none;
+    appearance: none;
   }
   
   .actions {

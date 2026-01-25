@@ -39,10 +39,10 @@ export default function Navbar() {
             <Image
               src="/logo.png"
               alt="LockIn"
-              width={200}
-              height={70}
+              width={160}
+              height={56}
               priority
-              style={{ width: 'auto', height: '56px' }}
+              style={{ width: 'auto', height: '44px' }}
             />
           </motion.div>
         </Link>

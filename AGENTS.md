@@ -119,7 +119,7 @@ All tables use RLS. Users access only their own data or group data.
 - **Global overflow protection** in `globals.css`:
   ```css
   html, body {
-    overflow-x: hidden;
+    overflow-x: clip;  /* NOT hidden - allows nested scroll on iOS */
     width: 100%;
   }
   body { max-width: 100vw; }
@@ -132,7 +132,8 @@ All tables use RLS. Users access only their own data or group data.
 2. **Framer Motion:** Requires `'use client'`
 3. **Theme:** Uses `data-theme` attribute on `<html>`
 4. **Auth:** Google OAuth redirects through `/auth/callback`
-5. **Mobile overflow:** Don't add `overflow-x: hidden` to scroll containers like HeatmapCalendar
+5. **Mobile overflow:** Use `overflow-x: clip` (not `hidden`) on html/body - `hidden` blocks nested scroll on iOS Safari
+6. **Nested scroll on iOS:** If a component needs horizontal scroll, parent must NOT have `overflow-x: hidden`
 
 ---
 
@@ -155,14 +156,17 @@ Run in Supabase SQL Editor (in order):
 2. `/supabase/security_fixes_final.sql` — Security hardening
 3. `/supabase/performance_fixes.sql` — RLS optimization
 
-## Recent Changes (Checkpoint 14 — Jan 25, 2026)
+## Recent Changes (Checkpoint 15 — Jan 25, 2026)
 
-**Mobile:**
-- Fixed horizontal scrolling on mobile by adding `overflow-x: hidden` to html/body in `globals.css`
+**iOS Safari Scroll Fix:**
+- Changed `overflow-x: hidden` to `overflow-x: clip` on html/body
+- `hidden` was blocking nested horizontal scroll containers on iOS Safari (WebKit bug)
+- `clip` clips content without creating scroll container interference
+- HeatmapCalendar activity calendar now scrolls properly on mobile
+
+**Previous checkpoint (14):**
+- Fixed horizontal scrolling on mobile by adding overflow-x to html/body
 - Added `width: 100%` and `max-width: 100vw` to prevent viewport overflow
-
-**Previous checkpoint (13):**
-- Custom logo branding, shareable invite links, PWA manifest
 
 ## Pending Features
 

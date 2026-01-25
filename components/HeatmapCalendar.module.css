@@ -247,6 +247,28 @@
   .calendarWrapper {
     overflow-x: scroll;
     -webkit-overflow-scrolling: touch;
+    /* Make scrollbar visible on mobile */
+    scrollbar-width: thin;
+  }
+  
+  /* Show scrollbar on webkit mobile */
+  .calendarWrapper::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  .calendarWrapper::-webkit-scrollbar-track {
+    background: var(--surface-2);
+    border-radius: 3px;
+  }
+  
+  .calendarWrapper::-webkit-scrollbar-thumb {
+    background: var(--border-default);
+    border-radius: 3px;
+  }
+  
+  /* CRITICAL: Month labels must have same min-width as grid to scroll together */
+  .monthLabels {
+    min-width: 700px;
   }
   
   .grid {

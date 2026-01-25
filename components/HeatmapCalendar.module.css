@@ -233,11 +233,14 @@
   padding: 0 var(--space-1);
 }
 
+.scrollHint {
+  display: none;
+}
+
 @media (max-width: 768px) {
   .container {
     max-width: 100%;
     overflow: visible;
-    position: relative;
   }
 
   .header {
@@ -246,35 +249,52 @@
   }
   
   .calendarWrapper {
+    width: 100%;
     overflow-x: auto;
+    overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    touch-action: pan-x pan-y;
-    scrollbar-width: thin;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
     margin: 0 calc(-1 * var(--space-6));
     padding: 0 var(--space-6);
   }
   
   .calendarWrapper::-webkit-scrollbar {
-    height: 6px;
+    height: 4px;
   }
   
   .calendarWrapper::-webkit-scrollbar-track {
     background: var(--surface-2);
-    border-radius: 3px;
+    border-radius: 2px;
   }
   
   .calendarWrapper::-webkit-scrollbar-thumb {
     background: var(--border-default);
-    border-radius: 3px;
+    border-radius: 2px;
   }
   
   .monthLabels {
-    min-width: 700px;
+    display: flex;
+    min-width: 750px;
+    width: fit-content;
+    flex-shrink: 0;
+  }
+  
+  .calendar {
+    min-width: 750px;
+    width: fit-content;
+    flex-shrink: 0;
   }
   
   .grid {
     min-width: 700px;
+    flex-shrink: 0;
+  }
+  
+  .week {
+    flex-shrink: 0;
+    scroll-snap-align: start;
   }
 
   .scrollHint {
@@ -282,9 +302,9 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-2) 0;
-    margin-top: var(--space-2);
-    font-size: var(--text-xs);
+    padding: var(--space-3) 0;
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
     color: var(--text-tertiary);
     animation: pulse 2s ease-in-out infinite;
   }
@@ -300,6 +320,4 @@
   }
 }
 
-.scrollHint {
-  display: none;
-}
+

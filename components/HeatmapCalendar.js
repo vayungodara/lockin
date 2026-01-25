@@ -43,11 +43,12 @@ export default function HeatmapCalendar({ userId }) {
     const firstDate = heatmapData.length > 0 ? new Date(heatmapData[0].date) : new Date();
     const startPadding = firstDate.getDay();
     
-    for (let i = 0; i < startPadding; i++) {
+    while (currentWeek.length < startPadding) {
       currentWeek.push(null);
     }
     
     heatmapData.forEach((day, index) => {
+      if (index === -1) return;
       currentWeek.push(day);
       
       if (currentWeek.length === 7) {
@@ -128,40 +129,42 @@ export default function HeatmapCalendar({ userId }) {
         </div>
       </div>
 
-      <div className={styles.calendarWrapper}>
-        <div className={styles.monthLabels}>
-          {months.map((month, i) => (
-            <span key={month} className={styles.monthLabel}>{month}</span>
-          ))}
-        </div>
-        
-        <div className={styles.calendar}>
-          <div className={styles.dayLabels}>
-            <span>Mon</span>
-            <span>Wed</span>
-            <span>Fri</span>
+      <div className={styles.calendarViewport}>
+        <div className={styles.calendarWrapper}>
+          <div className={styles.monthLabels}>
+            {months.map((month, i) => (
+              <span key={`${month}-${i}`} className={styles.monthLabel}>{month}</span>
+            ))}
           </div>
           
-          <div className={styles.grid}>
-            {weeks.map((week, weekIndex) => (
-              <div key={`week-${weekIndex}`} className={styles.week}>
-                {week.map((day, dayIndex) => (
-                  <div
-                    key={day ? day.date : `empty-${weekIndex}-${dayIndex}`}
-                    className={`${styles.day} ${day ? styles[`level${day.level}`] : styles.empty}`}
-                    onMouseEnter={() => day && setHoveredDay(day)}
-                    onMouseLeave={() => setHoveredDay(null)}
-                  >
-                    {hoveredDay && hoveredDay.date === day?.date && (
-                      <div className={styles.tooltip}>
-                        <strong>{getActivityText(day.count)}</strong>
-                        <span>{formatDate(day.date)}</span>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            ))}
+          <div className={styles.calendar}>
+            <div className={styles.dayLabels}>
+              <span>Mon</span>
+              <span>Wed</span>
+              <span>Fri</span>
+            </div>
+            
+            <div className={styles.grid}>
+              {weeks.map((week, weekIndex) => (
+                <div key={`week-${weekIndex}`} className={styles.week}>
+                  {week.map((day, dayIndex) => (
+                    <div
+                      key={day ? day.date : `empty-${weekIndex}-${dayIndex}`}
+                      className={`${styles.day} ${day ? styles[`level${day.level}`] : styles.empty}`}
+                      onMouseEnter={() => day && setHoveredDay(day)}
+                      onMouseLeave={() => setHoveredDay(null)}
+                    >
+                      {hoveredDay && hoveredDay.date === day?.date && (
+                        <div className={styles.tooltip}>
+                          <strong>{getActivityText(day.count)}</strong>
+                          <span>{formatDate(day.date)}</span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

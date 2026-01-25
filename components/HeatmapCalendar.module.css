@@ -83,6 +83,10 @@
   color: white;
 }
 
+.calendarViewport {
+  position: relative;
+}
+
 .calendarWrapper {
   overflow-x: auto;
   overflow-y: visible;
@@ -248,15 +252,20 @@
     align-items: flex-start;
   }
   
+  .calendarViewport {
+    margin: 0 calc(-1 * var(--space-6));
+    overflow: hidden;
+  }
+
   .calendarWrapper {
     width: 100%;
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    scroll-behavior: smooth;
-    margin: 0 calc(-1 * var(--space-6));
+    scroll-behavior: auto;
     padding: 0 var(--space-6);
+    touch-action: pan-x;
   }
   
   .calendarWrapper::-webkit-scrollbar {
@@ -300,11 +309,14 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-3) 0;
+    padding: var(--space-2) var(--space-3);
     margin-top: var(--space-3);
-    font-size: var(--text-sm);
+    font-size: var(--text-xs);
     color: var(--text-tertiary);
-    white-space: nowrap;
+    white-space: normal;
+    flex-wrap: wrap;
+    text-align: center;
+    line-height: var(--leading-snug);
   }
 
   .scrollHint svg {
@@ -312,5 +324,4 @@
     height: 16px;
   }
 }
-
 

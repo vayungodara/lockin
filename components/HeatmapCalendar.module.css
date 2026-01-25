@@ -245,8 +245,9 @@
   }
   
   .calendarWrapper {
-    overflow-x: scroll;
+    overflow-x: auto;
     -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
     /* Make scrollbar visible on mobile */
     scrollbar-width: thin;
   }

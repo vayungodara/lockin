@@ -234,6 +234,11 @@
 }
 
 @media (max-width: 768px) {
+  .container {
+    max-width: 100%;
+    overflow: hidden;
+  }
+
   .header {
     flex-direction: column;
     align-items: flex-start;
@@ -241,6 +246,7 @@
   
   .calendarWrapper {
     overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
   }
   
   .grid {

@@ -236,7 +236,7 @@
 @media (max-width: 768px) {
   .container {
     max-width: 100%;
-    overflow: hidden;
+    overflow: visible;
   }
 
   .header {
@@ -248,11 +248,12 @@
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior-x: contain;
-    /* Make scrollbar visible on mobile */
+    touch-action: pan-x pan-y;
     scrollbar-width: thin;
+    margin: 0 calc(-1 * var(--space-6));
+    padding: 0 var(--space-6);
   }
   
-  /* Show scrollbar on webkit mobile */
   .calendarWrapper::-webkit-scrollbar {
     height: 6px;
   }
@@ -267,7 +268,6 @@
     border-radius: 3px;
   }
   
-  /* CRITICAL: Month labels must have same min-width as grid to scroll together */
   .monthLabels {
     min-width: 700px;
   }

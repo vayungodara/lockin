@@ -1,6 +1,7 @@
 .layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-secondary);
 }
 
@@ -8,6 +9,7 @@
   flex: 1;
   padding: var(--space-8);
   min-height: 100vh;
+  min-height: 100dvh;
   transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

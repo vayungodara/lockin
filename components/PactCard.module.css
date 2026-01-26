@@ -59,6 +59,8 @@
   font-weight: var(--font-semibold);
   color: var(--text-primary);
   line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .card.completed .title {
@@ -96,6 +98,8 @@
   font-size: var(--text-sm);
   color: var(--text-secondary);
   line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .footer {

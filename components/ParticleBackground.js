@@ -3,6 +3,11 @@
 import { useEffect, useRef, useCallback } from 'react';
 import { useTheme } from './ThemeProvider';
 
+const isTouchDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 export default function ParticleBackground({ 
   particleCount = 50,
   speed = 0.5,
@@ -49,7 +54,10 @@ export default function ParticleBackground({
     resize();
     window.addEventListener('resize', resize);
 
+    const isTouch = isTouchDevice();
+    
     const handleMouseMove = (e) => {
+      if (isTouch) return;
       mouseRef.current = { x: e.clientX, y: e.clientY };
     };
 
@@ -57,8 +65,10 @@ export default function ParticleBackground({
       mouseRef.current = { x: null, y: null };
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseleave', handleMouseLeave);
+    if (!isTouch) {
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseleave', handleMouseLeave);
+    }
 
     const animate = () => {
       ctx.clearRect(0, 0, width, height);
@@ -121,8 +131,10 @@ export default function ParticleBackground({
 
     return () => {
       window.removeEventListener('resize', resize);
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseleave', handleMouseLeave);
+      if (!isTouchDevice()) {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseleave', handleMouseLeave);
+      }
       if (animationRef.current) {
         cancelAnimationFrame(animationRef.current);
       }

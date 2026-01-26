@@ -29,6 +29,8 @@
   color: var(--text-primary);
   margin: 0 0 var(--space-1) 0;
   line-height: 1.4;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .description {
@@ -40,6 +42,8 @@
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.5;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .meta {
@@ -204,6 +208,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  -webkit-backdrop-filter: blur(2px);
   backdrop-filter: blur(2px);
   z-index: 20;
 }
@@ -223,4 +228,38 @@
 
 @keyframes spin {
   to { transform: rotate(360deg); }
+}
+
+.card.actionsVisible .actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .actions {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    display: flex;
+    gap: var(--space-1);
+    background: var(--bg-primary);
+    padding: var(--space-1);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-default);
+    box-shadow: var(--shadow-md);
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .card.actionsVisible .actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .actionBtn {
+    width: 44px;
+    height: 44px;
+  }
 }

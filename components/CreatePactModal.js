@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
@@ -18,6 +18,15 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
   const [error, setError] = useState('');
 
   const supabase = createClient();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   // Get minimum date (today)
   const today = new Date().toISOString().split('T')[0];

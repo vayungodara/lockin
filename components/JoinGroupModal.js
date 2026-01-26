@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
@@ -11,6 +11,15 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const supabase = createClient();
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

@@ -178,6 +178,12 @@
   opacity: 1;
 }
 
+@media (hover: none) and (pointer: coarse) {
+  .addReactionBtn {
+    opacity: 1;
+  }
+}
+
 .addReactionBtn:hover {
   background: var(--surface-2);
   color: var(--text-secondary);
@@ -252,6 +258,8 @@
   flex-wrap: wrap;
   gap: 4px;
   align-items: baseline;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .userName {

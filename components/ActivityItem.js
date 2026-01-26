@@ -176,7 +176,7 @@ export default function ActivityItem({ activity }) {
                     className={`${styles.reactionBubble} ${userReactions.includes(r.key) ? styles.active : ''}`}
                     onClick={() => handleReaction(r.key)}
                     whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileTap={{ scale: 0.95 }}
                   >
                     <span>{r.emoji}</span>
                     <span className={styles.reactionCount}>{reactionCounts[r.key]}</span>
@@ -190,7 +190,7 @@ export default function ActivityItem({ activity }) {
                 className={styles.addReactionBtn}
                 onClick={() => setShowReactions(!showReactions)}
                 whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                whileTap={{ scale: 0.95 }}
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
@@ -214,7 +214,7 @@ export default function ActivityItem({ activity }) {
                         className={`${styles.reactionOption} ${userReactions.includes(r.key) ? styles.selected : ''}`}
                         onClick={() => handleReaction(r.key)}
                         whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.9 }}
+                        whileTap={{ scale: 0.95 }}
                         title={r.label}
                       >
                         {r.emoji}

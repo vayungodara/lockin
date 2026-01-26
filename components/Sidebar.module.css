@@ -228,8 +228,8 @@
 }
 
 .signOutBtn, .themeBtn {
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -263,6 +263,12 @@
 
 .sidebar:hover .collapseBtn {
   opacity: 1;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .collapseBtn {
+    opacity: 1;
+  }
 }
 
 .collapseBtn:hover {

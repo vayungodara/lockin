@@ -1,8 +1,13 @@
 .container {
+  --cell-size: 11px;
+  --cell-gap: 3px;
+  --cell-radius: 2px;
+  --day-label-width: 28px;
+  
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  padding: var(--space-5);
 }
 
 .loading {
@@ -15,16 +20,16 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-4);
   flex-wrap: wrap;
-  gap: var(--space-4);
+  gap: var(--space-3);
 }
 
 .title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-lg);
+  font-size: var(--text-base);
   font-weight: var(--font-semibold);
   color: var(--text-primary);
   margin: 0;
@@ -36,7 +41,8 @@
 
 .streakBadges {
   display: flex;
-  gap: var(--space-3);
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .streakBadge {
@@ -44,14 +50,14 @@
   align-items: center;
   gap: var(--space-1);
   background: var(--surface-2);
-  padding: var(--space-2) var(--space-3);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-full);
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
 }
 
 .fireIcon,
 .trophyIcon {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .streakValue {
@@ -67,8 +73,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
+  width: 36px;
+  height: 36px;
   background: var(--surface-2);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
@@ -83,72 +89,115 @@
   color: white;
 }
 
-.calendarViewport {
+.calendarSection {
   position: relative;
 }
 
-.calendarWrapper {
+.scrollWrapper {
   overflow-x: auto;
   overflow-y: visible;
+  -webkit-overflow-scrolling: touch;
   padding-bottom: var(--space-2);
-  padding-top: var(--space-10);
-  position: relative;
+}
+
+.scrollWrapper::-webkit-scrollbar {
+  height: 6px;
+}
+
+.scrollWrapper::-webkit-scrollbar-track {
+  background: var(--surface-2);
+  border-radius: 3px;
+}
+
+.scrollWrapper::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+.scrollWrapper::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+.calendarGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: max-content;
+  min-width: 100%;
+}
+
+.monthRow {
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: var(--space-1);
+}
+
+.dayLabelSpacer {
+  width: var(--day-label-width);
+  flex-shrink: 0;
 }
 
 .monthLabels {
-  display: flex;
-  gap: 0;
-  margin-bottom: var(--space-2);
-  padding-left: 32px;
+  display: grid;
+  grid-auto-columns: calc(var(--cell-size) + var(--cell-gap));
+  grid-auto-flow: column;
   font-size: var(--text-xs);
   color: var(--text-tertiary);
+  height: 16px;
 }
 
 .monthLabel {
-  flex: 1;
-  min-width: 50px;
+  white-space: nowrap;
 }
 
-.calendar {
+.gridRow {
   display: flex;
-  gap: var(--space-2);
+  gap: 0;
 }
 
 .dayLabels {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  font-size: var(--text-xs);
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell-size));
+  gap: var(--cell-gap);
+  width: var(--day-label-width);
+  flex-shrink: 0;
+  font-size: 9px;
   color: var(--text-tertiary);
-  padding-right: var(--space-2);
-  height: 90px;
+  padding-right: var(--space-1);
+}
+
+.dayLabel {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: var(--cell-size);
+  line-height: 1;
 }
 
 .grid {
   display: flex;
-  gap: 3px;
-  flex: 1;
+  gap: var(--cell-gap);
 }
 
 .week {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  display: grid;
+  grid-template-rows: repeat(7, var(--cell-size));
+  gap: var(--cell-gap);
 }
 
 .day {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border-radius: var(--cell-radius);
   position: relative;
   cursor: pointer;
-  transition: transform 0.1s ease;
-  z-index: 1;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .day:hover {
-  transform: scale(1.3);
+  transform: scale(1.4);
   z-index: 10;
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 3px var(--accent-primary);
 }
 
 .empty {
@@ -158,6 +207,7 @@
 
 .empty:hover {
   transform: none;
+  box-shadow: none;
 }
 
 .level0 {
@@ -165,7 +215,7 @@
 }
 
 .level1 {
-  background: rgba(99, 102, 241, 0.3);
+  background: rgba(99, 102, 241, 0.25);
 }
 
 .level2 {
@@ -173,7 +223,7 @@
 }
 
 .level3 {
-  background: rgba(99, 102, 241, 0.7);
+  background: rgba(99, 102, 241, 0.75);
 }
 
 .level4 {
@@ -191,7 +241,7 @@
   padding: var(--space-2) var(--space-3);
   font-size: var(--text-xs);
   white-space: nowrap;
-  z-index: 9999;
+  z-index: 100;
   box-shadow: var(--shadow-lg);
   display: flex;
   flex-direction: column;
@@ -213,6 +263,16 @@
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--bg-primary);
+}
+
+.tooltip::before {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   border: 6px solid transparent;
   border-top-color: var(--border-default);
 }
@@ -221,16 +281,16 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-1);
-  margin-top: var(--space-4);
+  gap: 4px;
+  margin-top: var(--space-3);
   font-size: var(--text-xs);
   color: var(--text-tertiary);
 }
 
 .legendDay {
-  width: 12px;
-  height: 12px;
-  border-radius: 2px;
+  width: var(--cell-size);
+  height: var(--cell-size);
+  border-radius: var(--cell-radius);
 }
 
 .legendLabel {
@@ -243,70 +303,31 @@
 
 @media (max-width: 768px) {
   .container {
-    max-width: 100%;
-    overflow: visible;
+    --cell-size: 10px;
+    --cell-gap: 2px;
+    padding: var(--space-4);
   }
 
   .header {
     flex-direction: column;
     align-items: flex-start;
-  }
-  
-  .calendarViewport {
-    margin: 0 calc(-1 * var(--space-6));
-    overflow: hidden;
+    gap: var(--space-3);
   }
 
-  .calendarWrapper {
+  .streakBadges {
     width: 100%;
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    overscroll-behavior-x: contain;
-    scroll-behavior: auto;
-    padding: 0 var(--space-6);
-    touch-action: pan-x;
-  }
-  
-  .calendarWrapper::-webkit-scrollbar {
-    height: 4px;
-  }
-  
-  .calendarWrapper::-webkit-scrollbar-track {
-    background: var(--surface-2);
-    border-radius: 2px;
-  }
-  
-  .calendarWrapper::-webkit-scrollbar-thumb {
-    background: var(--border-default);
-    border-radius: 2px;
-  }
-  
-  .monthLabels {
-    display: flex;
-    min-width: 750px;
-    width: fit-content;
-    flex-shrink: 0;
-  }
-  
-  .calendar {
-    min-width: 750px;
-    width: fit-content;
-    flex-shrink: 0;
-  }
-  
-  .grid {
-    min-width: 700px;
-    flex-shrink: 0;
-  }
-  
-  .week {
-    flex-shrink: 0;
+    justify-content: flex-start;
   }
 
-  .day {
-    width: 14px;
-    height: 14px;
+  .calendarSection {
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 0 var(--space-4);
+  }
+
+  .scrollWrapper {
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 0 var(--space-4);
+    padding-bottom: var(--space-3);
   }
 
   .scrollHint {
@@ -314,19 +335,32 @@
     align-items: center;
     justify-content: center;
     gap: var(--space-2);
-    padding: var(--space-2) var(--space-3);
-    margin-top: var(--space-3);
+    padding: var(--space-2);
     font-size: var(--text-xs);
-    color: var(--text-tertiary);
-    white-space: normal;
-    flex-wrap: wrap;
-    text-align: center;
-    line-height: var(--leading-snug);
+    color: var(--text-muted);
   }
 
   .scrollHint svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .legend {
+    justify-content: center;
   }
 }
 
+@media (max-width: 480px) {
+  .container {
+    --cell-size: 9px;
+    --day-label-width: 22px;
+  }
+
+  .dayLabels {
+    font-size: 8px;
+  }
+
+  .title {
+    font-size: var(--text-sm);
+  }
+}

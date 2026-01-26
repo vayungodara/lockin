@@ -299,7 +299,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           className={styles.themeBtn}
           aria-label={`Change theme. Current: ${getThemeLabel()}`}
           whileHover={{ scale: 1.1, backgroundColor: 'var(--surface-2)' }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.95 }}
         >
           {getThemeIcon()}
         </motion.button>
@@ -309,7 +309,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           className={styles.signOutBtn}
           aria-label="Sign out"
           whileHover={{ scale: 1.1, backgroundColor: 'var(--danger-bg)', color: 'var(--danger)' }}
-          whileTap={{ scale: 0.9 }}
+          whileTap={{ scale: 0.95 }}
         >
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -324,7 +324,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         onClick={handleCollapseToggle}
         aria-label={isCollapsed ? 'Pin sidebar' : 'Collapse sidebar'}
         whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
+        whileTap={{ scale: 0.95 }}
       >
         <motion.svg
           width="16"

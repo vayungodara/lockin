@@ -1,17 +1,27 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useToast } from '@/components/Toast';
 import styles from './TaskCard.module.css';
 
+const isTouchDevice = () => {
+  if (typeof window === 'undefined') return false;
+  return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+};
+
 export default function TaskCard({ task, currentUser, userRole, members, onUpdate, onDelete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [isTouch, setIsTouch] = useState(false);
   const supabase = createClient();
   const toast = useToast();
+
+  useEffect(() => {
+    setIsTouch(isTouchDevice());
+  }, []);
 
   if (!task || !currentUser) {
     return null;
@@ -153,11 +163,21 @@ export default function TaskCard({ task, currentUser, userRole, members, onUpdat
 
   const statusActions = getStatusActions();
 
+  const handleCardInteraction = () => {
+    if (isTouch && canEdit) {
+      setShowActions(prev => !prev);
+    }
+  };
+
   return (
     <div 
-      className={`${styles.card} ${isLoading ? styles.loading : ''}`}
-      onMouseEnter={() => setShowActions(true)}
-      onMouseLeave={() => setShowActions(false)}
+      className={`${styles.card} ${isLoading ? styles.loading : ''} ${isTouch && showActions ? styles.actionsVisible : ''}`}
+      onMouseEnter={() => !isTouch && setShowActions(true)}
+      onMouseLeave={() => !isTouch && setShowActions(false)}
+      onClick={handleCardInteraction}
+      onKeyDown={(e) => e.key === 'Enter' && handleCardInteraction()}
+      role="button"
+      tabIndex={0}
     >
       {/* Task Title & Description */}
       <div className={styles.content}>

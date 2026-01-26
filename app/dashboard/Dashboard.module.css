@@ -1,5 +1,6 @@
 .authContainer {
   min-height: 100vh;
+  min-height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,6 +112,7 @@
 .dashboard {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-secondary);
 }
 
@@ -263,6 +265,7 @@
   margin-left: 260px;
   padding: var(--space-8);
   min-height: 100vh;
+  min-height: 100dvh;
 }
 
 .header {

@@ -153,6 +153,10 @@ export default function HeatmapCalendar({ userId }) {
                       className={`${styles.day} ${day ? styles[`level${day.level}`] : styles.empty}`}
                       onMouseEnter={() => day && setHoveredDay(day)}
                       onMouseLeave={() => setHoveredDay(null)}
+                      onClick={() => day && setHoveredDay(hoveredDay?.date === day.date ? null : day)}
+                      onKeyDown={(e) => e.key === 'Enter' && day && setHoveredDay(hoveredDay?.date === day.date ? null : day)}
+                      role={day ? "button" : undefined}
+                      tabIndex={day ? 0 : undefined}
                     >
                       {hoveredDay && hoveredDay.date === day?.date && (
                         <div className={styles.tooltip}>

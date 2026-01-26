@@ -1,5 +1,6 @@
 .container {
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg-primary);
   padding: var(--space-6);
   max-width: 1200px;

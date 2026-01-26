@@ -298,6 +298,7 @@ body {
   color: var(--text-primary);
   background: var(--bg-primary);
   min-height: 100vh;
+  min-height: 100dvh;
   transition: background-color var(--transition-slow), color var(--transition-slow);
   overflow-x: clip;
   width: 100%;

@@ -67,7 +67,7 @@
 .weekDays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
   margin-bottom: var(--space-1);
 }
 
@@ -81,13 +81,13 @@
 .grid {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 6px;
 }
 
 .weekRow {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 6px;
 }
 
 .dayCell {
@@ -99,7 +99,7 @@
 }
 
 .dayCell:hover {
-  transform: scale(1.15);
+  transform: scale(1.08);
   z-index: 10;
   cursor: pointer;
 }

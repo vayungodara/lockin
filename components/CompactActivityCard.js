@@ -55,10 +55,6 @@ export default function CompactActivityCard({ userId }) {
     }
   };
 
-  const handleDayLeave = () => {
-    setHoveredDay(null);
-  };
-
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString('en-US', { 
@@ -153,7 +149,6 @@ export default function CompactActivityCard({ userId }) {
                       className={`${styles.dayCell} ${styles[`level${day.level}`]}`}
                       onClick={(e) => handleDayClick(day, e)}
                       onMouseEnter={() => handleDayHover(day)}
-                      onMouseLeave={handleDayLeave}
                       role={day.isEmpty ? undefined : "button"}
                       tabIndex={day.isEmpty ? undefined : 0}
                       onKeyDown={(e) => e.key === 'Enter' && handleDayClick(day, e)}

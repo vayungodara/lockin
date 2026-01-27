@@ -146,6 +146,19 @@
   color: var(--text-tertiary);
 }
 
+.tooltipDate {
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.tooltipLine {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  display: block;
+}
+
 .tooltip::after {
   content: '';
   position: absolute;

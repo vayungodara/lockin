@@ -9,7 +9,7 @@ import Link from 'next/link';
 import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
-import HeatmapCalendar from '@/components/HeatmapCalendar';
+import CompactActivityCard from '@/components/CompactActivityCard';
 
 function AnimatedCounter({ value }) {
   const [displayValue, setDisplayValue] = useState(value === 0 ? 0 : null);
@@ -346,7 +346,7 @@ export default function DashboardClient({ user }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...smoothTransition, delay: 0.3 }}
           >
-            <HeatmapCalendar userId={user?.id} />
+            <CompactActivityCard userId={user?.id} />
           </motion.div>
         )}
 

@@ -96,7 +96,7 @@ All tables use RLS. Users access only their own data or group data.
 | Groups | `GroupsPageClient.js`, `GroupDetailClient.js` |
 | Focus Timer | `FocusTimer.js`, `FocusPageClient.js` |
 | Activity Feed | `ActivityFeed.js`, `ActivityItem.js`, `lib/activity.js` |
-| Streaks/Heatmap | `lib/streaks.js`, `HeatmapCalendar.js` |
+| Streaks/Heatmap | `lib/streaks.js`, `CompactActivityCard.js`, `HeatmapCalendar.js` |
 | Theming | `ThemeProvider.js`, `ThemeToggle.js` |
 
 ## Design System
@@ -124,7 +124,8 @@ All tables use RLS. Users access only their own data or group data.
   }
   body { max-width: 100vw; }
   ```
-- HeatmapCalendar has intentional horizontal scroll inside `.calendarWrapper`
+- HeatmapCalendar has intentional horizontal scroll inside `.calendarWrapper` (not used on dashboard, kept for future stats page)
+- **CompactActivityCard** is the main dashboard activity display (2-week grid, no scroll)
 
 ## Common Gotchas
 
@@ -156,7 +157,27 @@ Run in Supabase SQL Editor (in order):
 2. `/supabase/security_fixes_final.sql` — Security hardening
 3. `/supabase/performance_fixes.sql` — RLS optimization
 
-## Recent Changes (Checkpoint 15 — Jan 25, 2026)
+## Recent Changes (Checkpoint 16 — Jan 27, 2026)
+
+**Activity Overview Redesign:**
+- Replaced 365-day `HeatmapCalendar` with new `CompactActivityCard` on dashboard
+- Shows 2-week (14 days) mini heatmap instead of full year
+- Prominent streak display: 🔥 current streak + 🏆 best streak
+- Hover/tap tooltip shows activity count and date
+- Empty state for new users: "✨ Start your streak today!"
+- No horizontal scrolling needed
+- `HeatmapCalendar.js` kept for potential future stats page
+
+**Files Added:**
+- `/components/CompactActivityCard.js` — Compact 2-week activity card
+- `/components/CompactActivityCard.module.css` — Styles with tooltip, empty state
+
+**Files Modified:**
+- `/app/dashboard/DashboardClient.js` — Uses CompactActivityCard instead of HeatmapCalendar
+
+---
+
+## Previous Changes (Checkpoint 15 — Jan 25, 2026)
 
 **iOS Safari Scroll Fix:**
 - Changed `overflow-x: hidden` to `overflow-x: clip` on html/body

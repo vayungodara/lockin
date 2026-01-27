@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
@@ -36,8 +36,16 @@ export default function CompactActivityCard({ userId }) {
     fetchData();
   }, [userId, supabase]);
 
+  const gridRef = useRef(null);
+
   useEffect(() => {
-    const handleClickOutside = () => setHoveredDay(null);
+    const handleClickOutside = (e) => {
+      // Don't close if clicking inside the grid
+      if (gridRef.current && gridRef.current.contains(e.target)) {
+        return;
+      }
+      setHoveredDay(null);
+    };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
   }, []);
@@ -68,24 +76,48 @@ export default function CompactActivityCard({ userId }) {
     if (!heatmapData.length) return [];
     
     const weeksArray = [];
-    for (let i = 0; i < heatmapData.length; i += 7) {
-      const weekData = heatmapData.slice(i, i + 7);
-      const paddedWeek = weekData.map(day => ({ ...day, id: day.date }));
+    let currentWeek = [];
+    
+    // Get the weekday of the first date (0 = Sunday, 1 = Monday, etc.)
+    const firstDate = new Date(heatmapData[0].date);
+    // Convert to Monday-based (0 = Monday, 6 = Sunday)
+    const startPadding = (firstDate.getDay() + 6) % 7;
+    
+    // Add empty cells before first day
+    for (let i = 0; i < startPadding; i++) {
+      currentWeek.push({ 
+        id: `pad-${i}`, 
+        level: 0, 
+        isEmpty: true 
+      });
+    }
+    
+    // Add actual data
+    heatmapData.forEach((day) => {
+      currentWeek.push({ ...day, id: day.date });
       
-      // Fill remaining days to ensure 7 columns
-      while (paddedWeek.length < 7) {
-        paddedWeek.push({ 
-          id: `empty-${i}-${paddedWeek.length}`, 
+      if (currentWeek.length === 7) {
+        weeksArray.push(currentWeek);
+        currentWeek = [];
+      }
+    });
+    
+    // Pad the last week if incomplete
+    if (currentWeek.length > 0) {
+      while (currentWeek.length < 7) {
+        currentWeek.push({ 
+          id: `empty-end-${currentWeek.length}`, 
           level: 0, 
           isEmpty: true 
         });
       }
-      weeksArray.push(paddedWeek);
+      weeksArray.push(currentWeek);
     }
+    
     return weeksArray;
   }, [heatmapData]);
 
-  const hasNoActivity = heatmapData.every(day => day.count === 0) && streakData.currentStreak === 0;
+  const hasNoActivity = heatmapData.every(day => day.pactCount === 0 && day.focusCount === 0) && streakData.currentStreak === 0;
 
   if (isLoading) {
     return (
@@ -140,7 +172,7 @@ export default function CompactActivityCard({ userId }) {
               <span className={styles.dayLabel}>S</span>
             </div>
 
-            <div className={styles.grid}>
+            <div className={styles.grid} ref={gridRef}>
               {weeks.map((week) => (
                 <div key={week[0].id} className={styles.weekRow}>
                   {week.map((day) => (
@@ -155,8 +187,20 @@ export default function CompactActivityCard({ userId }) {
                     >
                       {hoveredDay && hoveredDay.date === day.date && (
                         <div className={styles.tooltip}>
-                          <strong>{day.count} {day.count === 1 ? 'activity' : 'activities'}</strong>
-                          <span>{formatDate(day.date)}</span>
+                          <span className={styles.tooltipDate}>{formatDate(day.date)}</span>
+                          {day.pactCount > 0 && (
+                            <span className={styles.tooltipLine}>
+                              ✓ {day.pactCount} pact{day.pactCount !== 1 ? 's' : ''} completed
+                            </span>
+                          )}
+                          {day.focusCount > 0 && (
+                            <span className={styles.tooltipLine}>
+                              ⏱ {day.focusCount} focus session{day.focusCount !== 1 ? 's' : ''}
+                            </span>
+                          )}
+                          {day.pactCount === 0 && day.focusCount === 0 && (
+                            <span className={styles.tooltipLine}>No activity</span>
+                          )}
                         </div>
                       )}
                     </div>

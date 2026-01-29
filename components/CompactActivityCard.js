@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
@@ -12,18 +12,18 @@ export default function CompactActivityCard({ userId }) {
   const [isLoading, setIsLoading] = useState(true);
   const [hoveredDay, setHoveredDay] = useState(null);
   
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     async function fetchData() {
       if (!userId) return;
-      
+
       try {
         const [heatmap, streak] = await Promise.all([
           getActivityHeatmap(supabase, userId, 14),
           calculateStreak(supabase, userId)
         ]);
-        
+
         setHeatmapData(heatmap.data || []);
         setStreakData(streak);
       } catch (err) {
@@ -32,23 +32,24 @@ export default function CompactActivityCard({ userId }) {
         setIsLoading(false);
       }
     }
-    
+
     fetchData();
   }, [userId, supabase]);
 
   const gridRef = useRef(null);
 
+  const handleClickOutside = useCallback((e) => {
+    // Don't close if clicking inside the grid
+    if (gridRef.current && gridRef.current.contains(e.target)) {
+      return;
+    }
+    setHoveredDay(null);
+  }, []);
+
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      // Don't close if clicking inside the grid
-      if (gridRef.current && gridRef.current.contains(e.target)) {
-        return;
-      }
-      setHoveredDay(null);
-    };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [handleClickOutside]);
 
   const handleDayClick = (day, e) => {
     e.stopPropagation();
@@ -61,6 +62,10 @@ export default function CompactActivityCard({ userId }) {
     if (day && !day.isEmpty) {
       setHoveredDay(day);
     }
+  };
+
+  const handleGridLeave = () => {
+    setHoveredDay(null);
   };
 
   const formatDate = (dateStr) => {
@@ -172,39 +177,42 @@ export default function CompactActivityCard({ userId }) {
               <span className={styles.dayLabel}>S</span>
             </div>
 
-            <div className={styles.grid} ref={gridRef}>
-              {weeks.map((week) => (
+            <div className={styles.grid} ref={gridRef} onMouseLeave={handleGridLeave}>
+              {weeks.map((week, weekIndex) => (
                 <div key={week[0].id} className={styles.weekRow}>
-                  {week.map((day) => (
-                    <div 
-                      key={day.id}
-                      className={`${styles.dayCell} ${styles[`level${day.level}`]}`}
-                      onClick={(e) => handleDayClick(day, e)}
-                      onMouseEnter={() => handleDayHover(day)}
-                      role={day.isEmpty ? undefined : "button"}
-                      tabIndex={day.isEmpty ? undefined : 0}
-                      onKeyDown={(e) => e.key === 'Enter' && handleDayClick(day, e)}
-                    >
-                      {hoveredDay && hoveredDay.date === day.date && (
-                        <div className={styles.tooltip}>
-                          <span className={styles.tooltipDate}>{formatDate(day.date)}</span>
-                          {day.pactCount > 0 && (
-                            <span className={styles.tooltipLine}>
-                              ✓ {day.pactCount} pact{day.pactCount !== 1 ? 's' : ''} completed
-                            </span>
-                          )}
-                          {day.focusCount > 0 && (
-                            <span className={styles.tooltipLine}>
-                              ⏱ {day.focusCount} focus session{day.focusCount !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                          {day.pactCount === 0 && day.focusCount === 0 && (
-                            <span className={styles.tooltipLine}>No activity</span>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  ))}
+                  {week.map((day) => {
+                    const isTopRow = weekIndex === 0;
+                    return (
+                      <div
+                        key={day.id}
+                        className={`${styles.dayCell} ${styles[`level${day.level}`]}`}
+                        onClick={(e) => handleDayClick(day, e)}
+                        onMouseEnter={() => handleDayHover(day)}
+                        role={day.isEmpty ? undefined : "button"}
+                        tabIndex={day.isEmpty ? undefined : 0}
+                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
+                      >
+                        {hoveredDay && hoveredDay.date === day.date && (
+                          <div className={`${styles.tooltip} ${isTopRow ? styles.tooltipBelow : ''}`}>
+                            <span className={styles.tooltipDate}>{formatDate(day.date)}</span>
+                            {day.pactCount > 0 && (
+                              <span className={styles.tooltipLine}>
+                                ✓ {day.pactCount} pact{day.pactCount !== 1 ? 's' : ''} completed
+                              </span>
+                            )}
+                            {day.focusCount > 0 && (
+                              <span className={styles.tooltipLine}>
+                                ⏱ {day.focusCount} focus session{day.focusCount !== 1 ? 's' : ''}
+                              </span>
+                            )}
+                            {day.pactCount === 0 && day.focusCount === 0 && (
+                              <span className={styles.tooltipLine}>No activity</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ))}
             </div>

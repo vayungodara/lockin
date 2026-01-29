@@ -175,7 +175,7 @@ export default function TaskCard({ task, currentUser, userRole, members, onUpdat
       onMouseEnter={() => !isTouch && setShowActions(true)}
       onMouseLeave={() => !isTouch && setShowActions(false)}
       onClick={handleCardInteraction}
-      onKeyDown={(e) => e.key === 'Enter' && handleCardInteraction()}
+      onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleCardInteraction()}
       role="button"
       tabIndex={0}
     >

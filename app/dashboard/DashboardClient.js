@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition, layoutSmooth } from '@/lib/animations';
@@ -44,7 +44,7 @@ export default function DashboardClient({ user }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchPacts = useCallback(async () => {
     try {

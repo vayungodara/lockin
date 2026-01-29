@@ -110,6 +110,17 @@
 .level3 { background: rgba(99, 102, 241, 0.75); }
 .level4 { background: var(--accent-primary); }
 
+/* Empty/padding cells - non-interactive */
+.emptyCell {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.emptyCell:hover {
+  transform: none;
+  cursor: default;
+}
+
 .loading {
   display: flex;
   align-items: center;
@@ -180,12 +191,6 @@
   bottom: 100%;
   border-top-color: transparent;
   border-bottom-color: var(--bg-primary);
-}
-
-/* Tooltip above (explicit) for bottom row */
-.tooltipAbove {
-  bottom: calc(100% + 8px);
-  top: auto;
 }
 
 /* Left edge alignment - shift tooltip right */

@@ -178,18 +178,16 @@ export default function CompactActivityCard({ userId }) {
             </div>
 
             <div className={styles.grid} ref={gridRef} onMouseLeave={handleGridLeave}>
-              {weeks.map((week, weekIndex) => (
+              {weeks.map((week) => (
                 <div key={week[0].id} className={styles.weekRow}>
                   {week.map((day, dayIndex) => {
-                    const isTopRow = weekIndex === 0;
-                    const isBottomRow = weekIndex === weeks.length - 1;
                     const isLeftEdge = dayIndex <= 1;
                     const isRightEdge = dayIndex >= 5;
 
+                    // Always show tooltip below to avoid clipping
                     const tooltipClasses = [
                       styles.tooltip,
-                      isTopRow ? styles.tooltipBelow : '',
-                      isBottomRow && !isTopRow ? styles.tooltipAbove : '',
+                      styles.tooltipBelow,
                       isLeftEdge ? styles.tooltipAlignLeft : '',
                       isRightEdge ? styles.tooltipAlignRight : ''
                     ].filter(Boolean).join(' ');
@@ -197,12 +195,12 @@ export default function CompactActivityCard({ userId }) {
                     return (
                       <div
                         key={day.id}
-                        className={`${styles.dayCell} ${styles[`level${day.level}`]}`}
-                        onClick={(e) => handleDayClick(day, e)}
-                        onMouseEnter={() => handleDayHover(day)}
+                        className={`${styles.dayCell} ${styles[`level${day.level}`]} ${day.isEmpty ? styles.emptyCell : ''}`}
+                        onClick={(e) => !day.isEmpty && handleDayClick(day, e)}
+                        onMouseEnter={() => !day.isEmpty && handleDayHover(day)}
                         role={day.isEmpty ? undefined : "button"}
                         tabIndex={day.isEmpty ? undefined : 0}
-                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
+                        onKeyDown={(e) => !day.isEmpty && (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
                       >
                         {hoveredDay && hoveredDay.date === day.date && (
                           <div className={tooltipClasses}>

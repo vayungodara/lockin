@@ -49,11 +49,12 @@ export default function HeatmapCalendar({ userId }) {
     }
   }, [isLoading, heatmapData]);
 
+  const handleClickOutside = useCallback(() => setHoveredDay(null), []);
+
   useEffect(() => {
-    const handleClickOutside = () => setHoveredDay(null);
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
-  }, []);
+  }, [handleClickOutside]);
 
   const getWeeks = useCallback(() => {
     if (heatmapData.length === 0) return [];
@@ -218,7 +219,7 @@ export default function HeatmapCalendar({ userId }) {
                         onMouseEnter={() => day && setHoveredDay(day)}
                         onMouseLeave={() => setHoveredDay(null)}
                         onClick={(e) => handleDayClick(day, e)}
-                        onKeyDown={(e) => e.key === 'Enter' && handleDayClick(day, e)}
+                        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
                         role={day ? "button" : undefined}
                         tabIndex={day ? 0 : undefined}
                         aria-label={day ? `${getActivityText(day.count)} on ${formatDate(day.date)}` : undefined}

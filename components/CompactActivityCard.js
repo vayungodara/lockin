@@ -180,8 +180,20 @@ export default function CompactActivityCard({ userId }) {
             <div className={styles.grid} ref={gridRef} onMouseLeave={handleGridLeave}>
               {weeks.map((week, weekIndex) => (
                 <div key={week[0].id} className={styles.weekRow}>
-                  {week.map((day) => {
+                  {week.map((day, dayIndex) => {
                     const isTopRow = weekIndex === 0;
+                    const isBottomRow = weekIndex === weeks.length - 1;
+                    const isLeftEdge = dayIndex <= 1;
+                    const isRightEdge = dayIndex >= 5;
+
+                    const tooltipClasses = [
+                      styles.tooltip,
+                      isTopRow ? styles.tooltipBelow : '',
+                      isBottomRow && !isTopRow ? styles.tooltipAbove : '',
+                      isLeftEdge ? styles.tooltipAlignLeft : '',
+                      isRightEdge ? styles.tooltipAlignRight : ''
+                    ].filter(Boolean).join(' ');
+
                     return (
                       <div
                         key={day.id}
@@ -193,7 +205,7 @@ export default function CompactActivityCard({ userId }) {
                         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
                       >
                         {hoveredDay && hoveredDay.date === day.date && (
-                          <div className={`${styles.tooltip} ${isTopRow ? styles.tooltipBelow : ''}`}>
+                          <div className={tooltipClasses}>
                             <span className={styles.tooltipDate}>{formatDate(day.date)}</span>
                             {day.pactCount > 0 && (
                               <span className={styles.tooltipLine}>

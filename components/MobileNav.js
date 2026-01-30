@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { useFocusSafe } from '@/lib/FocusContext';
 import styles from './MobileNav.module.css';
 
 const navItems = [
@@ -52,6 +53,7 @@ const navItems = [
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const focusContext = useFocusSafe();
 
   const isActive = (href) => {
     if (href === '/dashboard') {
@@ -61,7 +63,30 @@ export default function MobileNav() {
   };
 
   return (
-    <nav className={styles.mobileNav}>
+    <>
+      {focusContext?.isRunning && (
+        <div className={styles.mobileTimer}>
+          <div className={styles.mobileTimerContent}>
+            <span className={styles.mobileTimerTime}>
+              {focusContext.formatTime(focusContext.timeLeft)}
+            </span>
+            <span className={styles.mobileTimerLabel}>
+              {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
+            </span>
+          </div>
+          <motion.button
+            className={styles.mobileTimerBtn}
+            onClick={focusContext.toggleTimer}
+            whileTap={{ scale: 0.95 }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+              <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+            </svg>
+          </motion.button>
+        </div>
+      )}
+      <nav className={styles.mobileNav}>
       {navItems.map((item) => (
         <Link
           key={item.href}
@@ -78,5 +103,6 @@ export default function MobileNav() {
         </Link>
       ))}
     </nav>
+    </>
   );
 }

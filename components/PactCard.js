@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
@@ -9,10 +9,10 @@ import { cardHover, buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import styles from './PactCard.module.css';
 
-export default function PactCard({ pact, onUpdate }) {
+export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
   const [isLoading, setIsLoading] = useState(false);
   const cardRef = useRef(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
 
   if (!pact) {
@@ -21,6 +21,30 @@ export default function PactCard({ pact, onUpdate }) {
 
   const isOverdue = new Date(pact.deadline) < new Date() && pact.status === 'active';
   const deadlineDate = new Date(pact.deadline);
+
+  // Calculate next deadline for recurring pacts
+  const getNextDeadline = (currentDeadline, recurrenceType) => {
+    const next = new Date(currentDeadline);
+
+    switch (recurrenceType) {
+      case 'daily':
+        next.setDate(next.getDate() + 1);
+        break;
+      case 'weekly':
+        next.setDate(next.getDate() + 7);
+        break;
+      case 'weekdays':
+        // Move to next weekday
+        do {
+          next.setDate(next.getDate() + 1);
+        } while (next.getDay() === 0 || next.getDay() === 6); // Skip weekends
+        break;
+      default:
+        next.setDate(next.getDate() + 1);
+    }
+
+    return next;
+  };
   
   // Format deadline
   const formatDeadline = () => {
@@ -62,9 +86,10 @@ export default function PactCard({ pact, onUpdate }) {
   const handleComplete = async () => {
     setIsLoading(true);
     try {
+      // Mark current pact as completed
       const { error } = await supabase
         .from('pacts')
-        .update({ 
+        .update({
           status: 'completed',
           completed_at: new Date().toISOString()
         })
@@ -73,9 +98,38 @@ export default function PactCard({ pact, onUpdate }) {
       if (error) throw error;
 
       await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
-      
+
       fireConfettiFromElement(cardRef.current);
-      
+
+      // If recurring, create the next pact
+      if (pact.is_recurring && pact.recurrence_type) {
+        const nextDeadline = getNextDeadline(pact.deadline, pact.recurrence_type);
+
+        const { data: newPact, error: createError } = await supabase
+          .from('pacts')
+          .insert({
+            user_id: pact.user_id,
+            title: pact.title,
+            description: pact.description,
+            deadline: nextDeadline.toISOString(),
+            status: 'active',
+            is_recurring: true,
+            recurrence_type: pact.recurrence_type
+          })
+          .select()
+          .single();
+
+        if (createError) {
+          console.error('Error creating recurring pact:', createError);
+          toast.error('Pact completed, but failed to create next recurring pact.');
+        } else {
+          toast.success(`Next ${pact.recurrence_type} pact created!`);
+          if (onNewRecurringPact) {
+            onNewRecurringPact(newPact);
+          }
+        }
+      }
+
       if (onUpdate) {
         onUpdate({ ...pact, status: 'completed', completed_at: new Date().toISOString() });
       }

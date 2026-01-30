@@ -1,4 +1,6 @@
-# AGENTS.md - LockIn Codebase Guide
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **IMPORTANT:** Update this file with significant changes before ending a session.
 
@@ -8,20 +10,12 @@
 >
 > **Developer:** Vayun (solo beginner). Keep code simple.
 
-## Quick Reference
+## Commands
 
 ```bash
 npm run dev      # Dev server (localhost:3000)
 npm run build    # Production build
 npm run lint     # ESLint
-```
-
-```
-/app              # Next.js App Router pages & layouts
-/components       # React components (*.js + *.module.css)
-/lib              # Supabase clients, animations, helpers
-/supabase         # SQL schema files
-/public           # Static assets (logo.png, icons/, manifest.json)
 ```
 
 ## Tech Stack
@@ -73,6 +67,16 @@ All in `globals.css`. Key categories:
 - Spacing: `--space-1` to `--space-32`
 - Radius: `--radius-sm` to `--radius-full`
 
+## Project Structure
+
+```
+/app              # Next.js App Router pages & layouts
+/components       # React components (*.js + *.module.css)
+/lib              # Supabase clients, animations, helpers
+/supabase         # SQL schema files
+/public           # Static assets (logo.png, icons/, manifest.json)
+```
+
 ## Database Schema
 
 | Table | Purpose |
@@ -94,7 +98,7 @@ All tables use RLS. Users access only their own data or group data.
 |---------|-------|
 | Pacts | `DashboardClient.js`, `PactCard.js`, `CreatePactModal.js` |
 | Groups | `GroupsPageClient.js`, `GroupDetailClient.js` |
-| Focus Timer | `FocusTimer.js`, `FocusPageClient.js` |
+| Focus Timer | `FocusTimer.js`, `FocusPageClient.js`, `lib/FocusContext.js` |
 | Activity Feed | `ActivityFeed.js`, `ActivityItem.js`, `lib/activity.js` |
 | Streaks/Heatmap | `lib/streaks.js`, `CompactActivityCard.js`, `HeatmapCalendar.js` |
 | Theming | `ThemeProvider.js`, `ThemeToggle.js` |
@@ -157,7 +161,45 @@ Run in Supabase SQL Editor (in order):
 2. `/supabase/security_fixes_final.sql` — Security hardening
 3. `/supabase/performance_fixes.sql` — RLS optimization
 
-## Recent Changes (Checkpoint 16 — Jan 27, 2026)
+## Recent Changes (Checkpoint 17 — Jan 30, 2026)
+
+**Bug Fixes & Features:**
+
+1. **Recurring Pacts Now Work** — When completing a recurring pact, the next pact is automatically created
+   - Daily: +1 day
+   - Weekly: +7 days
+   - Weekdays: skips to next Mon-Fri
+   - Shows toast notification when next pact is created
+
+2. **Sidebar Mini Timer Controls** — Focus timer in sidebar now has pause button
+   - Smooth spring animations on expand/collapse
+   - Shows time + "Focusing/Break" label when expanded
+   - Compact view when sidebar collapsed
+
+3. **Mobile Timer Bar** — Focus timer indicator on mobile bottom nav
+   - Floating gradient bar above nav when timer running
+   - Pause button for quick control
+
+4. **Minor Fixes:**
+   - Activity feed empty state text now says "your activity" (not "team") for personal feed
+   - FocusTimer uses `WORK_DURATION` constant instead of hardcoded 25
+   - `useMemo` for Supabase clients in PactCard and CreatePactModal
+
+**Files Modified:**
+- `components/PactCard.js` — Recurring pact logic, next deadline calculation
+- `components/Sidebar.js` — Mini timer with controls and animations
+- `components/Sidebar.module.css` — Timer expanded/collapsed styles
+- `components/MobileNav.js` — Mobile timer bar
+- `components/MobileNav.module.css` — Mobile timer styles
+- `components/ActivityFeed.js` — Fixed empty state text
+- `components/FocusTimer.js` — Use constant for duration calc
+- `components/CreatePactModal.js` — useMemo fix
+- `app/dashboard/DashboardClient.js` — Handle new recurring pact callback
+- `app/dashboard/pacts/PactsPageClient.js` — Handle new recurring pact callback
+
+---
+
+## Previous Changes (Checkpoint 16 — Jan 27, 2026)
 
 **Activity Overview Redesign:**
 - Replaced 365-day `HeatmapCalendar` with new `CompactActivityCard` on dashboard
@@ -167,13 +209,6 @@ Run in Supabase SQL Editor (in order):
 - Empty state for new users: "✨ Start your streak today!"
 - No horizontal scrolling needed
 - `HeatmapCalendar.js` kept for potential future stats page
-
-**Files Added:**
-- `/components/CompactActivityCard.js` — Compact 2-week activity card
-- `/components/CompactActivityCard.module.css` — Styles with tooltip, empty state
-
-**Files Modified:**
-- `/app/dashboard/DashboardClient.js` — Uses CompactActivityCard instead of HeatmapCalendar
 
 ---
 
@@ -192,5 +227,8 @@ Run in Supabase SQL Editor (in order):
 ## Pending Features
 
 - [ ] Email reminders for deadlines
+- [ ] Push notifications (browser)
 - [ ] Group activity notifications
+- [ ] Stats page with full 365-day heatmap
+- [ ] Settings page (timer duration, preferences)
 - [ ] iOS app (post-MVP)

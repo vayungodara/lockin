@@ -132,7 +132,7 @@ export default function FocusTimer() {
           </div>
           <div className={styles.statDivider}></div>
           <div className={styles.statItem}>
-            <span className={styles.statValue}>{sessionsCompleted * 25}m</span>
+            <span className={styles.statValue}>{sessionsCompleted * (WORK_DURATION / 60)}m</span>
             <span className={styles.statLabel}>Focus time</span>
           </div>
         </div>

@@ -96,7 +96,7 @@ export default function ActivityFeed({ groupId = null, limit = 15 }) {
             </svg>
           </div>
           <p>No activity yet</p>
-          <span>Activity will appear here as your team works</span>
+          <span>{groupId ? 'Activity will appear here as your team works' : 'Your activity will appear here as you work'}</span>
         </div>
       ) : (
         <>

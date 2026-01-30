@@ -64,3 +64,61 @@
   font-weight: var(--font-medium);
   white-space: nowrap;
 }
+
+/* Mobile Timer Bar */
+.mobileTimer {
+  display: none;
+  position: fixed;
+  bottom: calc(70px + env(safe-area-inset-bottom));
+  left: var(--space-3);
+  right: var(--space-3);
+  background: var(--gradient-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3) var(--space-4);
+  z-index: var(--z-sticky);
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow-lg);
+}
+
+@media (max-width: 767px) {
+  .mobileTimer {
+    display: flex;
+  }
+}
+
+.mobileTimerContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: white;
+}
+
+.mobileTimerTime {
+  font-size: var(--text-lg);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.mobileTimerLabel {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.mobileTimerBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  border-radius: var(--radius-md);
+  color: white;
+  cursor: pointer;
+}
+
+.mobileTimerBtn:active {
+  background: rgba(255, 255, 255, 0.3);
+}

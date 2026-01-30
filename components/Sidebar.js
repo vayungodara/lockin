@@ -238,27 +238,61 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
       </nav>
 
       {focusContext?.isRunning && (
-        <Link href="/dashboard/focus" className={styles.miniTimer}>
-          <motion.div 
+        <motion.div
+          className={`${styles.miniTimer} ${isExpanded ? styles.miniTimerExpanded : styles.miniTimerCollapsed}`}
+          layout="position"
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
+          <motion.div
             className={styles.miniTimerPulse}
-            animate={{ scale: [1, 1.2, 1], opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 2, repeat: Infinity }}
+            animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
           />
-          <span className={styles.miniTimerTime}>{focusContext.formatTime(focusContext.timeLeft)}</span>
-          <AnimatePresence>
+
+          <Link href="/dashboard/focus" className={styles.miniTimerLink}>
+            <span className={styles.miniTimerTime}>
+              {focusContext.formatTime(focusContext.timeLeft)}
+            </span>
+
+            <AnimatePresence mode="popLayout">
+              {isExpanded && (
+                <motion.span
+                  className={styles.miniTimerLabel}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
+                </motion.span>
+              )}
+            </AnimatePresence>
+          </Link>
+
+          <AnimatePresence mode="popLayout">
             {isExpanded && (
-              <motion.span
-                className={styles.miniTimerLabel}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -10 }}
-                transition={{ duration: 0.2 }}
+              <motion.button
+                className={styles.miniTimerBtn}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  focusContext.toggleTimer();
+                }}
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.35)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+                title="Pause timer"
               >
-                {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
-              </motion.span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                  <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+                </svg>
+              </motion.button>
             )}
           </AnimatePresence>
-        </Link>
+        </motion.div>
       )}
 
       <div className={styles.footer}>

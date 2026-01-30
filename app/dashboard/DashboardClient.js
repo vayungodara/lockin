@@ -85,6 +85,10 @@ export default function DashboardClient({ user }) {
     setPacts(pacts.map(p => p.id === updatedPact.id ? updatedPact : p));
   };
 
+  const handleNewRecurringPact = (newPact) => {
+    setPacts(prev => [...prev, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
+  };
+
   const handleSignIn = async () => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -327,9 +331,10 @@ export default function DashboardClient({ user }) {
                       exit={{ opacity: 0, scale: 0.9 }}
                       transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     >
-                      <PactCard 
-                        pact={pact} 
+                      <PactCard
+                        pact={pact}
                         onUpdate={handlePactUpdate}
+                        onNewRecurringPact={handleNewRecurringPact}
                       />
                     </motion.div>
                   ))}

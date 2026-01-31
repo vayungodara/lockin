@@ -163,24 +163,24 @@
   --bg-tertiary: #1A1E24;
   --bg-elevated: #1E2229;
   --bg-hover: #252A32;
-  
+
   /* Surface colors */
   --surface-1: #161A1F;
   --surface-2: #1E2229;
   --surface-3: #262C35;
   --surface-overlay: rgba(255, 255, 255, 0.02);
-  
+
   /* Text colors */
   --text-primary: #F5F6F7;
   --text-secondary: #A1A7B0;
   --text-tertiary: #6B7280;
   --text-muted: #4B5563;
   --text-inverse: #0B0D10;
-  
+
   /* Gradient adjustments for dark */
   --gradient-subtle: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(217, 70, 239, 0.12) 100%);
   --gradient-glow: linear-gradient(135deg, rgba(99, 102, 241, 0.25) 0%, rgba(217, 70, 239, 0.25) 100%);
-  
+
   /* Status colors - Slightly brighter for dark mode */
   --success: #22C55E;
   --success-light: rgba(34, 197, 94, 0.15);
@@ -194,11 +194,11 @@
   --info: #60A5FA;
   --info-light: rgba(96, 165, 250, 0.15);
   --info-bg: rgba(96, 165, 250, 0.12);
-  
-  /* Borders */
-  --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
+
+  /* Borders - Transparent for cleaner look, rely on surface color difference */
+  --border-subtle: transparent;
+  --border-default: rgba(255, 255, 255, 0.04);
+  --border-strong: rgba(255, 255, 255, 0.15);
   --border-focus: rgba(99, 102, 241, 0.6);
   
   /* Shadows - Darker, more dramatic */
@@ -253,10 +253,10 @@
     --info-light: rgba(96, 165, 250, 0.15);
     --info-bg: rgba(96, 165, 250, 0.12);
     
-    /* Borders */
-    --border-subtle: rgba(255, 255, 255, 0.04);
-    --border-default: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.12);
+    /* Borders - Transparent for cleaner look */
+    --border-subtle: transparent;
+    --border-default: rgba(255, 255, 255, 0.04);
+    --border-strong: rgba(255, 255, 255, 0.15);
     --border-focus: rgba(99, 102, 241, 0.6);
     
     /* Shadows */
@@ -1054,7 +1054,7 @@ a,
 }
 
 /* Minimum touch target size (Apple/Google guidelines: 44px) */
-button:not(.btn-icon-sm),
+button:not(.btn-icon-sm):not([class*="toggle"]),
 .btn,
 [role="button"] {
   min-height: 44px;

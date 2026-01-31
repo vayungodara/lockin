@@ -184,10 +184,8 @@ export default function StatsPageClient({ user }) {
           </div>
         </div>
 
-        {/* 365-Day Heatmap */}
-        <div className={styles.heatmapSection}>
-          <HeatmapCalendar userId={user.id} />
-        </div>
+        {/* Activity Overview */}
+        <HeatmapCalendar userId={user.id} />
 
         {/* Analytics Cards */}
         <div className={styles.analyticsGrid}>

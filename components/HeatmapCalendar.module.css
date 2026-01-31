@@ -303,8 +303,8 @@
 
 @media (max-width: 768px) {
   .container {
-    --cell-size: 10px;
-    --cell-gap: 2px;
+    --cell-size: 12px;
+    --cell-gap: 3px;
     padding: var(--space-4);
   }
 
@@ -328,6 +328,11 @@
     margin: 0 calc(-1 * var(--space-4));
     padding: 0 var(--space-4);
     padding-bottom: var(--space-3);
+    scroll-snap-type: x proximity;
+  }
+
+  .week {
+    scroll-snap-align: start;
   }
 
   .scrollHint {
@@ -352,7 +357,7 @@
 
 @media (max-width: 480px) {
   .container {
-    --cell-size: 9px;
+    --cell-size: 10px;
     --day-label-width: 22px;
   }
 

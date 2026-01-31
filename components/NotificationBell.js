@@ -24,8 +24,22 @@ function formatTimeAgo(dateStr) {
 
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropdownPosition, setDropdownPosition] = useState({ bottom: 0, left: 80 });
   const dropdownRef = useRef(null);
+  const buttonRef = useRef(null);
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications();
+
+  // Calculate dropdown position when opening
+  const handleToggle = () => {
+    if (!isOpen && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        bottom: window.innerHeight - rect.top + 8,
+        left: rect.left
+      });
+    }
+    setIsOpen(!isOpen);
+  };
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -57,13 +71,13 @@ export default function NotificationBell() {
   return (
     <div className={styles.container} ref={dropdownRef}>
       <motion.button
+        ref={buttonRef}
         className={styles.bellButton}
-        onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        onClick={handleToggle}
+        whileTap={{ scale: 0.9 }}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
@@ -83,9 +97,10 @@ export default function NotificationBell() {
         {isOpen && (
           <motion.div
             className={styles.dropdown}
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            style={{ bottom: dropdownPosition.bottom, left: dropdownPosition.left }}
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.15 }}
           >
             <div className={styles.header}>

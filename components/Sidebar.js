@@ -225,7 +225,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               {hoveredItem === item.href && !active && (
                 <motion.div
                   className={styles.navItemHoverBg}
-                  layoutId="navHover"
+                  layout="position"Id="navHover"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -319,10 +319,10 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
 
       <motion.div
         className={styles.footer}
-        layout
+        layout="position"
         transition={{ type: 'spring', stiffness: 200, damping: 25 }}
       >
-        <motion.div className={styles.userInfo} layout>
+        <motion.div className={styles.userInfo} layout="position">
           {user?.user_metadata?.avatar_url ? (
             <motion.div layout="position">
               <Image
@@ -356,7 +356,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           </AnimatePresence>
         </motion.div>
 
-        <motion.div className={styles.footerActions} layout transition={{ type: 'spring', stiffness: 200, damping: 25 }}>
+        <motion.div className={styles.footerActions} layout="position" transition={{ type: 'spring', stiffness: 200, damping: 25 }}>
           <NotificationBell />
 
           <motion.button
@@ -364,7 +364,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             className={styles.themeBtn}
             aria-label={`Change theme. Current: ${getThemeLabel()}`}
             whileTap={{ scale: 0.9 }}
-            layout
+            layout="position"
           >
             {getThemeIcon()}
           </motion.button>
@@ -374,7 +374,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             className={styles.signOutBtn}
             aria-label="Sign out"
             whileTap={{ scale: 0.9 }}
-            layout
+            layout="position"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { useKeyboardShortcuts } from '@/lib/KeyboardShortcutsContext';
+import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
 import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
@@ -46,7 +46,7 @@ export default function DashboardClient({ user }) {
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
-  const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcuts();
+  const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcutsSafe();
 
   // Register keyboard shortcuts
   useEffect(() => {

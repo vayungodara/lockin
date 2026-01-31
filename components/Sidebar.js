@@ -318,22 +318,32 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
       )}
 
       {/* Footer */}
-      <div className={styles.footer}>
+      <motion.div
+        className={`${styles.footer} ${isExpanded ? styles.footerExpanded : ''}`}
+        layout
+        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+      >
         {/* User Section - Avatar + optional name/email */}
-        <div className={`${styles.userSection} ${isExpanded ? styles.userSectionExpanded : ''}`}>
-          {user?.user_metadata?.avatar_url ? (
-            <Image
-              src={user.user_metadata.avatar_url}
-              alt={user.user_metadata?.full_name || 'User'}
-              className={styles.avatar}
-              width={32}
-              height={32}
-            />
-          ) : (
-            <div className={styles.avatarPlaceholder}>
-              {user?.email?.[0]?.toUpperCase() || 'U'}
-            </div>
-          )}
+        <motion.div
+          className={`${styles.userSection} ${isExpanded ? styles.userSectionExpanded : ''}`}
+          layout
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
+          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+            {user?.user_metadata?.avatar_url ? (
+              <Image
+                src={user.user_metadata.avatar_url}
+                alt={user.user_metadata?.full_name || 'User'}
+                className={styles.avatar}
+                width={36}
+                height={36}
+              />
+            ) : (
+              <div className={styles.avatarPlaceholder}>
+                {user?.email?.[0]?.toUpperCase() || 'U'}
+              </div>
+            )}
+          </motion.div>
 
           <AnimatePresence>
             {isExpanded && (
@@ -342,7 +352,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
               >
                 <span className={styles.userName}>
                   {user?.user_metadata?.full_name || 'User'}
@@ -351,33 +361,49 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </motion.div>
 
-        {/* Action buttons - always in horizontal row */}
-        <div className={styles.footerActions}>
-          <NotificationBell />
+        {/* Action buttons - vertical when collapsed, horizontal when expanded */}
+        <motion.div
+          className={`${styles.footerActions} ${isExpanded ? styles.footerActionsExpanded : ''}`}
+          layout
+          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        >
+          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+            <NotificationBell />
+          </motion.div>
 
-          <button
+          <motion.button
+            layout
             onClick={cycleTheme}
             className={styles.actionBtn}
             aria-label={`Change theme. Current: ${getThemeLabel()}`}
+            title={getThemeLabel()}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             {getThemeIcon()}
-          </button>
+          </motion.button>
 
-          <button
+          <motion.button
+            layout
             onClick={onSignOut}
             className={`${styles.actionBtn} ${styles.signOutBtn}`}
             aria-label="Sign out"
+            title="Sign out"
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.95 }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </button>
-        </div>
-      </div>
+          </motion.button>
+        </motion.div>
+      </motion.div>
 
       <motion.button
         className={styles.collapseBtn}

@@ -59,9 +59,7 @@ export default function CompactActivityCard({ userId }) {
   };
 
   const handleDayHover = (day) => {
-    if (day && !day.isEmpty) {
-      setHoveredDay(day);
-    }
+    setHoveredDay(day && !day.isEmpty ? day : null);
   };
 
   const handleGridLeave = () => {
@@ -197,7 +195,7 @@ export default function CompactActivityCard({ userId }) {
                         key={day.id}
                         className={`${styles.dayCell} ${styles[`level${day.level}`]} ${day.isEmpty ? styles.emptyCell : ''}`}
                         onClick={(e) => !day.isEmpty && handleDayClick(day, e)}
-                        onMouseEnter={() => !day.isEmpty && handleDayHover(day)}
+                        onMouseEnter={() => handleDayHover(day)}
                         role={day.isEmpty ? undefined : "button"}
                         tabIndex={day.isEmpty ? undefined : 0}
                         onKeyDown={(e) => !day.isEmpty && (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}

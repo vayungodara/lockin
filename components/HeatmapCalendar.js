@@ -216,7 +216,7 @@ export default function HeatmapCalendar({ userId }) {
                       <div
                         key={day ? day.date : `empty-${weekIndex}-${dayIndex}`}
                         className={`${styles.day} ${day ? styles[`level${day.level}`] : styles.empty}`}
-                        onMouseEnter={() => day && setHoveredDay(day)}
+                        onMouseEnter={() => setHoveredDay(day || null)}
                         onMouseLeave={() => setHoveredDay(null)}
                         onClick={(e) => handleDayClick(day, e)}
                         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}

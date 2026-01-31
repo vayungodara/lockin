@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
@@ -16,7 +16,7 @@ export default function TaskCard({ task, currentUser, userRole, members, onUpdat
   const [isLoading, setIsLoading] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
 
   useEffect(() => {

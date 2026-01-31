@@ -168,17 +168,17 @@ export default function SettingsPageClient({ user }) {
                 <span className={styles.settingLabel}>Sound Effects</span>
                 <span className={styles.settingDescription}>Play sound when timer completes</span>
               </div>
-              <motion.button
+              <button
                 className={`${styles.toggle} ${soundEnabled ? styles.toggleOn : ''}`}
                 onClick={handleSoundToggle}
-                whileTap={buttonTap}
+                type="button"
+                aria-pressed={soundEnabled}
               >
-                <motion.div
+                <span
                   className={styles.toggleKnob}
-                  animate={{ x: soundEnabled ? 20 : 0 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  style={{ transform: `translateX(${soundEnabled ? 20 : 0}px)` }}
                 />
-              </motion.button>
+              </button>
             </div>
           </div>
         </section>

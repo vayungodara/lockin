@@ -85,11 +85,6 @@
   background: var(--border-subtle);
 }
 
-/* Heatmap Section */
-.heatmapSection {
-  /* HeatmapCalendar component handles its own styling */
-}
-
 /* Analytics Grid */
 .analyticsGrid {
   display: grid;

@@ -89,6 +89,9 @@ All in `globals.css`. Key categories:
 | `activity_reactions` | Emoji reactions |
 | `focus_sessions` | Pomodoro timer sessions |
 | `profiles` | User display names/avatars |
+| `notifications` | In-app notifications |
+| `reminder_logs` | Tracks sent email reminders |
+| `pacts_needing_reminders` | View for cron job (service_role only) |
 
 All tables use RLS. Users access only their own data or group data.
 
@@ -101,7 +104,12 @@ All tables use RLS. Users access only their own data or group data.
 | Focus Timer | `FocusTimer.js`, `FocusPageClient.js`, `lib/FocusContext.js` |
 | Activity Feed | `ActivityFeed.js`, `ActivityItem.js`, `lib/activity.js` |
 | Streaks/Heatmap | `lib/streaks.js`, `CompactActivityCard.js`, `HeatmapCalendar.js` |
+| Stats | `app/dashboard/stats/StatsPageClient.js`, `HeatmapCalendar.js` |
+| Settings | `app/dashboard/settings/SettingsPageClient.js` |
+| Notifications | `NotificationBell.js`, `lib/NotificationContext.js`, `lib/notifications.js` |
+| Keyboard Shortcuts | `lib/KeyboardShortcutsContext.js` |
 | Theming | `ThemeProvider.js`, `ThemeToggle.js` |
+| Email Reminders | `lib/email.js`, `app/api/cron/send-reminders/route.js` *(not deployed)* |
 
 ## Design System
 
@@ -152,16 +160,93 @@ All tables use RLS. Users access only their own data or group data.
 | ESLint | 0 errors |
 | Mobile Support | Complete |
 | Google OAuth | Working |
+| Supabase | ACTIVE_HEALTHY |
+| Email Reminders | ⏳ Code written, not deployed (waiting on domain) |
 
-## SQL Files to Run
+## SQL Files
 
 Run in Supabase SQL Editor (in order):
 
-1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies
-2. `/supabase/security_fixes_final.sql` — Security hardening
-3. `/supabase/performance_fixes.sql` — RLS optimization
+1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies ✅
+2. `/supabase/security_fixes_final.sql` — Security hardening ✅
+3. `/supabase/performance_fixes.sql` — RLS optimization ✅
+4. `/supabase/email_reminders.sql` — Email reminder tracking + view ✅
+5. `/supabase/fix_reminders_view_security.sql` — View permissions fix ✅
+6. `/supabase/notifications.sql` — In-app notifications table ⏳ (run this to enable notifications)
 
-## Recent Changes (Checkpoint 17 — Jan 30, 2026)
+## Recent Changes (Checkpoint 18 — Jan 31, 2026)
+
+**Bug Check Results:**
+- Build: Passing
+- ESLint: 0 errors
+- Supabase: All 9 tables present, RLS enabled, no data integrity issues
+- `pacts_needing_reminders` view: Exists, permissions correctly restricted to service_role only
+
+**Email Reminders Feature (Code Written - NOT DEPLOYED):**
+
+Code is ready but waiting on custom domain before deployment:
+
+1. **24-Hour Reminders** — Sends branded email 24 hours before pact deadline
+   - Gradient header matching app design
+   - Pact card with title and deadline
+   - "View in LockIn" CTA button
+   - Mobile responsive HTML template
+
+2. **Duplicate Prevention** — `reminder_logs` table tracks sent reminders
+   - Unique constraint on (pact_id, reminder_type)
+   - Won't send same reminder twice
+
+3. **Hourly Cron Job** — Vercel cron runs `/api/cron/send-reminders` every hour
+   - Protected by `CRON_SECRET` header
+   - Uses service role to bypass RLS
+
+**New Files (uncommitted):**
+- `app/api/cron/send-reminders/route.js` — Cron endpoint
+- `lib/email.js` — Resend client + email template
+- `vercel.json` — Cron schedule config
+- `supabase/email_reminders.sql` — Database schema + view
+- `supabase/fix_reminders_view_security.sql` — Security fix for view
+
+---
+
+## To Deploy Email Reminders (When Ready)
+
+**Prerequisites:**
+1. Get a custom domain (e.g., `lockin.app`)
+2. Verify domain in Resend for sending emails
+3. Update `lib/email.js` line 134: change `reminders@lockin.app` to your verified domain
+
+**Deployment Steps:**
+
+1. **Run SQL in Supabase** (already done ✅):
+   ```
+   supabase/email_reminders.sql
+   ```
+
+2. **Add Vercel Environment Variables:**
+   | Variable | Value |
+   |----------|-------|
+   | `RESEND_API_KEY` | From https://resend.com/api-keys |
+   | `CRON_SECRET` | Run: `openssl rand -hex 32` |
+   | `SUPABASE_SERVICE_ROLE_KEY` | Supabase Dashboard → Settings → API |
+   | `NEXT_PUBLIC_APP_URL` | Your production URL |
+
+3. **Commit and Push:**
+   ```bash
+   git add app/api/ lib/email.js vercel.json
+   git commit -m "feat: email reminders for pact deadlines"
+   git push
+   ```
+
+4. **Verify:** After deploy, test endpoint returns 401 (unauthorized):
+   ```bash
+   curl https://your-app.vercel.app/api/cron/send-reminders
+   # Should return: {"error":"Unauthorized"}
+   ```
+
+---
+
+## Previous Changes (Checkpoint 17 — Jan 30, 2026)
 
 **Bug Fixes & Features:**
 
@@ -226,9 +311,47 @@ Run in Supabase SQL Editor (in order):
 
 ## Pending Features
 
-- [ ] Email reminders for deadlines
-- [ ] Push notifications (browser)
-- [ ] Group activity notifications
-- [ ] Stats page with full 365-day heatmap
-- [ ] Settings page (timer duration, preferences)
+- [ ] Email reminders for deadlines (code written, needs domain + deploy)
 - [ ] iOS app (post-MVP)
+
+## Recently Completed Features (Checkpoint 19 — Jan 31, 2026)
+
+**Stats Page** `/dashboard/stats`
+- Full 365-day activity heatmap
+- Streak summary (current, best, total completed)
+- Pact analytics (completion rate, weekly/monthly counts, status breakdown)
+- Focus analytics (total time, sessions, average duration)
+- Recent focus sessions history grouped by day
+
+**Settings Page** `/dashboard/settings`
+- Timer duration customization (work: 15-60 min, break: 1-15 min)
+- Sound effects toggle for timer completion
+- Theme switcher (light/dark/system)
+- Account info display
+- Keyboard shortcuts reference
+
+**In-App Notifications**
+- Notification bell in sidebar with unread badge
+- Dropdown with notification list
+- Mark as read / mark all read functionality
+- Realtime updates via Supabase subscription
+- Database: `supabase/notifications.sql` (needs to be run)
+
+**Keyboard Shortcuts**
+- `Cmd/Ctrl + N` — Open new pact modal (dashboard)
+- `Space` — Pause/resume timer (focus page)
+- `Escape` — Close any open modal
+
+**Sound Effects**
+- Timer completion chime using Web Audio API
+- Toggle in Settings page
+- Respects user preference stored in localStorage
+
+**New Files:**
+- `app/dashboard/stats/` — Stats page
+- `app/dashboard/settings/` — Settings page
+- `components/NotificationBell.js` — Notification dropdown
+- `lib/NotificationContext.js` — Notification state management
+- `lib/notifications.js` — Notification helper functions
+- `lib/KeyboardShortcutsContext.js` — Keyboard shortcut handling
+- `supabase/notifications.sql` — Notifications table schema

@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
+import { useKeyboardShortcuts } from '@/lib/KeyboardShortcutsContext';
+import { useFocus } from '@/lib/FocusContext';
 import styles from './FocusPage.module.css';
 import FocusTimer from '@/components/FocusTimer';
 
@@ -10,6 +12,19 @@ export default function FocusPageClient({ user }) {
   const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const supabase = useMemo(() => createClient(), []);
+  const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcuts();
+  const { toggleTimer } = useFocus();
+
+  // Register keyboard shortcut for timer toggle
+  useEffect(() => {
+    registerCallbacks({
+      onToggleTimer: toggleTimer,
+    });
+
+    return () => {
+      unregisterCallbacks(['onToggleTimer']);
+    };
+  }, [registerCallbacks, unregisterCallbacks, toggleTimer]);
 
   const fetchSessions = useCallback(async () => {
     try {

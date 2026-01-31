@@ -89,6 +89,7 @@ All in `globals.css`. Key categories:
 | `activity_reactions` | Emoji reactions |
 | `focus_sessions` | Pomodoro timer sessions |
 | `profiles` | User display names/avatars |
+| `notifications` | In-app notifications |
 | `reminder_logs` | Tracks sent email reminders |
 | `pacts_needing_reminders` | View for cron job (service_role only) |
 
@@ -103,6 +104,10 @@ All tables use RLS. Users access only their own data or group data.
 | Focus Timer | `FocusTimer.js`, `FocusPageClient.js`, `lib/FocusContext.js` |
 | Activity Feed | `ActivityFeed.js`, `ActivityItem.js`, `lib/activity.js` |
 | Streaks/Heatmap | `lib/streaks.js`, `CompactActivityCard.js`, `HeatmapCalendar.js` |
+| Stats | `app/dashboard/stats/StatsPageClient.js`, `HeatmapCalendar.js` |
+| Settings | `app/dashboard/settings/SettingsPageClient.js` |
+| Notifications | `NotificationBell.js`, `lib/NotificationContext.js`, `lib/notifications.js` |
+| Keyboard Shortcuts | `lib/KeyboardShortcutsContext.js` |
 | Theming | `ThemeProvider.js`, `ThemeToggle.js` |
 | Email Reminders | `lib/email.js`, `app/api/cron/send-reminders/route.js` *(not deployed)* |
 
@@ -160,13 +165,14 @@ All tables use RLS. Users access only their own data or group data.
 
 ## SQL Files
 
-Run in Supabase SQL Editor (in order). All have been run ✅:
+Run in Supabase SQL Editor (in order):
 
-1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies
-2. `/supabase/security_fixes_final.sql` — Security hardening
-3. `/supabase/performance_fixes.sql` — RLS optimization
-4. `/supabase/email_reminders.sql` — Email reminder tracking + view
-5. `/supabase/fix_reminders_view_security.sql` — View permissions fix
+1. `/supabase/checkpoint8_complete.sql` — Core tables, RLS policies ✅
+2. `/supabase/security_fixes_final.sql` — Security hardening ✅
+3. `/supabase/performance_fixes.sql` — RLS optimization ✅
+4. `/supabase/email_reminders.sql` — Email reminder tracking + view ✅
+5. `/supabase/fix_reminders_view_security.sql` — View permissions fix ✅
+6. `/supabase/notifications.sql` — In-app notifications table ⏳ (run this to enable notifications)
 
 ## Recent Changes (Checkpoint 18 — Jan 31, 2026)
 

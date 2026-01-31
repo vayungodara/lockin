@@ -317,27 +317,24 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         </motion.div>
       )}
 
-      <motion.div
-        className={styles.footer}
-        layout="position"
-        transition={{ type: 'spring', stiffness: 200, damping: 25 }}
-      >
-        <motion.div className={styles.userInfo} layout="position">
+      {/* Footer */}
+      <div className={styles.footer}>
+        {/* User Section - Avatar + optional name/email */}
+        <div className={`${styles.userSection} ${isExpanded ? styles.userSectionExpanded : ''}`}>
           {user?.user_metadata?.avatar_url ? (
-            <motion.div layout="position">
-              <Image
-                src={user.user_metadata.avatar_url}
-                alt={user.user_metadata?.full_name || 'User'}
-                className={styles.avatar}
-                width={32}
-                height={32}
-              />
-            </motion.div>
+            <Image
+              src={user.user_metadata.avatar_url}
+              alt={user.user_metadata?.full_name || 'User'}
+              className={styles.avatar}
+              width={32}
+              height={32}
+            />
           ) : (
-            <motion.div className={styles.avatarPlaceholder} layout="position">
+            <div className={styles.avatarPlaceholder}>
               {user?.email?.[0]?.toUpperCase() || 'U'}
-            </motion.div>
+            </div>
           )}
+
           <AnimatePresence>
             {isExpanded && (
               <motion.div
@@ -354,36 +351,33 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               </motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </div>
 
-        <motion.div className={styles.footerActions} layout="position" transition={{ type: 'spring', stiffness: 200, damping: 25 }}>
+        {/* Action buttons - always in horizontal row */}
+        <div className={styles.footerActions}>
           <NotificationBell />
 
-          <motion.button
+          <button
             onClick={cycleTheme}
-            className={styles.themeBtn}
+            className={styles.actionBtn}
             aria-label={`Change theme. Current: ${getThemeLabel()}`}
-            whileTap={{ scale: 0.9 }}
-            layout="position"
           >
             {getThemeIcon()}
-          </motion.button>
+          </button>
 
-          <motion.button
+          <button
             onClick={onSignOut}
-            className={styles.signOutBtn}
+            className={`${styles.actionBtn} ${styles.signOutBtn}`}
             aria-label="Sign out"
-            whileTap={{ scale: 0.9 }}
-            layout="position"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-          </motion.button>
-        </motion.div>
-      </motion.div>
+          </button>
+        </div>
+      </div>
 
       <motion.button
         className={styles.collapseBtn}

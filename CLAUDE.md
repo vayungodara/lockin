@@ -120,6 +120,15 @@ All tables use RLS. Users access only their own data or group data.
 - **Sidebar:** 72px collapsed / 260px expanded (Arc-style)
 - **Theme:** Light-first, dark mode via `data-theme="dark"` on `<html>`
 
+## Sidebar Footer Layout
+
+The sidebar footer uses a **consistent horizontal icon row** in both collapsed and expanded states:
+- **Collapsed:** Avatar centered, icons (bell, theme, sign-out) in horizontal row below
+- **Expanded:** Avatar + name/email left-aligned, same icon row centered below
+- Only user text animates (opacity + width) — icons stay fixed to prevent jarring movement
+- CSS classes: `.userSection` (centered), `.userSectionExpanded` (flex-start), `.footerActions` (always horizontal)
+- Button size: 36px for all action buttons (theme, sign-out, notification bell)
+
 ## Mobile Support
 
 **Status:** Complete ✅
@@ -136,7 +145,7 @@ All tables use RLS. Users access only their own data or group data.
   }
   body { max-width: 100vw; }
   ```
-- HeatmapCalendar has intentional horizontal scroll inside `.calendarWrapper` (not used on dashboard, kept for future stats page)
+- HeatmapCalendar has intentional horizontal scroll inside `.calendarWrapper`
 - **CompactActivityCard** is the main dashboard activity display (2-week grid, no scroll)
 
 ## Common Gotchas
@@ -146,7 +155,7 @@ All tables use RLS. Users access only their own data or group data.
 3. **Theme:** Uses `data-theme` attribute on `<html>`
 4. **Auth:** Google OAuth redirects through `/auth/callback`
 5. **Mobile overflow:** Use `overflow-x: clip` (not `hidden`) on html/body - `hidden` blocks nested scroll on iOS Safari
-6. **Nested scroll on iOS:** If a component needs horizontal scroll, parent must NOT have `overflow-x: hidden`
+6. **Sidebar footer animations:** Keep icons in same horizontal row; only animate user text width/opacity
 
 ---
 
@@ -173,39 +182,6 @@ Run in Supabase SQL Editor (in order):
 4. `/supabase/email_reminders.sql` — Email reminder tracking + view ✅
 5. `/supabase/fix_reminders_view_security.sql` — View permissions fix ✅
 6. `/supabase/notifications.sql` — In-app notifications table ⏳ (run this to enable notifications)
-
-## Recent Changes (Checkpoint 18 — Jan 31, 2026)
-
-**Bug Check Results:**
-- Build: Passing
-- ESLint: 0 errors
-- Supabase: All 9 tables present, RLS enabled, no data integrity issues
-- `pacts_needing_reminders` view: Exists, permissions correctly restricted to service_role only
-
-**Email Reminders Feature (Code Written - NOT DEPLOYED):**
-
-Code is ready but waiting on custom domain before deployment:
-
-1. **24-Hour Reminders** — Sends branded email 24 hours before pact deadline
-   - Gradient header matching app design
-   - Pact card with title and deadline
-   - "View in LockIn" CTA button
-   - Mobile responsive HTML template
-
-2. **Duplicate Prevention** — `reminder_logs` table tracks sent reminders
-   - Unique constraint on (pact_id, reminder_type)
-   - Won't send same reminder twice
-
-3. **Hourly Cron Job** — Vercel cron runs `/api/cron/send-reminders` every hour
-   - Protected by `CRON_SECRET` header
-   - Uses service role to bypass RLS
-
-**New Files (uncommitted):**
-- `app/api/cron/send-reminders/route.js` — Cron endpoint
-- `lib/email.js` — Resend client + email template
-- `vercel.json` — Cron schedule config
-- `supabase/email_reminders.sql` — Database schema + view
-- `supabase/fix_reminders_view_security.sql` — Security fix for view
 
 ---
 
@@ -246,112 +222,21 @@ Code is ready but waiting on custom domain before deployment:
 
 ---
 
-## Previous Changes (Checkpoint 17 — Jan 30, 2026)
-
-**Bug Fixes & Features:**
-
-1. **Recurring Pacts Now Work** — When completing a recurring pact, the next pact is automatically created
-   - Daily: +1 day
-   - Weekly: +7 days
-   - Weekdays: skips to next Mon-Fri
-   - Shows toast notification when next pact is created
-
-2. **Sidebar Mini Timer Controls** — Focus timer in sidebar now has pause button
-   - Smooth spring animations on expand/collapse
-   - Shows time + "Focusing/Break" label when expanded
-   - Compact view when sidebar collapsed
-
-3. **Mobile Timer Bar** — Focus timer indicator on mobile bottom nav
-   - Floating gradient bar above nav when timer running
-   - Pause button for quick control
-
-4. **Minor Fixes:**
-   - Activity feed empty state text now says "your activity" (not "team") for personal feed
-   - FocusTimer uses `WORK_DURATION` constant instead of hardcoded 25
-   - `useMemo` for Supabase clients in PactCard and CreatePactModal
-
-**Files Modified:**
-- `components/PactCard.js` — Recurring pact logic, next deadline calculation
-- `components/Sidebar.js` — Mini timer with controls and animations
-- `components/Sidebar.module.css` — Timer expanded/collapsed styles
-- `components/MobileNav.js` — Mobile timer bar
-- `components/MobileNav.module.css` — Mobile timer styles
-- `components/ActivityFeed.js` — Fixed empty state text
-- `components/FocusTimer.js` — Use constant for duration calc
-- `components/CreatePactModal.js` — useMemo fix
-- `app/dashboard/DashboardClient.js` — Handle new recurring pact callback
-- `app/dashboard/pacts/PactsPageClient.js` — Handle new recurring pact callback
-
----
-
-## Previous Changes (Checkpoint 16 — Jan 27, 2026)
-
-**Activity Overview Redesign:**
-- Replaced 365-day `HeatmapCalendar` with new `CompactActivityCard` on dashboard
-- Shows 2-week (14 days) mini heatmap instead of full year
-- Prominent streak display: 🔥 current streak + 🏆 best streak
-- Hover/tap tooltip shows activity count and date
-- Empty state for new users: "✨ Start your streak today!"
-- No horizontal scrolling needed
-- `HeatmapCalendar.js` kept for potential future stats page
-
----
-
-## Previous Changes (Checkpoint 15 — Jan 25, 2026)
-
-**iOS Safari Scroll Fix:**
-- Changed `overflow-x: hidden` to `overflow-x: clip` on html/body
-- `hidden` was blocking nested horizontal scroll containers on iOS Safari (WebKit bug)
-- `clip` clips content without creating scroll container interference
-- HeatmapCalendar activity calendar now scrolls properly on mobile
-
-**Previous checkpoint (14):**
-- Fixed horizontal scrolling on mobile by adding overflow-x to html/body
-- Added `width: 100%` and `max-width: 100vw` to prevent viewport overflow
-
 ## Pending Features
 
 - [ ] Email reminders for deadlines (code written, needs domain + deploy)
 - [ ] iOS app (post-MVP)
 
-## Recently Completed Features (Checkpoint 19 — Jan 31, 2026)
+## Completed Features
 
-**Stats Page** `/dashboard/stats`
-- Full 365-day activity heatmap
-- Streak summary (current, best, total completed)
-- Pact analytics (completion rate, weekly/monthly counts, status breakdown)
-- Focus analytics (total time, sessions, average duration)
-- Recent focus sessions history grouped by day
+**Stats Page** `/dashboard/stats` — Full 365-day heatmap, streak summary, pact/focus analytics
 
-**Settings Page** `/dashboard/settings`
-- Timer duration customization (work: 15-60 min, break: 1-15 min)
-- Sound effects toggle for timer completion
-- Theme switcher (light/dark/system)
-- Account info display
-- Keyboard shortcuts reference
+**Settings Page** `/dashboard/settings` — Timer customization, sound toggle, theme switcher, shortcuts reference
 
-**In-App Notifications**
-- Notification bell in sidebar with unread badge
-- Dropdown with notification list
-- Mark as read / mark all read functionality
-- Realtime updates via Supabase subscription
-- Database: `supabase/notifications.sql` (needs to be run)
+**In-App Notifications** — Bell in sidebar, dropdown list, mark read, realtime via Supabase
 
-**Keyboard Shortcuts**
-- `Cmd/Ctrl + N` — Open new pact modal (dashboard)
-- `Space` — Pause/resume timer (focus page)
-- `Escape` — Close any open modal
+**Keyboard Shortcuts** — `Cmd/Ctrl+N` (new pact), `Space` (pause timer), `Escape` (close modal)
 
-**Sound Effects**
-- Timer completion chime using Web Audio API
-- Toggle in Settings page
-- Respects user preference stored in localStorage
+**Recurring Pacts** — Auto-creates next pact on completion (daily/weekly/weekdays)
 
-**New Files:**
-- `app/dashboard/stats/` — Stats page
-- `app/dashboard/settings/` — Settings page
-- `components/NotificationBell.js` — Notification dropdown
-- `lib/NotificationContext.js` — Notification state management
-- `lib/notifications.js` — Notification helper functions
-- `lib/KeyboardShortcutsContext.js` — Keyboard shortcut handling
-- `supabase/notifications.sql` — Notifications table schema
+**Focus Timer** — Pomodoro timer with sidebar mini display, mobile timer bar, sound effects

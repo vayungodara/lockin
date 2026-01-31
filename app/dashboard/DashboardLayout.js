@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { FocusProvider } from '@/lib/FocusContext';
+import { KeyboardShortcutsProvider } from '@/lib/KeyboardShortcutsContext';
+import { NotificationProvider } from '@/lib/NotificationContext';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -10,7 +12,7 @@ import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const handleSignOut = async () => {
     try {
@@ -30,18 +32,22 @@ export default function DashboardLayout({ user, children }) {
 
   return (
     <FocusProvider>
-      <div className={styles.layout}>
-        <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
-        <MobileNav />
-        <main 
-          className={styles.main}
-          style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
-        >
-          <ErrorBoundary message="Something went wrong loading this page.">
-            {children}
-          </ErrorBoundary>
-        </main>
-      </div>
+      <NotificationProvider>
+        <KeyboardShortcutsProvider>
+          <div className={styles.layout}>
+            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
+            <MobileNav />
+            <main
+              className={styles.main}
+              style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
+            >
+              <ErrorBoundary message="Something went wrong loading this page.">
+                {children}
+              </ErrorBoundary>
+            </main>
+          </div>
+        </KeyboardShortcutsProvider>
+      </NotificationProvider>
     </FocusProvider>
   );
 }

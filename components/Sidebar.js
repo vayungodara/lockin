@@ -225,7 +225,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               {hoveredItem === item.href && !active && (
                 <motion.div
                   className={styles.navItemHoverBg}
-                  layout="position"Id="navHover"
+                  layoutId="navHover"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}

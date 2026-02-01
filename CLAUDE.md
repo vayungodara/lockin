@@ -125,7 +125,7 @@ All tables use RLS. Users access only their own data or group data.
 - **Pacts** — Personal commitments with deadlines, recurring support
 - **Groups** — Collaborative projects with Kanban tasks
 - **Focus Timer** — Pomodoro timer with sound effects
-- **Stats** — 365-day heatmap, streak tracking, analytics
+- **Stats** — Monthly activity calendar, streak tracking, analytics
 - **Settings** — Timer customization, theme switcher, shortcuts
 - **Notifications** — In-app bell, realtime via Supabase
 - **Keyboard Shortcuts** — `Cmd/Ctrl+N` (new pact), `Space` (pause timer), `Escape` (close modal)

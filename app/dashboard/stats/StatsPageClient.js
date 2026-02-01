@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
-import HeatmapCalendar from '@/components/HeatmapCalendar';
+import MonthlyCalendar from '@/components/MonthlyCalendar';
 import styles from './StatsPage.module.css';
 
 export default function StatsPageClient({ user }) {
@@ -184,8 +184,8 @@ export default function StatsPageClient({ user }) {
           </div>
         </div>
 
-        {/* Activity Overview */}
-        <HeatmapCalendar userId={user.id} />
+        {/* Activity Calendar */}
+        <MonthlyCalendar userId={user.id} />
 
         {/* Analytics Cards */}
         <div className={styles.analyticsGrid}>

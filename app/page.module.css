@@ -265,6 +265,301 @@
   line-height: 1.6;
 }
 
+/* === App Preview Section === */
+
+.appPreview {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: var(--space-24) var(--space-6);
+}
+
+.browserFrame {
+  border-radius: var(--radius-2xl);
+  border: 1px solid var(--border-default);
+  background: var(--surface-1);
+  box-shadow: var(--shadow-2xl);
+  overflow: hidden;
+}
+
+.browserBar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.browserDots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.dotRed,
+.dotYellow,
+.dotGreen {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.dotRed { background: #FF5F56; }
+.dotYellow { background: #FFBD2E; }
+.dotGreen { background: #27C93F; }
+
+.browserUrl {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  padding: var(--space-1) var(--space-3);
+  background: var(--surface-1);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  font-family: var(--font-sans);
+}
+
+.mockDashboard {
+  display: flex;
+  height: 400px;
+}
+
+.mockSidebar {
+  width: 56px;
+  flex-shrink: 0;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-3) 0;
+  gap: var(--space-4);
+}
+
+.mockSidebarLogo {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.mockLogoIcon {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  background: var(--gradient-primary);
+}
+
+.mockNavItems {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.mockNavItem {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+}
+
+.mockNavActive {
+  background: var(--gradient-subtle);
+  color: var(--accent-primary);
+}
+
+.mockMain {
+  flex: 1;
+  min-width: 0;
+  padding: var(--space-3) var(--space-5);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.mockGreeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mockGreetingText {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.mockTextLine {
+  border-radius: var(--radius-sm);
+  background: var(--bg-tertiary);
+}
+
+.mockStreakBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  background: var(--warning-bg);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--warning);
+  white-space: nowrap;
+}
+
+.mockFireIcon {
+  font-size: 12px;
+}
+
+.mockCards {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.mockPactCard {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 6px 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.mockPactHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.mockCheckbox {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: 18px;
+  max-width: 18px;
+  max-height: 18px;
+  box-sizing: border-box;
+  border-radius: var(--radius-sm);
+  background: var(--gradient-primary);
+  border: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mockUnchecked {
+  background: none;
+  border-color: var(--border-strong);
+}
+
+.mockPactTitle {
+  font-size: 12px;
+  font-weight: var(--font-medium);
+  color: var(--text-primary);
+}
+
+.mockPactMeta {
+  padding-left: 26px;
+}
+
+.mockDeadline {
+  font-size: 10px;
+  color: var(--text-tertiary);
+}
+
+.mockDeadlineWarning {
+  font-size: 10px;
+  color: var(--warning);
+  font-weight: var(--font-medium);
+}
+
+.mockCalendar {
+  padding: var(--space-2) var(--space-3);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.mockCalendarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+}
+
+.mockCalendarMonth {
+  font-weight: var(--font-normal);
+  color: var(--text-tertiary);
+}
+
+.mockCalendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 12px);
+  gap: 2px;
+}
+
+.mockCalendarCell {
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  background: var(--bg-tertiary);
+}
+
+.mockLevel0 { background: var(--bg-tertiary); }
+.mockLevel1 { background: rgba(99, 102, 241, 0.2); }
+.mockLevel2 { background: rgba(99, 102, 241, 0.45); }
+.mockLevel3 { background: rgba(99, 102, 241, 0.75); }
+
+.mockCheckboxClickable {
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.mockCheckboxClickable:hover {
+  transform: scale(1.1);
+}
+
+.mockCalendarCell {
+  transition: background 0.4s ease;
+}
+
+.mockCelebration {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-4);
+  text-align: center;
+}
+
+.mockCelebration p {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+/* === How It Works Section === */
+
 .howItWorks {
   max-width: 1100px;
   margin: 0 auto;
@@ -397,7 +692,7 @@
 }
 
 .footer {
-  padding: var(--space-12) var(--space-6);
+  padding: var(--space-16) var(--space-6) var(--space-8);
   border-top: 1px solid var(--border-subtle);
   background: var(--bg-secondary);
 }
@@ -407,9 +702,21 @@
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-4);
-  text-align: center;
+  gap: var(--space-10);
+}
+
+.footerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-12);
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  max-width: 280px;
 }
 
 .footerLogo {
@@ -432,10 +739,52 @@
   color: white;
 }
 
-.footerText {
+.footerTagline {
   color: var(--text-tertiary);
   font-size: var(--text-sm);
-  max-width: 400px;
+  line-height: 1.5;
+}
+
+.footerLinks {
+  display: flex;
+  gap: var(--space-16);
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.footerColumnTitle {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin-bottom: var(--space-1);
+}
+
+.footerLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.footerLink:hover {
+  color: var(--text-primary);
+}
+
+.footerBottom {
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.footerText {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
 }
 
 @media (max-width: 1024px) {
@@ -443,21 +792,30 @@
     padding: var(--space-20) var(--space-6) var(--space-16);
     min-height: auto;
   }
-  
+
   .heroVisual {
     display: none;
   }
-  
+
   .featureGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .steps {
     gap: var(--space-4);
   }
-  
+
   .stepConnector {
     display: none;
+  }
+
+  .footerTop {
+    flex-direction: column;
+    gap: var(--space-8);
+  }
+
+  .footerBrand {
+    max-width: 100%;
   }
 }
 
@@ -524,5 +882,21 @@
   
   .sectionHeader h2 {
     font-size: clamp(1.75rem, 5vw, 2.25rem);
+  }
+
+  .mockSidebar {
+    display: none;
+  }
+
+  .mockMain {
+    padding: var(--space-4);
+  }
+
+  .mockDashboard {
+    height: 320px;
+  }
+
+  .footerLinks {
+    gap: var(--space-10);
   }
 }

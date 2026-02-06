@@ -1,62 +1,90 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { getGroupActivity, getAllActivity } from '@/lib/activity';
 import ActivityItem from './ActivityItem';
 import styles from './ActivityFeed.module.css';
 
-export default function ActivityFeed({ groupId = null, limit = 15 }) {
+const DEFAULT_PAGE_SIZE = 20;
+
+export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_SIZE }) {
   const [activities, setActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const supabase = useMemo(() => createClient(), []);
+  const sentinelRef = useRef(null);
+  const feedRef = useRef(null);
 
   const loadActivities = useCallback(async () => {
     setIsLoading(true);
     try {
       let result;
       if (groupId) {
-        result = await getGroupActivity(supabase, groupId, limit, 0);
+        result = await getGroupActivity(supabase, groupId, pageSize, 0);
       } else {
-        result = await getAllActivity(supabase, limit);
+        result = await getAllActivity(supabase, pageSize);
       }
-      
+
       setActivities(result.data || []);
-      setHasMore(result.data?.length === limit);
+      setHasMore((result.data?.length || 0) === pageSize);
     } catch (err) {
       console.error('Error loading activities:', err);
     } finally {
       setIsLoading(false);
     }
-  }, [groupId, limit, supabase]);
+  }, [groupId, pageSize, supabase]);
 
   useEffect(() => {
     loadActivities();
   }, [loadActivities]);
 
-  const loadMore = async () => {
+  const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
-    
+
     setIsLoadingMore(true);
     try {
       let result;
       if (groupId) {
-        result = await getGroupActivity(supabase, groupId, limit, activities.length);
+        result = await getGroupActivity(supabase, groupId, pageSize, activities.length);
       } else {
-        result = await getAllActivity(supabase, limit, activities.length);
+        result = await getAllActivity(supabase, pageSize, activities.length);
       }
       const newActivities = result.data || [];
-      
-      setActivities([...activities, ...newActivities]);
-      setHasMore(newActivities.length === limit);
+
+      setActivities(prev => [...prev, ...newActivities]);
+      setHasMore(newActivities.length === pageSize);
     } catch (err) {
       console.error('Error loading more:', err);
     } finally {
       setIsLoadingMore(false);
     }
-  };
+  }, [isLoadingMore, hasMore, groupId, pageSize, supabase, activities.length]);
+
+  // IntersectionObserver for infinite scroll
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    const scrollContainer = feedRef.current;
+    if (!sentinel || !scrollContainer) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
+          loadMore();
+        }
+      },
+      {
+        root: scrollContainer,
+        rootMargin: '100px',
+        threshold: 0,
+      }
+    );
+
+    observer.observe(sentinel);
+
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, loadMore]);
 
   if (isLoading) {
     return (
@@ -99,35 +127,29 @@ export default function ActivityFeed({ groupId = null, limit = 15 }) {
           <span>{groupId ? 'Activity will appear here as your team works' : 'Your activity will appear here as you work'}</span>
         </div>
       ) : (
-        <>
-          <div className={styles.feed}>
-            {activities.map((activity) => (
-              <ActivityItem key={activity.id} activity={activity} />
-            ))}
+        <div className={styles.feed} ref={feedRef}>
+          {activities.map((activity) => (
+            <ActivityItem key={activity.id} activity={activity} />
+          ))}
+
+          {/* Sentinel element for infinite scroll */}
+          <div ref={sentinelRef} className={styles.sentinel}>
+            {isLoadingMore && (
+              <div className={styles.loadingMore}>
+                <div className={styles.feedSpinner}></div>
+                <span>Loading more...</span>
+              </div>
+            )}
           </div>
 
-          {hasMore && (
-            <button 
-              className={styles.loadMoreBtn}
-              onClick={loadMore}
-              disabled={isLoadingMore}
-            >
-              {isLoadingMore ? (
-                <>
-                  <div className={styles.btnSpinner}></div>
-                  Loading...
-                </>
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5V19M5 12L12 19L19 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  <span>Load more</span>
-                </>
-              )}
-            </button>
+          {!hasMore && activities.length > 0 && (
+            <div className={styles.endOfFeed}>
+              <div className={styles.endLine}></div>
+              <span>You&apos;re all caught up</span>
+              <div className={styles.endLine}></div>
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );

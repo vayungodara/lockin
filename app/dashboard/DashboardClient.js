@@ -376,7 +376,7 @@ export default function DashboardClient({ user }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ ...smoothTransition, delay: 0.4 }}
           >
-            <ActivityFeed limit={10} />
+            <ActivityFeed pageSize={10} />
           </motion.div>
         )}
       

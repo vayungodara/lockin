@@ -41,3 +41,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .sisyphus/
+
+# playwright mcp logs
+.playwright-mcp/
+
+# playwright test output
+/test-results/
+/playwright-report/
+/playwright/.cache/

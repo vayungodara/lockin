@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import GroupsPageClient from './GroupsPageClient';
 
 export const metadata = {
@@ -11,7 +12,7 @@ export default async function GroupsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return null;
+    redirect('/');
   }
 
   return <GroupsPageClient user={user} />;

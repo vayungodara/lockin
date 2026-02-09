@@ -13,8 +13,7 @@ export default async function Dashboard() {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    // Show sign-in page
-    return <DashboardClient user={null} />
+    redirect('/')
   }
 
   return <DashboardClient user={user} />

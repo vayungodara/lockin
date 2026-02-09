@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 import PactsPageClient from './PactsPageClient';
 
 export const metadata = {
@@ -11,7 +12,7 @@ export default async function PactsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    return null;
+    redirect('/');
   }
 
   return <PactsPageClient user={user} />;

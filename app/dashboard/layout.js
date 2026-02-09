@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import DashboardLayout from './DashboardLayout'
 
 export default async function Layout({ children }) {
@@ -6,7 +7,7 @@ export default async function Layout({ children }) {
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
-    return children
+    redirect('/')
   }
 
   return <DashboardLayout user={user}>{children}</DashboardLayout>

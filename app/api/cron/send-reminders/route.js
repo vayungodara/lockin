@@ -14,7 +14,7 @@ export async function GET(request) {
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return Response.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
@@ -28,7 +28,7 @@ export async function GET(request) {
 
     if (queryError) {
       console.error('Query error:', queryError);
-      return Response.json({ error: queryError.message }, { status: 500 });
+      return Response.json({ error: 'Internal server error' }, { status: 500 });
     }
 
     if (!pacts || pacts.length === 0) {
@@ -83,7 +83,7 @@ export async function GET(request) {
     });
   } catch (err) {
     console.error('Cron error:', err);
-    return Response.json({ error: err.message }, { status: 500 });
+    return Response.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
 

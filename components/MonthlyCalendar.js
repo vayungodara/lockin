@@ -281,7 +281,7 @@ export default function MonthlyCalendar({ userId }) {
                   onClick={() => handleDayClick(date, dayData)}
                   role="button"
                   tabIndex={isFuture ? -1 : 0}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleDayClick(date, dayData)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleDayClick(date, dayData); } }}
                   aria-label={`${date.getDate()} - ${dayData ? `${dayData.count} activities` : 'No activity'}`}
                 >
                   <span className={styles.dayNumber}>{date.getDate()}</span>

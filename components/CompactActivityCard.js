@@ -198,7 +198,7 @@ export default function CompactActivityCard({ userId }) {
                         onMouseEnter={() => handleDayHover(day)}
                         role={day.isEmpty ? undefined : "button"}
                         tabIndex={day.isEmpty ? undefined : 0}
-                        onKeyDown={(e) => !day.isEmpty && (e.key === 'Enter' || e.key === ' ') && handleDayClick(day, e)}
+                        onKeyDown={(e) => { if (!day.isEmpty && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); handleDayClick(day, e); } }}
                       >
                         {hoveredDay && hoveredDay.date === day.date && (
                           <div className={tooltipClasses}>

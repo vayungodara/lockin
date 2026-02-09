@@ -58,10 +58,29 @@ CREATE OR REPLACE FUNCTION create_notification(
 RETURNS UUID
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 DECLARE
   v_id UUID;
 BEGIN
+  -- Validate notification type
+  IF p_type NOT IN (
+    'pact_reminder', 'pact_completed', 'pact_overdue',
+    'group_invite', 'group_joined',
+    'task_assigned', 'task_completed',
+    'reaction', 'streak_milestone'
+  ) THEN
+    RAISE EXCEPTION 'Invalid notification type: %', p_type;
+  END IF;
+
+  -- Validate text lengths
+  IF length(p_title) > 200 THEN
+    RAISE EXCEPTION 'Notification title too long (max 200 chars)';
+  END IF;
+  IF length(p_message) > 1000 THEN
+    RAISE EXCEPTION 'Notification message too long (max 1000 chars)';
+  END IF;
+
   INSERT INTO public.notifications (user_id, type, title, message, metadata)
   VALUES (p_user_id, p_type, p_title, p_message, p_metadata)
   RETURNING id INTO v_id;

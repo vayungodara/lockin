@@ -40,6 +40,8 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     loadActivities();
   }, [loadActivities]);
 
+  const loadMoreRef = useRef(null);
+
   const loadMore = useCallback(async () => {
     if (isLoadingMore || !hasMore) return;
 
@@ -62,6 +64,11 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     }
   }, [isLoadingMore, hasMore, groupId, pageSize, supabase, activities.length]);
 
+  // Keep ref in sync so the observer always calls the latest loadMore
+  useEffect(() => {
+    loadMoreRef.current = loadMore;
+  }, [loadMore]);
+
   // IntersectionObserver for infinite scroll
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -70,8 +77,8 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasMore && !isLoadingMore) {
-          loadMore();
+        if (entries[0].isIntersecting) {
+          loadMoreRef.current?.();
         }
       },
       {
@@ -84,7 +91,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     observer.observe(sentinel);
 
     return () => observer.disconnect();
-  }, [hasMore, isLoadingMore, loadMore]);
+  }, []);
 
   if (isLoading) {
     return (

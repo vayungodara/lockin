@@ -1,0 +1,119 @@
+.card {
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+
+.title {
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.streakBadge {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px 10px;
+  background: var(--warning-bg);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+  color: var(--warning);
+}
+
+.streakIcon {
+  font-size: 14px;
+}
+
+.riskBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--danger-bg);
+  border: 1px solid var(--danger-light);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-3);
+  font-size: 13px;
+  color: var(--danger);
+  font-weight: var(--font-medium);
+}
+
+.freezeBtn {
+  padding: 4px 12px;
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.freezeBtn:hover {
+  background: var(--info);
+  color: white;
+}
+
+.stats {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.statValue {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+.statValue.warning {
+  color: var(--warning);
+}
+
+.statValue.danger {
+  color: var(--danger);
+}
+
+.statLabel {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+.divider {
+  width: 1px;
+  height: 28px;
+  background: var(--border-default);
+}
+
+@media (max-width: 640px) {
+  .stats {
+    gap: var(--space-3);
+  }
+
+  .riskBanner {
+    flex-direction: column;
+    text-align: center;
+  }
+}

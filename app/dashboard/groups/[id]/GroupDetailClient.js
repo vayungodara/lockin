@@ -8,6 +8,7 @@ import TaskCard from '@/components/TaskCard';
 import CreateTaskModal from '@/components/CreateTaskModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import GroupStats from '@/components/GroupStats';
+import NudgeButton from '@/components/NudgeButton';
 
 export default function GroupDetailClient({ user, group, userRole }) {
   const [tasks, setTasks] = useState([]);
@@ -43,9 +44,10 @@ export default function GroupDetailClient({ user, group, userRole }) {
 
         if (profilesError) {
           console.error('Error fetching member profiles:', profilesError);
+          throw profilesError;
         }
 
-        if (!profilesError && profilesData) {
+        if (profilesData) {
           profilesData.forEach(p => {
             profilesMap[p.id] = p;
           });
@@ -276,6 +278,9 @@ export default function GroupDetailClient({ user, group, userRole }) {
                 )}
                 {member.role === 'owner' && <span className={styles.ownerBadge}>Owner</span>}
               </span>
+              {member.id !== user.id && (
+                <NudgeButton userId={member.id} userName={member.full_name || 'them'} />
+              )}
             </div>
           ))}
         </div>

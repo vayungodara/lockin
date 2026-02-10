@@ -1,8 +1,9 @@
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5);
+  margin-bottom: var(--space-8);
 }
 
 .header {

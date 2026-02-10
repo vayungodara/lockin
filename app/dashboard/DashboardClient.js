@@ -203,8 +203,8 @@ export default function DashboardClient({ user }) {
               Welcome back, {firstName}!
             </h1>
             <p className={styles.subGreeting}>Ready to lock in today?</p>
+            <XPBar userId={user?.id} />
           </div>
-          <XPBar userId={user?.id} />
           <motion.button 
             className="btn btn-primary" 
             onClick={() => setIsModalOpen(true)}

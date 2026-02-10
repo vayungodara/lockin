@@ -11,6 +11,9 @@ import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
+import DailySummaryCard from '@/components/DailySummaryCard';
+import OnboardingModal from '@/components/OnboardingModal';
+import XPBar from '@/components/XPBar';
 
 function AnimatedCounter({ value }) {
   const [displayValue, setDisplayValue] = useState(value === 0 ? 0 : null);
@@ -71,6 +74,7 @@ export default function DashboardClient({ user }) {
       const { data, error } = await supabase
         .from('pacts')
         .select('*')
+        .eq('user_id', user.id)
         .order('deadline', { ascending: true });
 
       if (error) throw error;
@@ -82,7 +86,7 @@ export default function DashboardClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user]);
 
   // Fetch pacts on mount
   useEffect(() => {
@@ -200,6 +204,7 @@ export default function DashboardClient({ user }) {
             </h1>
             <p className={styles.subGreeting}>Ready to lock in today?</p>
           </div>
+          <XPBar userId={user?.id} />
           <motion.button 
             className="btn btn-primary" 
             onClick={() => setIsModalOpen(true)}
@@ -213,8 +218,10 @@ export default function DashboardClient({ user }) {
           </motion.button>
         </motion.header>
         
+        <DailySummaryCard userId={user?.id} />
+
         {/* Stats Overview */}
-        <motion.div 
+        <motion.div
           className={styles.statsGrid}
           variants={staggerContainer}
           initial="initial"
@@ -380,11 +387,13 @@ export default function DashboardClient({ user }) {
           </motion.div>
         )}
       
-      <CreatePactModal 
+      <CreatePactModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onPactCreated={handlePactCreated}
       />
+
+      <OnboardingModal userId={user?.id} onCreatePact={() => setIsModalOpen(true)} />
     </>
   );
 }

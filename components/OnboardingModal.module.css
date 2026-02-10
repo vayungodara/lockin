@@ -1,0 +1,113 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: var(--space-4);
+}
+
+.modal {
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  padding: var(--space-8);
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: var(--shadow-2xl);
+}
+
+.progress {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-6);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--surface-3);
+  transition: all 0.2s;
+}
+
+.dotActive {
+  background: var(--accent-primary);
+  width: 24px;
+}
+
+.dotDone {
+  background: var(--success);
+}
+
+.stepIcon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+
+.stepTitle {
+  font-size: var(--text-xl);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.stepDescription {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.actionBtn {
+  width: 100%;
+  padding: var(--space-3);
+  background: var(--gradient-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-base);
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.actionBtn:hover {
+  opacity: 0.9;
+}
+
+.secondaryActions {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.skipBtn {
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  border: none;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.skipBtn:hover {
+  color: var(--text-secondary);
+}
+
+.counter {
+  margin-top: var(--space-4);
+  font-size: 12px;
+  color: var(--text-muted);
+}

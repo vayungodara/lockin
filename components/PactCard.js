@@ -11,6 +11,7 @@ import styles from './PactCard.module.css';
 
 export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
   const [isLoading, setIsLoading] = useState(false);
+  const isCompletingRef = useRef(false);
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
@@ -84,6 +85,8 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
   };
 
   const handleComplete = async () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
     setIsLoading(true);
     try {
       // Mark current pact as completed
@@ -100,6 +103,28 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
       await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
 
       fireConfettiFromElement(cardRef.current);
+
+      // XP, streaks, achievements, partner notifications (fire-and-forget)
+      Promise.all([
+        import('@/lib/gamification').then(({ awardXP, XP_REWARDS, checkPactAchievements }) =>
+          awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
+        ),
+        import('@/lib/streaks').then(({ calculateStreak }) =>
+          calculateStreak(supabase, pact.user_id).then(({ currentStreak, totalCompleted }) =>
+            Promise.all([
+              import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
+                updateStreakOnCompletion(supabase, pact.user_id, currentStreak)
+              ),
+              import('@/lib/gamification').then(({ checkPactAchievements }) =>
+                checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
+              ),
+            ])
+          )
+        ),
+        import('@/lib/partnerships').then(({ notifyPartner }) =>
+          notifyPartner(supabase, pact.user_id, 'completed', pact.title)
+        ),
+      ]).catch(err => console.error('Post-completion hooks error:', err));
 
       // If recurring, create the next pact
       if (pact.is_recurring && pact.recurrence_type) {
@@ -137,6 +162,7 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
       console.error('Error completing pact:', err);
       toast.error('Failed to complete pact. Please try again.');
     } finally {
+      isCompletingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -152,7 +178,12 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
       if (error) throw error;
 
       await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
-      
+
+      // Notify accountability partner (fire-and-forget)
+      import('@/lib/partnerships').then(({ notifyPartner }) =>
+        notifyPartner(supabase, pact.user_id, 'missed', pact.title)
+      ).catch(err => console.error('Partner notify error:', err));
+
       if (onUpdate) {
         onUpdate({ ...pact, status: 'missed' });
       }

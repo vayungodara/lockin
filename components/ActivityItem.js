@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { formatRelativeTime, getActionInfo } from '@/lib/activity';
 import { REACTIONS, getReactions, toggleReaction } from '@/lib/reactions';
 import { createClient } from '@/lib/supabase/client';
+import ActivityComments from './ActivityComments';
 import styles from './ActivityItem.module.css';
 
 export default function ActivityItem({ activity }) {
@@ -228,6 +229,8 @@ export default function ActivityItem({ activity }) {
         </div>
 
         <span className={styles.time}>{timeAgo}</span>
+
+        <ActivityComments activityId={activity.id} initialCount={activity.comment_count || 0} />
       </div>
     </div>
   );

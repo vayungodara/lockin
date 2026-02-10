@@ -23,6 +23,7 @@ export default function PactsPageClient({ user }) {
       const { data, error } = await supabase
         .from('pacts')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -33,7 +34,7 @@ export default function PactsPageClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user]);
 
   useEffect(() => {
     fetchPacts();

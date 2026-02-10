@@ -1,0 +1,40 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.levelBadge {
+  background: var(--gradient-primary);
+  color: white;
+  padding: 1px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-bold);
+  letter-spacing: 0.02em;
+}
+
+.xpText {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-weight: var(--font-medium);
+}
+
+.track {
+  height: 5px;
+  background: var(--surface-3);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: var(--gradient-primary);
+  border-radius: var(--radius-full);
+}

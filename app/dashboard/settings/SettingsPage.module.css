@@ -290,6 +290,41 @@
   border-color: var(--accent-primary);
 }
 
+/* Accent Color Picker */
+.accentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.accentGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.accentSwatch {
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  flex-shrink: 0;
+}
+
+.accentSwatch:hover {
+  transform: scale(1.1);
+}
+
+.accentSwatchActive {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+}
+
 /* Shortcuts */
 .shortcutList {
   display: flex;
@@ -364,6 +399,12 @@
   }
 
   .themeRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+  }
+
+  .accentRow {
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-3);

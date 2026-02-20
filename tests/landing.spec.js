@@ -94,7 +94,7 @@ test.describe('Landing Page', () => {
     const footerTagline = page.getByText('The app that makes sure tomorrow actually comes.').last();
     await expect(footerTagline).toBeVisible();
 
-    const footerBuiltBy = page.getByText(/Built with frustration and caffeine/);
+    const footerBuiltBy = page.getByText(/Built by Vayun Godara/);
     await expect(footerBuiltBy).toBeVisible();
   });
 

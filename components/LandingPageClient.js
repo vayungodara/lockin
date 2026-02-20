@@ -248,13 +248,12 @@ export default function LandingPageClient() {
               >tomorrow</motion.span>
             </span>
             <br />
-            <motion.span 
-              className="text-gradient"
+            <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              Start locking in today
+              Start locking in <span className="text-gradient">today</span>
             </motion.span>
           </motion.h1>
           
@@ -668,7 +667,7 @@ export default function LandingPageClient() {
 
             <div className={styles.footerBottom}>
               <p className={styles.footerText}>
-                Built with frustration and caffeine by a student who was tired of his own excuses.
+                Built by Vayun Godara
               </p>
             </div>
           </div>

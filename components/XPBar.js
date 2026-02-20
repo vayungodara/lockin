@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
 import styles from './XPBar.module.css';
 
-export default function XPBar({ userId }) {
+export default function XPBar({ userId, refreshKey }) {
   const [xp, setXP] = useState(0);
   const [level, setLevel] = useState(1);
   const supabase = useMemo(() => createClient(), []);
@@ -25,7 +25,7 @@ export default function XPBar({ userId }) {
       }
     }
     if (userId) fetchXP();
-  }, [userId, supabase]);
+  }, [userId, supabase, refreshKey]);
 
   const progress = getProgressToNextLevel(xp);
 

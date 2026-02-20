@@ -104,27 +104,30 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
 
       fireConfettiFromElement(cardRef.current);
 
-      // XP, streaks, achievements, partner notifications (fire-and-forget)
-      Promise.all([
-        import('@/lib/gamification').then(({ awardXP, XP_REWARDS, checkPactAchievements }) =>
-          awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
-        ),
-        import('@/lib/streaks').then(({ calculateStreak }) =>
-          calculateStreak(supabase, pact.user_id).then(({ currentStreak, totalCompleted }) =>
-            Promise.all([
-              import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
-                updateStreakOnCompletion(supabase, pact.user_id, currentStreak)
-              ),
-              import('@/lib/gamification').then(({ checkPactAchievements }) =>
-                checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
-              ),
-            ])
-          )
-        ),
-        import('@/lib/partnerships').then(({ notifyPartner }) =>
-          notifyPartner(supabase, pact.user_id, 'completed', pact.title)
-        ),
-      ]).catch(err => console.error('Post-completion hooks error:', err));
+      // XP, streaks, achievements, partner notifications — each independent so one failure doesn't block others
+      const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
+        awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
+      ).catch(err => console.error('XP award error:', err));
+
+      const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
+        calculateStreak(supabase, pact.user_id).then(({ currentStreak, totalCompleted }) =>
+          Promise.all([
+            import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
+              updateStreakOnCompletion(supabase, pact.user_id, currentStreak)
+            ),
+            import('@/lib/gamification').then(({ checkPactAchievements }) =>
+              checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
+            ),
+          ])
+        )
+      ).catch(err => console.error('Streak update error:', err));
+
+      const partnerPromise = import('@/lib/partnerships').then(({ notifyPartner }) =>
+        notifyPartner(supabase, pact.user_id, 'completed', pact.title)
+      ).catch(err => console.error('Partner notify error:', err));
+
+      // Await streak/XP to ensure profile is updated before UI refresh
+      await Promise.all([xpPromise, streakPromise, partnerPromise]);
 
       // If recurring, create the next pact
       if (pact.is_recurring && pact.recurrence_type) {

@@ -11,9 +11,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Commands
 
 ```bash
-npm run dev      # Dev server (localhost:3000)
-npm run build    # Production build
-npm run lint     # ESLint
+npm run dev          # Dev server (localhost:3000)
+npm run build        # Production build
+npm run lint         # ESLint
+npm run test:e2e     # Playwright e2e tests (auto-starts dev server)
 ```
 
 ## Tech Stack
@@ -65,6 +66,19 @@ All in `globals.css`. Key categories:
 - Spacing: `--space-1` to `--space-32`
 - Radius: `--radius-sm` to `--radius-full`
 
+## Environment Variables
+
+Copy `.env.local.example` to `.env.local`. Required vars:
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anonymous key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase admin key (server-only) |
+| `RESEND_API_KEY` | Email sending via Resend |
+| `CRON_SECRET` | Secures `/api/cron/send-reminders` endpoint |
+| `NEXT_PUBLIC_APP_URL` | App URL for email links |
+
 ## Project Structure
 
 ```
@@ -72,8 +86,26 @@ All in `globals.css`. Key categories:
 /components       # React components (*.js + *.module.css)
 /lib              # Supabase clients, animations, helpers
 /supabase         # SQL schema files
+/tests            # Playwright e2e tests
 /public           # Static assets (logo.png, icons/, manifest.json)
 ```
+
+## Key Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page |
+| `/dashboard` | Main dashboard (activity feed) |
+| `/dashboard/pacts` | Personal commitments |
+| `/dashboard/groups` | Group projects |
+| `/dashboard/groups/[id]` | Single group (Kanban board) |
+| `/dashboard/focus` | Pomodoro timer |
+| `/dashboard/stats` | Activity calendar & analytics |
+| `/dashboard/settings` | User preferences |
+| `/join/[code]` | Group invite link |
+| `/share/streak` | Shareable streak card |
+| `/auth/callback` | Google OAuth callback (route handler) |
+| `/api/cron/send-reminders` | Cron job for email reminders (route handler) |
 
 ## Database Schema
 

@@ -6,10 +6,6 @@
     },
     {
       "path": "/api/cron/check-streak-risk",
-      "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/cron/check-streak-breaks",
       "schedule": "0 0 * * *"
     }
   ]

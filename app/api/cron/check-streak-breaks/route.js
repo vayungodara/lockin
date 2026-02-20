@@ -19,14 +19,19 @@ export async function GET(request) {
   const supabase = getSupabaseClient();
 
   try {
-    const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+    // Use a 2-day buffer to account for timezone differences.
+    // A user in UTC-12 could have last_activity_date set to "yesterday" in UTC
+    // even though it's still "today" in their local timezone.
+    // With a 2-day buffer, we only break streaks for users who have been
+    // inactive for at least 2 UTC days, ensuring no false breaks.
+    const twoDaysAgo = new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0];
 
-    // Find users whose last activity was before yesterday (streak broken)
+    // Find users whose last activity was before 2 days ago (streak broken)
     const { data: profiles, error } = await supabase
       .from('profiles')
       .select('id, current_streak, last_activity_date')
       .gt('current_streak', 0)
-      .lt('last_activity_date', yesterday);
+      .lt('last_activity_date', twoDaysAgo);
 
     if (error) throw error;
 

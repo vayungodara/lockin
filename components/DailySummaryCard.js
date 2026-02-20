@@ -8,7 +8,7 @@ import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus } from '@/lib
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
 
-export default function DailySummaryCard({ userId }) {
+export default function DailySummaryCard({ userId, refreshKey }) {
   const [summary, setSummary] = useState(null);
   const [streakRisk, setStreakRisk] = useState(null);
   const [freezeAvailable, setFreezeAvailable] = useState(false);
@@ -63,19 +63,29 @@ export default function DailySummaryCard({ userId }) {
           .eq('status', 'completed')
           .gte('completed_at', todayISO);
 
-        // Streak info
+        // Streak info — also fetch last_activity_date to validate stale data
         const { data: profile } = await supabase
           .from('profiles')
-          .select('current_streak, total_xp, level')
+          .select('current_streak, last_activity_date, total_xp, level')
           .eq('id', userId)
           .single();
+
+        // If last_activity_date is more than 1 day ago, streak is broken
+        // regardless of what current_streak says (cron may not have reset it)
+        let streak = profile?.current_streak || 0;
+        if (streak > 0 && profile?.last_activity_date) {
+          const now = new Date();
+          const lastActivity = new Date(profile.last_activity_date + 'T00:00:00Z');
+          const daysSince = Math.floor((now - lastActivity) / (1000 * 60 * 60 * 24));
+          if (daysSince > 1) streak = 0;
+        }
 
         setSummary({
           dueToday,
           overdue,
           completedToday: completedToday?.length || 0,
           focusMinutes,
-          streak: profile?.current_streak || 0,
+          streak,
           xp: profile?.total_xp || 0,
           level: profile?.level || 1,
         });
@@ -96,7 +106,7 @@ export default function DailySummaryCard({ userId }) {
     }
 
     fetchSummary();
-  }, [userId, supabase]);
+  }, [userId, supabase, refreshKey]);
 
   const handleUseFreeze = async () => {
     const result = await useStreakFreeze(supabase);

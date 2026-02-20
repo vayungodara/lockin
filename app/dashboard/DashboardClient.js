@@ -48,6 +48,7 @@ export default function DashboardClient({ user }) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcutsSafe();
 
@@ -101,6 +102,10 @@ export default function DashboardClient({ user }) {
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(pacts.map(p => p.id === updatedPact.id ? updatedPact : p));
+    // Refresh DailySummaryCard and XPBar when a pact status changes
+    if (updatedPact.status === 'completed' || updatedPact.status === 'missed') {
+      setRefreshKey(k => k + 1);
+    }
   };
 
   const handleNewRecurringPact = (newPact) => {
@@ -203,7 +208,7 @@ export default function DashboardClient({ user }) {
               Welcome back, {firstName}!
             </h1>
             <p className={styles.subGreeting}>Ready to lock in today?</p>
-            <XPBar userId={user?.id} />
+            <XPBar userId={user?.id} refreshKey={refreshKey} />
           </div>
           <motion.button 
             className="btn btn-primary" 
@@ -218,7 +223,7 @@ export default function DashboardClient({ user }) {
           </motion.button>
         </motion.header>
         
-        <DailySummaryCard userId={user?.id} />
+        <DailySummaryCard userId={user?.id} refreshKey={refreshKey} />
 
         {/* Stats Overview */}
         <motion.div

@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import { buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
+import { ACCENT_PALETTES } from '@/lib/accentColors';
 import styles from './SettingsPage.module.css';
 
 const STORAGE_KEYS = {
@@ -15,7 +16,7 @@ const STORAGE_KEYS = {
 };
 
 export default function SettingsPageClient({ user }) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, accent, setAccent } = useTheme();
   const toast = useToast();
 
   // Timer settings - initialize from localStorage
@@ -235,6 +236,24 @@ export default function SettingsPageClient({ user }) {
                   </svg>
                   System
                 </motion.button>
+              </div>
+            </div>
+
+            <div className={styles.accentRow}>
+              <span className={styles.settingLabel}>Accent Color</span>
+              <div className={styles.accentGrid}>
+                {ACCENT_PALETTES.map((palette) => (
+                  <button
+                    key={palette.id}
+                    className={`${styles.accentSwatch} ${accent === palette.id ? styles.accentSwatchActive : ''}`}
+                    onClick={() => setAccent(palette.id)}
+                    title={palette.name}
+                    type="button"
+                    style={{
+                      background: `linear-gradient(135deg, ${palette.primary}, ${palette.secondary}, ${palette.tertiary})`,
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>

@@ -108,9 +108,6 @@ export default function DashboardClient({ user }) {
     }
   };
 
-  const handleNewRecurringPact = (newPact) => {
-    setPacts(prev => [...prev, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
-  };
 
   const handleSignIn = async () => {
     try {
@@ -360,7 +357,6 @@ export default function DashboardClient({ user }) {
                       <PactCard
                         pact={pact}
                         onUpdate={handlePactUpdate}
-                        onNewRecurringPact={handleNewRecurringPact}
                       />
                     </motion.div>
                   ))}

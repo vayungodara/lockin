@@ -9,7 +9,7 @@ import { cardHover, buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import styles from './PactCard.module.css';
 
-export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
+export default function PactCard({ pact, onUpdate }) {
   const [isLoading, setIsLoading] = useState(false);
   const isCompletingRef = useRef(false);
   const cardRef = useRef(null);
@@ -23,30 +23,6 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
   const isOverdue = new Date(pact.deadline) < new Date() && pact.status === 'active';
   const deadlineDate = new Date(pact.deadline);
 
-  // Calculate next deadline for recurring pacts
-  const getNextDeadline = (currentDeadline, recurrenceType) => {
-    const next = new Date(currentDeadline);
-
-    switch (recurrenceType) {
-      case 'daily':
-        next.setDate(next.getDate() + 1);
-        break;
-      case 'weekly':
-        next.setDate(next.getDate() + 7);
-        break;
-      case 'weekdays':
-        // Move to next weekday
-        do {
-          next.setDate(next.getDate() + 1);
-        } while (next.getDay() === 0 || next.getDay() === 6); // Skip weekends
-        break;
-      default:
-        next.setDate(next.getDate() + 1);
-    }
-
-    return next;
-  };
-  
   // Format deadline
   const formatDeadline = () => {
     const now = new Date();
@@ -129,33 +105,8 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
       // Await streak/XP to ensure profile is updated before UI refresh
       await Promise.all([xpPromise, streakPromise, partnerPromise]);
 
-      // If recurring, create the next pact
       if (pact.is_recurring && pact.recurrence_type) {
-        const nextDeadline = getNextDeadline(pact.deadline, pact.recurrence_type);
-
-        const { data: newPact, error: createError } = await supabase
-          .from('pacts')
-          .insert({
-            user_id: pact.user_id,
-            title: pact.title,
-            description: pact.description,
-            deadline: nextDeadline.toISOString(),
-            status: 'active',
-            is_recurring: true,
-            recurrence_type: pact.recurrence_type
-          })
-          .select()
-          .single();
-
-        if (createError) {
-          console.error('Error creating recurring pact:', createError);
-          toast.error('Pact completed, but failed to create next recurring pact.');
-        } else {
-          toast.success(`Next ${pact.recurrence_type} pact created!`);
-          if (onNewRecurringPact) {
-            onNewRecurringPact(newPact);
-          }
-        }
+        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
       }
 
       if (onUpdate) {
@@ -189,6 +140,10 @@ export default function PactCard({ pact, onUpdate, onNewRecurringPact }) {
 
       if (onUpdate) {
         onUpdate({ ...pact, status: 'missed' });
+      }
+
+      if (pact.is_recurring && pact.recurrence_type) {
+        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
       }
     } catch (err) {
       console.error('Error marking pact as missed:', err);

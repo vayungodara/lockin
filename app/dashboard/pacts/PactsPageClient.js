@@ -48,9 +48,6 @@ export default function PactsPageClient({ user }) {
     setPacts(pacts.map(p => p.id === updatedPact.id ? updatedPact : p));
   };
 
-  const handleNewRecurringPact = (newPact) => {
-    setPacts(prev => [newPact, ...prev]);
-  };
 
   const handleDeletePact = async (pactId) => {
     try {
@@ -180,7 +177,6 @@ export default function PactsPageClient({ user }) {
               key={pact.id}
               pact={pact}
               onUpdate={handlePactUpdate}
-              onNewRecurringPact={handleNewRecurringPact}
             />
           ))}
         </div>

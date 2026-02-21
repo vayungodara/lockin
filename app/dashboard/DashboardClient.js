@@ -143,6 +143,11 @@ export default function DashboardClient({ user }) {
   const completedPacts = pacts.filter(p => p.status === 'completed');
   const missedPacts = pacts.filter(p => p.status === 'missed');
 
+  // Dashboard shows active pacts first; if none, show a few recent completed ones
+  const dashboardPacts = activePacts.length > 0
+    ? activePacts
+    : completedPacts.slice(0, 3);
+
   // If no user, show sign-in page
   const fullName = typeof user?.user_metadata?.full_name === 'string'
     ? user.user_metadata.full_name
@@ -339,13 +344,13 @@ export default function DashboardClient({ user }) {
         ) : (
           <motion.div className={styles.pactsSection} variants={fadeInUp} initial="initial" animate="animate">
             <div className={styles.sectionHeader}>
-              <h2>Your Pacts</h2>
-              <span className={styles.pactCount}>{activePacts.length} active</span>
+              <h2>{activePacts.length > 0 ? 'Active Pacts' : 'Recent Pacts'}</h2>
+              <a href="/dashboard/pacts" className={styles.viewAllLink}>View all</a>
             </div>
             <LayoutGroup>
               <motion.div className={styles.pactsGrid}>
                 <AnimatePresence mode="popLayout">
-                  {pacts.map((pact) => (
+                  {dashboardPacts.map((pact) => (
                     <motion.div 
                       key={pact.id} 
                       layout

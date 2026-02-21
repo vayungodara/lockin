@@ -451,6 +451,18 @@
   border-radius: var(--radius-full);
 }
 
+.viewAllLink {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-tertiary);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.viewAllLink:hover {
+  color: var(--accent-primary);
+}
+
 .pactsGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);

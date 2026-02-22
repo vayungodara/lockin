@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useSyncExternalStore, useCallback } from 'react';
+import { useState, useEffect, useRef, useSyncExternalStore, useCallback } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -102,6 +102,27 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
   
     const [hoveredItem, setHoveredItem] = useState(null);
   const [isHovering, setIsHovering] = useState(false);
+  const hoverTimeout = useRef(null);
+
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+      hoverTimeout.current = null;
+    }
+    setIsHovering(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    hoverTimeout.current = setTimeout(() => {
+      setIsHovering(false);
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeout.current) clearTimeout(hoverTimeout.current);
+    };
+  }, []);
 
   const handleCollapseToggle = useCallback(() => {
     const newState = !isCollapsed;
@@ -166,8 +187,8 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
   return (
     <motion.aside
       className={styles.sidebar}
-      onMouseEnter={() => setIsHovering(true)}
-      onMouseLeave={() => setIsHovering(false)}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       animate={{ width: isExpanded ? 260 : 72 }}
       transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
     >

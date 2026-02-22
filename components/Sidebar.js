@@ -187,14 +187,14 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               style={{ width: 'auto', height: '32px' }}
             />
           </motion.div>
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.div
                 className={styles.logoTextWrapper}
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
+                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               >
                 <Image
                   src="/logo-text.png"
@@ -241,14 +241,14 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               >
                 {item.icon}
               </motion.span>
-              <AnimatePresence>
+              <AnimatePresence mode="wait">
                 {isExpanded && (
                   <motion.span
                     className={styles.navLabel}
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
+                    transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
                   >
                     {item.label}
                   </motion.span>
@@ -345,14 +345,14 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             )}
           </motion.div>
 
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {isExpanded && (
               <motion.div
                 className={styles.userDetails}
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
+                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
               >
                 <span className={styles.userName}>
                   {user?.user_metadata?.full_name || 'User'}

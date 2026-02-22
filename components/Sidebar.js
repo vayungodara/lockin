@@ -194,7 +194,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
               >
                 <Image
                   src="/logo-text.png"
@@ -248,7 +248,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.2 }}
+                    transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
                   >
                     {item.label}
                   </motion.span>
@@ -352,7 +352,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                 initial={{ opacity: 0, width: 0 }}
                 animate={{ opacity: 1, width: 'auto' }}
                 exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
+                transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
               >
                 <span className={styles.userName}>
                   {user?.user_metadata?.full_name || 'User'}

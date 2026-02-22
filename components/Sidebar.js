@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useSyncExternalStore, useCallback } from '
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
 import NotificationBell from './NotificationBell';
@@ -89,17 +89,21 @@ const navItems = [
   },
 ];
 
+// Shared transition for all expand/collapse inner elements.
+// Using a short tween instead of spring avoids queued spring settle frames.
+const expandTransition = { duration: 0.2, ease: [0.25, 1, 0.5, 1] };
+
 export default function Sidebar({ user, onSignOut, onExpandChange }) {
   const pathname = usePathname();
   const { theme, setTheme, resolvedTheme, mounted } = useTheme();
   const focusContext = useFocusSafe();
-  
+
   const isCollapsed = useSyncExternalStore(
     subscribeToSidebarStorage,
     getSidebarCollapsed,
     () => true
   );
-  
+
     const [hoveredItem, setHoveredItem] = useState(null);
   const [isHovering, setIsHovering] = useState(false);
   const hoverTimeout = useRef(null);
@@ -208,26 +212,25 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               style={{ width: 'auto', height: '32px' }}
             />
           </motion.div>
-          <AnimatePresence mode="wait">
-            {isExpanded && (
-              <motion.div
-                className={styles.logoTextWrapper}
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              >
-                <Image
-                  src="/logo-text.png"
-                  alt="LockIn"
-                  width={107}
-                  height={32}
-                  priority
-                  style={{ width: 'auto', height: '28px' }}
-                />
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Always mounted -- animate width between 0 and fixed value */}
+          <motion.div
+            className={styles.logoTextWrapper}
+            initial={false}
+            animate={{
+              opacity: isExpanded ? 1 : 0,
+              width: isExpanded ? 120 : 0,
+            }}
+            transition={expandTransition}
+          >
+            <Image
+              src="/logo-text.png"
+              alt="LockIn"
+              width={107}
+              height={32}
+              priority
+              style={{ width: 'auto', height: '28px' }}
+            />
+          </motion.div>
         </Link>
       </div>
 
@@ -253,28 +256,28 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                   transition={{ duration: 0.2 }}
                 />
               )}
-              <motion.span 
+              <motion.span
                 className={styles.navIcon}
-                animate={{ 
+                animate={{
                   scale: active ? 1.1 : 1,
                   color: active ? 'var(--accent-primary)' : 'currentColor'
                 }}
               >
                 {item.icon}
               </motion.span>
-              <AnimatePresence mode="wait">
-                {isExpanded && (
-                  <motion.span
-                    className={styles.navLabel}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-                  >
-                    {item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
+              {/* Always mounted -- fade + slide */}
+              <motion.span
+                className={styles.navLabel}
+                initial={false}
+                animate={{
+                  opacity: isExpanded ? 1 : 0,
+                  x: isExpanded ? 0 : -8,
+                }}
+                transition={expandTransition}
+                style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
+              >
+                {item.label}
+              </motion.span>
             </Link>
           );
         })}
@@ -297,44 +300,44 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               {focusContext.formatTime(focusContext.timeLeft)}
             </span>
 
-            <AnimatePresence mode="popLayout">
-              {isExpanded && (
-                <motion.span
-                  className={styles.miniTimerLabel}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.8 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
-                </motion.span>
-              )}
-            </AnimatePresence>
+            {/* Always mounted -- fade + scale */}
+            <motion.span
+              className={styles.miniTimerLabel}
+              initial={false}
+              animate={{
+                opacity: isExpanded ? 1 : 0,
+                scale: isExpanded ? 1 : 0.8,
+              }}
+              transition={{ duration: 0.15 }}
+              style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
+            >
+              {focusContext.mode === 'work' ? 'Focusing' : 'Break'}
+            </motion.span>
           </Link>
 
-          <AnimatePresence mode="popLayout">
-            {isExpanded && (
-              <motion.button
-                className={styles.miniTimerBtn}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  focusContext.toggleTimer();
-                }}
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.35)' }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-                title="Pause timer"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
-                  <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
-                </svg>
-              </motion.button>
-            )}
-          </AnimatePresence>
+          {/* Always mounted -- fade + scale */}
+          <motion.button
+            className={styles.miniTimerBtn}
+            onClick={(e) => {
+              e.stopPropagation();
+              focusContext.toggleTimer();
+            }}
+            initial={false}
+            animate={{
+              opacity: isExpanded ? 1 : 0,
+              scale: isExpanded ? 1 : 0.5,
+            }}
+            whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.35)' }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            title="Pause timer"
+            style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="6" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+              <rect x="14" y="4" width="4" height="16" rx="1" fill="currentColor"/>
+            </svg>
+          </motion.button>
         </motion.div>
       )}
 
@@ -366,22 +369,21 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             )}
           </motion.div>
 
-          <AnimatePresence mode="wait">
-            {isExpanded && (
-              <motion.div
-                className={styles.userDetails}
-                initial={{ opacity: 0, width: 0 }}
-                animate={{ opacity: 1, width: 'auto' }}
-                exit={{ opacity: 0, width: 0 }}
-                transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-              >
-                <span className={styles.userName}>
-                  {user?.user_metadata?.full_name || 'User'}
-                </span>
-                <span className={styles.userEmail}>{user?.email}</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* Always mounted -- animate width between 0 and fixed value */}
+          <motion.div
+            className={styles.userDetails}
+            initial={false}
+            animate={{
+              opacity: isExpanded ? 1 : 0,
+              width: isExpanded ? 150 : 0,
+            }}
+            transition={expandTransition}
+          >
+            <span className={styles.userName}>
+              {user?.user_metadata?.full_name || 'User'}
+            </span>
+            <span className={styles.userEmail}>{user?.email}</span>
+          </motion.div>
         </motion.div>
 
         {/* Action buttons - vertical when collapsed, horizontal when expanded */}

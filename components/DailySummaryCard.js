@@ -71,12 +71,14 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           .single();
 
         // If last_activity_date is more than 1 day ago, streak is broken
-        // regardless of what current_streak says (cron may not have reset it)
+        // regardless of what current_streak says (cron may not have reset it).
+        // Use UTC dates on both sides to match server-side streak logic.
         let streak = profile?.current_streak || 0;
         if (streak > 0 && profile?.last_activity_date) {
           const now = new Date();
-          const lastActivity = new Date(profile.last_activity_date + 'T00:00:00Z');
-          const daysSince = Math.floor((now - lastActivity) / (1000 * 60 * 60 * 24));
+          const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
+          const lastActivity = new Date(profile.last_activity_date + 'T00:00:00Z').getTime();
+          const daysSince = Math.round((todayUTC - lastActivity) / (1000 * 60 * 60 * 24));
           if (daysSince > 1) streak = 0;
         }
 

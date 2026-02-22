@@ -86,10 +86,10 @@ export default function PactCard({ pact, onUpdate }) {
       ).catch(err => console.error('XP award error:', err));
 
       const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
-        calculateStreak(supabase, pact.user_id).then(({ currentStreak, totalCompleted }) =>
+        calculateStreak(supabase, pact.user_id).then(({ currentStreak, longestStreak, totalCompleted }) =>
           Promise.all([
             import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
-              updateStreakOnCompletion(supabase, pact.user_id, currentStreak)
+              updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
             ),
             import('@/lib/gamification').then(({ checkPactAchievements }) =>
               checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)

@@ -19,7 +19,6 @@ export default function FocusTimer() {
     resetTimer,
     skipToNext,
     WORK_DURATION,
-    BREAK_DURATION,
   } = useFocus();
 
   const prevSessionsRef = useRef(sessionsCompleted);

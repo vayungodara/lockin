@@ -123,8 +123,6 @@ export default function DailySummaryCard({ userId, refreshKey }) {
 
   if (isLoading || !summary) return null;
 
-  const hasActivity = summary.dueToday > 0 || summary.overdue > 0 || summary.completedToday > 0 || summary.focusMinutes > 0;
-
   return (
     <motion.div className={styles.card} variants={fadeInUp} initial="initial" animate="animate">
       <div className={styles.header}>

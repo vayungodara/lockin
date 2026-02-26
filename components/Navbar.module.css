@@ -5,22 +5,11 @@
   right: 0;
   z-index: var(--z-sticky);
   padding: var(--space-3) 0;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface-glass);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-bottom: 1px solid var(--border-subtle);
   transition: all var(--transition-base);
-}
-
-[data-theme="dark"] .navbar {
-  background: rgba(11, 13, 16, 0.7);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .navbar {
-    background: rgba(11, 13, 16, 0.7);
-  }
 }
 
 .container {

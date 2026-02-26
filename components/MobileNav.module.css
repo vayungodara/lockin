@@ -4,7 +4,9 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--bg-primary);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-top: 1px solid var(--border-subtle);
   padding: var(--space-2) var(--space-4);
   padding-bottom: max(var(--space-2), env(safe-area-inset-bottom));
@@ -33,6 +35,12 @@
   transition: all var(--transition-fast);
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
+  position: relative;
+}
+
+.navItem:active {
+  transform: scale(0.92);
+  transition: transform 0.08s ease;
 }
 
 .navItem:hover {
@@ -42,6 +50,19 @@
 
 .navItem.active {
   color: var(--accent-primary);
+}
+
+.navItem.active::after {
+  content: '';
+  position: absolute;
+  bottom: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 .navItem.active .navIcon {

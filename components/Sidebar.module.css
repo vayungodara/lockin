@@ -3,7 +3,9 @@
   top: 0;
   left: 0;
   bottom: 0;
-  background: var(--bg-primary);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-right: 1px solid var(--border-subtle);
   display: flex;
   flex-direction: column;
@@ -100,8 +102,15 @@
 }
 
 .navItem.active {
-  background: var(--gradient-subtle);
   color: var(--accent-primary);
+}
+
+.navPill {
+  position: absolute;
+  inset: 2px;
+  background: var(--gradient-subtle);
+  border-radius: var(--radius-lg);
+  z-index: -1;
 }
 
 .navItem:hover {
@@ -117,6 +126,11 @@
   align-items: center;
   justify-content: center;
   min-width: 24px;
+  transition: color var(--transition-fast);
+}
+
+.navItem:hover .navIcon {
+  color: var(--accent-primary);
 }
 
 .navLabel {

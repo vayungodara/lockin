@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg-primary);
+  animation: dotPulse 3s ease-in-out infinite;
 }
 
 .dropdown {

@@ -214,10 +214,10 @@
   --info-bg: rgba(110, 168, 254, 0.12);
   --info-glow: rgba(110, 168, 254, 0.35);
 
-  /* Borders — visible card edges */
-  --border-subtle: rgba(255, 255, 255, 0.08);
-  --border-default: rgba(255, 255, 255, 0.12);
-  --border-strong: rgba(255, 255, 255, 0.18);
+  /* Borders — soft card edges */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-default: rgba(255, 255, 255, 0.09);
+  --border-strong: rgba(255, 255, 255, 0.14);
   --border-focus: rgba(var(--accent-primary-rgb), 0.6);
 
   /* Shadows — deep and dramatic */

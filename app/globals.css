@@ -178,12 +178,12 @@
   --bg-elevated: #1A1F2B;
   --bg-hover: #222838;
 
-  /* Surface colors — lifted for card visibility */
-  --surface-1: rgba(30, 35, 50, 0.95);
-  --surface-2: rgba(36, 42, 58, 0.9);
-  --surface-3: rgba(44, 50, 68, 0.85);
+  /* Surface colors — gentle lift, translucent */
+  --surface-1: rgba(22, 27, 40, 0.9);
+  --surface-2: rgba(28, 34, 48, 0.8);
+  --surface-3: rgba(36, 42, 58, 0.75);
   --surface-overlay: rgba(91, 94, 245, 0.04);
-  --surface-glass: rgba(24, 29, 42, 0.85);
+  --surface-glass: rgba(18, 22, 34, 0.7);
 
   /* Text colors */
   --text-primary: #F0F0FF;

@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { motion } from 'framer-motion';
+import { staggerContainer } from '@/lib/animations';
 import { createClient } from '@/lib/supabase/client';
 import { getGroupActivity, getAllActivity } from '@/lib/activity';
 import ActivityItem from './ActivityItem';
@@ -134,7 +136,13 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
           <span>{groupId ? 'Activity will appear here as your team works' : 'Your activity will appear here as you work'}</span>
         </div>
       ) : (
-        <div className={styles.feed} ref={feedRef}>
+        <motion.div
+          className={styles.feed}
+          ref={feedRef}
+          variants={staggerContainer}
+          initial="initial"
+          animate="animate"
+        >
           {activities.map((activity) => (
             <ActivityItem key={activity.id} activity={activity} />
           ))}
@@ -156,7 +164,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
               <div className={styles.endLine}></div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
     </div>
   );

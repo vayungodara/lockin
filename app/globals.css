@@ -183,7 +183,7 @@
   --surface-2: rgba(28, 34, 48, 0.8);
   --surface-3: rgba(36, 42, 58, 0.75);
   --surface-overlay: rgba(91, 94, 245, 0.04);
-  --surface-glass: rgba(18, 22, 34, 0.55);
+  --surface-glass: rgba(18, 22, 34, 0.35);
 
   /* Text colors */
   --text-primary: #F0F0FF;

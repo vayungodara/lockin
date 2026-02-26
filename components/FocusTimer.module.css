@@ -177,6 +177,12 @@
   transition: all var(--transition-base);
 }
 
+.primaryBtn:focus-visible,
+.secondaryBtn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
 .secondaryBtn:hover {
   background: var(--surface-3);
   color: var(--text-primary);

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { fadeInUp } from '@/lib/animations';
+import { fadeInUp, streakCelebration } from '@/lib/animations';
 import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus } from '@/lib/streaks-advanced';
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
@@ -132,7 +132,13 @@ export default function DailySummaryCard({ userId, refreshKey }) {
         {summary.streak > 0 && (
           <div className={styles.streakBadge}>
             <span className={styles.streakIcon}>🔥</span>
-            {summary.streak} day streak
+            {summary.streak >= 3 ? (
+              <motion.span {...streakCelebration}>
+                {summary.streak} day streak
+              </motion.span>
+            ) : (
+              <span>{summary.streak} day streak</span>
+            )}
           </div>
         )}
       </div>

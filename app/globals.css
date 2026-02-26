@@ -178,12 +178,12 @@
   --bg-elevated: #1A1F2B;
   --bg-hover: #222838;
 
-  /* Surface colors — subtle luminosity */
-  --surface-1: rgba(22, 27, 37, 0.9);
-  --surface-2: rgba(26, 31, 43, 0.85);
-  --surface-3: rgba(34, 40, 56, 0.8);
-  --surface-overlay: rgba(91, 94, 245, 0.03);
-  --surface-glass: rgba(14, 17, 23, 0.75);
+  /* Surface colors — lifted for card visibility */
+  --surface-1: rgba(30, 35, 50, 0.95);
+  --surface-2: rgba(36, 42, 58, 0.9);
+  --surface-3: rgba(44, 50, 68, 0.85);
+  --surface-overlay: rgba(91, 94, 245, 0.04);
+  --surface-glass: rgba(24, 29, 42, 0.85);
 
   /* Text colors */
   --text-primary: #F0F0FF;
@@ -214,10 +214,10 @@
   --info-bg: rgba(110, 168, 254, 0.12);
   --info-glow: rgba(110, 168, 254, 0.35);
 
-  /* Borders — subtle gradient-aware */
-  --border-subtle: rgba(91, 94, 245, 0.06);
-  --border-default: rgba(91, 94, 245, 0.10);
-  --border-strong: rgba(255, 255, 255, 0.12);
+  /* Borders — visible card edges */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.12);
+  --border-strong: rgba(255, 255, 255, 0.18);
   --border-focus: rgba(var(--accent-primary-rgb), 0.6);
 
   /* Shadows — deep and dramatic */

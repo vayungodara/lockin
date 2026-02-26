@@ -4,7 +4,6 @@
 }
 
 .hero {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,19 +39,15 @@
 
 .heroTitle {
   font-size: clamp(3rem, 6vw, 4.5rem);
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.05;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.035em;
   margin-bottom: var(--space-6);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 .strikethrough {
   position: relative;
-  -webkit-text-fill-color: var(--text-tertiary);
+  color: var(--text-tertiary);
 }
 
 .strikethrough::after {
@@ -85,20 +80,6 @@
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
   border-radius: var(--radius-xl);
-}
-
-.ctaButton {
-  background: var(--gradient-primary);
-  background-size: 200% 200%;
-  animation: gradientShift 4s ease infinite;
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-glow-lg);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.ctaButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0 50px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 .heroStats {
@@ -144,39 +125,6 @@
   pointer-events: none;
   overflow: hidden;
   z-index: -1;
-}
-
-.heroOrbs {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  z-index: -1;
-  pointer-events: none;
-}
-
-.orbPrimary {
-  position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: rgba(var(--accent-primary-rgb), 0.15);
-  filter: blur(80px);
-  top: -10%;
-  right: 10%;
-  animation: float 6s ease-in-out infinite;
-}
-
-.orbTertiary {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  background: rgba(var(--accent-tertiary-rgb), 0.12);
-  filter: blur(80px);
-  bottom: 10%;
-  left: 5%;
-  animation: float 6s ease-in-out infinite;
-  animation-delay: 2s;
 }
 
 .floatingCard {

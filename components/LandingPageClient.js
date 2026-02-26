@@ -8,11 +8,10 @@ import Navbar from '@/components/Navbar';
 import ParticleBackground from '@/components/ParticleBackground';
 import { createClient } from '@/lib/supabase/client';
 import styles from '../app/page.module.css';
-import {
+import { 
   buttonHover,
   buttonTap,
   iconHover,
-  revealUp,
 } from '@/lib/animations';
 
 const easeOutQuint = [0.22, 1, 0.36, 1];
@@ -154,11 +153,7 @@ export default function LandingPageClient() {
       
       <main className={styles.main}>
         <section className={styles.hero}>
-          <div className={styles.heroOrbs}>
-            <div className={styles.orbPrimary} />
-            <div className={styles.orbTertiary} />
-          </div>
-          <motion.div
+          <motion.div 
             className={styles.heroVisual}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -347,10 +342,13 @@ export default function LandingPageClient() {
           
           <div className={styles.featureGrid}>
             {features.map((feature, index) => (
-              <motion.div
+              <motion.div 
                 key={feature.title}
                 className={styles.featureCard}
-                {...revealUp}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.06, ease: easeOutQuint }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
                 <motion.div 
@@ -558,10 +556,13 @@ export default function LandingPageClient() {
           
           <div className={styles.steps}>
             {steps.map((step, index) => (
-              <motion.div
+              <motion.div 
                 key={step.number}
                 className={styles.step}
-                {...revealUp}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.4, delay: index * 0.1, ease: easeOutQuint }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
                 <motion.div 

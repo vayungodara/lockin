@@ -1,14 +1,17 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
+import { xpFillFlash } from '@/lib/animations';
 import styles from './XPBar.module.css';
 
 export default function XPBar({ userId, refreshKey }) {
   const [xp, setXP] = useState(0);
   const [level, setLevel] = useState(1);
+  const [xpChanged, setXpChanged] = useState(false);
+  const prevXpRef = useRef(0);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -27,6 +30,15 @@ export default function XPBar({ userId, refreshKey }) {
     if (userId) fetchXP();
   }, [userId, supabase, refreshKey]);
 
+  useEffect(() => {
+    if (xp > 0 && xp !== prevXpRef.current) {
+      setXpChanged(true);
+      const timer = setTimeout(() => setXpChanged(false), 600);
+      prevXpRef.current = xp;
+      return () => clearTimeout(timer);
+    }
+  }, [xp]);
+
   const progress = getProgressToNextLevel(xp);
 
   return (
@@ -39,7 +51,10 @@ export default function XPBar({ userId, refreshKey }) {
         <motion.div
           className={styles.fill}
           initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
+          animate={{
+            width: `${progress}%`,
+            ...(xpChanged ? xpFillFlash.animate : {}),
+          }}
           transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
         />
       </div>

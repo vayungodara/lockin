@@ -15,6 +15,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
 .subtitle {
@@ -55,7 +56,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-4);
@@ -117,7 +120,9 @@
 
 /* Setting Card */
 .settingCard {
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-4);

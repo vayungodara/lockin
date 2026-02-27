@@ -243,7 +243,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               key={item.href}
               href={item.href}
               className={`${styles.navItem} ${active ? styles.active : ''}`}
-              title={isExpanded ? undefined : item.label}
+              data-label={isExpanded ? undefined : item.label}
               onMouseEnter={() => setHoveredItem(item.href)}
               onMouseLeave={() => setHoveredItem(null)}
             >

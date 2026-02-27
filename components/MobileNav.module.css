@@ -57,8 +57,7 @@
   color: var(--accent-primary);
 }
 
-.navItem.active::after {
-  content: '';
+.activeDot {
   position: absolute;
   bottom: 4px;
   left: 50%;

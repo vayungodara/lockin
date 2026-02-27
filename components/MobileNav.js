@@ -111,6 +111,13 @@ export default function MobileNav() {
             {item.icon}
           </motion.span>
           <span className={styles.navLabel}>{item.label}</span>
+          {isActive(item.href) && (
+            <motion.div
+              className={styles.activeDot}
+              layoutId="mobile-nav-dot"
+              transition={{ type: 'spring', stiffness: 350, damping: 30, mass: 0.8 }}
+            />
+          )}
         </Link>
       ))}
     </nav>

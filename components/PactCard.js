@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
@@ -12,10 +12,22 @@ import styles from './PactCard.module.css';
 export default function PactCard({ pact, onUpdate }) {
   const [isLoading, setIsLoading] = useState(false);
   const isCompletingRef = useRef(false);
+  const justCompletedRef = useRef(false);
+  const [showBounce, setShowBounce] = useState(false);
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
   const { fire: triggerConfetti, ConfettiComponent } = useConfetti();
+
+  // Clear bounce animation after 1s
+  useEffect(() => {
+    if (!showBounce) return;
+    const timer = setTimeout(() => {
+      setShowBounce(false);
+      justCompletedRef.current = false;
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [showBounce]);
 
   if (!pact) {
     return null;
@@ -80,6 +92,8 @@ export default function PactCard({ pact, onUpdate }) {
       await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
 
       triggerConfetti();
+      justCompletedRef.current = true;
+      setShowBounce(true);
 
       // XP, streaks, achievements, partner notifications — each independent so one failure doesn't block others
       const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
@@ -211,7 +225,7 @@ export default function PactCard({ pact, onUpdate }) {
                 aria-label="Mark pact as complete"
                 whileHover={buttonHover}
                 whileTap={buttonTap}
-                {...(pact.status === 'completed' ? celebrationBounce : {})}
+                {...(showBounce ? celebrationBounce : {})}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

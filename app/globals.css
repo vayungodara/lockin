@@ -25,7 +25,7 @@
   /* Text colors — Rich, readable */
   --text-primary: #161529;
   --text-secondary: #524E68;
-  --text-tertiary: #837F96;
+  --text-tertiary: #6E6A82;
   --text-muted: #A9A5BC;
   --text-inverse: #FFFFFF;
 
@@ -941,8 +941,8 @@ p {
 }
 
 @keyframes toastProgress {
-  from { width: 100%; }
-  to { width: 0%; }
+  from { transform: scaleX(1); }
+  to { transform: scaleX(0); }
 }
 
 /* Animation classes */

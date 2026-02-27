@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerItem } from '@/lib/animations';
@@ -22,6 +22,8 @@ export default function ActivityItem({ activity }) {
   const actionInfo = getActionInfo(activity.action);
   const user = activity.user || { full_name: 'Unknown' };
   const timeAgo = formatRelativeTime(activity.created_at);
+  // Check if activity was created less than 30s ago (at mount time)
+  const [isNew] = useState(() => Date.now() - new Date(activity.created_at).getTime() < 30000);
 
   const fetchReactions = useCallback(async () => {
     const result = await getReactions(supabase, activity.id);
@@ -137,7 +139,7 @@ export default function ActivityItem({ activity }) {
   };
 
   return (
-    <motion.div className={styles.item} variants={staggerItem}>
+    <motion.div className={`${styles.item} ${isNew ? styles.newItem : ''}`} variants={staggerItem}>
       <div className={styles.timeline}>
         {renderIcon()}
         <div className={styles.line}></div>

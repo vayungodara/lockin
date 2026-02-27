@@ -135,7 +135,7 @@
   justify-content: center;
   border: none;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), filter var(--transition-base);
 }
 
 .playBtn {
@@ -174,7 +174,7 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
 }
 
 .primaryBtn:focus-visible,

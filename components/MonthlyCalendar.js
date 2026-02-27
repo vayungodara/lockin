@@ -265,6 +265,10 @@ export default function MonthlyCalendar({ userId }) {
               const isFuture = isFutureDate(date);
               const isSelected = selectedDay?.dateKey === dateKey;
 
+              const tooltipText = isCurrentMonth && !isFuture
+                ? (dayData && dayData.count > 0 ? `${dayData.count} activit${dayData.count === 1 ? 'y' : 'ies'}` : 'No activity')
+                : undefined;
+
               return (
                 <motion.div
                   key={dateKey}
@@ -279,6 +283,7 @@ export default function MonthlyCalendar({ userId }) {
                     ${isFuture ? styles.future : ''}
                     ${isSelected ? styles.selected : ''}
                   `}
+                  data-tooltip={tooltipText}
                   onClick={() => handleDayClick(date, dayData)}
                   role="button"
                   tabIndex={isFuture ? -1 : 0}

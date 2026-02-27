@@ -25,9 +25,21 @@ function formatTimeAgo(dateStr) {
 export default function NotificationBell() {
   const [isOpen, setIsOpen] = useState(false);
   const [dropdownPosition, setDropdownPosition] = useState({ bottom: 0, left: 80 });
+  const [wiggle, setWiggle] = useState(false);
   const dropdownRef = useRef(null);
   const buttonRef = useRef(null);
+  const prevUnreadRef = useRef(0);
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications();
+
+  // Wiggle bell when unread count increases
+  useEffect(() => {
+    if (unreadCount > prevUnreadRef.current) {
+      setWiggle(true);
+      const timer = setTimeout(() => setWiggle(false), 600);
+      return () => clearTimeout(timer);
+    }
+    prevUnreadRef.current = unreadCount;
+  }, [unreadCount]);
 
   // Calculate dropdown position when opening
   const updatePosition = () => {
@@ -97,7 +109,7 @@ export default function NotificationBell() {
     <div className={styles.container} ref={dropdownRef}>
       <motion.button
         ref={buttonRef}
-        className={styles.bellButton}
+        className={`${styles.bellButton} ${wiggle ? styles.wiggle : ''}`}
         onClick={handleToggle}
         whileTap={{ scale: 0.9 }}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}

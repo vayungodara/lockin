@@ -3,6 +3,17 @@
   gap: var(--space-3);
   position: relative;
   padding-bottom: var(--space-4);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 48px;
+}
+
+.item.newItem {
+  animation: newItemFlash 2s ease-out forwards;
+}
+
+@keyframes newItemFlash {
+  0% { background: rgba(var(--accent-celebration-rgb), 0.15); }
+  100% { background: transparent; }
 }
 
 .item:last-child {
@@ -29,34 +40,34 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: all var(--transition-base);
+  transition: transform var(--transition-base), background-color var(--transition-base);
   position: relative;
   z-index: 1;
 }
 
 .iconPurple {
-  background: rgba(91, 94, 245, 0.15);
-  color: #5B5EF5;
+  background: rgba(var(--accent-primary-rgb), 0.15);
+  color: var(--accent-primary);
 }
 
 .iconGreen {
-  background: rgba(13, 191, 115, 0.15);
-  color: #0DBF73;
+  background: var(--success-bg);
+  color: var(--success);
 }
 
 .iconYellow {
-  background: rgba(245, 166, 35, 0.15);
-  color: #F5A623;
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 .iconBlue {
-  background: rgba(59, 123, 246, 0.15);
-  color: #3B7BF6;
+  background: var(--info-bg);
+  color: var(--info);
 }
 
 .iconRed {
-  background: rgba(239, 68, 68, 0.15);
-  color: #EF4444;
+  background: var(--danger-bg);
+  color: var(--danger);
 }
 
 .iconGray {
@@ -118,12 +129,12 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-full);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), border-color var(--transition-fast);
   font-size: 12px;
 }
 
 .reactionBubble:hover {
-  background: var(--surface-3);
+  background-color: var(--surface-3);
   border-color: var(--border-default);
 }
 
@@ -153,7 +164,7 @@
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
   opacity: 0;
 }
 

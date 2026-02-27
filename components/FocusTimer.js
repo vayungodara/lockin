@@ -55,7 +55,7 @@ export default function FocusTimer() {
         <div className={styles.timerRing}>
           <svg className={styles.progressRing} viewBox="0 0 120 120">
             <defs>
-              <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform={`rotate(${progress * 3.6}, 0.5, 0.5)`} gradientUnits="objectBoundingBox">
                 <stop offset="0%" stopColor="#6366F1" />
                 <stop offset="50%" stopColor="#8B5CF6" />
                 <stop offset="100%" stopColor="#D946EF" />

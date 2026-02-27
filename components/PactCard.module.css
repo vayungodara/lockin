@@ -5,7 +5,7 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-base), border-color var(--transition-base), box-shadow var(--transition-base), transform var(--transition-base), opacity var(--transition-base);
   position: relative;
   overflow: hidden;
 }
@@ -142,7 +142,7 @@
   width: 36px;
   height: 36px;
   border-radius: var(--radius-lg);
-  transition: all var(--transition-base);
+  transition: background-color var(--transition-base), color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
 }
 
 .completeBtn {

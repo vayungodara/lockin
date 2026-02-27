@@ -187,8 +187,8 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
                 </motion.button>
                 <motion.button 
                   type="submit" 
-                  disabled={isLoading} 
-                  className={styles.submitBtn}
+                  disabled={isLoading}
+                  className={`${styles.submitBtn} ${isLoading ? styles.loading : ''}`}
                   whileHover={!isLoading ? buttonHover : undefined}
                   whileTap={!isLoading ? buttonTap : undefined}
                 >

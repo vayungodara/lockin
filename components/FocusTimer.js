@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { useFocus } from '@/lib/FocusContext';
-import { fireSideConfetti } from '@/lib/confetti';
+import { useConfetti } from '@/lib/confetti';
 import { buttonHover, buttonTap, pulseGlow } from '@/lib/animations';
 import styles from './FocusTimer.module.css';
 import { useEffect, useRef } from 'react';
@@ -19,17 +19,17 @@ export default function FocusTimer() {
     resetTimer,
     skipToNext,
     WORK_DURATION,
-    BREAK_DURATION,
   } = useFocus();
 
   const prevSessionsRef = useRef(sessionsCompleted);
+  const { fire: triggerConfetti, ConfettiComponent } = useConfetti();
 
   useEffect(() => {
     if (sessionsCompleted > prevSessionsRef.current) {
-      fireSideConfetti();
+      triggerConfetti();
     }
     prevSessionsRef.current = sessionsCompleted;
-  }, [sessionsCompleted]);
+  }, [sessionsCompleted, triggerConfetti]);
 
   return (
     <div className={styles.container}>
@@ -44,7 +44,8 @@ export default function FocusTimer() {
         </div>
       </div>
 
-      <div className={styles.timerSection}>
+      <div className={styles.timerSection} style={{ position: 'relative' }}>
+        {ConfettiComponent}
         <div className={styles.modeIndicator}>
           <span className={`${styles.modeTag} ${mode === 'work' ? styles.workMode : styles.breakMode}`}>
             {mode === 'work' ? 'Focus Time' : 'Break Time'}
@@ -53,6 +54,13 @@ export default function FocusTimer() {
 
         <div className={styles.timerRing}>
           <svg className={styles.progressRing} viewBox="0 0 120 120">
+            <defs>
+              <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#6366F1" />
+                <stop offset="50%" stopColor="#8B5CF6" />
+                <stop offset="100%" stopColor="#D946EF" />
+              </linearGradient>
+            </defs>
             <circle
               className={styles.progressBg}
               cx="60"

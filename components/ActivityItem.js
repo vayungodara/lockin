@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
+import { staggerItem } from '@/lib/animations';
 import { formatRelativeTime, getActionInfo } from '@/lib/activity';
 import { REACTIONS, getReactions, toggleReaction } from '@/lib/reactions';
 import { createClient } from '@/lib/supabase/client';
@@ -17,7 +18,7 @@ export default function ActivityItem({ activity }) {
   const [userReactions, setUserReactions] = useState(initialUserReactions);
   const [isLoading, setIsLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
-  
+
   const actionInfo = getActionInfo(activity.action);
   const user = activity.user || { full_name: 'Unknown' };
   const timeAgo = formatRelativeTime(activity.created_at);
@@ -31,16 +32,16 @@ export default function ActivityItem({ activity }) {
   const handleReaction = async (reactionKey) => {
     if (isLoading) return;
     setIsLoading(true);
-    
+
     const result = await toggleReaction(supabase, activity.id, reactionKey);
     if (result.success) {
       await fetchReactions();
     }
-    
+
     setIsLoading(false);
     setShowReactions(false);
   };
-  
+
   const getTargetName = () => {
     const meta = activity.metadata || {};
     return meta.task_title || meta.pact_description || meta.group_name || '';
@@ -51,7 +52,7 @@ export default function ActivityItem({ activity }) {
 
   const renderIcon = () => {
     const iconClass = `${styles.icon} ${styles[`icon${actionInfo.color.charAt(0).toUpperCase() + actionInfo.color.slice(1)}`]}`;
-    
+
     switch (actionInfo.icon) {
       case 'check':
         return (
@@ -136,7 +137,7 @@ export default function ActivityItem({ activity }) {
   };
 
   return (
-    <div className={styles.item}>
+    <motion.div className={styles.item} variants={staggerItem}>
       <div className={styles.timeline}>
         {renderIcon()}
         <div className={styles.line}></div>
@@ -232,6 +233,6 @@ export default function ActivityItem({ activity }) {
 
         <ActivityComments activityId={activity.id} initialCount={activity.comment_count || 0} />
       </div>
-    </div>
+    </motion.div>
   );
 }

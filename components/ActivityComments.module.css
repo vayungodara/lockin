@@ -1,6 +1,11 @@
 .container {
   margin-top: var(--space-1);
   margin-left: 30px;
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
 }
 
 .toggleButton {
@@ -107,17 +112,17 @@
   flex: 1;
   padding: var(--space-1-5) var(--space-2);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   font-size: 13px;
   background: var(--bg-primary);
   color: var(--text-primary);
   outline: none;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .input:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px var(--accent-glow);
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.15), 0 0 20px rgba(var(--accent-primary-rgb), 0.08);
 }
 
 .input::placeholder {

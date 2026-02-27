@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { navPillSpring } from '@/lib/animations';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
 import NotificationBell from './NotificationBell';
@@ -254,6 +255,13 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.2 }}
+                />
+              )}
+              {active && (
+                <motion.div
+                  className={styles.navPill}
+                  layoutId="nav-pill"
+                  transition={navPillSpring}
                 />
               )}
               <motion.span

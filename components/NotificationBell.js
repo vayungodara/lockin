@@ -30,16 +30,38 @@ export default function NotificationBell() {
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications();
 
   // Calculate dropdown position when opening
-  const handleToggle = () => {
-    if (!isOpen && buttonRef.current) {
+  const updatePosition = () => {
+    if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setDropdownPosition({
         bottom: window.innerHeight - rect.top + 8,
         left: rect.left
       });
     }
+  };
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      updatePosition();
+    }
     setIsOpen(!isOpen);
   };
+
+  // Reposition dropdown briefly when opened (covers sidebar collapse animation ~350ms)
+  useEffect(() => {
+    if (!isOpen || !buttonRef.current) return;
+    let rafId;
+    let frames = 0;
+    const track = () => {
+      updatePosition();
+      frames++;
+      if (frames < 25) {
+        rafId = requestAnimationFrame(track);
+      }
+    };
+    rafId = requestAnimationFrame(track);
+    return () => cancelAnimationFrame(rafId);
+  }, [isOpen]);
 
   // Close dropdown when clicking outside
   useEffect(() => {

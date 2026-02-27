@@ -23,6 +23,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
 .subtitle {
@@ -43,7 +44,9 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-8);
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-6);
@@ -99,7 +102,9 @@
 
 /* Analytics Cards */
 .analyticsCard {
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -184,7 +189,9 @@
 
 /* Sessions Card */
 .sessionsCard {
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-5);

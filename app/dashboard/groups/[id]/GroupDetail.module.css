@@ -50,6 +50,7 @@
   font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
 .description {
@@ -99,7 +100,9 @@
 
 /* Leaderboard Section */
 .leaderboardCard {
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   padding: var(--space-5);
@@ -235,7 +238,9 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   transition: all var(--transition-fast);
@@ -343,7 +348,9 @@
 }
 
 .kanbanColumn {
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   display: flex;

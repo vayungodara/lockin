@@ -17,6 +17,7 @@
 .nudgeBtn:hover:not(:disabled) {
   background: var(--warning-light);
   border-color: var(--warning);
+  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
 }
 
 .nudgeBtn:disabled {

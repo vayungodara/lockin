@@ -3,6 +3,14 @@
   min-height: 100vh;
   min-height: 100dvh;
   background: var(--bg-secondary);
+  overflow-x: clip;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.layout::-webkit-scrollbar {
+  display: none;
 }
 
 .main {
@@ -12,6 +20,12 @@
   min-height: 100dvh;
   transition: margin-left 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.05);
   will-change: margin-left;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.main::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 768px) {

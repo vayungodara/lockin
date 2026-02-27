@@ -109,8 +109,9 @@ export default function MonthlyCalendar({ userId }) {
 
   const canGoNext = () => {
     const today = new Date();
-    const nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
-    return nextMonth <= new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    return currentMonth.getFullYear() < today.getFullYear() ||
+      (currentMonth.getFullYear() === today.getFullYear() &&
+        currentMonth.getMonth() < today.getMonth());
   };
 
   const navigateMonth = (direction) => {
@@ -273,7 +274,7 @@ export default function MonthlyCalendar({ userId }) {
                   className={`
                     ${styles.dayCell}
                     ${!isCurrentMonth ? styles.otherMonth : ''}
-                    ${styles[`level${level}`]}
+                    ${isCurrentMonth ? styles[`level${level}`] : styles.level0}
                     ${isTodayDate ? styles.today : ''}
                     ${isFuture ? styles.future : ''}
                     ${isSelected ? styles.selected : ''}

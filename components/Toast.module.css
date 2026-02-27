@@ -15,11 +15,26 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  background: var(--surface-1);
+  background: var(--surface-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   pointer-events: auto;
+  overflow: hidden;
+  position: relative;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-primary);
+  animation: toastProgress 4s linear forwards;
 }
 
 .icon {
@@ -32,9 +47,17 @@
   border-radius: var(--radius-md);
 }
 
+.success {
+  border-color: rgba(var(--success-rgb, 13, 191, 115), 0.2);
+}
+
 .success .icon {
   background: rgba(34, 197, 94, 0.15);
   color: var(--success);
+}
+
+.error {
+  border-color: rgba(239, 68, 68, 0.2);
 }
 
 .error .icon {
@@ -42,9 +65,17 @@
   color: var(--danger);
 }
 
+.warning {
+  border-color: rgba(245, 158, 11, 0.2);
+}
+
 .warning .icon {
   background: rgba(245, 158, 11, 0.15);
   color: var(--warning);
+}
+
+.info {
+  border-color: rgba(var(--accent-primary-rgb), 0.2);
 }
 
 .info .icon {

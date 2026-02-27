@@ -4,8 +4,8 @@ import { useState, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
-import { fireConfettiFromElement } from '@/lib/confetti';
-import { cardHover, buttonHover, buttonTap } from '@/lib/animations';
+import { useConfetti } from '@/lib/confetti';
+import { cardHover, buttonHover, buttonTap, celebrationBounce } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import styles from './PactCard.module.css';
 
@@ -15,6 +15,7 @@ export default function PactCard({ pact, onUpdate }) {
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
+  const { fire: triggerConfetti, ConfettiComponent } = useConfetti();
 
   if (!pact) {
     return null;
@@ -78,7 +79,7 @@ export default function PactCard({ pact, onUpdate }) {
 
       await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
 
-      fireConfettiFromElement(cardRef.current);
+      triggerConfetti();
 
       // XP, streaks, achievements, partner notifications — each independent so one failure doesn't block others
       const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
@@ -160,12 +161,14 @@ export default function PactCard({ pact, onUpdate }) {
   };
 
   return (
-    <motion.div 
+    <motion.div
       ref={cardRef}
       className={`${styles.card} ${getStatusClass()}`}
       whileHover={pact.status === 'active' ? cardHover : undefined}
       layout
+      style={{ position: 'relative' }}
     >
+      {ConfettiComponent}
       <div className={styles.content}>
         <div className={styles.header}>
           <h3 className={styles.title}>{pact.title}</h3>
@@ -201,13 +204,14 @@ export default function PactCard({ pact, onUpdate }) {
                   <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </motion.button>
-              <motion.button 
-                onClick={handleComplete} 
+              <motion.button
+                onClick={handleComplete}
                 disabled={isLoading}
                 className={styles.completeBtn}
                 aria-label="Mark pact as complete"
                 whileHover={buttonHover}
                 whileTap={buttonTap}
+                {...(pact.status === 'completed' ? celebrationBounce : {})}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M20 6L9 17L4 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

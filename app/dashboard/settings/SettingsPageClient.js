@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
@@ -18,6 +18,14 @@ const STORAGE_KEYS = {
 export default function SettingsPageClient({ user }) {
   const { theme, setTheme, accent, setAccent } = useTheme();
   const toast = useToast();
+
+  // Preload all logo color variants for instant accent swaps
+  useEffect(() => {
+    ACCENT_PALETTES.forEach(palette => {
+      new window.Image().src = `/logos/${palette.id}-lock.png`;
+      new window.Image().src = `/logos/${palette.id}-text.png`;
+    });
+  }, []);
 
   // Timer settings - initialize from localStorage
   const [workDuration, setWorkDuration] = useState(() => {

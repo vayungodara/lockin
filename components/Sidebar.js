@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useSyncExternalStore, useCallback } from '
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { navPillSpring } from '@/lib/animations';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
@@ -96,7 +96,9 @@ const expandTransition = { duration: 0.2, ease: [0.25, 1, 0.5, 1] };
 
 export default function Sidebar({ user, onSignOut, onExpandChange }) {
   const pathname = usePathname();
-  const { theme, setTheme, resolvedTheme, mounted } = useTheme();
+  const { theme, setTheme, resolvedTheme, mounted, accent } = useTheme();
+  const lockSrc = `/logos/${accent || 'indigo'}-lock.png`;
+  const textSrc = `/logos/${accent || 'indigo'}-text.png`;
   const focusContext = useFocusSafe();
 
   const isCollapsed = useSyncExternalStore(
@@ -204,14 +206,24 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Image
-              src="/lock-icon.png"
-              alt="LockIn"
-              width={26}
-              height={32}
-              priority
-              style={{ width: 'auto', height: '32px' }}
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={lockSrc}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Image
+                  src={lockSrc}
+                  alt="LockIn"
+                  width={26}
+                  height={32}
+                  priority
+                  style={{ width: 'auto', height: '32px' }}
+                />
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
           {/* Always mounted -- animate width between 0 and fixed value */}
           <motion.div
@@ -223,14 +235,24 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             }}
             transition={expandTransition}
           >
-            <Image
-              src="/logo-text.png"
-              alt="LockIn"
-              width={107}
-              height={32}
-              priority
-              style={{ width: 'auto', height: '28px' }}
-            />
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={textSrc}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <Image
+                  src={textSrc}
+                  alt="LockIn"
+                  width={107}
+                  height={32}
+                  priority
+                  style={{ width: 'auto', height: '28px' }}
+                />
+              </motion.div>
+            </AnimatePresence>
           </motion.div>
         </Link>
       </div>

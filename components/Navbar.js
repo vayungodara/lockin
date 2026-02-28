@@ -46,7 +46,7 @@ export default function Navbar() {
             transition={smoothSpring}
           >
             <Image
-              src="/lock-icon.png"
+              src="/logos/indigo-lock.png"
               alt="LockIn"
               width={26}
               height={32}
@@ -54,7 +54,7 @@ export default function Navbar() {
               style={{ width: 'auto', height: '28px' }}
             />
             <Image
-              src="/logo-text.png"
+              src="/logos/indigo-text.png"
               alt="LockIn"
               width={107}
               height={28}

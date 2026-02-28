@@ -40,6 +40,7 @@ export default function Navbar() {
       <div className={styles.container}>
         <Link href="/" className={styles.logo}>
           <motion.div
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             transition={smoothSpring}
@@ -47,18 +48,18 @@ export default function Navbar() {
             <Image
               src="/lock-icon.png"
               alt="LockIn"
-              width={32}
-              height={40}
+              width={26}
+              height={32}
               priority
-              style={{ width: 'auto', height: '36px' }}
+              style={{ width: 'auto', height: '28px' }}
             />
             <Image
               src="/logo-text.png"
               alt="LockIn"
-              width={120}
-              height={40}
+              width={107}
+              height={28}
               priority
-              style={{ width: 'auto', height: '36px' }}
+              style={{ width: 'auto', height: '22px' }}
             />
           </motion.div>
         </Link>

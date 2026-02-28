@@ -45,12 +45,20 @@ export default function Navbar() {
             transition={smoothSpring}
           >
             <Image
-              src="/logo.png"
+              src="/lock-icon.png"
               alt="LockIn"
-              width={160}
-              height={56}
+              width={32}
+              height={40}
               priority
-              style={{ width: 'auto', height: '44px' }}
+              style={{ width: 'auto', height: '36px' }}
+            />
+            <Image
+              src="/logo-text.png"
+              alt="LockIn"
+              width={120}
+              height={40}
+              priority
+              style={{ width: 'auto', height: '36px' }}
             />
           </motion.div>
         </Link>

@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useSyncExternalStore, useCallback } from '
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { navPillSpring } from '@/lib/animations';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
@@ -206,24 +206,14 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={lockSrc}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Image
-                  src={lockSrc}
-                  alt="LockIn"
-                  width={26}
-                  height={32}
-                  priority
-                  style={{ width: 'auto', height: '32px' }}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <Image
+              src={lockSrc}
+              alt="LockIn"
+              width={26}
+              height={32}
+              priority
+              style={{ width: 'auto', height: '32px' }}
+            />
           </motion.div>
           {/* Always mounted -- animate width between 0 and fixed value */}
           <motion.div
@@ -235,24 +225,14 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             }}
             transition={expandTransition}
           >
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={textSrc}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
-              >
-                <Image
-                  src={textSrc}
-                  alt="LockIn"
-                  width={107}
-                  height={32}
-                  priority
-                  style={{ width: 'auto', height: '28px' }}
-                />
-              </motion.div>
-            </AnimatePresence>
+            <Image
+              src={textSrc}
+              alt="LockIn"
+              width={107}
+              height={32}
+              priority
+              style={{ width: 'auto', height: '28px' }}
+            />
           </motion.div>
         </Link>
       </div>

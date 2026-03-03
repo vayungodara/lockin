@@ -1,11 +1,20 @@
-<svg width="192" height="192" viewBox="0 0 192 192" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="192" height="192" rx="40" fill="url(#gradient)"/>
-  <text x="96" y="120" font-family="system-ui, -apple-system, sans-serif" font-size="80" font-weight="700" fill="white" text-anchor="middle">L</text>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" rx="108" fill="url(#bg)"/>
+  <!-- Lock body -->
+  <rect x="136" y="232" width="240" height="196" rx="32" fill="white"/>
+  <!-- Lock shackle -->
+  <path d="M176 232V184C176 139.8 212.8 104 256 104C299.2 104 336 139.8 336 184V232" stroke="white" stroke-width="36" stroke-linecap="round" fill="none"/>
+  <!-- Checkmark -->
+  <path d="M208 330L244 366L304 296" stroke="url(#check)" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
   <defs>
-    <linearGradient id="gradient" x1="0" y1="0" x2="192" y2="192" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
       <stop stop-color="#6366F1"/>
       <stop offset="0.5" stop-color="#8B5CF6"/>
       <stop offset="1" stop-color="#D946EF"/>
+    </linearGradient>
+    <linearGradient id="check" x1="208" y1="296" x2="304" y2="366" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6366F1"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
     </linearGradient>
   </defs>
 </svg>

@@ -99,6 +99,7 @@ export default function RootLayout({ children }) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={inter.className}>
+        <a href="#main-content" className="skip-to-content">Skip to content</a>
         <ThemeProvider>
           <ToastProvider>
             {children}

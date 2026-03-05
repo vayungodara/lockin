@@ -10,6 +10,7 @@ import JoinGroupModal from '@/components/JoinGroupModal';
 export default function GroupsPageClient({ user }) {
   const [groups, setGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const supabase = useMemo(() => createClient(), []);
@@ -47,32 +48,21 @@ export default function GroupsPageClient({ user }) {
         throw groupsError;
       }
 
-      const { data: membersCountsData, error: membersCountsError } = await supabase
-        .from('group_members')
-        .select('group_id')
-        .in('group_id', groupIds);
+      // Fetch member and task counts in parallel, selecting only the group_id column
+      const [membersResult, tasksResult] = await Promise.all([
+        supabase.from('group_members').select('group_id').in('group_id', groupIds),
+        supabase.from('tasks').select('group_id').in('group_id', groupIds),
+      ]);
 
-      if (membersCountsError) {
-        console.error('Member counts error:', membersCountsError);
-        throw membersCountsError;
-      }
+      if (membersResult.error) throw membersResult.error;
+      if (tasksResult.error) throw tasksResult.error;
 
-      const { data: taskCountsData, error: taskCountsError } = await supabase
-        .from('tasks')
-        .select('group_id')
-        .in('group_id', groupIds);
-
-      if (taskCountsError) {
-        console.error('Task counts error:', taskCountsError);
-        throw taskCountsError;
-      }
-
-      const memberCounts = (membersCountsData || []).reduce((acc, row) => {
+      const memberCounts = (membersResult.data || []).reduce((acc, row) => {
         acc[row.group_id] = (acc[row.group_id] || 0) + 1;
         return acc;
       }, {});
 
-      const taskCounts = (taskCountsData || []).reduce((acc, row) => {
+      const taskCounts = (tasksResult.data || []).reduce((acc, row) => {
         acc[row.group_id] = (acc[row.group_id] || 0) + 1;
         return acc;
       }, {});
@@ -91,8 +81,7 @@ export default function GroupsPageClient({ user }) {
       setGroups(groupsWithCounts);
     } catch (err) {
       console.error('Error fetching groups:', err);
-      console.error('Error message:', err?.message);
-      console.error('Error details:', JSON.stringify(err, null, 2));
+      setError('Failed to load groups. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -103,7 +92,7 @@ export default function GroupsPageClient({ user }) {
   }, [fetchGroups]);
 
   const handleGroupCreated = (newGroup) => {
-    setGroups([...groups, { ...newGroup, role: 'owner', memberCount: 1, taskCount: 0 }]);
+    setGroups(prev => [...prev, { ...newGroup, role: 'owner', memberCount: 1, taskCount: 0 }]);
   };
 
   const handleGroupJoined = (joinedGroup) => {
@@ -136,7 +125,19 @@ export default function GroupsPageClient({ user }) {
       </div>
 
       {/* Groups List */}
-      {isLoading ? (
+      {error ? (
+        <div className={styles.emptyState}>
+          <div className={styles.emptyIcon}>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+          <h3>Something went wrong</h3>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={fetchGroups}>Try Again</button>
+        </div>
+      ) : isLoading ? (
         <div className={styles.loadingState}>
           <div className={styles.spinner}></div>
           <p>Loading your groups...</p>

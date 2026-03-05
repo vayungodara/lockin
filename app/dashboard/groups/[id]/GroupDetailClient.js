@@ -16,6 +16,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
   const [activeMembers, setActiveMembers] = useState(new Set());
   const [focusLeaderboard, setFocusLeaderboard] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [copiedCode, setCopiedCode] = useState(false);
   const copyTimeoutRef = useRef(null);
@@ -38,7 +39,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
       let profilesMap = {};
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .select('id, full_name, avatar_url')
           .in('id', userIds);
 
@@ -127,7 +128,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
       let ownerProfilesMap = {};
       if (ownerIds.length > 0) {
         const { data: ownerProfiles, error: ownerError } = await supabase
-          .from('user_profiles')
+          .from('profiles')
           .select('id, full_name, avatar_url')
           .in('id', ownerIds);
 
@@ -151,6 +152,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
       setTasks(tasksWithOwners);
     } catch (err) {
       console.error('Error fetching data:', err);
+      setError('Failed to load group data. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -189,27 +191,27 @@ export default function GroupDetailClient({ user, group, userRole }) {
         avatar_url: owner.avatar_url
       } : null
     };
-    setTasks([taskWithOwner, ...tasks]);
+    setTasks(prev => [taskWithOwner, ...prev]);
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    setTasks(tasks.map(t => t.id === updatedTask.id ? {
+    setTasks(prev => prev.map(t => t.id === updatedTask.id ? {
       ...t,
       ...updatedTask,
-      owner: updatedTask.owner_id 
-        ? members.find(m => m.id === updatedTask.owner_id) 
+      owner: updatedTask.owner_id
+        ? members.find(m => m.id === updatedTask.owner_id)
         : t.owner
     } : t));
   };
 
   const handleTaskDelete = (taskId) => {
-    setTasks(tasks.filter(t => t.id !== taskId));
+    setTasks(prev => prev.filter(t => t.id !== taskId));
   };
 
-  // Group tasks by status
-  const todoTasks = tasks.filter(t => t.status === 'todo');
-  const inProgressTasks = tasks.filter(t => t.status === 'in_progress');
-  const doneTasks = tasks.filter(t => t.status === 'done');
+  // Group tasks by status (memoized to avoid recomputing on unrelated re-renders)
+  const todoTasks = useMemo(() => tasks.filter(t => t.status === 'todo'), [tasks]);
+  const inProgressTasks = useMemo(() => tasks.filter(t => t.status === 'in_progress'), [tasks]);
+  const doneTasks = useMemo(() => tasks.filter(t => t.status === 'done'), [tasks]);
 
   return (
     <div className={styles.container}>
@@ -287,7 +289,12 @@ export default function GroupDetailClient({ user, group, userRole }) {
       </section>
 
       {/* Kanban Board */}
-      {isLoading ? (
+      {error ? (
+        <div className={styles.loadingState}>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={fetchData} style={{ marginTop: '1rem' }}>Try Again</button>
+        </div>
+      ) : isLoading ? (
         <div className={styles.loadingState}>
           <div className={styles.spinner}></div>
           <p>Loading tasks...</p>

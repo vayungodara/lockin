@@ -97,11 +97,11 @@ export default function DashboardClient({ user }) {
   }, [user, fetchPacts]);
 
   const handlePactCreated = (newPact) => {
-    setPacts([...pacts, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
+    setPacts(prev => [...prev, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
   };
 
   const handlePactUpdate = (updatedPact) => {
-    setPacts(pacts.map(p => p.id === updatedPact.id ? updatedPact : p));
+    setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
     // Refresh DailySummaryCard and XPBar when a pact status changes
     if (updatedPact.status === 'completed' || updatedPact.status === 'missed') {
       setRefreshKey(k => k + 1);

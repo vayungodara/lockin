@@ -27,7 +27,7 @@ export default async function ShareStreakPage({ searchParams }) {
   }
   
   const { data: profile } = await supabase
-    .from('user_profiles')
+    .from('profiles')
     .select('full_name, avatar_url')
     .eq('id', user.id)
     .single();

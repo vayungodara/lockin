@@ -12,6 +12,7 @@ export default function StatsPageClient({ user }) {
   const [focusStats, setFocusStats] = useState({ totalMinutes: 0, sessionsCount: 0, avgDuration: 0 });
   const [recentSessions, setRecentSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const supabase = useMemo(() => createClient(), []);
 
   const fetchStats = useCallback(async () => {
@@ -87,6 +88,7 @@ export default function StatsPageClient({ user }) {
 
     } catch (err) {
       console.error('Error fetching stats:', err);
+      setError('Failed to load stats. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -143,6 +145,17 @@ export default function StatsPageClient({ user }) {
     return (
       <div className={styles.container}>
         <div className={styles.loading}>Loading stats...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <p>{error}</p>
+          <button className="btn btn-primary" onClick={fetchStats} style={{ marginTop: '1rem' }}>Try Again</button>
+        </div>
       </div>
     );
   }

@@ -11,6 +11,7 @@ export default function FocusPageClient({ user }) {
   const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcuts();
   const { toggleTimer } = useFocus();
@@ -54,6 +55,7 @@ export default function FocusPageClient({ user }) {
       });
     } catch (err) {
       console.error('Error fetching sessions:', err);
+      setError('Failed to load focus sessions. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -83,6 +85,12 @@ export default function FocusPageClient({ user }) {
         </div>
 
         <div className={styles.statsColumn}>
+          {error && (
+            <div className={styles.statsCard}>
+              <p>{error}</p>
+              <button className="btn btn-primary" onClick={fetchSessions} style={{ marginTop: '0.5rem' }}>Try Again</button>
+            </div>
+          )}
           <div className={styles.statsCard}>
             <h3>Your Focus Stats</h3>
             <div className={styles.statsGrid}>

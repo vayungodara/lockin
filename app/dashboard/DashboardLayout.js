@@ -42,6 +42,7 @@ export default function DashboardLayout({ user, children }) {
             <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
             <MobileNav />
             <main
+              id="main-content"
               className={styles.main}
               style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
             >

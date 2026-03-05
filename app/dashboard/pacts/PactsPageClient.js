@@ -41,13 +41,12 @@ export default function PactsPageClient({ user }) {
   }, [fetchPacts]);
 
   const handlePactCreated = (newPact) => {
-    setPacts([newPact, ...pacts]);
+    setPacts(prev => [newPact, ...prev]);
   };
 
   const handlePactUpdate = (updatedPact) => {
-    setPacts(pacts.map(p => p.id === updatedPact.id ? updatedPact : p));
+    setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
   };
-
 
   const handleDeletePact = async (pactId) => {
     try {
@@ -57,7 +56,7 @@ export default function PactsPageClient({ user }) {
         .eq('id', pactId);
 
       if (error) throw error;
-      setPacts(pacts.filter(p => p.id !== pactId));
+      setPacts(prev => prev.filter(p => p.id !== pactId));
     } catch (err) {
       console.error('Error deleting pact:', err);
     }
@@ -177,6 +176,7 @@ export default function PactsPageClient({ user }) {
               key={pact.id}
               pact={pact}
               onUpdate={handlePactUpdate}
+              onDelete={handleDeletePact}
             />
           ))}
         </div>

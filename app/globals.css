@@ -232,70 +232,8 @@
   --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.4);
 }
 
-/* System preference detection */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    /* Background colors — deep space with blue undertone */
-    --bg-primary: #08090D;
-    --bg-secondary: #0E1117;
-    --bg-tertiary: #161B25;
-    --bg-elevated: #1A1F2B;
-    --bg-hover: #222838;
-
-    /* Surface colors — subtle luminosity */
-    --surface-1: rgba(22, 27, 37, 0.9);
-    --surface-2: rgba(26, 31, 43, 0.85);
-    --surface-3: rgba(34, 40, 56, 0.8);
-    --surface-overlay: rgba(91, 94, 245, 0.03);
-    --surface-glass: rgba(18, 22, 34, 0.35);
-
-    /* Text colors */
-    --text-primary: #F0F0FF;
-    --text-secondary: #A8A3C0;
-    --text-tertiary: #6E6990;
-    --text-muted: #4A4568;
-    --text-inverse: #08090D;
-
-    /* Gradient adjustments — more luminous in dark */
-    --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.14) 0%, rgba(var(--accent-tertiary-rgb), 0.14) 100%);
-    --gradient-glow: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.3) 0%, rgba(var(--accent-tertiary-rgb), 0.3) 100%);
-
-    /* Status colors — brighter for dark mode */
-    --success: #2DDF8E;
-    --success-light: rgba(45, 223, 142, 0.15);
-    --success-bg: rgba(45, 223, 142, 0.12);
-    --success-glow: rgba(45, 223, 142, 0.35);
-    --warning: #FFB84D;
-    --warning-light: rgba(255, 184, 77, 0.15);
-    --warning-bg: rgba(255, 184, 77, 0.12);
-    --warning-glow: rgba(255, 184, 77, 0.35);
-    --danger: #FF6B6B;
-    --danger-light: rgba(255, 107, 107, 0.15);
-    --danger-bg: rgba(255, 107, 107, 0.12);
-    --danger-glow: rgba(255, 107, 107, 0.35);
-    --info: #6EA8FE;
-    --info-light: rgba(110, 168, 254, 0.15);
-    --info-bg: rgba(110, 168, 254, 0.12);
-    --info-glow: rgba(110, 168, 254, 0.35);
-
-    /* Borders — subtle gradient-aware */
-    --border-subtle: rgba(255, 255, 255, 0.06);
-    --border-default: rgba(255, 255, 255, 0.09);
-    --border-strong: rgba(255, 255, 255, 0.14);
-    --border-focus: rgba(var(--accent-primary-rgb), 0.6);
-
-    /* Shadows — deep and dramatic */
-    --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.35), 0 1px 2px rgba(0, 0, 0, 0.25);
-    --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3);
-    --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.45), 0 4px 8px -4px rgba(0, 0, 0, 0.35);
-    --shadow-xl: 0 20px 40px -8px rgba(0, 0, 0, 0.5), 0 8px 16px -6px rgba(0, 0, 0, 0.35);
-    --shadow-2xl: 0 32px 64px -16px rgba(0, 0, 0, 0.65);
-    --shadow-glow: 0 0 40px rgba(var(--accent-primary-rgb), 0.25);
-    --shadow-glow-lg: 0 0 60px rgba(var(--accent-primary-rgb), 0.35);
-    --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.4);
-  }
-}
+/* System preference fallback — handled by inline script in layout.js
+   which sets data-theme before first paint, so no duplication needed */
 
 /* === CSS RESET & BASE STYLES === */
 *,
@@ -363,13 +301,33 @@ body::before {
     radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.06), transparent);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) body::before {
-    background:
-      radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--accent-primary-rgb), 0.18), transparent),
-      radial-gradient(ellipse 50% 40% at 100% 0%, rgba(var(--accent-tertiary-rgb), 0.12), transparent),
-      radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.06), transparent);
-  }
+/* body::before dark fallback also handled by data-theme attribute */
+
+/* === SKIP TO CONTENT (Accessibility) === */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+.skip-to-content:focus {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  width: auto;
+  height: auto;
+  padding: 12px 24px;
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  box-shadow: var(--shadow-lg);
+  text-decoration: none;
 }
 
 /* === LINKS === */

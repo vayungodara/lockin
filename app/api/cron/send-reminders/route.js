@@ -73,7 +73,7 @@ export async function GET(request) {
         results.sent++;
       } else {
         results.failed++;
-        results.errors.push(`Failed to send to ${user_email}: ${emailResult.error}`);
+        results.errors.push(`Failed to send to user ${user_id}: ${emailResult.error}`);
       }
     }
 

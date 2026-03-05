@@ -35,46 +35,59 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    let broken = 0;
-    for (const profile of profiles || []) {
-      const brokenStreak = profile.current_streak;
+    if (!profiles || profiles.length === 0) {
+      return Response.json({ message: 'No broken streaks' });
+    }
 
-      // Reset streak
-      await supabase
-        .from('profiles')
-        .update({ current_streak: 0 })
-        .eq('id', profile.id);
+    const profileIds = profiles.map(p => p.id);
 
-      // Notify user
-      await createNotification(
+    // Batch reset all streaks at once
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ current_streak: 0 })
+      .in('id', profileIds);
+
+    if (updateError) throw updateError;
+
+    // Batch fetch all group memberships for affected users
+    const { data: allMemberships } = await supabase
+      .from('group_members')
+      .select('user_id, group_id')
+      .in('user_id', profileIds);
+
+    // Send notifications and activity logs (still per-user for custom messages)
+    const notificationPromises = profiles.map(profile =>
+      createNotification(
         supabase,
         profile.id,
         NOTIFICATION_TYPES.STREAK_BROKEN,
         'Streak Broken',
-        `Your ${brokenStreak}-day streak has ended. Start a new one today!`,
-        { brokenStreak }
-      );
+        `Your ${profile.current_streak}-day streak has ended. Start a new one today!`,
+        { brokenStreak: profile.current_streak }
+      ).catch(err => console.error(`Notification error for ${profile.id}:`, err))
+    );
 
-      // Post to group feeds so members can see
-      const { data: memberships } = await supabase
-        .from('group_members')
-        .select('group_id')
-        .eq('user_id', profile.id);
-
-      for (const membership of memberships || []) {
-        // Use service role insert directly since logActivity requires auth context
-        await supabase
-          .from('activity_log')
-          .insert({
-            user_id: profile.id,
-            group_id: membership.group_id,
-            action: 'streak_broken',
-            metadata: { streak_length: brokenStreak }
-          });
+    // Build activity log entries in bulk
+    const activityEntries = [];
+    for (const profile of profiles) {
+      const userMemberships = (allMemberships || []).filter(m => m.user_id === profile.id);
+      for (const membership of userMemberships) {
+        activityEntries.push({
+          user_id: profile.id,
+          group_id: membership.group_id,
+          action: 'streak_broken',
+          metadata: { streak_length: profile.current_streak }
+        });
       }
-
-      broken++;
     }
+
+    const activityPromise = activityEntries.length > 0
+      ? supabase.from('activity_log').insert(activityEntries)
+      : Promise.resolve();
+
+    await Promise.all([...notificationPromises, activityPromise]);
+
+    const broken = profiles.length;
 
     return Response.json({ message: `Processed ${broken} broken streaks` });
   } catch (err) {

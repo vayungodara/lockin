@@ -7,6 +7,8 @@
   padding: var(--space-5);
   margin-bottom: var(--space-8);
   transition: all var(--transition-base);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 200px;
 }
 
 .card:hover {

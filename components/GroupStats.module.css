@@ -5,6 +5,8 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xl);
   overflow: hidden;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 300px;
 }
 
 .header {

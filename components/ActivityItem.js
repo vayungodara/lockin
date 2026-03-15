@@ -189,45 +189,72 @@ export default function ActivityItem({ activity }) {
               </div>
             )}
 
-            <div className={styles.reactionTrigger}>
-              <motion.button
-                className={styles.addReactionBtn}
-                onClick={() => setShowReactions(!showReactions)}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M8 14C8.5 15.5 10 17 12 17C14 17 15.5 15.5 16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="9" cy="10" r="1" fill="currentColor"/>
-                  <circle cx="15" cy="10" r="1" fill="currentColor"/>
-                </svg>
-              </motion.button>
-
-              <AnimatePresence>
-                {showReactions && (
-                  <motion.div
-                    className={styles.reactionPicker}
-                    initial={{ opacity: 0, scale: 0.8, x: -6 }}
-                    animate={{ opacity: 1, scale: 1, x: 0 }}
-                    exit={{ opacity: 0, scale: 0.8, x: -6 }}
+            <motion.div
+              className={`${styles.reactionTrigger} ${showReactions ? styles.reactionTriggerOpen : ''}`}
+              layout
+              transition={{ type: "spring", stiffness: 400, damping: 28, mass: 0.8 }}
+              onClick={() => !showReactions && setShowReactions(true)}
+            >
+              <AnimatePresence mode="wait">
+                {!showReactions ? (
+                  <motion.button
+                    key="trigger"
+                    className={styles.addReactionBtn}
+                    initial={{ opacity: 0, scale: 0.5 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.5 }}
+                    transition={{ duration: 0.15 }}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
                   >
-                    {REACTIONS.map(r => (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M8 14C8.5 15.5 10 17 12 17C14 17 15.5 15.5 16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      <circle cx="9" cy="10" r="1" fill="currentColor"/>
+                      <circle cx="15" cy="10" r="1" fill="currentColor"/>
+                    </svg>
+                  </motion.button>
+                ) : (
+                  <motion.div
+                    key="picker"
+                    className={styles.reactionPickerInline}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.15, delay: 0.05 }}
+                  >
+                    {REACTIONS.map((r, i) => (
                       <motion.button
                         key={r.key}
                         className={`${styles.reactionOption} ${userReactions.includes(r.key) ? styles.selected : ''}`}
-                        onClick={() => handleReaction(r.key)}
-                        whileHover={{ scale: 1.2 }}
-                        whileTap={{ scale: 0.95 }}
+                        onClick={(e) => { e.stopPropagation(); handleReaction(r.key); }}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: i * 0.03, type: "spring", stiffness: 500, damping: 25 }}
+                        whileHover={{ scale: 1.3 }}
+                        whileTap={{ scale: 0.85 }}
                         title={r.label}
                       >
                         {r.emoji}
                       </motion.button>
                     ))}
+                    <motion.button
+                      className={styles.reactionClose}
+                      onClick={(e) => { e.stopPropagation(); setShowReactions(false); }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.15 }}
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.9 }}
+                    >
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                        <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>
+                      </svg>
+                    </motion.button>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </motion.div>
           </div>
         </div>
 

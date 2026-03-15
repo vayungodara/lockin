@@ -180,3 +180,25 @@
 .card.completed:hover {
   opacity: 1;
 }
+
+/* Shimmer sweep on the complete button when just completed */
+.completedCheck {
+  position: relative;
+  overflow: hidden;
+}
+
+.completedCheck::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmerSweep 2s ease-in-out 1;
+  pointer-events: none;
+  border-radius: inherit;
+}

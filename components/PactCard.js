@@ -179,7 +179,6 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       ref={cardRef}
       className={`${styles.card} ${getStatusClass()}`}
       whileHover={pact.status === 'active' ? cardHover : undefined}
-      layout
       style={{ position: 'relative' }}
     >
       {ConfettiComponent}

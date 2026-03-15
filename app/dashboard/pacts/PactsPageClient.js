@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import styles from './PactsPage.module.css';
 import CreatePactModal from '@/components/CreatePactModal';
@@ -170,16 +171,28 @@ export default function PactsPageClient({ user }) {
           )}
         </div>
       ) : (
-        <div className={styles.pactsGrid}>
-          {filteredPacts.map((pact) => (
-            <PactCard
-              key={pact.id}
-              pact={pact}
-              onUpdate={handlePactUpdate}
-              onDelete={handleDeletePact}
-            />
-          ))}
-        </div>
+        <LayoutGroup>
+          <motion.div className={styles.pactsGrid}>
+            <AnimatePresence mode="popLayout">
+              {filteredPacts.map((pact) => (
+                <motion.div
+                  key={pact.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                >
+                  <PactCard
+                    pact={pact}
+                    onUpdate={handlePactUpdate}
+                    onDelete={handleDeletePact}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        </LayoutGroup>
       )}
 
       {/* Create Pact Modal */}

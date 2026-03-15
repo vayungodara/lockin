@@ -32,8 +32,6 @@
 
 .feed {
   padding: var(--space-4);
-  max-height: 500px;
-  overflow-y: auto;
 }
 
 .loading {
@@ -145,13 +143,10 @@
   .container {
     display: flex;
     flex-direction: column;
-    overflow: clip;
     border-radius: var(--radius-xl);
   }
 
   .feed {
     flex: 1;
-    max-height: 280px;
-    overflow-y: auto;
   }
 }

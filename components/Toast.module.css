@@ -35,7 +35,7 @@
   height: 2px;
   background: var(--gradient-primary);
   transform-origin: left;
-  animation: toastProgress 4s linear forwards;
+  animation: toastProgress 4s ease-out forwards;
 }
 
 .icon {

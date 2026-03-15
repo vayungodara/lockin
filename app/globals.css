@@ -25,7 +25,7 @@
   /* Text colors — Rich, readable */
   --text-primary: #161529;
   --text-secondary: #524E68;
-  --text-tertiary: #6E6A82;
+  --text-tertiary: #656180;
   --text-muted: #A9A5BC;
   --text-inverse: #FFFFFF;
 
@@ -847,6 +847,11 @@ p {
 @keyframes shimmerGlint {
   0% { transform: translateX(-150%); }
   100% { transform: translateX(250%); }
+}
+
+@keyframes shimmerSweep {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }
 
 @keyframes breathe {

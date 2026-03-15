@@ -183,9 +183,9 @@
 
 .reactionPicker {
   position: absolute;
-  top: calc(100% + 8px);
-  left: 50%;
-  transform: translateX(-50%);
+  top: 50%;
+  left: calc(100% + 8px);
+  transform: translateY(-50%);
   display: flex;
   gap: 4px;
   padding: 6px 8px;

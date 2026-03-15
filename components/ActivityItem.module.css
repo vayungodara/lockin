@@ -3,8 +3,6 @@
   gap: var(--space-3);
   position: relative;
   padding-bottom: var(--space-4);
-  content-visibility: auto;
-  contain-intrinsic-size: auto 48px;
 }
 
 .item.newItem {

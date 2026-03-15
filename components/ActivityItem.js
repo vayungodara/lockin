@@ -208,9 +208,9 @@ export default function ActivityItem({ activity }) {
                 {showReactions && (
                   <motion.div
                     className={styles.reactionPicker}
-                    initial={{ opacity: 0, scale: 0.8, y: -6 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.8, y: -6 }}
+                    initial={{ opacity: 0, scale: 0.8, x: -6 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, x: -6 }}
                   >
                     {REACTIONS.map(r => (
                       <motion.button

@@ -185,17 +185,17 @@
 
 .reactionPicker {
   position: absolute;
-  bottom: calc(100% + 8px);
+  top: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
   display: flex;
   gap: 4px;
   padding: 6px 8px;
-  background: var(--bg-primary);
+  background: var(--bg-elevated);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
-  z-index: 100;
+  box-shadow: var(--shadow-xl);
+  z-index: 200;
 }
 
 .reactionOption {

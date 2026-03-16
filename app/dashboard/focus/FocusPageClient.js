@@ -38,6 +38,7 @@ export default function FocusPageClient({ user }) {
       const { data, error } = await supabase
         .from('focus_sessions')
         .select('*')
+        .eq('user_id', user.id)
         .order('started_at', { ascending: false })
         .limit(10);
 

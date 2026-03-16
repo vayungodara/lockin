@@ -12,6 +12,7 @@ export default function XPBar({ userId, refreshKey }) {
   const [level, setLevel] = useState(1);
   const [xpChanged, setXpChanged] = useState(false);
   const prevXpRef = useRef(null);
+  const flashTimerRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
@@ -25,8 +26,9 @@ export default function XPBar({ userId, refreshKey }) {
       if (data) {
         const newXP = data.total_xp || 0;
         if (prevXpRef.current !== null && newXP > 0 && newXP !== prevXpRef.current) {
+          if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
           setXpChanged(true);
-          setTimeout(() => setXpChanged(false), 600);
+          flashTimerRef.current = setTimeout(() => setXpChanged(false), 600);
         }
         prevXpRef.current = newXP;
         setXP(newXP);
@@ -35,6 +37,12 @@ export default function XPBar({ userId, refreshKey }) {
     }
     if (userId) fetchXP();
   }, [userId, supabase, refreshKey]);
+
+  useEffect(() => {
+    return () => {
+      if (flashTimerRef.current) clearTimeout(flashTimerRef.current);
+    };
+  }, []);
 
   const progress = getProgressToNextLevel(xp);
 

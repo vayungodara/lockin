@@ -23,25 +23,18 @@ export default function XPBar({ userId, refreshKey }) {
         .single();
 
       if (data) {
-        setXP(data.total_xp || 0);
-        setLevel(data.level || getLevelFromXP(data.total_xp || 0));
+        const newXP = data.total_xp || 0;
+        if (prevXpRef.current !== null && newXP > 0 && newXP !== prevXpRef.current) {
+          setXpChanged(true);
+          setTimeout(() => setXpChanged(false), 600);
+        }
+        prevXpRef.current = newXP;
+        setXP(newXP);
+        setLevel(data.level || getLevelFromXP(newXP));
       }
     }
     if (userId) fetchXP();
   }, [userId, supabase, refreshKey]);
-
-  useEffect(() => {
-    if (prevXpRef.current === null) {
-      prevXpRef.current = xp;
-      return;
-    }
-    if (xp > 0 && xp !== prevXpRef.current) {
-      setXpChanged(true);
-      const timer = setTimeout(() => setXpChanged(false), 600);
-      prevXpRef.current = xp;
-      return () => clearTimeout(timer);
-    }
-  }, [xp]);
 
   const progress = getProgressToNextLevel(xp);
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
-import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus } from '@/lib/streaks-advanced';
+import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus } from '@/lib/streaks-advanced';
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
 
@@ -111,7 +111,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
   }, [userId, supabase, refreshKey]);
 
   const handleUseFreeze = async () => {
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     if (result.success) {
       toast.success('Streak freeze activated!');
       setStreakRisk({ atRisk: false, streak: streakRisk.streak });

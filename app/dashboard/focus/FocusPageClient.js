@@ -38,6 +38,7 @@ export default function FocusPageClient({ user }) {
       const { data, error } = await supabase
         .from('focus_sessions')
         .select('*')
+        .eq('user_id', user.id)
         .order('started_at', { ascending: false })
         .limit(10);
 
@@ -128,7 +129,7 @@ export default function FocusPageClient({ user }) {
                       </svg>
                     </div>
                     <div className={styles.sessionInfo}>
-                      <span className={styles.sessionDuration}>{session.duration_minutes} minutes</span>
+                      <span className={styles.sessionDuration}>{session.duration_minutes} {session.duration_minutes === 1 ? 'minute' : 'minutes'}</span>
                       <span className={styles.sessionDate}>{formatDate(session.started_at)}</span>
                     </div>
                   </div>

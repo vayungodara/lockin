@@ -44,7 +44,7 @@ export default function DashboardLayout({ user, children }) {
             <main
               id="main-content"
               className={styles.main}
-              style={{ marginLeft: sidebarExpanded ? 260 : 72 }}
+              style={{ marginLeft: sidebarExpanded ? 260 : 80 }}
             >
               <ErrorBoundary message="Something went wrong loading this page.">
                 <motion.div

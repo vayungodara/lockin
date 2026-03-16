@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import FocusPageClient from './FocusPageClient';
 
+export const metadata = { title: 'Focus Timer | LockIn' };
+
 export default async function FocusPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

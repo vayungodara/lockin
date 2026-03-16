@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
@@ -17,18 +17,18 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
   const [commentCount, setCommentCount] = useState(initialCount);
   const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    if (showComments) {
-      fetchComments();
-    }
-  }, [showComments]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     setIsLoading(true);
     const result = await getComments(supabase, activityId);
     setComments(result.data);
     setCommentCount(result.data.length);
     setIsLoading(false);
+  }, [supabase, activityId]);
+
+  const toggleComments = () => {
+    const next = !showComments;
+    setShowComments(next);
+    if (next) fetchComments();
   };
 
   const handleSubmit = async (e) => {
@@ -56,7 +56,7 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
     <div className={styles.container}>
       <button
         className={styles.toggleButton}
-        onClick={() => setShowComments(!showComments)}
+        onClick={toggleComments}
       >
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

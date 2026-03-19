@@ -4,10 +4,13 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
-import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
+import { modalOverlay, modalContent, buttonHover, buttonTap, staggerContainer, staggerItem, fadeInUp } from '@/lib/animations';
+import { PACT_TEMPLATES, TEMPLATE_CATEGORIES } from '@/lib/pactTemplates';
 import styles from './CreatePactModal.module.css';
 
 export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
+  const [step, setStep] = useState('templates');
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [deadline, setDeadline] = useState('');
@@ -28,8 +31,56 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     };
   }, [isOpen]);
 
+  // Reset to templates step when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setStep('templates');
+      setSelectedTemplate(null);
+    }
+  }, [isOpen]);
+
   // Get minimum date (today)
   const today = new Date().toISOString().split('T')[0];
+
+  const handleSelectTemplate = (template) => {
+    setSelectedTemplate(template);
+    setTitle(template.title);
+    setDescription(template.description);
+    setDeadline(today);
+    setDeadlineTime(template.suggestedTime);
+    setIsRecurring(template.isRecurring);
+    setRecurrenceType(template.recurrenceType || 'daily');
+    setStep('form');
+  };
+
+  const handleStartFromScratch = () => {
+    setSelectedTemplate(null);
+    setTitle('');
+    setDescription('');
+    setDeadline('');
+    setDeadlineTime('23:59');
+    setIsRecurring(false);
+    setRecurrenceType('daily');
+    setStep('form');
+  };
+
+  const handleBack = () => {
+    setStep('templates');
+    setSelectedTemplate(null);
+    setError('');
+  };
+
+  const handleClose = () => {
+    setTitle('');
+    setDescription('');
+    setDeadline('');
+    setDeadlineTime('23:59');
+    setIsRecurring(false);
+    setRecurrenceType('daily');
+    setSelectedTemplate(null);
+    setError('');
+    onClose();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -51,7 +102,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     try {
       const { data: authData } = await supabase.auth.getUser();
       const user = authData?.user;
-      
+
       if (!user) {
         setError('You must be signed in to create a pact');
         setIsLoading(false);
@@ -88,7 +139,8 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
       setDeadlineTime('23:59');
       setIsRecurring(false);
       setRecurrenceType('daily');
-      
+      setSelectedTemplate(null);
+
       // Notify parent and close
       if (onPactCreated) {
         onPactCreated(data);
@@ -102,24 +154,52 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     }
   };
 
+  const recurrenceLabel = (type) => {
+    if (type === 'daily') return 'Daily';
+    if (type === 'weekly') return 'Weekly';
+    if (type === 'weekdays') return 'Weekdays';
+    return '';
+  };
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div 
-          className={styles.overlay} 
-          onClick={onClose}
+        <motion.div
+          className={styles.overlay}
+          onClick={handleClose}
           {...modalOverlay}
         >
-          <motion.div 
-            className={styles.modal} 
+          <motion.div
+            className={styles.modal}
             onClick={(e) => e.stopPropagation()}
             {...modalContent}
           >
+            {/* Header */}
             <div className={styles.header}>
-              <h2>Create New Pact</h2>
-              <motion.button 
-                className={styles.closeBtn} 
-                onClick={onClose}
+              <div className={styles.headerLeft}>
+                {step === 'form' && (
+                  <motion.button
+                    className={styles.backBtn}
+                    onClick={handleBack}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    {...fadeInUp}
+                  >
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </motion.button>
+                )}
+                <div>
+                  <h2>{step === 'templates' ? 'New Pact' : 'Create New Pact'}</h2>
+                  {step === 'templates' && (
+                    <p className={styles.headerSubtitle}>Choose a template or start from scratch</p>
+                  )}
+                </div>
+              </div>
+              <motion.button
+                className={styles.closeBtn}
+                onClick={handleClose}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -129,175 +209,234 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
               </motion.button>
             </div>
 
-            <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="title" className={styles.label}>
-                  What are you committing to?
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Finish reading Chapter 5"
-                  className={styles.input}
-                  autoFocus
-                />
-              </div>
+            {/* Step 1: Template Picker */}
+            {step === 'templates' && (
+              <div className={styles.templatePickerBody}>
+                <motion.div
+                  className={styles.templateGrid}
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                >
+                  {PACT_TEMPLATES.map((template) => (
+                    <motion.button
+                      key={template.id}
+                      className={styles.templateCard}
+                      onClick={() => handleSelectTemplate(template)}
+                      variants={staggerItem}
+                      whileHover={{ y: -2, borderColor: 'var(--accent-primary)' }}
+                      whileTap={{ scale: 0.97 }}
+                    >
+                      <span className={styles.templateEmoji}>{template.emoji}</span>
+                      <span className={styles.templateTitle}>{template.title}</span>
+                      <div className={styles.templateMeta}>
+                        <span className={styles.categoryBadge}>
+                          {TEMPLATE_CATEGORIES.find(c => c.id === template.category)?.label}
+                        </span>
+                        {template.isRecurring && (
+                          <span className={styles.recurrenceBadge}>
+                            {recurrenceLabel(template.recurrenceType)}
+                          </span>
+                        )}
+                      </div>
+                    </motion.button>
+                  ))}
+                </motion.div>
 
-              <div className={styles.inputGroup}>
-                <label htmlFor="description" className={styles.label}>
-                  Details (optional)
-                </label>
-                <textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Any additional context or notes..."
-                  className={styles.textarea}
-                  rows={3}
-                />
+                <motion.button
+                  className={styles.scratchBtn}
+                  onClick={handleStartFromScratch}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
+                  {...fadeInUp}
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  Start from scratch
+                </motion.button>
               </div>
+            )}
 
-              <div className={styles.deadlineRow}>
+            {/* Step 2: Form */}
+            {step === 'form' && (
+              <form onSubmit={handleSubmit} className={styles.form}>
+                {selectedTemplate && (
+                  <motion.div className={styles.templateBadge} {...fadeInUp}>
+                    <span>{selectedTemplate.emoji}</span>
+                    Based on {selectedTemplate.title}
+                  </motion.div>
+                )}
+
                 <div className={styles.inputGroup}>
-                  <label htmlFor="deadline" className={styles.label}>
-                    Deadline Date
+                  <label htmlFor="title" className={styles.label}>
+                    What are you committing to?
                   </label>
                   <input
-                    type="date"
-                    id="deadline"
-                    value={deadline}
-                    onChange={(e) => setDeadline(e.target.value)}
-                    min={today}
+                    type="text"
+                    id="title"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="e.g., Finish reading Chapter 5"
                     className={styles.input}
+                    autoFocus
                   />
                 </div>
 
                 <div className={styles.inputGroup}>
-                  <label htmlFor="deadlineTime" className={styles.label}>
-                    Time
+                  <label htmlFor="description" className={styles.label}>
+                    Details (optional)
                   </label>
-                  <input
-                    type="time"
-                    id="deadlineTime"
-                    value={deadlineTime}
-                    onChange={(e) => setDeadlineTime(e.target.value)}
-                    className={styles.input}
+                  <textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Any additional context or notes..."
+                    className={styles.textarea}
+                    rows={3}
                   />
                 </div>
-              </div>
 
-              <div className={styles.recurringSection}>
-                <label className={styles.checkboxLabel}>
-                  <input
-                    type="checkbox"
-                    checked={isRecurring}
-                    onChange={(e) => setIsRecurring(e.target.checked)}
-                    className={styles.checkbox}
-                  />
-                  <span className={styles.checkboxText}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M17 1L21 5L17 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M3 11V9C3 7.93913 3.42143 6.92172 4.17157 6.17157C4.92172 5.42143 5.93913 5 7 5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M7 23L3 19L7 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M21 13V15C21 16.0609 20.5786 17.0783 19.8284 17.8284C19.0783 18.5786 18.0609 19 17 19H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    Make this a recurring pact
-                  </span>
-                </label>
+                <div className={styles.deadlineRow}>
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="deadline" className={styles.label}>
+                      Deadline Date
+                    </label>
+                    <input
+                      type="date"
+                      id="deadline"
+                      value={deadline}
+                      onChange={(e) => setDeadline(e.target.value)}
+                      min={today}
+                      className={styles.input}
+                    />
+                  </div>
+
+                  <div className={styles.inputGroup}>
+                    <label htmlFor="deadlineTime" className={styles.label}>
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      id="deadlineTime"
+                      value={deadlineTime}
+                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      className={styles.input}
+                    />
+                  </div>
+                </div>
+
+                <div className={styles.recurringSection}>
+                  <label className={styles.checkboxLabel}>
+                    <input
+                      type="checkbox"
+                      checked={isRecurring}
+                      onChange={(e) => setIsRecurring(e.target.checked)}
+                      className={styles.checkbox}
+                    />
+                    <span className={styles.checkboxText}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 1L21 5L17 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M3 11V9C3 7.93913 3.42143 6.92172 4.17157 6.17157C4.92172 5.42143 5.93913 5 7 5H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M7 23L3 19L7 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M21 13V15C21 16.0609 20.5786 17.0783 19.8284 17.8284C19.0783 18.5786 18.0609 19 17 19H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Make this a recurring pact
+                    </span>
+                  </label>
+
+                  <AnimatePresence>
+                    {isRecurring && (
+                      <motion.div
+                        className={styles.recurrenceOptions}
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <div className={styles.recurrenceButtons}>
+                          <button
+                            type="button"
+                            className={`${styles.recurrenceBtn} ${recurrenceType === 'daily' ? styles.active : ''}`}
+                            onClick={() => setRecurrenceType('daily')}
+                          >
+                            Daily
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.recurrenceBtn} ${recurrenceType === 'weekly' ? styles.active : ''}`}
+                            onClick={() => setRecurrenceType('weekly')}
+                          >
+                            Weekly
+                          </button>
+                          <button
+                            type="button"
+                            className={`${styles.recurrenceBtn} ${recurrenceType === 'weekdays' ? styles.active : ''}`}
+                            onClick={() => setRecurrenceType('weekdays')}
+                          >
+                            Weekdays
+                          </button>
+                        </div>
+                        <p className={styles.recurrenceHint}>
+                          {recurrenceType === 'daily' && 'This pact will repeat every day'}
+                          {recurrenceType === 'weekly' && 'This pact will repeat every week on the same day'}
+                          {recurrenceType === 'weekdays' && 'This pact will repeat Monday through Friday'}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
 
                 <AnimatePresence>
-                  {isRecurring && (
-                    <motion.div 
-                      className={styles.recurrenceOptions}
+                  {error && (
+                    <motion.div
+                      className={styles.error}
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       exit={{ opacity: 0, height: 0 }}
                     >
-                      <div className={styles.recurrenceButtons}>
-                        <button
-                          type="button"
-                          className={`${styles.recurrenceBtn} ${recurrenceType === 'daily' ? styles.active : ''}`}
-                          onClick={() => setRecurrenceType('daily')}
-                        >
-                          Daily
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.recurrenceBtn} ${recurrenceType === 'weekly' ? styles.active : ''}`}
-                          onClick={() => setRecurrenceType('weekly')}
-                        >
-                          Weekly
-                        </button>
-                        <button
-                          type="button"
-                          className={`${styles.recurrenceBtn} ${recurrenceType === 'weekdays' ? styles.active : ''}`}
-                          onClick={() => setRecurrenceType('weekdays')}
-                        >
-                          Weekdays
-                        </button>
-                      </div>
-                      <p className={styles.recurrenceHint}>
-                        {recurrenceType === 'daily' && 'This pact will repeat every day'}
-                        {recurrenceType === 'weekly' && 'This pact will repeat every week on the same day'}
-                        {recurrenceType === 'weekdays' && 'This pact will repeat Monday through Friday'}
-                      </p>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                        <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                      </svg>
+                      {error}
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </div>
 
-              <AnimatePresence>
-                {error && (
-                  <motion.div 
-                    className={styles.error}
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
+                <div className={styles.actions}>
+                  <motion.button
+                    type="button"
+                    onClick={handleClose}
+                    className={styles.cancelBtn}
+                    whileHover={buttonHover}
+                    whileTap={buttonTap}
                   >
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              <div className={styles.actions}>
-                <motion.button 
-                  type="button" 
-                  onClick={onClose} 
-                  className={styles.cancelBtn}
-                  whileHover={buttonHover}
-                  whileTap={buttonTap}
-                >
-                  Cancel
-                </motion.button>
-                <motion.button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className={`${styles.submitBtn} ${isLoading ? styles.loading : ''}`}
-                  whileHover={!isLoading ? buttonHover : undefined}
-                  whileTap={!isLoading ? buttonTap : undefined}
-                >
-                  {isLoading ? (
-                    <>
-                      <span className={styles.spinner}></span>
-                      Creating...
-                    </>
-                  ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Lock It In
-                    </>
-                  )}
-                </motion.button>
-              </div>
-            </form>
+                    Cancel
+                  </motion.button>
+                  <motion.button
+                    type="submit"
+                    disabled={isLoading}
+                    className={`${styles.submitBtn} ${isLoading ? styles.loading : ''}`}
+                    whileHover={!isLoading ? buttonHover : undefined}
+                    whileTap={!isLoading ? buttonTap : undefined}
+                  >
+                    {isLoading ? (
+                      <>
+                        <span className={styles.spinner}></span>
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                        Lock It In
+                      </>
+                    )}
+                  </motion.button>
+                </div>
+              </form>
+            )}
           </motion.div>
         </motion.div>
       )}

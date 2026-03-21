@@ -7,6 +7,7 @@ import { logActivity } from '@/lib/activity';
 import { useConfetti } from '@/lib/confetti';
 import { cardHover, buttonHover, buttonTap, celebrationBounce } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
+import { playCompletionSound, playMissSound } from '@/lib/sounds';
 import styles from './PactCard.module.css';
 
 export default function PactCard({ pact, onUpdate, onDelete }) {
@@ -152,6 +153,8 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
         new Promise(resolve => setTimeout(resolve, 10000)),
       ]);
 
+      playCompletionSound();
+
       if (pact.is_recurring && pact.recurrence_type) {
         toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
       }
@@ -199,6 +202,8 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       import('@/lib/partnerships').then(({ notifyPartner }) =>
         notifyPartner(supabase, pact.user_id, 'missed', pact.title)
       ).catch(err => console.error('Partner notify error:', err));
+
+      playMissSound();
 
       if (onUpdate) {
         onUpdate({ ...pact, status: 'missed' });

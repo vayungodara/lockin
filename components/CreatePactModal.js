@@ -402,11 +402,20 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                             >
                               Weekdays
                             </button>
+                            <button
+                              type="button"
+                              className={`${styles.recurrenceBtn} ${recurrenceType === 'monthly' ? styles.active : ''}`}
+                              onClick={() => setRecurrenceType('monthly')}
+                              aria-pressed={recurrenceType === 'monthly'}
+                            >
+                              Monthly
+                            </button>
                           </div>
                           <p className={styles.recurrenceHint}>
                             {recurrenceType === 'daily' && 'This pact will repeat every day'}
                             {recurrenceType === 'weekly' && 'This pact will repeat every week on the same day'}
                             {recurrenceType === 'weekdays' && 'This pact will repeat Monday through Friday'}
+                            {recurrenceType === 'monthly' && 'This pact will repeat every month on the same date'}
                           </p>
                         </motion.div>
                       )}

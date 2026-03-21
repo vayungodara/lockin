@@ -137,6 +137,8 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
   };
 
   const handleMiss = async () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
     setIsLoading(true);
     try {
       const { error } = await supabase
@@ -164,6 +166,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       console.error('Error marking pact as missed:', err);
       toast.error('Failed to update pact. Please try again.');
     } finally {
+      isCompletingRef.current = false;
       setIsLoading(false);
     }
   };

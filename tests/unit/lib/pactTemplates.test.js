@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { TEMPLATE_CATEGORIES, PACT_TEMPLATES } from '@/lib/pactTemplates';
 
-const VALID_RECURRENCE_TYPES = ['daily', 'weekly', 'weekdays'];
+const VALID_RECURRENCE_TYPES = ['daily', 'weekly', 'weekdays', 'monthly'];
 const REQUIRED_TEMPLATE_FIELDS = [
   'id',
   'title',

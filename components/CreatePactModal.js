@@ -180,7 +180,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
   // Fix #13: Portal always renders, AnimatePresence controls visibility
   return (
     <>
-      {createPortal(
+      {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isOpen && (
             <div

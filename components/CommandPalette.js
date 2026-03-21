@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import { modalContent } from '@/lib/animations';
+import { useModalScrollLock } from '@/lib/useModalScrollLock';
 import styles from './CommandPalette.module.css';
 
 const commands = [
@@ -21,6 +22,7 @@ const commands = [
 
 export default function CommandPalette({ onCreatePact } = {}) {
   const [open, setOpen] = useState(false);
+  useModalScrollLock(open);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
   const inputRef = useRef(null);

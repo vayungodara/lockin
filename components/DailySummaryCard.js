@@ -1,12 +1,25 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
 import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
+import { fireMilestoneConfetti } from '@/lib/confetti';
+import { playStreakMilestone } from '@/lib/sounds';
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
+
+const STREAK_MILESTONES = [7, 14, 30, 50, 100];
+
+function getMilestoneMessage(streak) {
+  if (streak >= 100) return { emoji: '\uD83D\uDC51', text: 'Legendary. 100 days locked in.' };
+  if (streak >= 50) return { emoji: '\uD83D\uDC8E', text: '50 days. Diamond hands.' };
+  if (streak >= 30) return { emoji: '\uD83D\uDD25', text: '30 days. Monthly master.' };
+  if (streak >= 14) return { emoji: '\u26A1', text: '2 weeks strong. Keep going.' };
+  if (streak >= 7) return { emoji: '\uD83C\uDFAF', text: 'One week locked in. W.' };
+  return null;
+}
 
 /**
  * Pick the right icon for the streak level:
@@ -41,6 +54,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
   const [freezeLoading, setFreezeLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
+  const milestoneFiredRef = useRef(false);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -138,6 +152,19 @@ export default function DailySummaryCard({ userId, refreshKey }) {
     fetchSummary();
   }, [userId, supabase, refreshKey]);
 
+  // Milestone detection
+  const isMilestone = STREAK_MILESTONES.includes(summary?.streak);
+  const milestoneMessage = summary ? getMilestoneMessage(summary.streak) : null;
+
+  // Fire celebration effects once per session when a milestone is detected
+  useEffect(() => {
+    if (isMilestone && milestoneMessage && !milestoneFiredRef.current) {
+      milestoneFiredRef.current = true;
+      fireMilestoneConfetti();
+      playStreakMilestone();
+    }
+  }, [isMilestone, milestoneMessage]);
+
   const handleUseFreeze = async () => {
     setFreezeLoading(true);
     const result = await useStreakFreeze(supabase);
@@ -192,6 +219,19 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           )}
         </div>
       </div>
+
+      {/* Milestone celebration banner */}
+      {isMilestone && milestoneMessage && (
+        <motion.div
+          className={styles.milestoneBanner}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <span className={styles.milestoneEmoji}>{milestoneMessage.emoji}</span>
+          <span className={styles.milestoneText}>{milestoneMessage.text}</span>
+        </motion.div>
+      )}
 
       {/* At-risk banner with freeze controls */}
       {streakRisk?.atRisk && (

@@ -5,8 +5,10 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import styles from './GroupsPage.module.css';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
+import { fadeInUp } from '@/lib/animations';
 
 // Deterministic color based on group name — consistent across renders
 const GROUP_COLORS = [
@@ -203,17 +205,19 @@ export default function GroupsPageClient({ user }) {
           <p>Loading your groups...</p>
         </div>
       ) : groups.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-              <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <motion.div className={styles.emptyState} {...fadeInUp}>
+          <div className={styles.emptyIllustration}>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="22" cy="24" r="8" stroke="var(--accent-primary)" strokeWidth="2" />
+              <circle cx="42" cy="24" r="8" stroke="var(--accent-primary)" strokeWidth="2" opacity="0.6" />
+              <path d="M10 48C10 40.268 16.268 34 24 34H28" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" />
+              <path d="M54 48C54 40.268 47.732 34 40 34H36" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+              <path d="M28 40L32 44L36 40" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
+              <path d="M32 44V36" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
             </svg>
           </div>
-          <h3>No groups yet</h3>
-          <p>Create a group for your project or join an existing one with an invite code.</p>
+          <h3>Better with friends</h3>
+          <p>Accountability is a team sport. Start a group and keep each other honest.</p>
           <div className={styles.emptyActions}>
             <button className="btn btn-secondary" onClick={() => setIsJoinModalOpen(true)}>
               Join Group
@@ -222,7 +226,7 @@ export default function GroupsPageClient({ user }) {
               Create Group
             </button>
           </div>
-        </div>
+        </motion.div>
       ) : (
         <div className={styles.groupsGrid}>
           {groups.map((group) => {

@@ -173,13 +173,22 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--space-10) var(--space-6);
+  padding: var(--space-12) var(--space-6);
   gap: var(--space-3);
+  background: var(--surface-1);
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-xl);
 }
 
-.emptyEmoji {
-  font-size: 3rem;
-  line-height: 1;
+.emptyIllustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  background: var(--accent-glow);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-2);
 }
 
 .emptyTitle {

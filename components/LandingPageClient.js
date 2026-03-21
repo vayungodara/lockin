@@ -154,72 +154,6 @@ export default function LandingPageClient() {
       <main className={styles.main}>
         <section className={styles.hero}>
           <motion.div 
-            className={styles.heroVisual}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: easeOutQuint }}
-          >
-            <motion.div 
-              className={`${styles.floatingCard} ${styles.card1}`}
-              initial={{ opacity: 0, x: 30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
-              transition={{ 
-                opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" }
-              }}
-            >
-              <div className={styles.cardIcon}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span>Pact completed!</span>
-            </motion.div>
-            
-            <motion.div 
-              className={`${styles.floatingCard} ${styles.card2}`}
-              initial={{ opacity: 0, x: -30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-              transition={{ 
-                opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" }
-              }}
-            >
-              <div className={styles.cardIcon} style={{ background: 'var(--warning-light)', color: 'var(--warning)' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span>2 hours left</span>
-            </motion.div>
-            
-            <motion.div 
-              className={`${styles.floatingCard} ${styles.card3}`}
-              initial={{ opacity: 0, x: 30, y: -10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
-              transition={{ 
-                opacity: { delay: 1, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 1, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" }
-              }}
-            >
-              <div className={styles.cardIcon} style={{ background: 'var(--info-light)', color: 'var(--info)' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M23 21V19C23 17.14 21.73 15.57 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M16 3.13C17.73 3.57 19 5.14 19 7C19 8.86 17.73 10.43 16 10.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span>Alex joined</span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div 
             className={styles.heroTag}
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -363,16 +297,16 @@ export default function LandingPageClient() {
           
           <div className={styles.featureGrid}>
             {features.map((feature, index) => (
-              <motion.div 
+              <motion.div
                 key={feature.title}
-                className={styles.featureCard}
+                className={`${styles.featureCard} ${index === 0 ? styles.featureCardLarge : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay: index * 0.06, ease: easeOutQuint }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
-                <motion.div 
+                <motion.div
                   className={styles.featureIcon}
                   whileHover={iconHover}
                 >

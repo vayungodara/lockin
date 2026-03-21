@@ -172,6 +172,10 @@
 }
 
 /* Deadline urgency colors */
+.urgencyLow {
+  color: var(--success);
+}
+
 .urgencyMedium {
   color: var(--warning);
 }

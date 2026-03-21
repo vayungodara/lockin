@@ -5,6 +5,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
 import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
 import CreatePactModal from '@/components/CreatePactModal';
@@ -54,6 +55,17 @@ export default function DashboardClient({ user }) {
   const [refreshKey, setRefreshKey] = useState(0);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcutsSafe();
+  const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
+
+  // Fetch streak data
+  useEffect(() => {
+    if (!user) return;
+    calculateStreak(supabase, user.id).then(data => {
+      setStreakData(data);
+    }).catch(err => console.error('Error fetching streak:', err));
+  }, [supabase, user, refreshKey]);
+
+  const animatedStreak = useCountUp(streakData.currentStreak);
 
   // Register keyboard shortcuts
   useEffect(() => {
@@ -243,7 +255,24 @@ export default function DashboardClient({ user }) {
           initial="initial"
           animate="animate"
         >
+          {/* Streak card — visually distinct, larger with flame */}
           <motion.div className={`${styles.statCard} ${styles.statCardStreak}`} variants={staggerItem}>
+            <div className={styles.streakFlame}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 23C16.5 23 20 19.5 20 15C20 11.5 18 8.5 16 6.5C15.5 9 13.5 10 12 9C12.5 7 12 4 9.5 2C9 4.5 7 7 5 9.5C3.5 11.5 4 15 4 15C4 19.5 7.5 23 12 23Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 23C14 23 16 21.5 16 18.5C16 16.5 14.5 15 13.5 14C13 15.5 12 16 11 15C11.5 13.5 11 12 10 11C9.5 12.5 8 14 8 16C8 18 8.5 19 9 20C9.5 21 10 23 12 23Z" fill="var(--bg-primary)" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className={styles.statContent}>
+              <span className={styles.streakValue}>{animatedStreak}</span>
+              <span className={styles.statLabel}>Day Streak</span>
+            </div>
+            {streakData.longestStreak > 0 && (
+              <span className={styles.streakBest}>Best: {streakData.longestStreak}</span>
+            )}
+          </motion.div>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardCompleted}`} variants={staggerItem}>
             <div className={styles.statIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -252,7 +281,7 @@ export default function DashboardClient({ user }) {
             </div>
             <div className={styles.statContent}>
               <span className={styles.statValue}>{animatedCompleted}</span>
-              <span className={styles.statLabel}>Pacts Completed</span>
+              <span className={styles.statLabel}>Completed</span>
             </div>
           </motion.div>
 
@@ -269,7 +298,7 @@ export default function DashboardClient({ user }) {
             </div>
           </motion.div>
 
-          <motion.div className={`${styles.statCard} ${styles.statCardFocus}`} variants={staggerItem}>
+          <motion.div className={`${styles.statCard} ${styles.statCardMissed}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.danger}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -278,18 +307,6 @@ export default function DashboardClient({ user }) {
             <div className={styles.statContent}>
               <span className={styles.statValue}>{animatedMissed}</span>
               <span className={styles.statLabel}>Missed</span>
-            </div>
-          </motion.div>
-
-          <motion.div className={`${styles.statCard} ${styles.statCardXP}`} variants={staggerItem}>
-            <div className={`${styles.statIcon} ${styles.accent}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statValue}>{animatedTotal}</span>
-              <span className={styles.statLabel}>Total Pacts</span>
             </div>
           </motion.div>
         </motion.div>

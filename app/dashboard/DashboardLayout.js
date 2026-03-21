@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
@@ -11,12 +11,32 @@ import { pageTransition } from '@/lib/animations';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import CommandPalette from '@/components/CommandPalette';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
+
+  // Detect and persist the user's IANA timezone so streak calculations
+  // can bucket activity into their local day instead of UTC.
+  // Migration needed: ALTER TABLE profiles ADD COLUMN IF NOT EXISTS timezone TEXT DEFAULT 'UTC';
+  useEffect(() => {
+    if (!user?.id) return;
+    try {
+      const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (detectedTimezone) {
+        supabase
+          .from('profiles')
+          .update({ timezone: detectedTimezone })
+          .eq('id', user.id)
+          .then(() => {}); // fire-and-forget
+      }
+    } catch {
+      // Intl API unavailable — timezone stays as DB default ('UTC')
+    }
+  }, [user?.id, supabase]);
 
   const handleSignOut = async () => {
     try {
@@ -34,13 +54,37 @@ export default function DashboardLayout({ user, children }) {
     setSidebarExpanded(expanded);
   }, []);
 
+  // Konami code easter egg
+  useEffect(() => {
+    const konamiCode = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+    let konamiIndex = 0;
+
+    const handleKeyDown = (e) => {
+      if (e.key === konamiCode[konamiIndex]) {
+        konamiIndex++;
+        if (konamiIndex === konamiCode.length) {
+          import('@/lib/confetti').then(({ fireConfetti }) => {
+            if (fireConfetti) fireConfetti();
+          });
+          konamiIndex = 0;
+        }
+      } else {
+        konamiIndex = 0;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   return (
     <FocusProvider>
       <NotificationProvider>
         <KeyboardShortcutsProvider>
-          <div className={styles.layout}>
+          <div id="dashboard-layout" className={styles.layout}>
             <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
             <MobileNav />
+            <CommandPalette />
             <main
               id="main-content"
               className={styles.main}

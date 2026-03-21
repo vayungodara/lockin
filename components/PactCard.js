@@ -43,7 +43,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     ? hoursRemaining < 6 ? styles.urgencyCritical
     : hoursRemaining < 12 ? styles.urgencyHigh
     : hoursRemaining < 24 ? styles.urgencyMedium
-    : ''
+    : styles.urgencyLow
     : '';
 
   // Format deadline

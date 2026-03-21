@@ -24,11 +24,11 @@ export default function GroupDetailClient({ user, group, userRole }) {
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch group members (with profiles joined) and tasks in parallel
+      // Fetch group members and tasks in parallel
       const [membersResult, tasksResult] = await Promise.all([
         supabase
           .from('group_members')
-          .select('user_id, role, joined_at, profiles(id, full_name, avatar_url)')
+          .select('user_id, role, joined_at')
           .eq('group_id', group.id),
         supabase
           .from('tasks')
@@ -43,13 +43,23 @@ export default function GroupDetailClient({ user, group, userRole }) {
       const membersData = membersResult.data || [];
       const tasksData = tasksResult.data || [];
 
-      // Build profiles map from the joined data
+      // Fetch profiles for all members in a single batch query
+      // (group_members.user_id references auth.users, not profiles directly,
+      //  so PostgREST cannot auto-join — we do it manually)
       const profilesMap = {};
-      membersData.forEach(m => {
-        if (m.profiles) {
-          profilesMap[m.user_id] = m.profiles;
+      const memberUserIds = membersData.map(m => m.user_id);
+      if (memberUserIds.length > 0) {
+        const { data: memberProfiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, avatar_url')
+          .in('id', memberUserIds);
+
+        if (!profilesError && memberProfiles) {
+          memberProfiles.forEach(p => {
+            profilesMap[p.id] = p;
+          });
         }
-      });
+      }
 
       const userIds = membersData.map(m => m.user_id);
 

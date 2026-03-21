@@ -175,62 +175,6 @@
   background: var(--border-default);
 }
 
-.heroVisual {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.floatingCard {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface-1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-primary);
-  white-space: nowrap;
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-}
-
-.cardIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  background: var(--success-light);
-  color: var(--success);
-  border-radius: var(--radius-lg);
-}
-
-.card1 {
-  top: 18%;
-  right: 8%;
-}
-
-.card2 {
-  top: 55%;
-  left: 5%;
-}
-
-.card3 {
-  bottom: 25%;
-  right: 12%;
-}
 
 .features {
   max-width: 1100px;
@@ -317,6 +261,10 @@
   color: var(--text-secondary);
   font-size: var(--text-base);
   line-height: 1.6;
+}
+
+.featureCardLarge {
+  grid-column: span 2;
 }
 
 /* === App Preview Section === */
@@ -649,10 +597,10 @@
 }
 
 .stepNumber {
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
+  font-size: var(--text-3xl);
+  font-weight: 800;
   color: var(--accent-primary);
-  min-width: 28px;
+  line-height: 1;
   margin-bottom: var(--space-5);
 }
 
@@ -840,10 +788,6 @@
     min-height: auto;
   }
 
-  .heroVisual {
-    display: none;
-  }
-
   .featureGrid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -908,7 +852,11 @@
     grid-template-columns: 1fr;
     gap: var(--space-4);
   }
-  
+
+  .featureCardLarge {
+    grid-column: span 1;
+  }
+
   .featureCard {
     padding: var(--space-6);
   }

@@ -30,6 +30,31 @@
   margin: 0;
 }
 
+/* Container for streak badge + freeze badge side by side */
+.headerBadges {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Freeze count badge — small pill next to streak */
+.freezeBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 8px;
+  background: var(--info-bg);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--info);
+}
+
+.freezeIcon {
+  font-size: 12px;
+}
+
+/* Base streak badge */
 .streakBadge {
   display: flex;
   align-items: center;
@@ -40,12 +65,39 @@
   font-size: 12px;
   font-weight: var(--font-semibold);
   color: var(--accent-celebration);
+  transition: box-shadow 0.3s ease;
 }
 
 .streakIcon {
   font-size: 14px;
 }
 
+/* 7+ day streak — orange glow */
+.streak_fire {
+  box-shadow: 0 0 10px rgba(var(--accent-celebration-rgb), 0.35);
+}
+
+/* 30+ day streak — diamond blue tint */
+.streak_diamond {
+  background: rgba(59, 123, 246, 0.15);
+  color: var(--info);
+  box-shadow: 0 0 12px var(--info-glow);
+}
+
+/* 100+ day streak — gold crown glow */
+.streak_legendary {
+  background: linear-gradient(135deg, rgba(var(--accent-celebration-rgb), 0.2), rgba(217, 70, 239, 0.15));
+  color: var(--accent-celebration);
+  box-shadow: 0 0 16px rgba(var(--accent-celebration-rgb), 0.4);
+  animation: legendaryPulse 3s ease-in-out infinite;
+}
+
+@keyframes legendaryPulse {
+  0%, 100% { box-shadow: 0 0 12px rgba(var(--accent-celebration-rgb), 0.3); }
+  50% { box-shadow: 0 0 22px rgba(var(--accent-celebration-rgb), 0.5); }
+}
+
+/* Risk banner */
 .riskBanner {
   display: flex;
   align-items: center;
@@ -61,6 +113,7 @@
   font-weight: var(--font-medium);
 }
 
+/* Active freeze button */
 .freezeBtn {
   padding: 4px 12px;
   background: var(--info-bg);
@@ -74,11 +127,20 @@
   transition: all 0.15s;
 }
 
-.freezeBtn:hover {
+.freezeBtn:hover:not(:disabled) {
   background: var(--info);
   color: white;
 }
 
+/* Disabled / cooldown state */
+.freezeBtnDisabled,
+.freezeBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+/* Stats row */
 .stats {
   display: flex;
   align-items: center;
@@ -126,5 +188,9 @@
   .riskBanner {
     flex-direction: column;
     text-align: center;
+  }
+
+  .headerBadges {
+    gap: var(--space-1);
   }
 }

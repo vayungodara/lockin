@@ -431,15 +431,9 @@
 /* Category filter pills */
 .categoryPills {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
   padding-bottom: var(--space-1);
-}
-
-.categoryPills::-webkit-scrollbar {
-  display: none;
 }
 
 .categoryPill {

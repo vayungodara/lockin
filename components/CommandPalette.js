@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
-import { modalOverlay, modalContent } from '@/lib/animations';
+import { modalContent } from '@/lib/animations';
 import styles from './CommandPalette.module.css';
 
 const commands = [
@@ -125,10 +125,9 @@ export default function CommandPalette({ onCreatePact } = {}) {
   return createPortal(
     <AnimatePresence>
       {open && (
-        <motion.div
+        <div
           className={styles.overlay}
           onClick={() => setOpen(false)}
-          {...modalOverlay}
           key="command-palette-overlay"
         >
           <motion.div
@@ -208,7 +207,7 @@ export default function CommandPalette({ onCreatePact } = {}) {
               </span>
             </div>
           </motion.div>
-        </motion.div>
+        </div>
       )}
     </AnimatePresence>,
     document.body

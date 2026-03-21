@@ -29,7 +29,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
   const supabase = useMemo(() => createClient(), []);
 
   // Fix #11: Extracted resetFormState to eliminate 3x duplication
-  const resetFormState = () => {
+  const resetFormState = useCallback(() => {
     setTitle('');
     setDescription('');
     setDeadline('');
@@ -40,13 +40,13 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     setActiveCategory('academics');
     setError('');
     setStep('templates');
-  };
+  }, []);
 
   // Fix #11: Use resetFormState in handleClose
   const handleClose = useCallback(() => {
     resetFormState();
     onClose();
-  }, [onClose]);
+  }, [onClose, resetFormState]);
 
   useModalScrollLock(isOpen);
 
@@ -422,7 +422,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                         animate={{ opacity: 1, height: 'auto' }}
                         exit={{ opacity: 0, height: 0 }}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                           <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
                         </svg>

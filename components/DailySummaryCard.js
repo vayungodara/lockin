@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
-import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus } from '@/lib/streaks-advanced';
+import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
 
@@ -148,7 +148,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
         ...prev,
         available: false,
         freezesRemaining: result.freezesRemaining,
-        cooldownEnds: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        cooldownEnds: new Date(Date.now() + FREEZE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000),
       }));
       // Update summary freeze count too
       setSummary(prev => ({ ...prev, freezesRemaining: result.freezesRemaining }));

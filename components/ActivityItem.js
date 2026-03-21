@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerItem } from '@/lib/animations';
@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import ActivityComments from './ActivityComments';
 import styles from './ActivityItem.module.css';
 
-export default function ActivityItem({ activity }) {
+function ActivityItem({ activity }) {
   const [showReactions, setShowReactions] = useState(false);
   const initialCounts = activity.reactions?.counts || {};
   const initialUserReactions = activity.reactions?.userReactions || [];
@@ -265,3 +265,5 @@ export default function ActivityItem({ activity }) {
     </motion.div>
   );
 }
+
+export default memo(ActivityItem);

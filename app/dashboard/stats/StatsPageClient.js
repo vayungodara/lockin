@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
+import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './StatsPage.module.css';
 
 export default function StatsPageClient({ user }) {
@@ -144,7 +145,20 @@ export default function StatsPageClient({ user }) {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading stats...</div>
+        <header className={styles.header}>
+          <div>
+            <SkeletonText width="160px" height="28px" />
+            <SkeletonText width="240px" height="16px" />
+          </div>
+        </header>
+        <div className={styles.content}>
+          <SkeletonCard height="100px" />
+          <SkeletonCard height="280px" />
+          <div className={styles.analyticsGrid}>
+            <SkeletonCard height="200px" />
+            <SkeletonCard height="200px" />
+          </div>
+        </div>
       </div>
     );
   }

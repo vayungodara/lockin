@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './PactsPage.module.css';
 import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
+import { SkeletonRow } from '@/components/Skeleton';
 
 export default function PactsPageClient({ user }) {
   const [pacts, setPacts] = useState([]);
@@ -147,9 +148,10 @@ export default function PactsPageClient({ user }) {
 
       {/* Pacts List */}
       {isLoading ? (
-        <div className={styles.loadingState}>
-          <div className={styles.spinner}></div>
-          <p>Loading your pacts...</p>
+        <div className={styles.pactsGrid}>
+          <SkeletonRow />
+          <SkeletonRow />
+          <SkeletonRow />
         </div>
       ) : filteredPacts.length === 0 ? (
         <div className={styles.emptyState}>

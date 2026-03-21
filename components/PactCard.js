@@ -77,8 +77,15 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsLoading(true);
+
+    // Safety timeout — if the entire operation hangs for 15s, unlock the UI
+    const safetyTimer = setTimeout(() => {
+      isCompletingRef.current = false;
+      setIsLoading(false);
+    }, 15000);
+
     try {
-      // Mark current pact as completed
+      // Step 1: Mark pact as completed in DB — this is the critical operation
       const { error } = await supabase
         .from('pacts')
         .update({
@@ -89,36 +96,52 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
       if (error) throw error;
 
-      await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
+      // Pact is now saved. Everything below is best-effort — failures must not
+      // revert the completion or show an error toast to the user.
 
       triggerConfetti();
       justCompletedRef.current = true;
       setShowBounce(true);
 
-      // XP, streaks, achievements, partner notifications — each independent so one failure doesn't block others
+      // Activity logging — independent, non-blocking
+      try {
+        await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
+
+      // XP award — independent
       const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
         awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
       ).catch(err => console.error('XP award error:', err));
 
+      // Streak calculation, then streak-advanced + achievements — isolated from each other
       const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
-        calculateStreak(supabase, pact.user_id).then(({ currentStreak, longestStreak, totalCompleted }) =>
-          Promise.all([
-            import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
-              updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
-            ),
-            import('@/lib/gamification').then(({ checkPactAchievements }) =>
-              checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
-            ),
-          ])
-        )
-      ).catch(err => console.error('Streak update error:', err));
+        calculateStreak(supabase, pact.user_id)
+      ).then(({ currentStreak, longestStreak, totalCompleted }) => {
+        // Run streak update and achievement check independently so one failure
+        // does not prevent the other from completing
+        const streakUpdate = import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
+          updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
+        ).catch(err => console.error('Streak advanced update error:', err));
 
+        const achievementCheck = import('@/lib/gamification').then(({ checkPactAchievements }) =>
+          checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
+        ).catch(err => console.error('Achievement check error:', err));
+
+        return Promise.all([streakUpdate, achievementCheck]);
+      }).catch(err => console.error('Streak calculation error:', err));
+
+      // Partner notification — independent
       const partnerPromise = import('@/lib/partnerships').then(({ notifyPartner }) =>
         notifyPartner(supabase, pact.user_id, 'completed', pact.title)
       ).catch(err => console.error('Partner notify error:', err));
 
-      // Await streak/XP to ensure profile is updated before UI refresh
-      await Promise.all([xpPromise, streakPromise, partnerPromise]);
+      // Wait for best-effort work, but cap at 10s so we don't hang the UI
+      await Promise.race([
+        Promise.all([xpPromise, streakPromise, partnerPromise]),
+        new Promise(resolve => setTimeout(resolve, 10000)),
+      ]);
 
       if (pact.is_recurring && pact.recurrence_type) {
         toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
@@ -131,6 +154,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       console.error('Error completing pact:', err);
       toast.error('Failed to complete pact. Please try again.');
     } finally {
+      clearTimeout(safetyTimer);
       isCompletingRef.current = false;
       setIsLoading(false);
     }
@@ -140,6 +164,13 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsLoading(true);
+
+    // Safety timeout — if the operation hangs for 15s, unlock the UI
+    const safetyTimer = setTimeout(() => {
+      isCompletingRef.current = false;
+      setIsLoading(false);
+    }, 15000);
+
     try {
       const { error } = await supabase
         .from('pacts')
@@ -148,7 +179,12 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
       if (error) throw error;
 
-      await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
+      // Activity logging — best-effort, don't block on failure
+      try {
+        await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
 
       // Notify accountability partner (fire-and-forget)
       import('@/lib/partnerships').then(({ notifyPartner }) =>
@@ -166,6 +202,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       console.error('Error marking pact as missed:', err);
       toast.error('Failed to update pact. Please try again.');
     } finally {
+      clearTimeout(safetyTimer);
       isCompletingRef.current = false;
       setIsLoading(false);
     }

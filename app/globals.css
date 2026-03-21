@@ -303,6 +303,20 @@ body::before {
 
 /* body::before dark fallback also handled by data-theme attribute */
 
+/* === MODAL BLUR EFFECT ===
+   When a modal is open, blur the dashboard content behind it.
+   backdrop-filter is unreliable with stacking contexts from transforms,
+   so we apply filter: blur() directly to the content instead. */
+html[data-modal-open] #dashboard-layout {
+  filter: blur(12px) saturate(0.8);
+  transition: filter 0.2s ease;
+  pointer-events: none;
+}
+
+#dashboard-layout {
+  transition: filter 0.2s ease;
+}
+
 /* === SKIP TO CONTENT (Accessibility) === */
 .skip-to-content {
   position: absolute;
@@ -408,7 +422,7 @@ p {
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
   line-height: 1;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-lg);
   transition: all var(--transition-base);
   white-space: nowrap;
   position: relative;
@@ -487,7 +501,7 @@ p {
 .btn-lg {
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
 }
 
 .btn-icon {
@@ -504,8 +518,8 @@ p {
 .card {
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  padding: var(--space-6);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
   box-shadow: var(--shadow-sm);
   transition: all var(--transition-base);
 }

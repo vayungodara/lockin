@@ -24,36 +24,34 @@ export default function GroupDetailClient({ user, group, userRole }) {
 
   const fetchData = useCallback(async () => {
     try {
-      // Fetch group members
-      const { data: membersData, error: membersError } = await supabase
-        .from('group_members')
-        .select('user_id, role, joined_at')
-        .eq('group_id', group.id);
+      // Fetch group members (with profiles joined) and tasks in parallel
+      const [membersResult, tasksResult] = await Promise.all([
+        supabase
+          .from('group_members')
+          .select('user_id, role, joined_at, profiles(id, full_name, avatar_url)')
+          .eq('group_id', group.id),
+        supabase
+          .from('tasks')
+          .select('*')
+          .eq('group_id', group.id)
+          .order('created_at', { ascending: false }),
+      ]);
 
-      if (membersError) throw membersError;
+      if (membersResult.error) throw membersResult.error;
+      if (tasksResult.error) throw tasksResult.error;
 
-      // Get user IDs to fetch profiles
-      const userIds = (membersData || []).map(m => m.user_id);
+      const membersData = membersResult.data || [];
+      const tasksData = tasksResult.data || [];
 
-      // Fetch user profiles separately
-      let profilesMap = {};
-      if (userIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from('profiles')
-          .select('id, full_name, avatar_url')
-          .in('id', userIds);
-
-        if (profilesError) {
-          console.error('Error fetching member profiles:', profilesError);
-          throw profilesError;
+      // Build profiles map from the joined data
+      const profilesMap = {};
+      membersData.forEach(m => {
+        if (m.profiles) {
+          profilesMap[m.user_id] = m.profiles;
         }
+      });
 
-        if (profilesData) {
-          profilesData.forEach(p => {
-            profilesMap[p.id] = p;
-          });
-        }
-      }
+      const userIds = membersData.map(m => m.user_id);
 
       // Fetch focus sessions for presence and leaderboard
       if (userIds.length > 0) {
@@ -99,8 +97,8 @@ export default function GroupDetailClient({ user, group, userRole }) {
         }
       }
 
-      // Transform members data
-      const transformedMembers = (membersData || []).map(m => ({
+      // Transform members data using joined profiles
+      const transformedMembers = membersData.map(m => ({
         id: m.user_id,
         role: m.role,
         joined_at: m.joined_at,
@@ -110,22 +108,14 @@ export default function GroupDetailClient({ user, group, userRole }) {
 
       setMembers(transformedMembers);
 
-      // Fetch tasks
-      const { data: tasksData, error: tasksError } = await supabase
-        .from('tasks')
-        .select('*')
-        .eq('group_id', group.id)
-        .order('created_at', { ascending: false });
+      // Get unique owner IDs not already in profilesMap
+      const ownerIds = [...new Set(
+        tasksData
+          .filter(t => t.owner_id && !profilesMap[t.owner_id])
+          .map(t => t.owner_id)
+      )];
 
-      if (tasksError) throw tasksError;
-
-      // Get owner IDs from tasks
-      const ownerIds = (tasksData || [])
-        .filter(t => t.owner_id)
-        .map(t => t.owner_id);
-
-      // Fetch owner profiles
-      let ownerProfilesMap = {};
+      // Only fetch owner profiles that we don't already have from the members join
       if (ownerIds.length > 0) {
         const { data: ownerProfiles, error: ownerError } = await supabase
           .from('profiles')
@@ -138,15 +128,15 @@ export default function GroupDetailClient({ user, group, userRole }) {
 
         if (!ownerError && ownerProfiles) {
           ownerProfiles.forEach(p => {
-            ownerProfilesMap[p.id] = p;
+            profilesMap[p.id] = p;
           });
         }
       }
 
-      // Attach owner info to tasks
-      const tasksWithOwners = (tasksData || []).map(task => ({
+      // Attach owner info to tasks (using the shared profilesMap)
+      const tasksWithOwners = tasksData.map(task => ({
         ...task,
-        owner: task.owner_id ? ownerProfilesMap[task.owner_id] || null : null
+        owner: task.owner_id ? profilesMap[task.owner_id] || null : null
       }));
 
       setTasks(tasksWithOwners);

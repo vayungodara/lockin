@@ -50,15 +50,39 @@ export default function DailySummaryCard({ userId, refreshKey }) {
         today.setHours(0, 0, 0, 0);
         const todayISO = today.toISOString();
 
-        // Fetch pacts due today/overdue
-        const { data: activePacts } = await supabase
-          .from('pacts')
-          .select('id, deadline')
-          .eq('user_id', userId)
-          .eq('status', 'active');
-
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
+
+        // Run all independent queries in parallel
+        const [
+          { data: activePacts },
+          { data: focusSessions },
+          { data: completedToday },
+          { data: profile },
+        ] = await Promise.all([
+          supabase
+            .from('pacts')
+            .select('id, deadline')
+            .eq('user_id', userId)
+            .eq('status', 'active'),
+          supabase
+            .from('focus_sessions')
+            .select('duration_minutes')
+            .eq('user_id', userId)
+            .gte('started_at', todayISO)
+            .not('ended_at', 'is', null),
+          supabase
+            .from('pacts')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('status', 'completed')
+            .gte('completed_at', todayISO),
+          supabase
+            .from('profiles')
+            .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
+            .eq('id', userId)
+            .single(),
+        ]);
 
         const dueToday = (activePacts || []).filter(p => {
           const d = new Date(p.deadline);
@@ -69,32 +93,9 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           new Date(p.deadline) < today
         ).length;
 
-        // Fetch focus sessions today
-        const { data: focusSessions } = await supabase
-          .from('focus_sessions')
-          .select('duration_minutes')
-          .eq('user_id', userId)
-          .gte('started_at', todayISO)
-          .not('ended_at', 'is', null);
-
         const focusMinutes = (focusSessions || []).reduce(
           (sum, s) => sum + (s.duration_minutes || 0), 0
         );
-
-        // Fetch completed pacts today
-        const { data: completedToday } = await supabase
-          .from('pacts')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('status', 'completed')
-          .gte('completed_at', todayISO);
-
-        // Streak info — also fetch last_activity_date to validate stale data
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
-          .eq('id', userId)
-          .single();
 
         // If last_activity_date is more than 1 day ago, streak is broken
         // regardless of what current_streak says (cron may not have reset it).
@@ -108,6 +109,12 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           if (daysSince > 1) streak = 0;
         }
 
+        // Check streak risk and freeze status in parallel
+        const [risk, freeze] = await Promise.all([
+          checkStreakAtRisk(supabase, userId),
+          getStreakFreezeStatus(supabase, userId),
+        ]);
+
         setSummary({
           dueToday,
           overdue,
@@ -119,12 +126,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           freezesRemaining: profile?.streak_freezes_remaining || 0,
         });
 
-        // Check streak risk
-        const risk = await checkStreakAtRisk(supabase, userId);
         setStreakRisk(risk);
-
-        // Always fetch freeze status (we show count in header, not just when at risk)
-        const freeze = await getStreakFreezeStatus(supabase, userId);
         setFreezeStatus(freeze);
       } catch (err) {
         console.error('Error loading summary:', err);

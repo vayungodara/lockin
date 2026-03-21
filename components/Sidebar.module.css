@@ -311,7 +311,7 @@
   height: 36px;
   min-width: 36px;
   border-radius: var(--radius-full);
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;

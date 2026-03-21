@@ -14,6 +14,7 @@ import CompactActivityCard from '@/components/CompactActivityCard';
 import DailySummaryCard from '@/components/DailySummaryCard';
 import OnboardingModal from '@/components/OnboardingModal';
 import XPBar from '@/components/XPBar';
+import { SkeletonCard } from '@/components/Skeleton';
 
 function AnimatedCounter({ value }) {
   const [displayValue, setDisplayValue] = useState(value === 0 ? 0 : null);
@@ -287,9 +288,11 @@ export default function DashboardClient({ user }) {
         
         {/* Pacts List or Empty State */}
         {isLoading ? (
-          <div className={styles.loadingState}>
-            <div className={styles.spinner}></div>
-            <p>Loading your pacts...</p>
+          <div className={styles.pactsGrid}>
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
           </div>
         ) : error ? (
           <motion.div 

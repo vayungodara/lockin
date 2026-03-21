@@ -7,6 +7,7 @@ import { useTheme } from '@/components/ThemeProvider';
 import { buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import { ACCENT_PALETTES } from '@/lib/accentColors';
+import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './SettingsPage.module.css';
 
 const STORAGE_KEYS = {
@@ -71,6 +72,24 @@ export default function SettingsPageClient({ user }) {
   const getThemeButtonClass = (themeName) => {
     return `${styles.themeBtn} ${theme === themeName ? styles.themeBtnActive : ''}`;
   };
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <div>
+            <SkeletonText width="120px" height="28px" />
+            <SkeletonText width="220px" height="16px" />
+          </div>
+        </header>
+        <div className={styles.content}>
+          <SkeletonCard height="120px" />
+          <SkeletonCard height="200px" />
+          <SkeletonCard height="160px" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>

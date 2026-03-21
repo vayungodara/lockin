@@ -102,7 +102,7 @@
   padding: var(--space-3) var(--space-4);
   background: var(--surface-1);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: var(--text-base);
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
@@ -356,7 +356,7 @@
 }
 
 .recurrenceBtn.active {
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   color: white;
   box-shadow: var(--shadow-sm);
 }

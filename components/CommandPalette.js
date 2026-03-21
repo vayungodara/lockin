@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import { modalContent } from '@/lib/animations';
 import styles from './CommandPalette.module.css';
@@ -121,22 +121,19 @@ export default function CommandPalette({ onCreatePact } = {}) {
   );
 
   if (typeof document === 'undefined') return null;
+  if (!open) return null;
 
   return createPortal(
-    <AnimatePresence>
-      {open && (
-        <div
-          className={styles.overlay}
-          onClick={() => setOpen(false)}
-          key="command-palette-overlay"
-        >
-          <motion.div
-            className={styles.palette}
-            onClick={(e) => e.stopPropagation()}
-            onKeyDown={handleKeyDown}
-            {...modalContent}
-            key="command-palette-modal"
-          >
+    <div
+      className={styles.overlay}
+      onClick={() => setOpen(false)}
+    >
+      <motion.div
+        className={styles.palette}
+        onClick={(e) => e.stopPropagation()}
+        onKeyDown={handleKeyDown}
+        {...modalContent}
+      >
             <div className={styles.searchWrap}>
               <svg
                 className={styles.searchIcon}
@@ -207,9 +204,7 @@ export default function CommandPalette({ onCreatePact } = {}) {
               </span>
             </div>
           </motion.div>
-        </div>
-      )}
-    </AnimatePresence>,
+    </div>,
     document.body
   );
 }

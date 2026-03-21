@@ -327,7 +327,28 @@ export default function LandingPageClient() {
             ))}
           </motion.div>
         </section>
-        
+
+        <motion.section
+          className={styles.productShowcase}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7, ease: easeOutQuint }}
+        >
+          <div className={styles.browserMockup}>
+            <div className={styles.browserChrome}>
+              <div className={styles.showcaseDots}>
+                <span></span><span></span><span></span>
+              </div>
+              <div className={styles.showcaseUrl}>lock-in.me/dashboard</div>
+            </div>
+            <div className={styles.browserContent}>
+              <div className={styles.screenshotPlaceholder}>
+                <p>Your dashboard, visualized</p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         <section id="features" className={styles.features}>
           <motion.div 
             className={styles.sectionHeader}

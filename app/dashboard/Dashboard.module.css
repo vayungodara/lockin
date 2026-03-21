@@ -308,9 +308,24 @@
 }
 
 .statCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   border-color: var(--border-default);
+}
+
+.statCardStreak {
+  border-left: 3px solid var(--accent-primary);
+}
+
+.statCardPacts {
+  border-left: 3px solid var(--success);
+}
+
+.statCardFocus {
+  border-left: 3px solid var(--info);
+}
+
+.statCardXP {
+  border-left: 3px solid var(--warning);
 }
 
 .statIcon {

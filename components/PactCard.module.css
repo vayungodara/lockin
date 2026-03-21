@@ -24,10 +24,8 @@
 }
 
 .card:hover {
-  background: var(--surface-1);
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-3px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 .card.completed::before {
@@ -171,6 +169,33 @@
 .missBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Deadline urgency colors */
+.urgencyMedium {
+  color: var(--warning);
+}
+
+.urgencyHigh {
+  color: var(--danger);
+  font-weight: var(--font-semibold);
+}
+
+.urgencyCritical {
+  color: var(--danger);
+  font-weight: var(--font-bold);
+  animation: urgencyPulse 2s ease-in-out infinite;
+}
+
+@keyframes urgencyPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .urgencyCritical {
+    animation: none;
+  }
 }
 
 .card.completed {

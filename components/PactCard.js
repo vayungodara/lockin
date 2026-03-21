@@ -36,6 +36,15 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
   const isOverdue = new Date(pact.deadline) < new Date() && pact.status === 'active';
   const deadlineDate = new Date(pact.deadline);
 
+  // Deadline urgency coloring
+  const hoursRemaining = pact.deadline ? (new Date(pact.deadline) - new Date()) / (1000 * 60 * 60) : null;
+  const urgencyClass = hoursRemaining !== null
+    ? hoursRemaining < 6 ? styles.urgencyCritical
+    : hoursRemaining < 12 ? styles.urgencyHigh
+    : hoursRemaining < 24 ? styles.urgencyMedium
+    : ''
+    : '';
+
   // Format deadline
   const formatDeadline = () => {
     const now = new Date();
@@ -235,7 +244,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
         )}
         
         <div className={styles.footer}>
-          <div className={styles.deadline}>
+          <div className={`${styles.deadline} ${pact.status === 'active' ? urgencyClass : ''}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
               <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>

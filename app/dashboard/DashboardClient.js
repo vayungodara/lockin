@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
@@ -16,32 +16,34 @@ import OnboardingModal from '@/components/OnboardingModal';
 import XPBar from '@/components/XPBar';
 import { SkeletonCard } from '@/components/Skeleton';
 
-function AnimatedCounter({ value }) {
-  const [displayValue, setDisplayValue] = useState(value === 0 ? 0 : null);
-  
+function useCountUp(target, duration = 800) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+
   useEffect(() => {
-    if (value === 0) {
+    if (target === 0 || target === null || target === undefined) {
+      setCount(0);
       return;
     }
-    
-    let start = 0;
-    const duration = 800;
-    const increment = value / (duration / 16);
-    
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= value) {
-        setDisplayValue(value);
-        clearInterval(timer);
-      } else {
-        setDisplayValue(Math.floor(start));
+
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setCount(Math.round(eased * target));
+
+      if (progress < 1) {
+        ref.current = requestAnimationFrame(animate);
       }
-    }, 16);
-    
-    return () => clearInterval(timer);
-  }, [value]);
-  
-  return <span>{displayValue ?? 0}</span>;
+    }
+
+    ref.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(ref.current);
+  }, [target, duration]);
+
+  return count;
 }
 
 export default function DashboardClient({ user }) {
@@ -144,6 +146,12 @@ export default function DashboardClient({ user }) {
   const completedPacts = pacts.filter(p => p.status === 'completed');
   const missedPacts = pacts.filter(p => p.status === 'missed');
 
+  // Animated count-up values
+  const animatedCompleted = useCountUp(completedPacts.length);
+  const animatedActive = useCountUp(activePacts.length);
+  const animatedMissed = useCountUp(missedPacts.length);
+  const animatedTotal = useCountUp(pacts.length);
+
   // Dashboard shows active pacts first; if none, show a few recent completed ones
   const dashboardPacts = activePacts.length > 0
     ? activePacts
@@ -235,7 +243,7 @@ export default function DashboardClient({ user }) {
           initial="initial"
           animate="animate"
         >
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+          <motion.div className={`${styles.statCard} ${styles.statCardStreak}`} variants={staggerItem}>
             <div className={styles.statIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -243,12 +251,12 @@ export default function DashboardClient({ user }) {
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={completedPacts.length} /></span>
+              <span className={styles.statValue}>{animatedCompleted}</span>
               <span className={styles.statLabel}>Pacts Completed</span>
             </div>
           </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardPacts}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.warning}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
@@ -256,31 +264,31 @@ export default function DashboardClient({ user }) {
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={activePacts.length} /></span>
+              <span className={styles.statValue}>{animatedActive}</span>
               <span className={styles.statLabel}>Active Pacts</span>
             </div>
           </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardFocus}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.danger}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={missedPacts.length} /></span>
+              <span className={styles.statValue}>{animatedMissed}</span>
               <span className={styles.statLabel}>Missed</span>
             </div>
           </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardXP}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.accent}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={pacts.length} /></span>
+              <span className={styles.statValue}>{animatedTotal}</span>
               <span className={styles.statLabel}>Total Pacts</span>
             </div>
           </motion.div>

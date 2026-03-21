@@ -10,7 +10,7 @@
   text-align: center;
   max-width: 900px;
   margin: 0 auto;
-  padding: var(--space-24) var(--space-6) var(--space-20);
+  padding: var(--space-16) var(--space-6) var(--space-12);
   min-height: 100vh;
   min-height: 100dvh;
 }
@@ -80,6 +80,65 @@
   padding: var(--space-4) var(--space-8);
   font-size: var(--text-base);
   border-radius: var(--radius-lg);
+}
+
+/* === Product Showcase === */
+
+.productShowcase {
+  padding: var(--space-4) var(--space-6) var(--space-16);
+  display: flex;
+  justify-content: center;
+}
+
+.browserMockup {
+  width: 100%;
+  max-width: 900px;
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-xl);
+  transform: perspective(1000px) rotateX(2deg);
+}
+
+.browserChrome {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.showcaseDots {
+  display: flex;
+  gap: 6px;
+}
+
+.showcaseDots span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--surface-3);
+}
+
+.showcaseUrl {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  background: var(--surface-1);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-sm);
+  flex: 1;
+  max-width: 300px;
+}
+
+.screenshotPlaceholder {
+  height: 400px;
+  background: var(--bg-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-tertiary);
+  font-size: var(--text-sm);
 }
 
 .heroStats {
@@ -240,16 +299,11 @@
 }
 
 .featureIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  background: var(--accent-primary);
-  border-radius: var(--radius-lg);
-  color: white;
+  width: 32px;
+  height: 32px;
+  color: var(--accent-primary);
+  flex-shrink: 0;
   margin-bottom: var(--space-5);
-  box-shadow: var(--shadow-glow);
 }
 
 .featureCard h3 {
@@ -595,18 +649,11 @@
 }
 
 .stepNumber {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  font-size: var(--text-xl);
-  font-weight: 700;
-  background: var(--accent-primary);
-  color: white;
-  border-radius: var(--radius-full);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--accent-primary);
+  min-width: 28px;
   margin-bottom: var(--space-5);
-  box-shadow: var(--shadow-glow);
 }
 
 .step h3 {
@@ -898,5 +945,13 @@
 
   .footerLinks {
     gap: var(--space-10);
+  }
+
+  .browserMockup {
+    transform: none;
+  }
+
+  .screenshotPlaceholder {
+    height: 250px;
   }
 }

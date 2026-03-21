@@ -29,14 +29,14 @@
   --text-muted: #A9A5BC;
   --text-inverse: #FFFFFF;
 
-  /* Gradient Accents — richer, deeper stops */
-  --gradient-primary: linear-gradient(135deg, #5B5EF5 0%, #7C4DFF 40%, #B44AE6 70%, #E040CB 100%);
-  --gradient-secondary: linear-gradient(135deg, #3B7BF6 0%, #5B5EF5 100%);
+  /* Gradient Accents — clean 2-stop indigo family */
+  --gradient-primary: linear-gradient(135deg, #4338CA 0%, #5B5EF5 100%);
+  --gradient-secondary: linear-gradient(135deg, #3730A3 0%, #4F46E5 100%);
   --gradient-success: linear-gradient(135deg, #0DBF73 0%, #2DDFAC 100%);
   --gradient-warm: linear-gradient(135deg, #F5A623 0%, #FF6B35 100%);
-  --gradient-celebration: linear-gradient(135deg, #F5A623 0%, #FFD700 50%, #F5A623 100%);
-  --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.1) 0%, rgba(var(--accent-tertiary-rgb), 0.1) 100%);
-  --gradient-glow: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.22) 0%, rgba(var(--accent-tertiary-rgb), 0.22) 100%);
+  --gradient-celebration: linear-gradient(135deg, #E8A217 0%, #FFD700 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.1) 0%, rgba(var(--accent-primary-rgb), 0.04) 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.22) 0%, rgba(var(--accent-primary-rgb), 0.10) 100%);
 
   /* Solid accent colors */
   --accent-primary: #5B5EF5;
@@ -171,9 +171,9 @@
 
 /* === DARK MODE — "Deep Space" === */
 [data-theme="dark"] {
-  /* Background colors — deep space with blue undertone */
-  --bg-primary: #08090D;
-  --bg-secondary: #0E1117;
+  /* Background colors — warm neutral darks */
+  --bg-primary: #0C0C0E;
+  --bg-secondary: #111113;
   --bg-tertiary: #161B25;
   --bg-elevated: #1A1F2B;
   --bg-hover: #222838;
@@ -193,8 +193,8 @@
   --text-inverse: #08090D;
 
   /* Gradient adjustments — more luminous in dark */
-  --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.14) 0%, rgba(var(--accent-tertiary-rgb), 0.14) 100%);
-  --gradient-glow: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.3) 0%, rgba(var(--accent-tertiary-rgb), 0.3) 100%);
+  --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.14) 0%, rgba(var(--accent-primary-rgb), 0.06) 100%);
+  --gradient-glow: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.3) 0%, rgba(var(--accent-primary-rgb), 0.14) 100%);
 
   /* Status colors — brighter for dark mode */
   --success: #2DDF8E;
@@ -1125,6 +1125,19 @@ textarea {
   --safe-area-right: env(safe-area-inset-right, 0px);
 }
 
+/* Noise texture for organic depth */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  mix-blend-mode: overlay;
+}
+
 /* Reduce motion for accessibility */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -1135,7 +1148,8 @@ textarea {
     transition-duration: 0.01ms !important;
   }
 
-  body::before {
+  body::before,
+  body::after {
     display: none;
   }
 }

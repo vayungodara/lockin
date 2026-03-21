@@ -9,7 +9,7 @@ import { modalOverlay, modalContent } from '@/lib/animations';
 import styles from './CommandPalette.module.css';
 
 const commands = [
-  { id: 'new-pact', label: 'Create New Pact', shortcut: '\u2318N', icon: '\uD83D\uDD12', action: 'navigate', path: '/dashboard/pacts' },
+  { id: 'new-pact', label: 'Create New Pact', shortcut: '\u2318N', icon: '\uD83D\uDD12', action: 'create-pact' },
   { id: 'dashboard', label: 'Go to Dashboard', icon: '\uD83D\uDCCA', action: 'navigate', path: '/dashboard' },
   { id: 'pacts', label: 'My Pacts', icon: '\uD83D\uDCCB', action: 'navigate', path: '/dashboard/pacts' },
   { id: 'groups', label: 'Groups', icon: '\uD83D\uDC65', action: 'navigate', path: '/dashboard/groups' },
@@ -19,7 +19,7 @@ const commands = [
   { id: 'theme', label: 'Toggle Theme', icon: '\uD83C\uDF19', action: 'theme' },
 ];
 
-export default function CommandPalette() {
+export default function CommandPalette({ onCreatePact } = {}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [activeIndex, setActiveIndex] = useState(0);
@@ -83,9 +83,11 @@ export default function CommandPalette() {
         router.push(cmd.path);
       } else if (cmd.action === 'theme') {
         setTheme(resolvedTheme === 'dark' ? 'light' : 'dark');
+      } else if (cmd.action === 'create-pact') {
+        if (onCreatePact) onCreatePact();
       }
     },
-    [router, resolvedTheme, setTheme]
+    [router, resolvedTheme, setTheme, onCreatePact]
   );
 
   const handleKeyDown = useCallback(

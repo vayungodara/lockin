@@ -25,7 +25,9 @@
   width: 100%;
   max-width: 520px;
   max-height: 90vh;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   background: var(--surface-glass);
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
@@ -52,6 +54,7 @@
   justify-content: space-between;
   padding: var(--space-5) var(--space-6);
   border-bottom: 1px solid var(--border-subtle);
+  flex-shrink: 0;
 }
 
 .header h2 {
@@ -80,6 +83,9 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .inputGroup {
@@ -414,11 +420,12 @@
 
 .templatePickerBody {
   padding: var(--space-5) var(--space-6);
-  padding-bottom: 0;
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  overflow: hidden;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 /* Category filter pills */

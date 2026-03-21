@@ -12,10 +12,12 @@ import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import CommandPalette from '@/components/CommandPalette';
+import CreatePactModal from '@/components/CreatePactModal';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
+  const [showCreatePact, setShowCreatePact] = useState(false);
   const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
 
@@ -84,7 +86,12 @@ export default function DashboardLayout({ user, children }) {
           <div id="dashboard-layout" className={styles.layout}>
             <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
             <MobileNav />
-            <CommandPalette />
+            <CommandPalette onCreatePact={() => setShowCreatePact(true)} />
+            <CreatePactModal
+              isOpen={showCreatePact}
+              onClose={() => setShowCreatePact(false)}
+              onPactCreated={() => setShowCreatePact(false)}
+            />
             <main
               id="main-content"
               className={styles.main}

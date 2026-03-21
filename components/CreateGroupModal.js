@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
+import { useModalScrollLock } from '@/lib/useModalScrollLock';
 import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateGroupModal.module.css';
 
@@ -23,14 +25,7 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
   const [error, setError] = useState('');
   const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useModalScrollLock(isOpen);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -102,9 +97,9 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div className={styles.overlay} onClick={onClose} {...modalOverlay}>
+    <>
+      {isOpen && createPortal(
+        <div className={styles.overlay} onClick={onClose}>
           <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
               <h2>Create New Group</h2>
@@ -209,8 +204,9 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
               </div>
             </form>
           </motion.div>
-        </motion.div>
+        </div>,
+        document.body
       )}
-    </AnimatePresence>
+    </>
   );
 }

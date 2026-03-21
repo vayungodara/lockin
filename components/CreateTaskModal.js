@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
+import { useModalScrollLock } from '@/lib/useModalScrollLock';
 import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateTaskModal.module.css';
 
@@ -16,14 +18,7 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
   const [error, setError] = useState('');
   const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useModalScrollLock(isOpen);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -97,9 +92,9 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
   const today = new Date().toISOString().split('T')[0];
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div className={styles.overlay} onClick={handleClose} {...modalOverlay}>
+    <>
+      {isOpen && createPortal(
+        <div className={styles.overlay} onClick={handleClose}>
           <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
               <h2>Create New Task</h2>
@@ -231,8 +226,9 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
               </div>
             </form>
           </motion.div>
-        </motion.div>
+        </div>,
+        document.body
       )}
-    </AnimatePresence>
+    </>
   );
 }

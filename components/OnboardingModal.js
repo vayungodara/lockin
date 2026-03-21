@@ -1,9 +1,11 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { modalOverlay, modalContent } from '@/lib/animations';
+import { useModalScrollLock } from '@/lib/useModalScrollLock';
+import { modalContent } from '@/lib/animations';
 import styles from './OnboardingModal.module.css';
 
 const STEPS = [
@@ -76,6 +78,8 @@ export default function OnboardingModal({ userId, onCreatePact }) {
     checkOnboarding();
   }, [userId, supabase]);
 
+  useModalScrollLock(isOpen);
+
   const handleDismiss = async () => {
     setIsOpen(false);
     await supabase
@@ -98,51 +102,50 @@ export default function OnboardingModal({ userId, onCreatePact }) {
   const step = STEPS[currentStep];
   const completedCount = STEPS.filter(s => onboarding[s.field]).length;
 
-  return (
-    <AnimatePresence>
-      <motion.div className={styles.overlay} {...modalOverlay} onClick={handleDismiss}>
-        <motion.div
-          className={styles.modal}
-          {...modalContent}
-          onClick={(e) => e.stopPropagation()}
-        >
-          <div className={styles.progress}>
-            {STEPS.map((s, i) => (
-              <div
-                key={i}
-                className={`${styles.dot} ${onboarding[s.field] ? styles.dotDone : i === currentStep ? styles.dotActive : ''}`}
-              />
-            ))}
-          </div>
+  return createPortal(
+    <div className={styles.overlay} onClick={handleDismiss}>
+      <motion.div
+        className={styles.modal}
+        {...modalContent}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className={styles.progress}>
+          {STEPS.map((s, i) => (
+            <div
+              key={i}
+              className={`${styles.dot} ${onboarding[s.field] ? styles.dotDone : i === currentStep ? styles.dotActive : ''}`}
+            />
+          ))}
+        </div>
 
-          <div className={styles.stepIcon}>{step.icon}</div>
-          <h2 className={styles.stepTitle}>{step.title}</h2>
-          <p className={styles.stepDescription}>{step.description}</p>
+        <div className={styles.stepIcon}>{step.icon}</div>
+        <h2 className={styles.stepTitle}>{step.title}</h2>
+        <p className={styles.stepDescription}>{step.description}</p>
 
-          <div className={styles.actions}>
-            <button className={styles.actionBtn} onClick={() => handleAction(step)}>
-              {step.action}
-            </button>
-            <div className={styles.secondaryActions}>
-              {currentStep > 0 && (
-                <button className={styles.skipBtn} onClick={() => setCurrentStep(currentStep - 1)}>
-                  Back
-                </button>
-              )}
-              {currentStep < STEPS.length - 1 && (
-                <button className={styles.skipBtn} onClick={() => setCurrentStep(currentStep + 1)}>
-                  Skip
-                </button>
-              )}
-              <button className={styles.skipBtn} onClick={handleDismiss}>
-                Dismiss
+        <div className={styles.actions}>
+          <button className={styles.actionBtn} onClick={() => handleAction(step)}>
+            {step.action}
+          </button>
+          <div className={styles.secondaryActions}>
+            {currentStep > 0 && (
+              <button className={styles.skipBtn} onClick={() => setCurrentStep(currentStep - 1)}>
+                Back
               </button>
-            </div>
+            )}
+            {currentStep < STEPS.length - 1 && (
+              <button className={styles.skipBtn} onClick={() => setCurrentStep(currentStep + 1)}>
+                Skip
+              </button>
+            )}
+            <button className={styles.skipBtn} onClick={handleDismiss}>
+              Dismiss
+            </button>
           </div>
+        </div>
 
-          <div className={styles.counter}>{completedCount}/{STEPS.length} completed</div>
-        </motion.div>
+        <div className={styles.counter}>{completedCount}/{STEPS.length} completed</div>
       </motion.div>
-    </AnimatePresence>
+    </div>,
+    document.body
   );
 }

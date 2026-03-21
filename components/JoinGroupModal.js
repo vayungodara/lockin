@@ -1,9 +1,11 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
+import { useModalScrollLock } from '@/lib/useModalScrollLock';
+import { modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateGroupModal.module.css';
 
 export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
@@ -12,14 +14,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
   const [error, setError] = useState('');
   const supabase = useMemo(() => createClient(), []);
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    }
-    return () => {
-      document.body.style.overflow = '';
-    };
-  }, [isOpen]);
+  useModalScrollLock(isOpen);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -104,14 +99,14 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
   };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div className={styles.overlay} onClick={onClose} {...modalOverlay}>
+    <>
+      {isOpen && createPortal(
+        <div className={styles.overlay} onClick={onClose}>
           <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
               <h2>Join a Group</h2>
-              <motion.button 
-                className={styles.closeBtn} 
+              <motion.button
+                className={styles.closeBtn}
                 onClick={onClose}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -150,7 +145,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
 
               <AnimatePresence>
                 {error && (
-                  <motion.div 
+                  <motion.div
                     className={styles.error}
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
@@ -166,18 +161,18 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
               </AnimatePresence>
 
               <div className={styles.actions}>
-                <motion.button 
-                  type="button" 
-                  onClick={onClose} 
+                <motion.button
+                  type="button"
+                  onClick={onClose}
                   className={styles.cancelBtn}
                   whileHover={buttonHover}
                   whileTap={buttonTap}
                 >
                   Cancel
                 </motion.button>
-                <motion.button 
-                  type="submit" 
-                  disabled={isLoading} 
+                <motion.button
+                  type="submit"
+                  disabled={isLoading}
                   className={styles.submitBtn}
                   whileHover={!isLoading ? buttonHover : undefined}
                   whileTap={!isLoading ? buttonTap : undefined}
@@ -201,8 +196,9 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
               </div>
             </form>
           </motion.div>
-        </motion.div>
+        </div>,
+        document.body
       )}
-    </AnimatePresence>
+    </>
   );
 }

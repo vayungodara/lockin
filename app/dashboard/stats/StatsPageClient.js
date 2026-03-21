@@ -24,8 +24,17 @@ export default function StatsPageClient({ user }) {
       const monthAgo = new Date(now);
       monthAgo.setMonth(monthAgo.getMonth() - 1);
 
-      // Fetch streak data
-      const streak = await calculateStreak(supabase, user.id);
+      // Detect the user's IANA timezone so streak calculations bucket
+      // activity into their local day (matches DashboardLayout persistence).
+      let timezone = 'UTC';
+      try {
+        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      } catch {
+        // Intl API unavailable — fall back to UTC
+      }
+
+      // Fetch streak data using the shared calculation from lib/streaks
+      const streak = await calculateStreak(supabase, user.id, timezone);
       setStreakData(streak);
 
       // Fetch pact stats

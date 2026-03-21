@@ -79,11 +79,18 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     [activeCategory, isOpen]
   );
 
-  // Get minimum date (today) — pinned when modal opens
+  // Get minimum date (today) and maximum date (1 year from today) — pinned when modal opens
   const today = useMemo(
     () => isOpen ? new Date().toISOString().split('T')[0] : '',
     [isOpen]
   );
+
+  const maxDate = useMemo(() => {
+    if (!isOpen) return '';
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    return oneYearFromNow.toISOString().split('T')[0];
+  }, [isOpen]);
 
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template);
@@ -332,6 +339,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                         value={deadline}
                         onChange={(e) => setDeadline(e.target.value)}
                         min={today}
+                        max={maxDate}
                         className={styles.input}
                       />
                     </div>

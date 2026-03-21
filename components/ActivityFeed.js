@@ -18,6 +18,10 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
   const supabase = useMemo(() => createClient(), []);
   const sentinelRef = useRef(null);
   const feedRef = useRef(null);
+  const hasMoreRef = useRef(hasMore);
+  hasMoreRef.current = hasMore;
+  const isLoadingMoreRef = useRef(isLoadingMore);
+  isLoadingMoreRef.current = isLoadingMore;
 
   const loadActivities = useCallback(async () => {
     setIsLoading(true);
@@ -45,7 +49,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
   const loadMoreRef = useRef(null);
 
   const loadMore = useCallback(async () => {
-    if (isLoadingMore || !hasMore) return;
+    if (isLoadingMoreRef.current || !hasMoreRef.current) return;
 
     setIsLoadingMore(true);
     try {
@@ -64,7 +68,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     } finally {
       setIsLoadingMore(false);
     }
-  }, [isLoadingMore, hasMore, groupId, pageSize, supabase, activities.length]);
+  }, [groupId, pageSize, supabase, activities.length]);
 
   // Keep ref in sync so the observer always calls the latest loadMore
   useEffect(() => {

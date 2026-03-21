@@ -179,7 +179,6 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       ref={cardRef}
       className={`${styles.card} ${getStatusClass()}`}
       whileHover={pact.status === 'active' ? cardHover : undefined}
-      layout
       style={{ position: 'relative' }}
     >
       {ConfettiComponent}
@@ -221,7 +220,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
               <motion.button
                 onClick={handleComplete}
                 disabled={isLoading}
-                className={styles.completeBtn}
+                className={`${styles.completeBtn} ${showBounce ? styles.completedCheck : ''}`}
                 aria-label="Mark pact as complete"
                 whileHover={buttonHover}
                 whileTap={buttonTap}

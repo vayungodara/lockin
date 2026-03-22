@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
+import ParticleBackground from '@/components/ParticleBackground';
 import { createClient } from '@/lib/supabase/client';
 import styles from '../app/page.module.css';
 import { 
@@ -147,6 +148,7 @@ export default function LandingPageClient() {
 
   return (
     <>
+      <ParticleBackground particleCount={50} speed={0.25} connectDistance={90} />
       <Navbar />
       
       <main className={styles.main}>

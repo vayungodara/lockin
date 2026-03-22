@@ -69,18 +69,18 @@
   --info-glow: rgba(59, 123, 246, 0.25);
 
   /* Borders */
-  --border-subtle: rgba(91, 94, 245, 0.06);
-  --border-default: rgba(91, 94, 245, 0.10);
-  --border-strong: rgba(91, 94, 245, 0.16);
+  --border-subtle: rgba(0, 0, 0, 0.06);
+  --border-default: rgba(0, 0, 0, 0.10);
+  --border-strong: rgba(0, 0, 0, 0.16);
   --border-focus: rgba(var(--accent-primary-rgb), 0.5);
 
-  /* Shadows — accent-tinted atmosphere */
-  --shadow-xs: 0 1px 2px rgba(91, 94, 245, 0.04);
-  --shadow-sm: 0 1px 3px rgba(91, 94, 245, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
-  --shadow-md: 0 4px 12px -2px rgba(91, 94, 245, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
-  --shadow-lg: 0 12px 24px -4px rgba(91, 94, 245, 0.10), 0 4px 8px -4px rgba(0, 0, 0, 0.04);
-  --shadow-xl: 0 20px 40px -8px rgba(91, 94, 245, 0.12), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
-  --shadow-2xl: 0 32px 64px -16px rgba(91, 94, 245, 0.18);
+  /* Shadows — neutral */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 12px -2px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 12px 24px -4px rgba(0, 0, 0, 0.10), 0 4px 8px -4px rgba(0, 0, 0, 0.04);
+  --shadow-xl: 0 20px 40px -8px rgba(0, 0, 0, 0.12), 0 8px 16px -6px rgba(0, 0, 0, 0.04);
+  --shadow-2xl: 0 32px 64px -16px rgba(0, 0, 0, 0.18);
   --shadow-glow: 0 0 40px rgba(var(--accent-primary-rgb), 0.18);
   --shadow-glow-lg: 0 0 60px rgba(var(--accent-primary-rgb), 0.25);
   --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.3);
@@ -1063,14 +1063,28 @@ p {
 }
 
 /* === SCROLLBAR STYLING === */
-/* Hidden globally to prevent flash during theme/sidebar transitions */
+/* Thin styled scrollbars — visible for accessibility/scroll-position awareness */
 * {
-  scrollbar-width: none;
-  -ms-overflow-style: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-default) transparent;
 }
 
 *::-webkit-scrollbar {
-  display: none;
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
 }
 
 /* === SELECTION STYLING === */

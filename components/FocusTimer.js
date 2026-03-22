@@ -31,6 +31,18 @@ export default function FocusTimer() {
     prevSessionsRef.current = sessionsCompleted;
   }, [sessionsCompleted, triggerConfetti]);
 
+  // Update document.title with remaining time during active sessions
+  useEffect(() => {
+    if (isRunning && timeLeft != null) {
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      document.title = `⏱ ${mins}:${String(secs).padStart(2, '0')} — LockIn`;
+    } else {
+      document.title = 'LockIn';
+    }
+    return () => { document.title = 'LockIn'; };
+  }, [isRunning, timeLeft]);
+
   return (
     <div className={styles.container}>
       <div className={styles.header}>

@@ -82,9 +82,17 @@ export default function DashboardClient({ user }) {
   const fetchPacts = useCallback(async () => {
     try {
       setError(null);
-      const { error: overdueError } = await supabase.rpc('mark_overdue_pacts');
-      if (overdueError) {
-        console.error('Error marking overdue pacts:', overdueError);
+
+      // Only call mark_overdue_pacts once per calendar day
+      const today = new Date().toDateString();
+      const lastCheck = localStorage.getItem('lastOverdueCheck');
+      if (lastCheck !== today) {
+        const { error: overdueError } = await supabase.rpc('mark_overdue_pacts');
+        if (overdueError) {
+          console.error('Error marking overdue pacts:', overdueError);
+        } else {
+          localStorage.setItem('lastOverdueCheck', today);
+        }
       }
 
       const { data, error } = await supabase

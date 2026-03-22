@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { createNotification, NOTIFICATION_TYPES } from '@/lib/notifications';
+import { NOTIFICATION_TYPES } from '@/lib/notifications';
 
 function getSupabaseClient() {
   return createClient(
@@ -33,35 +33,45 @@ export async function GET(request) {
 
     if (error) throw error;
 
-    let riskSent = 0;
-
-    for (const profile of profiles || []) {
-      // Deduplicate: check if we already sent a streak-at-risk notification today
-      const { data: existing } = await supabase
-        .from('notifications')
-        .select('id')
-        .eq('user_id', profile.id)
-        .eq('type', NOTIFICATION_TYPES.STREAK_AT_RISK)
-        .gte('created_at', `${today}T00:00:00Z`)
-        .limit(1);
-
-      if (existing && existing.length > 0) continue;
-
-      const { error: notifError } = await createNotification(
-        supabase,
-        profile.id,
-        NOTIFICATION_TYPES.STREAK_AT_RISK,
-        'Streak at Risk!',
-        `Your ${profile.current_streak}-day streak will break if you don't complete a pact today!`,
-        { streak: profile.current_streak }
-      );
-
-      if (notifError) {
-        console.error(`Failed to notify user ${profile.id}:`, notifError);
-      } else {
-        riskSent++;
-      }
+    if (!profiles || profiles.length === 0) {
+      return Response.json({ message: 'Sent 0 risk alerts' });
     }
+
+    const profileIds = profiles.map(p => p.id);
+
+    // Batch fetch: find all users who already got a streak-at-risk notification today
+    const { data: existingNotifs } = await supabase
+      .from('notifications')
+      .select('user_id')
+      .in('user_id', profileIds)
+      .eq('type', NOTIFICATION_TYPES.STREAK_AT_RISK)
+      .gte('created_at', `${today}T00:00:00Z`);
+
+    const alreadyNotified = new Set((existingNotifs || []).map(n => n.user_id));
+
+    // Filter to only users who haven't been notified yet
+    const profilesToNotify = profiles.filter(p => !alreadyNotified.has(p.id));
+
+    if (profilesToNotify.length === 0) {
+      return Response.json({ message: 'Sent 0 risk alerts' });
+    }
+
+    // Batch insert all notifications at once
+    const notificationRows = profilesToNotify.map(profile => ({
+      user_id: profile.id,
+      type: NOTIFICATION_TYPES.STREAK_AT_RISK,
+      title: 'Streak at Risk!',
+      message: `Your ${profile.current_streak}-day streak will break if you don't complete a pact today!`,
+      metadata: { streak: profile.current_streak }
+    }));
+
+    const { error: insertError } = await supabase
+      .from('notifications')
+      .insert(notificationRows);
+
+    if (insertError) throw insertError;
+
+    const riskSent = profilesToNotify.length;
 
     return Response.json({
       message: `Sent ${riskSent} risk alerts`

@@ -7,7 +7,12 @@ export async function GET(request) {
   const code = searchParams.get('code')
   // Validate redirect path to prevent open redirect attacks
   let next = searchParams.get('next') ?? '/dashboard'
-  if (!next.startsWith('/') || next.startsWith('//') || next.includes('://')) {
+  try {
+    const resolvedUrl = new URL(next, origin)
+    if (resolvedUrl.origin !== origin) {
+      next = '/dashboard'
+    }
+  } catch {
     next = '/dashboard'
   }
 

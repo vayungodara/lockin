@@ -8,6 +8,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 >
 > **Developer:** Vayun (solo beginner). Keep code simple.
 
+## Agent Policy
+
+**Always use specialized/plugin agents** — never general-purpose when a domain agent exists:
+- **Bugs & implementation:** `frontend-mobile-development:frontend-developer` or `javascript-typescript:javascript-pro`
+- **Security:** `comprehensive-review:security-auditor`
+- **Code review:** `feature-dev:code-reviewer` or `comprehensive-review:code-reviewer`
+- **Debugging:** `unit-testing:debugger` or `agent-teams:team-debugger`
+- **Visual/design:** `ui-design:ui-designer`
+- **iOS:** `multi-platform-apps:ios-developer`
+- **Performance:** `vercel:performance-optimizer`
+- **Architecture:** `feature-dev:code-architect`
+
+If none of these fit the task, use whichever specialized agent you think is best. Use parallel agent dispatch when tasks are independent. Use skills proactively.
+
 ## Commands
 
 ```bash

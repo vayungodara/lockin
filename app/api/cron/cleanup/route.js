@@ -45,19 +45,21 @@ export async function GET(request) {
 
     if (fetchError) throw fetchError;
 
-    for (const session of orphaned || []) {
-      const endedAt = new Date(
-        new Date(session.started_at).getTime() + session.duration_minutes * 60 * 1000
-      );
+    if (orphaned && orphaned.length > 0) {
+      // Batch upsert: compute ended_at for each session, then write all at once
+      const updates = orphaned.map(session => ({
+        id: session.id,
+        ended_at: new Date(
+          new Date(session.started_at).getTime() + session.duration_minutes * 60 * 1000
+        ).toISOString(),
+      }));
 
-      await supabase
+      const { error: upsertError } = await supabase
         .from('focus_sessions')
-        .update({
-          ended_at: endedAt.toISOString(),
-        })
-        .eq('id', session.id);
+        .upsert(updates, { onConflict: 'id', ignoreDuplicates: false });
 
-      results.orphanedSessions++;
+      if (upsertError) throw upsertError;
+      results.orphanedSessions = orphaned.length;
     }
   } catch (err) {
     console.error('Error closing orphaned sessions:', err);

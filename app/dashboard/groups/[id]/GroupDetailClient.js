@@ -61,10 +61,8 @@ export default function GroupDetailClient({ user, group, userRole }) {
         }
       }
 
-      const userIds = membersData.map(m => m.user_id);
-
       // Fetch focus sessions for presence and leaderboard
-      if (userIds.length > 0) {
+      if (memberUserIds.length > 0) {
         const now = new Date();
         const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000).toISOString();
         const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -72,7 +70,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
         const { data: focusData, error: focusError } = await supabase
           .from('focus_sessions')
           .select('user_id, duration_minutes, started_at, ended_at')
-          .in('user_id', userIds)
+          .in('user_id', memberUserIds)
           .gte('started_at', sevenDaysAgo);
 
         if (!focusError && focusData) {

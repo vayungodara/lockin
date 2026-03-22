@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
+import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './StatsPage.module.css';
 
 export default function StatsPageClient({ user }) {
@@ -23,8 +24,17 @@ export default function StatsPageClient({ user }) {
       const monthAgo = new Date(now);
       monthAgo.setMonth(monthAgo.getMonth() - 1);
 
-      // Fetch streak data
-      const streak = await calculateStreak(supabase, user.id);
+      // Detect the user's IANA timezone so streak calculations bucket
+      // activity into their local day (matches DashboardLayout persistence).
+      let timezone = 'UTC';
+      try {
+        timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+      } catch {
+        // Intl API unavailable — fall back to UTC
+      }
+
+      // Fetch streak data using the shared calculation from lib/streaks
+      const streak = await calculateStreak(supabase, user.id, timezone);
       setStreakData(streak);
 
       // Fetch pact stats
@@ -144,7 +154,20 @@ export default function StatsPageClient({ user }) {
   if (isLoading) {
     return (
       <div className={styles.container}>
-        <div className={styles.loading}>Loading stats...</div>
+        <header className={styles.header}>
+          <div>
+            <SkeletonText width="160px" height="28px" />
+            <SkeletonText width="240px" height="16px" />
+          </div>
+        </header>
+        <div className={styles.content}>
+          <SkeletonCard height="100px" />
+          <SkeletonCard height="280px" />
+          <div className={styles.analyticsGrid}>
+            <SkeletonCard height="200px" />
+            <SkeletonCard height="200px" />
+          </div>
+        </div>
       </div>
     );
   }
@@ -170,6 +193,15 @@ export default function StatsPageClient({ user }) {
       </header>
 
       <div className={styles.content}>
+        {/* Top-level empty state when user has zero activity */}
+        {pactStats.total === 0 && focusStats.sessionsCount === 0 && (
+          <div className={styles.emptyState}>
+            <span className={styles.emptyEmoji}>{'\uD83D\uDCCA'}</span>
+            <h3 className={styles.emptyTitle}>No stats yet.</h3>
+            <p className={styles.emptySubtext}>Complete some pacts and your streak will start building here.</p>
+          </div>
+        )}
+
         {/* Streak Summary */}
         <div className={styles.streakCard}>
           <div className={styles.streakItem}>
@@ -281,8 +313,9 @@ export default function StatsPageClient({ user }) {
           </h3>
           {groupedSessions.length === 0 ? (
             <div className={styles.empty}>
+              <span className={styles.emptyEmojiSmall}>{'\u23F3'}</span>
               <p>No focus sessions in the last 7 days.</p>
-              <p className={styles.emptyHint}>Start a focus session to see your history here!</p>
+              <p className={styles.emptyHint}>The timer is waiting. Go lock in.</p>
             </div>
           ) : (
             <div className={styles.sessionsList}>

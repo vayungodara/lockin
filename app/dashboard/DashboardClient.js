@@ -1,75 +1,115 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
-import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { staggerContainer, staggerItem, fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
-import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
 import DailySummaryCard from '@/components/DailySummaryCard';
 import OnboardingModal from '@/components/OnboardingModal';
 import XPBar from '@/components/XPBar';
+import { SkeletonCard } from '@/components/Skeleton';
 
-function AnimatedCounter({ value }) {
-  const [displayValue, setDisplayValue] = useState(value === 0 ? 0 : null);
-  
+function useCountUp(target, duration = 800) {
+  const [count, setCount] = useState(0);
+  const ref = useRef(null);
+
   useEffect(() => {
-    if (value === 0) {
-      return;
-    }
-    
-    let start = 0;
-    const duration = 800;
-    const increment = value / (duration / 16);
-    
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= value) {
-        setDisplayValue(value);
-        clearInterval(timer);
-      } else {
-        setDisplayValue(Math.floor(start));
+    // For zero/null/undefined targets, the animation runs one frame and
+    // sets count to Math.round(0) = 0, so no special case is needed.
+    const safeTarget = target || 0;
+    const startTime = performance.now();
+
+    function animate(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+      setCount(Math.round(eased * safeTarget));
+
+      if (progress < 1) {
+        ref.current = requestAnimationFrame(animate);
       }
-    }, 16);
-    
-    return () => clearInterval(timer);
-  }, [value]);
-  
-  return <span>{displayValue ?? 0}</span>;
+    }
+
+    ref.current = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(ref.current);
+  }, [target, duration]);
+
+  return count;
+}
+
+// Helper to request the layout-level CreatePactModal to open
+function requestCreatePact() {
+  window.dispatchEvent(new CustomEvent('open-create-pact'));
 }
 
 export default function DashboardClient({ user }) {
   const [pacts, setPacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcutsSafe();
+  const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
 
-  // Register keyboard shortcuts
+  // Fetch streak data with timezone-aware calculation
+  useEffect(() => {
+    if (!user?.id) return;
+    let timezone = 'UTC';
+    try {
+      timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    } catch {
+      // Intl API unavailable — fall back to UTC
+    }
+    calculateStreak(supabase, user.id, timezone).then(data => {
+      setStreakData(data);
+    }).catch(err => console.error('Error fetching streak:', err));
+  }, [supabase, user?.id, refreshKey]);
+
+  const animatedStreak = useCountUp(streakData.currentStreak);
+
+  // Register keyboard shortcuts — delegate to layout-level CreatePactModal
   useEffect(() => {
     registerCallbacks({
-      onNewPact: () => setIsModalOpen(true),
-      onCloseModal: () => setIsModalOpen(false),
+      onNewPact: requestCreatePact,
     });
 
     return () => {
-      unregisterCallbacks(['onNewPact', 'onCloseModal']);
+      unregisterCallbacks(['onNewPact']);
     };
   }, [registerCallbacks, unregisterCallbacks]);
+
+  // Listen for pact-created events from the layout-level CreatePactModal
+  useEffect(() => {
+    const handlePactCreated = (e) => {
+      if (e.detail) {
+        setPacts(prev => [...prev, e.detail].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
+      }
+    };
+    window.addEventListener('pact-created', handlePactCreated);
+    return () => window.removeEventListener('pact-created', handlePactCreated);
+  }, []);
 
   const fetchPacts = useCallback(async () => {
     try {
       setError(null);
-      const { error: overdueError } = await supabase.rpc('mark_overdue_pacts');
-      if (overdueError) {
-        console.error('Error marking overdue pacts:', overdueError);
+
+      // Only call mark_overdue_pacts once per calendar day
+      const today = new Date().toDateString();
+      const lastCheck = localStorage.getItem('lastOverdueCheck');
+      if (lastCheck !== today) {
+        const { error: overdueError } = await supabase.rpc('mark_overdue_pacts');
+        if (overdueError) {
+          console.error('Error marking overdue pacts:', overdueError);
+        } else {
+          localStorage.setItem('lastOverdueCheck', today);
+        }
       }
 
       const { data, error } = await supabase
@@ -87,18 +127,14 @@ export default function DashboardClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, user]);
+  }, [supabase, user?.id]);
 
   // Fetch pacts on mount
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchPacts();
     }
-  }, [user, fetchPacts]);
-
-  const handlePactCreated = (newPact) => {
-    setPacts(prev => [...prev, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
-  };
+  }, [user?.id, fetchPacts]);
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
@@ -126,22 +162,15 @@ export default function DashboardClient({ user }) {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error.message || error);
-      }
-      window.location.href = '/';
-    } catch (err) {
-      console.error('Error signing out:', err);
-    }
-  };
-
   // Calculate stats
   const activePacts = pacts.filter(p => p.status === 'active');
   const completedPacts = pacts.filter(p => p.status === 'completed');
   const missedPacts = pacts.filter(p => p.status === 'missed');
+
+  // Animated count-up values
+  const animatedCompleted = useCountUp(completedPacts.length);
+  const animatedActive = useCountUp(activePacts.length);
+  const animatedMissed = useCountUp(missedPacts.length);
 
   // Dashboard shows active pacts first; if none, show a few recent completed ones
   const dashboardPacts = activePacts.length > 0
@@ -212,9 +241,9 @@ export default function DashboardClient({ user }) {
             <p className={styles.subGreeting}>Ready to lock in today?</p>
             <XPBar userId={user?.id} refreshKey={refreshKey} />
           </div>
-          <motion.button 
-            className="btn btn-primary" 
-            onClick={() => setIsModalOpen(true)}
+          <motion.button
+            className="btn btn-primary"
+            onClick={requestCreatePact}
             whileHover={buttonHover}
             whileTap={buttonTap}
           >
@@ -234,7 +263,24 @@ export default function DashboardClient({ user }) {
           initial="initial"
           animate="animate"
         >
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+          {/* Streak card — visually distinct, larger with flame */}
+          <motion.div className={`${styles.statCard} ${styles.statCardStreak}`} variants={staggerItem}>
+            <div className={styles.streakFlame}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 23C16.5 23 20 19.5 20 15C20 11.5 18 8.5 16 6.5C15.5 9 13.5 10 12 9C12.5 7 12 4 9.5 2C9 4.5 7 7 5 9.5C3.5 11.5 4 15 4 15C4 19.5 7.5 23 12 23Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                <path d="M12 23C14 23 16 21.5 16 18.5C16 16.5 14.5 15 13.5 14C13 15.5 12 16 11 15C11.5 13.5 11 12 10 11C9.5 12.5 8 14 8 16C8 18 8.5 19 9 20C9.5 21 10 23 12 23Z" fill="var(--bg-primary)" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+            <div className={styles.statContent}>
+              <span className={styles.streakValue}>{animatedStreak}</span>
+              <span className={styles.statLabel}>Day Streak</span>
+            </div>
+            {streakData.longestStreak > 0 && (
+              <span className={styles.streakBest}>Best: {streakData.longestStreak}</span>
+            )}
+          </motion.div>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardCompleted}`} variants={staggerItem}>
             <div className={styles.statIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -242,12 +288,12 @@ export default function DashboardClient({ user }) {
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={completedPacts.length} /></span>
-              <span className={styles.statLabel}>Pacts Completed</span>
+              <span className={styles.statValue}>{animatedCompleted}</span>
+              <span className={styles.statLabel}>Completed</span>
             </div>
           </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardPacts}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.warning}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
@@ -255,41 +301,31 @@ export default function DashboardClient({ user }) {
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={activePacts.length} /></span>
+              <span className={styles.statValue}>{animatedActive}</span>
               <span className={styles.statLabel}>Active Pacts</span>
             </div>
           </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
+
+          <motion.div className={`${styles.statCard} ${styles.statCardMissed}`} variants={staggerItem}>
             <div className={`${styles.statIcon} ${styles.danger}`}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </div>
             <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={missedPacts.length} /></span>
+              <span className={styles.statValue}>{animatedMissed}</span>
               <span className={styles.statLabel}>Missed</span>
-            </div>
-          </motion.div>
-          
-          <motion.div className={styles.statCard} variants={staggerItem} whileHover={cardHover}>
-            <div className={`${styles.statIcon} ${styles.accent}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statValue}><AnimatedCounter value={pacts.length} /></span>
-              <span className={styles.statLabel}>Total Pacts</span>
             </div>
           </motion.div>
         </motion.div>
         
         {/* Pacts List or Empty State */}
         {isLoading ? (
-          <div className={styles.loadingState}>
-            <div className={styles.spinner}></div>
-            <p>Loading your pacts...</p>
+          <div className={styles.pactsGrid}>
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
+            <SkeletonCard height="140px" />
           </div>
         ) : error ? (
           <motion.div 
@@ -329,9 +365,9 @@ export default function DashboardClient({ user }) {
             </div>
             <h3>No pacts yet</h3>
             <p>Create your first pact to start building accountability.</p>
-            <motion.button 
-              className="btn btn-primary" 
-              onClick={() => setIsModalOpen(true)}
+            <motion.button
+              className="btn btn-primary"
+              onClick={requestCreatePact}
               whileHover={buttonHover}
               whileTap={buttonTap}
             >
@@ -393,13 +429,7 @@ export default function DashboardClient({ user }) {
           </motion.div>
         )}
       
-      <CreatePactModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onPactCreated={handlePactCreated}
-      />
-
-      <OnboardingModal userId={user?.id} onCreatePact={() => setIsModalOpen(true)} />
+      <OnboardingModal userId={user?.id} onCreatePact={requestCreatePact} />
     </>
   );
 }

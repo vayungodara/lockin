@@ -107,7 +107,6 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
     () => true
   );
 
-    const [hoveredItem, setHoveredItem] = useState(null);
   const [isHovering, setIsHovering] = useState(false);
   const hoverTimeout = useRef(null);
 
@@ -201,11 +200,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
     >
       <div className={styles.header}>
         <Link href="/dashboard" className={styles.logoLink}>
-          <motion.div
-            className={styles.logoIcon}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
+          <div className={styles.logoIcon}>
             <Image
               src={lockSrc}
               alt="LockIn"
@@ -214,7 +209,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               priority
               style={{ width: 'auto', height: '32px' }}
             />
-          </motion.div>
+          </div>
           {/* Always mounted -- animate width between 0 and fixed value */}
           <motion.div
             className={styles.logoTextWrapper}
@@ -246,19 +241,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               href={item.href}
               className={`${styles.navItem} ${active ? styles.active : ''}`}
               data-label={isExpanded ? undefined : item.label}
-              onMouseEnter={() => setHoveredItem(item.href)}
-              onMouseLeave={() => setHoveredItem(null)}
             >
-              {hoveredItem === item.href && !active && (
-                <motion.div
-                  className={styles.navItemHoverBg}
-                  layoutId="navHover"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                />
-              )}
               {active && (
                 <motion.div
                   className={styles.navPill}
@@ -266,15 +249,9 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                   transition={navPillSpring}
                 />
               )}
-              <motion.span
-                className={styles.navIcon}
-                animate={{
-                  scale: active ? 1.1 : 1,
-                  color: active ? 'var(--accent-primary)' : 'currentColor'
-                }}
-              >
+              <span className={`${styles.navIcon} ${active ? styles.navIconActive : ''}`}>
                 {item.icon}
-              </motion.span>
+              </span>
               {/* Always mounted -- fade + slide */}
               <motion.span
                 className={styles.navLabel}
@@ -337,7 +314,6 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               opacity: isExpanded ? 1 : 0,
               scale: isExpanded ? 1 : 0.5,
             }}
-            whileHover={{ scale: 1.1, backgroundColor: 'rgba(255, 255, 255, 0.35)' }}
             whileTap={{ scale: 0.95 }}
             transition={{ duration: 0.15 }}
             title="Pause timer"
@@ -413,7 +389,6 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             aria-label={`Change theme. Current: ${getThemeLabel()}`}
             title={getThemeLabel()}
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
             {getThemeIcon()}
@@ -426,7 +401,6 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             aria-label="Sign out"
             title="Sign out"
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -442,7 +416,6 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         className={styles.collapseBtn}
         onClick={handleCollapseToggle}
         aria-label={isCollapsed ? 'Pin sidebar' : 'Collapse sidebar'}
-        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
       >
         <motion.svg

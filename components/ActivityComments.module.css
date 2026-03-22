@@ -1,9 +1,7 @@
 .container {
   margin-top: var(--space-1);
   margin-left: 30px;
-  background: var(--surface-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface-1);
   border-radius: var(--radius-lg);
   padding: var(--space-3);
 }
@@ -55,7 +53,7 @@
   width: 20px;
   height: 20px;
   border-radius: var(--radius-full);
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   color: white;
   display: flex;
   align-items: center;
@@ -112,7 +110,7 @@
   flex: 1;
   padding: var(--space-1-5) var(--space-2);
   border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-md);
   font-size: 13px;
   background: var(--bg-primary);
   color: var(--text-primary);
@@ -131,7 +129,7 @@
 
 .submitBtn {
   padding: var(--space-1-5) var(--space-3);
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   color: white;
   border: none;
   border-radius: var(--radius-md);

@@ -97,46 +97,43 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
         <div className={styles.overlay} onClick={handleClose}>
           <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
-              <h2>Create New Task</h2>
-              <motion.button 
-                className={styles.closeBtn} 
+              <div className={styles.headerLeft}>
+                <svg className={styles.headerIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <h2>Quick Task</h2>
+              </div>
+              <motion.button
+                className={styles.closeBtn}
                 onClick={handleClose}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
               >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
               </motion.button>
             </div>
 
             <form onSubmit={handleSubmit} className={styles.form}>
-              <div className={styles.inputGroup}>
-                <label htmlFor="title" className={styles.label}>
-                  Task Title <span className={styles.required}>*</span>
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g., Complete research section"
-                  className={styles.input}
-                  autoFocus
-                />
-              </div>
+              <input
+                type="text"
+                id="title"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="What needs to get done?"
+                className={styles.titleInput}
+                autoFocus
+              />
 
               <div className={styles.inputGroup}>
-                <label htmlFor="description" className={styles.label}>
-                  Description <span className={styles.optional}>(optional)</span>
-                </label>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add more details about this task..."
+                  placeholder="Notes (optional)"
                   className={styles.textarea}
-                  rows={3}
+                  rows={2}
                 />
               </div>
 
@@ -193,17 +190,17 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
               </AnimatePresence>
 
               <div className={styles.actions}>
-                <motion.button 
-                  type="button" 
-                  onClick={handleClose} 
+                <motion.button
+                  type="button"
+                  onClick={handleClose}
                   className={styles.cancelBtn}
                   whileHover={buttonHover}
                   whileTap={buttonTap}
                 >
                   Cancel
                 </motion.button>
-                <motion.button 
-                  type="submit" 
+                <motion.button
+                  type="submit"
                   disabled={isLoading}
                   className={`${styles.submitBtn} ${isLoading ? styles.loading : ''}`}
                   whileHover={!isLoading ? buttonHover : undefined}
@@ -212,15 +209,10 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
                   {isLoading ? (
                     <>
                       <span className={styles.spinner}></span>
-                      Creating...
+                      Adding...
                     </>
                   ) : (
-                    <>
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                      Create Task
-                    </>
+                    'Add Task'
                   )}
                 </motion.button>
               </div>

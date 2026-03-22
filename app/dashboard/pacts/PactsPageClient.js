@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './PactsPage.module.css';
 import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
+import { SkeletonRow } from '@/components/Skeleton';
+import { fadeInUp } from '@/lib/animations';
 
 export default function PactsPageClient({ user }) {
   const [pacts, setPacts] = useState([]);
@@ -147,29 +149,39 @@ export default function PactsPageClient({ user }) {
 
       {/* Pacts List */}
       {isLoading ? (
-        <div className={styles.loadingState}>
-          <div className={styles.spinner}></div>
-          <p>Loading your pacts...</p>
+        <div className={styles.pactsGrid}>
+          <SkeletonRow />
+          <SkeletonRow />
+          <SkeletonRow />
         </div>
       ) : filteredPacts.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+        <motion.div className={styles.emptyState} {...fadeInUp}>
+          <div className={styles.emptyIllustration}>
+            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="12" y="8" width="40" height="48" rx="6" stroke="var(--accent-primary)" strokeWidth="2.5" strokeDasharray="4 3" opacity="0.35" />
+              <rect x="16" y="12" width="32" height="40" rx="4" stroke="var(--accent-primary)" strokeWidth="2" />
+              <path d="M24 26L29 31L40 20" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+              <line x1="24" y1="38" x2="40" y2="38" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
+              <line x1="24" y1="44" x2="34" y2="44" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" opacity="0.25" />
             </svg>
           </div>
-          <h3>{filter === 'all' ? 'No pacts yet' : `No ${filter} pacts`}</h3>
-          <p>{filter === 'all' ? 'Create your first pact to start building accountability.' : `You don't have any ${filter} pacts.`}</p>
+          <h3 className={styles.emptyTitle}>
+            {filter === 'all' ? 'Your pact list is feeling lonely' : `No ${filter} pacts`}
+          </h3>
+          <p className={styles.emptySubtext}>
+            {filter === 'all'
+              ? 'Make a promise to yourself — future you will thank you.'
+              : `${filter === 'completed' ? 'Nothing checked off yet. You got this.' : filter === 'missed' ? 'Clean record so far. Let\'s keep it that way.' : 'Time to commit to something new.'}`}
+          </p>
           {filter === 'all' && (
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ marginTop: 'var(--space-2)' }}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Create Your First Pact
+              Make Your First Pact
             </button>
           )}
-        </div>
+        </motion.div>
       ) : (
         <LayoutGroup>
           <motion.div className={styles.pactsGrid}>

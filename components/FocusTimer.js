@@ -3,7 +3,7 @@
 import { motion } from 'framer-motion';
 import { useFocus } from '@/lib/FocusContext';
 import { useConfetti } from '@/lib/confetti';
-import { buttonHover, buttonTap, pulseGlow } from '@/lib/animations';
+import { buttonTap, pulseGlow } from '@/lib/animations';
 import styles from './FocusTimer.module.css';
 import { useEffect, useRef } from 'react';
 
@@ -30,6 +30,18 @@ export default function FocusTimer() {
     }
     prevSessionsRef.current = sessionsCompleted;
   }, [sessionsCompleted, triggerConfetti]);
+
+  // Update document.title with remaining time during active sessions
+  useEffect(() => {
+    if (isRunning && timeLeft != null) {
+      const mins = Math.floor(timeLeft / 60);
+      const secs = timeLeft % 60;
+      document.title = `⏱ ${mins}:${String(secs).padStart(2, '0')} — LockIn`;
+    } else {
+      document.title = 'LockIn';
+    }
+    return () => { document.title = 'LockIn'; };
+  }, [isRunning, timeLeft]);
 
   return (
     <div className={styles.container}>
@@ -87,11 +99,10 @@ export default function FocusTimer() {
         </div>
 
         <div className={styles.controls}>
-          <motion.button 
-            className={styles.secondaryBtn} 
-            onClick={resetTimer} 
+          <motion.button
+            className={styles.secondaryBtn}
+            onClick={resetTimer}
             title="Reset"
-            whileHover={buttonHover}
             whileTap={buttonTap}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -100,10 +111,9 @@ export default function FocusTimer() {
             </svg>
           </motion.button>
 
-          <motion.button 
-            className={`${styles.primaryBtn} ${isRunning ? styles.pauseBtn : styles.playBtn}`} 
+          <motion.button
+            className={`${styles.primaryBtn} ${isRunning ? styles.pauseBtn : styles.playBtn}`}
             onClick={toggleTimer}
-            whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             animate={isRunning ? pulseGlow.animate : {}}
           >
@@ -119,11 +129,10 @@ export default function FocusTimer() {
             )}
           </motion.button>
 
-          <motion.button 
-            className={styles.secondaryBtn} 
-            onClick={skipToNext} 
+          <motion.button
+            className={styles.secondaryBtn}
+            onClick={skipToNext}
             title="Skip"
-            whileHover={buttonHover}
             whileTap={buttonTap}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

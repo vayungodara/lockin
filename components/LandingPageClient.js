@@ -153,17 +153,17 @@ export default function LandingPageClient() {
       
       <main className={styles.main}>
         <section className={styles.hero}>
-          <motion.div 
+          <motion.div
             className={styles.heroVisual}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3, ease: easeOutQuint }}
           >
-            <motion.div 
+            <motion.div
               className={`${styles.floatingCard} ${styles.card1}`}
               initial={{ opacity: 0, x: 30, y: 10 }}
               animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
-              transition={{ 
+              transition={{
                 opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
                 y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" }
@@ -177,12 +177,12 @@ export default function LandingPageClient() {
               </div>
               <span>Pact completed!</span>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className={`${styles.floatingCard} ${styles.card2}`}
               initial={{ opacity: 0, x: -30, y: 10 }}
               animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
-              transition={{ 
+              transition={{
                 opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
                 y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" }
@@ -196,12 +196,12 @@ export default function LandingPageClient() {
               </div>
               <span>2 hours left</span>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               className={`${styles.floatingCard} ${styles.card3}`}
               initial={{ opacity: 0, x: 30, y: -10 }}
               animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
-              transition={{ 
+              transition={{
                 opacity: { delay: 1, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 1, duration: 0.5, ease: easeOutQuint },
                 y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" }
@@ -219,7 +219,7 @@ export default function LandingPageClient() {
             </motion.div>
           </motion.div>
 
-          <motion.div 
+          <motion.div
             className={styles.heroTag}
             initial={{ opacity: 0, y: -12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -327,7 +327,28 @@ export default function LandingPageClient() {
             ))}
           </motion.div>
         </section>
-        
+
+        <motion.section
+          className={styles.productShowcase}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.7, ease: easeOutQuint }}
+        >
+          <div className={styles.browserMockup}>
+            <div className={styles.browserChrome}>
+              <div className={styles.showcaseDots}>
+                <span></span><span></span><span></span>
+              </div>
+              <div className={styles.showcaseUrl}>lock-in.me/dashboard</div>
+            </div>
+            <div className={styles.browserContent}>
+              <div className={styles.screenshotPlaceholder}>
+                <p>Your dashboard, visualized</p>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
         <section id="features" className={styles.features}>
           <motion.div 
             className={styles.sectionHeader}
@@ -342,16 +363,16 @@ export default function LandingPageClient() {
           
           <div className={styles.featureGrid}>
             {features.map((feature, index) => (
-              <motion.div 
+              <motion.div
                 key={feature.title}
-                className={styles.featureCard}
+                className={`${styles.featureCard} ${index === 0 ? styles.featureCardLarge : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay: index * 0.06, ease: easeOutQuint }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
-                <motion.div 
+                <motion.div
                   className={styles.featureIcon}
                   whileHover={iconHover}
                 >

@@ -22,7 +22,7 @@
 .groupIcon {
   width: 80px;
   height: 80px;
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   border-radius: var(--radius-xl);
   display: flex;
   align-items: center;

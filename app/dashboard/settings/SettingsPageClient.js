@@ -7,12 +7,13 @@ import { useTheme } from '@/components/ThemeProvider';
 import { buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import { ACCENT_PALETTES } from '@/lib/accentColors';
+import { setSoundEnabled as setGlobalSoundEnabled } from '@/lib/sounds';
+import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './SettingsPage.module.css';
 
 const STORAGE_KEYS = {
   workDuration: 'lockin-work-duration',
   breakDuration: 'lockin-break-duration',
-  soundEnabled: 'lockin-sound-enabled',
 };
 
 export default function SettingsPageClient({ user }) {
@@ -38,10 +39,10 @@ export default function SettingsPageClient({ user }) {
     const saved = localStorage.getItem(STORAGE_KEYS.breakDuration);
     return saved ? parseInt(saved, 10) : 5;
   });
-  const [soundEnabled, setSoundEnabled] = useState(() => {
+  const [globalSoundEnabled, setGlobalSoundEnabledState] = useState(() => {
     if (typeof window === 'undefined') return true;
-    const saved = localStorage.getItem(STORAGE_KEYS.soundEnabled);
-    return saved === null ? true : saved === 'true';
+    try { return localStorage.getItem('lockin_sounds') !== 'false'; }
+    catch { return true; }
   });
 
   const handleWorkDurationChange = (value) => {
@@ -57,11 +58,11 @@ export default function SettingsPageClient({ user }) {
     window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.breakDuration }));
   };
 
-  const handleSoundToggle = () => {
-    const newValue = !soundEnabled;
-    setSoundEnabled(newValue);
-    localStorage.setItem(STORAGE_KEYS.soundEnabled, newValue.toString());
-    toast.success(newValue ? 'Sound effects enabled' : 'Sound effects disabled');
+  const handleGlobalSoundToggle = () => {
+    const newValue = !globalSoundEnabled;
+    setGlobalSoundEnabled(newValue);
+    setGlobalSoundEnabledState(newValue);
+    toast.success(newValue ? 'App sounds enabled' : 'App sounds disabled');
   };
 
   const handleThemeChange = (newTheme) => {
@@ -71,6 +72,24 @@ export default function SettingsPageClient({ user }) {
   const getThemeButtonClass = (themeName) => {
     return `${styles.themeBtn} ${theme === themeName ? styles.themeBtnActive : ''}`;
   };
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <header className={styles.header}>
+          <div>
+            <SkeletonText width="120px" height="28px" />
+            <SkeletonText width="220px" height="16px" />
+          </div>
+        </header>
+        <div className={styles.content}>
+          <SkeletonCard height="120px" />
+          <SkeletonCard height="200px" />
+          <SkeletonCard height="160px" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.container}>
@@ -173,21 +192,35 @@ export default function SettingsPageClient({ user }) {
                 <span className={styles.sliderValue}>{breakDuration} min</span>
               </div>
             </div>
+          </div>
+        </section>
 
+        {/* Sound Effects Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M11 5L6 9H2V15H6L11 19V5Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M15.54 8.46C16.4774 9.39764 17.0039 10.6692 17.0039 11.995C17.0039 13.3208 16.4774 14.5924 15.54 15.53" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M19.07 4.93C20.9447 6.80528 21.9979 9.34836 21.9979 12C21.9979 14.6516 20.9447 17.1947 19.07 19.07" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Sound Effects
+          </h2>
+
+          <div className={styles.settingCard}>
             <div className={styles.settingRow}>
               <div className={styles.settingInfo}>
                 <span className={styles.settingLabel}>Sound Effects</span>
-                <span className={styles.settingDescription}>Play sound when timer completes</span>
+                <span className={styles.settingDescription}>Play sounds on pact completion, timer finish, and streak milestones</span>
               </div>
               <button
-                className={`${styles.toggle} ${soundEnabled ? styles.toggleOn : ''}`}
-                onClick={handleSoundToggle}
+                className={`${styles.toggle} ${globalSoundEnabled ? styles.toggleOn : ''}`}
+                onClick={handleGlobalSoundToggle}
                 type="button"
-                aria-pressed={soundEnabled}
+                aria-pressed={globalSoundEnabled}
               >
                 <span
                   className={styles.toggleKnob}
-                  style={{ transform: `translateX(${soundEnabled ? 20 : 0}px)` }}
+                  style={{ transform: `translateX(${globalSoundEnabled ? 20 : 0}px)` }}
                 />
               </button>
             </div>

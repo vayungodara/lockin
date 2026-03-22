@@ -102,9 +102,12 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
         <div className={styles.overlay} onClick={onClose}>
           <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
-              <h2>Create New Group</h2>
-              <motion.button 
-                className={styles.closeBtn} 
+              <div className={styles.headerText}>
+                <h2>Start a Group</h2>
+                <p className={styles.subtitle}>Accountability is better together</p>
+              </div>
+              <motion.button
+                className={styles.closeBtn}
                 onClick={onClose}
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
@@ -129,28 +132,35 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
                   className={styles.input}
                   autoFocus
                 />
+                <span className={styles.hint}>Choose a name your crew will recognize</span>
               </div>
 
               <div className={styles.inputGroup}>
                 <label htmlFor="description" className={styles.label}>
-                  Description (optional)
+                  Description <span className={styles.optional}>(optional)</span>
                 </label>
                 <textarea
                   id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="What's this group for?"
+                  placeholder="What's this group working toward?"
                   className={styles.textarea}
                   rows={3}
                 />
               </div>
 
-              <div className={styles.infoBox}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 16V12M12 8H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-                <p>An invite code will be generated automatically. Share it with your team to let them join.</p>
+              <div className={styles.inviteSection}>
+                <div className={styles.inviteIcon}>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <circle cx="8.5" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M20 8V14M17 11H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className={styles.inviteText}>
+                  <span className={styles.inviteTitle}>Invite link created automatically</span>
+                  <span className={styles.inviteDesc}>Share the code after creating to bring your crew in</span>
+                </div>
               </div>
 
               <AnimatePresence>
@@ -195,9 +205,11 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
                   ) : (
                     <>
                       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M16 21V19C16 17.9391 15.5786 16.9217 14.8284 16.1716C14.0783 15.4214 13.0609 15 12 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <circle cx="8.5" cy="7" r="4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M20 8V14M17 11H23" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      Create Group
+                      Start Group
                     </>
                   )}
                 </motion.button>

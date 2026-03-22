@@ -18,6 +18,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
   const supabase = useMemo(() => createClient(), []);
   const sentinelRef = useRef(null);
   const feedRef = useRef(null);
+  const observerRef = useRef(null);
   const hasMoreRef = useRef(hasMore);
   hasMoreRef.current = hasMore;
   const isLoadingMoreRef = useRef(isLoadingMore);
@@ -75,11 +76,20 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     loadMoreRef.current = loadMore;
   }, [loadMore]);
 
-  // IntersectionObserver for infinite scroll
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
+  // Callback ref for the sentinel element — sets up the IntersectionObserver
+  // exactly when the sentinel mounts, without depending on isLoading or hasMore state.
+  const sentinelCallbackRef = useCallback((node) => {
+    // Disconnect any previous observer
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+      observerRef.current = null;
+    }
+
+    sentinelRef.current = node;
+    if (!node) return;
+
     const scrollContainer = feedRef.current;
-    if (!sentinel || !scrollContainer) return;
+    if (!scrollContainer) return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -94,10 +104,18 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       }
     );
 
-    observer.observe(sentinel);
+    observer.observe(node);
+    observerRef.current = observer;
+  }, []);
 
-    return () => observer.disconnect();
-  }, [isLoading]);
+  // Clean up observer on unmount
+  useEffect(() => {
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, []);
 
   if (isLoading) {
     return (
@@ -152,7 +170,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
           ))}
 
           {/* Sentinel element for infinite scroll */}
-          <div ref={sentinelRef} className={styles.sentinel}>
+          <div ref={sentinelCallbackRef} className={styles.sentinel}>
             {isLoadingMore && (
               <div className={styles.loadingMore}>
                 <div className={styles.feedSpinner}></div>

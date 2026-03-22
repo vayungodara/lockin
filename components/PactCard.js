@@ -156,7 +156,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       playCompletionSound();
 
       if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
+        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
       }
 
       if (onUpdate) {
@@ -210,7 +210,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       }
 
       if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
+        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
       }
     } catch (err) {
       console.error('Error marking pact as missed:', err);

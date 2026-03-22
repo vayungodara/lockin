@@ -40,29 +40,28 @@ export default function CommandPalette({ onCreatePact } = {}) {
     );
   }, [query]);
 
-  // Reset active index when filtered results change
-  useEffect(() => {
-    setActiveIndex(0);
-  }, [filtered]);
-
   // Open/close with Cmd+K / Ctrl+K
   useEffect(() => {
     function handleKeyDown(e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
         e.preventDefault();
-        setOpen((prev) => !prev);
+        setOpen((prev) => {
+          if (!prev) {
+            // Opening: reset state here instead of in a separate effect
+            setQuery('');
+            setActiveIndex(0);
+          }
+          return !prev;
+        });
       }
     }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Focus input when opened, reset state when closed
+  // Focus input when opened
   useEffect(() => {
     if (open) {
-      setQuery('');
-      setActiveIndex(0);
-      // Small delay so the portal mounts before we focus
       requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
@@ -157,7 +156,7 @@ export default function CommandPalette({ onCreatePact } = {}) {
                 type="text"
                 placeholder="Type a command or search..."
                 value={query}
-                onChange={(e) => setQuery(e.target.value)}
+                onChange={(e) => { setQuery(e.target.value); setActiveIndex(0); }}
                 aria-label="Command palette search"
                 autoComplete="off"
                 spellCheck={false}

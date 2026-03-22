@@ -21,18 +21,16 @@ function useCountUp(target, duration = 800) {
   const ref = useRef(null);
 
   useEffect(() => {
-    if (target === 0 || target === null || target === undefined) {
-      setCount(0);
-      return;
-    }
-
+    // For zero/null/undefined targets, the animation runs one frame and
+    // sets count to Math.round(0) = 0, so no special case is needed.
+    const safeTarget = target || 0;
     const startTime = performance.now();
 
     function animate(currentTime) {
       const elapsed = currentTime - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setCount(Math.round(eased * target));
+      setCount(Math.round(eased * safeTarget));
 
       if (progress < 1) {
         ref.current = requestAnimationFrame(animate);

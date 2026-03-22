@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
-import { checkStreakAtRisk, useStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
+import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
 import { useToast } from '@/components/Toast';
@@ -167,7 +167,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
 
   const handleUseFreeze = async () => {
     setFreezeLoading(true);
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     setFreezeLoading(false);
 
     if (result.success) {

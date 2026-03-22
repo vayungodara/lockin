@@ -7,6 +7,7 @@ import { logActivity } from '@/lib/activity';
 import { useConfetti } from '@/lib/confetti';
 import { cardHover, buttonHover, buttonTap, celebrationBounce } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
+import { playCompletionSound, playMissSound } from '@/lib/sounds';
 import styles from './PactCard.module.css';
 
 export default function PactCard({ pact, onUpdate, onDelete }) {
@@ -35,6 +36,15 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   const isOverdue = new Date(pact.deadline) < new Date() && pact.status === 'active';
   const deadlineDate = new Date(pact.deadline);
+
+  // Deadline urgency coloring
+  const hoursRemaining = pact.deadline ? (new Date(pact.deadline) - new Date()) / (1000 * 60 * 60) : null;
+  const urgencyClass = hoursRemaining !== null
+    ? hoursRemaining < 6 ? styles.urgencyCritical
+    : hoursRemaining < 12 ? styles.urgencyHigh
+    : hoursRemaining < 24 ? styles.urgencyMedium
+    : styles.urgencyLow
+    : '';
 
   // Format deadline
   const formatDeadline = () => {
@@ -77,8 +87,15 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsLoading(true);
+
+    // Safety timeout — if the entire operation hangs for 15s, unlock the UI
+    const safetyTimer = setTimeout(() => {
+      isCompletingRef.current = false;
+      setIsLoading(false);
+    }, 15000);
+
     try {
-      // Mark current pact as completed
+      // Step 1: Mark pact as completed in DB — this is the critical operation
       const { error } = await supabase
         .from('pacts')
         .update({
@@ -89,39 +106,57 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
       if (error) throw error;
 
-      await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
+      // Pact is now saved. Everything below is best-effort — failures must not
+      // revert the completion or show an error toast to the user.
 
       triggerConfetti();
       justCompletedRef.current = true;
       setShowBounce(true);
 
-      // XP, streaks, achievements, partner notifications — each independent so one failure doesn't block others
+      // Activity logging — independent, non-blocking
+      try {
+        await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
+
+      // XP award — independent
       const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
         awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
       ).catch(err => console.error('XP award error:', err));
 
+      // Streak calculation, then streak-advanced + achievements — isolated from each other
       const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
-        calculateStreak(supabase, pact.user_id).then(({ currentStreak, longestStreak, totalCompleted }) =>
-          Promise.all([
-            import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
-              updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
-            ),
-            import('@/lib/gamification').then(({ checkPactAchievements }) =>
-              checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
-            ),
-          ])
-        )
-      ).catch(err => console.error('Streak update error:', err));
+        calculateStreak(supabase, pact.user_id)
+      ).then(({ currentStreak, longestStreak, totalCompleted }) => {
+        // Run streak update and achievement check independently so one failure
+        // does not prevent the other from completing
+        const streakUpdate = import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
+          updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
+        ).catch(err => console.error('Streak advanced update error:', err));
 
+        const achievementCheck = import('@/lib/gamification').then(({ checkPactAchievements }) =>
+          checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
+        ).catch(err => console.error('Achievement check error:', err));
+
+        return Promise.all([streakUpdate, achievementCheck]);
+      }).catch(err => console.error('Streak calculation error:', err));
+
+      // Partner notification — independent
       const partnerPromise = import('@/lib/partnerships').then(({ notifyPartner }) =>
         notifyPartner(supabase, pact.user_id, 'completed', pact.title)
       ).catch(err => console.error('Partner notify error:', err));
 
-      // Await streak/XP to ensure profile is updated before UI refresh
-      await Promise.all([xpPromise, streakPromise, partnerPromise]);
+      // Wait for best-effort work, but cap at 10s so we don't hang the UI
+      await Promise.race([
+        Promise.all([xpPromise, streakPromise, partnerPromise]),
+        new Promise(resolve => setTimeout(resolve, 10000)),
+      ]);
+
+      playCompletionSound();
 
       if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
+        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
       }
 
       if (onUpdate) {
@@ -131,13 +166,23 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       console.error('Error completing pact:', err);
       toast.error('Failed to complete pact. Please try again.');
     } finally {
+      clearTimeout(safetyTimer);
       isCompletingRef.current = false;
       setIsLoading(false);
     }
   };
 
   const handleMiss = async () => {
+    if (isCompletingRef.current) return;
+    isCompletingRef.current = true;
     setIsLoading(true);
+
+    // Safety timeout — if the operation hangs for 15s, unlock the UI
+    const safetyTimer = setTimeout(() => {
+      isCompletingRef.current = false;
+      setIsLoading(false);
+    }, 15000);
+
     try {
       const { error } = await supabase
         .from('pacts')
@@ -146,24 +191,33 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
       if (error) throw error;
 
-      await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
+      // Activity logging — best-effort, don't block on failure
+      try {
+        await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
 
       // Notify accountability partner (fire-and-forget)
       import('@/lib/partnerships').then(({ notifyPartner }) =>
         notifyPartner(supabase, pact.user_id, 'missed', pact.title)
       ).catch(err => console.error('Partner notify error:', err));
 
+      playMissSound();
+
       if (onUpdate) {
         onUpdate({ ...pact, status: 'missed' });
       }
 
       if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : 'weekday'}.`);
+        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
       }
     } catch (err) {
       console.error('Error marking pact as missed:', err);
       toast.error('Failed to update pact. Please try again.');
     } finally {
+      clearTimeout(safetyTimer);
+      isCompletingRef.current = false;
       setIsLoading(false);
     }
   };
@@ -195,7 +249,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
         )}
         
         <div className={styles.footer}>
-          <div className={styles.deadline}>
+          <div className={`${styles.deadline} ${pact.status === 'active' ? urgencyClass : ''}`}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
               <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>

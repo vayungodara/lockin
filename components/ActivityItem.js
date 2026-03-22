@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, memo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { staggerItem } from '@/lib/animations';
@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/client';
 import ActivityComments from './ActivityComments';
 import styles from './ActivityItem.module.css';
 
-export default function ActivityItem({ activity }) {
+function ActivityItem({ activity }) {
   const [showReactions, setShowReactions] = useState(false);
   const initialCounts = activity.reactions?.counts || {};
   const initialUserReactions = activity.reactions?.userReactions || [];
@@ -127,6 +127,38 @@ export default function ActivityItem({ activity }) {
             </svg>
           </div>
         );
+      case 'fire':
+        return (
+          <div className={iconClass}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C16.4183 22 20 18.4183 20 14C20 10.5 17.5 7.5 16 6C15.5 8 13.5 9 12 8C12.5 5 10 2 8 2C8 4 6.5 6 5 8C3.5 10 4 12 4 14C4 18.4183 7.58172 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M12 22C14.2091 22 16 20.2091 16 18C16 16.5 15 15 14 14C13.5 15.5 12.5 16 12 15C12 16 11 17 10 17.5C9 18 8 18 8 18C8 20.2091 9.79086 22 12 22Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        );
+      case 'snowflake':
+        return (
+          <div className={iconClass}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2V22M12 2L8 6M12 2L16 6M12 22L8 18M12 22L16 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3.5 7.5L20.5 16.5M3.5 7.5L4.5 12.5M3.5 7.5L8.5 6.5M20.5 16.5L19.5 11.5M20.5 16.5L15.5 17.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3.5 16.5L20.5 7.5M3.5 16.5L8.5 17.5M3.5 16.5L4.5 11.5M20.5 7.5L15.5 6.5M20.5 7.5L19.5 12.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        );
+      case 'trophy':
+        return (
+          <div className={iconClass}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 9H4C3.44772 9 3 8.55228 3 8V5C3 4.44772 3.44772 4 4 4H6" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M18 9H20C20.5523 9 21 8.55228 21 8V5C21 4.44772 20.5523 4 20 4H18" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M6 4H18V10C18 13.3137 15.3137 16 12 16C8.68629 16 6 13.3137 6 10V4Z" stroke="currentColor" strokeWidth="2"/>
+              <path d="M12 16V19" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M8 22H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M9 19H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+            </svg>
+          </div>
+        );
       default:
         return (
           <div className={iconClass}>
@@ -146,7 +178,7 @@ export default function ActivityItem({ activity }) {
       </div>
 
       <div className={styles.content}>
-        <div className={styles.mainWrapper}>
+        <div className={styles.header}>
           <div className={styles.main}>
             <div className={styles.avatar}>
               {user.avatar_url ? (
@@ -166,11 +198,14 @@ export default function ActivityItem({ activity }) {
               <span className={styles.userName}>{user.full_name || 'Someone'}</span>
               <span className={styles.verb}>{actionInfo.verb}</span>
               {targetName && (
-                <span className={styles.target}>&quot;{targetName}&quot;</span>
+                <span className={styles.target}>{targetName}</span>
               )}
+              <span className={styles.time}>{timeAgo}</span>
             </div>
           </div>
+        </div>
 
+        <div className={styles.footer}>
           <div className={styles.reactions}>
             {hasReactions && (
               <div className={styles.reactionBubbles}>
@@ -256,12 +291,12 @@ export default function ActivityItem({ activity }) {
               </AnimatePresence>
             </motion.div>
           </div>
+
+          <ActivityComments activityId={activity.id} initialCount={activity.comment_count || 0} />
         </div>
-
-        <span className={styles.time}>{timeAgo}</span>
-
-        <ActivityComments activityId={activity.id} initialCount={activity.comment_count || 0} />
       </div>
     </motion.div>
   );
 }
+
+export default memo(ActivityItem);

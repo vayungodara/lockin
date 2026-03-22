@@ -79,11 +79,18 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
     [activeCategory, isOpen]
   );
 
-  // Get minimum date (today) — pinned when modal opens
+  // Get minimum date (today) and maximum date (1 year from today) — pinned when modal opens
   const today = useMemo(
     () => isOpen ? new Date().toISOString().split('T')[0] : '',
     [isOpen]
   );
+
+  const maxDate = useMemo(() => {
+    if (!isOpen) return '';
+    const oneYearFromNow = new Date();
+    oneYearFromNow.setFullYear(oneYearFromNow.getFullYear() + 1);
+    return oneYearFromNow.toISOString().split('T')[0];
+  }, [isOpen]);
 
   const handleSelectTemplate = (template) => {
     setSelectedTemplate(template);
@@ -180,7 +187,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
   // Fix #13: Portal always renders, AnimatePresence controls visibility
   return (
     <>
-      {createPortal(
+      {typeof document !== 'undefined' && createPortal(
         <AnimatePresence>
           {isOpen && (
             <div
@@ -332,6 +339,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                         value={deadline}
                         onChange={(e) => setDeadline(e.target.value)}
                         min={today}
+                        max={maxDate}
                         className={styles.input}
                       />
                     </div>
@@ -402,11 +410,20 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                             >
                               Weekdays
                             </button>
+                            <button
+                              type="button"
+                              className={`${styles.recurrenceBtn} ${recurrenceType === 'monthly' ? styles.active : ''}`}
+                              onClick={() => setRecurrenceType('monthly')}
+                              aria-pressed={recurrenceType === 'monthly'}
+                            >
+                              Monthly
+                            </button>
                           </div>
                           <p className={styles.recurrenceHint}>
                             {recurrenceType === 'daily' && 'This pact will repeat every day'}
                             {recurrenceType === 'weekly' && 'This pact will repeat every week on the same day'}
                             {recurrenceType === 'weekdays' && 'This pact will repeat Monday through Friday'}
+                            {recurrenceType === 'monthly' && 'This pact will repeat every month on the same date'}
                           </p>
                         </motion.div>
                       )}

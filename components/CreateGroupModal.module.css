@@ -1,11 +1,11 @@
 /* ============================================
-   Create Group Modal Styles
+   Create Group Modal — Social & Inviting
    ============================================ */
 
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -23,9 +23,10 @@
   width: 100%;
   max-width: 480px;
   background: var(--surface-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid var(--border-default);
+  border-left: 3px solid var(--accent-primary);
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-2xl);
   animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -42,19 +43,32 @@
   }
 }
 
+/* Header — with subtitle for social feel */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: var(--space-6);
-  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-6) var(--space-6) var(--space-4);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .header h2 {
   font-size: var(--text-xl);
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-primary);
   margin: 0;
+}
+
+.subtitle {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: 0;
+  font-weight: 400;
 }
 
 .closeBtn {
@@ -69,6 +83,7 @@
   border: none;
   cursor: pointer;
   transition: all var(--transition-fast);
+  margin-top: 2px;
 }
 
 .closeBtn:hover {
@@ -76,8 +91,9 @@
   color: var(--text-primary);
 }
 
+/* Form — spacious for social context */
 .form {
-  padding: var(--space-6);
+  padding: var(--space-4) var(--space-6) var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
@@ -93,6 +109,17 @@
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
+}
+
+.optional {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  padding-left: var(--space-1);
 }
 
 .input,
@@ -131,26 +158,49 @@
   color-scheme: dark;
 }
 
-.infoBox {
+/* Invite section — dashed border, prominent */
+.inviteSection {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  background: var(--info-bg);
-  border: 1px solid rgba(59, 130, 246, 0.2);
+  padding: var(--space-4);
+  border: 2px dashed var(--border-default);
   border-radius: var(--radius-lg);
-  color: var(--info);
+  background: var(--surface-1);
+  transition: border-color var(--transition-fast);
 }
 
-.infoBox svg {
+.inviteSection:hover {
+  border-color: var(--accent-primary);
+}
+
+.inviteIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--accent-glow);
+  color: var(--accent-primary);
   flex-shrink: 0;
-  margin-top: 2px;
 }
 
-.infoBox p {
-  margin: 0;
+.inviteText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inviteTitle {
   font-size: var(--text-sm);
-  line-height: 1.5;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.inviteDesc {
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
 }
 
 .error {
@@ -167,7 +217,7 @@
 .actions {
   display: flex;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 .cancelBtn {

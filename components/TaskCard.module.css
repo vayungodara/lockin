@@ -1,8 +1,6 @@
 .card {
   position: relative;
-  background: var(--surface-glass);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--surface-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-4);
@@ -93,7 +91,7 @@
   width: 22px;
   height: 22px;
   border-radius: var(--radius-full);
-  background: var(--gradient-primary);
+  background: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;

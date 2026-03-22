@@ -3,8 +3,16 @@ import { redirect } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import GroupDetailClient from './GroupDetailClient';
 
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 export default async function GroupDetailPage({ params }) {
   const { id } = await params;
+
+  // Validate UUID format before making any DB queries
+  if (!id || !UUID_REGEX.test(id)) {
+    notFound();
+  }
+
   const supabase = await createClient();
 
   // Get current user

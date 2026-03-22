@@ -14,7 +14,7 @@ describe('checkStreakAtRisk', () => {
 
   it('returns not at risk before 6pm', async () => {
     // Set time to 2pm
-    vi.setSystemTime(new Date('2024-06-15T14:00:00'));
+    vi.setSystemTime(new Date('2024-06-15T14:00:00Z'));
 
     const { supabase } = createMockSupabase();
     const result = await checkStreakAtRisk(supabase, 'user-1');
@@ -23,7 +23,7 @@ describe('checkStreakAtRisk', () => {
   });
 
   it('returns not at risk when no profile exists', async () => {
-    vi.setSystemTime(new Date('2024-06-15T19:00:00'));
+    vi.setSystemTime(new Date('2024-06-15T19:00:00Z'));
 
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({ data: null, error: null });
@@ -34,7 +34,7 @@ describe('checkStreakAtRisk', () => {
   });
 
   it('returns not at risk when user has no streak', async () => {
-    vi.setSystemTime(new Date('2024-06-15T19:00:00'));
+    vi.setSystemTime(new Date('2024-06-15T19:00:00Z'));
 
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
@@ -48,7 +48,7 @@ describe('checkStreakAtRisk', () => {
   });
 
   it('returns not at risk when active today', async () => {
-    const now = new Date('2024-06-15T19:00:00');
+    const now = new Date('2024-06-15T19:00:00Z');
     vi.setSystemTime(now);
     const todayStr = formatUTCDate(now);
 
@@ -64,7 +64,7 @@ describe('checkStreakAtRisk', () => {
   });
 
   it('returns at risk when last activity was yesterday and it is after 6pm', async () => {
-    const now = new Date('2024-06-15T19:00:00');
+    const now = new Date('2024-06-15T19:00:00Z');
     vi.setSystemTime(now);
     const yesterday = new Date(now);
     yesterday.setUTCDate(yesterday.getUTCDate() - 1);
@@ -82,7 +82,7 @@ describe('checkStreakAtRisk', () => {
   });
 
   it('returns streak 0 when last activity was 2+ days ago (broken)', async () => {
-    const now = new Date('2024-06-15T19:00:00');
+    const now = new Date('2024-06-15T19:00:00Z');
     vi.setSystemTime(now);
 
     const { supabase, builder } = createMockSupabase();
@@ -98,49 +98,70 @@ describe('checkStreakAtRisk', () => {
 });
 
 describe('getStreakFreezeStatus', () => {
-  it('returns available when freeze has not been used this week', async () => {
+  it('returns available when freezes remaining and no cooldown', async () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: false,
-        streak_freeze_last_reset: new Date().toISOString(),
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
+        current_streak: 5,
       },
       error: null,
     });
 
     const result = await getStreakFreezeStatus(supabase, 'user-1');
     expect(result.available).toBe(true);
+    expect(result.freezesRemaining).toBe(2);
   });
 
-  it('returns not available when freeze was used recently', async () => {
+  it('returns not available when on cooldown', async () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: true,
-        streak_freeze_last_reset: new Date().toISOString(),
+        streak_freezes_remaining: 1,
+        streak_freeze_last_used: new Date().toISOString(),
+        current_streak: 5,
       },
       error: null,
     });
 
     const result = await getStreakFreezeStatus(supabase, 'user-1');
     expect(result.available).toBe(false);
+    expect(result.cooldownEnds).not.toBeNull();
   });
 
-  it('returns available when freeze was used but 7+ days passed (cooldown reset)', async () => {
+  it('returns available when cooldown has expired (3+ days)', async () => {
     const { supabase, builder } = createMockSupabase();
-    const tenDaysAgo = new Date();
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    const fourDaysAgo = new Date();
+    fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
 
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: true,
-        streak_freeze_last_reset: tenDaysAgo.toISOString(),
+        streak_freezes_remaining: 1,
+        streak_freeze_last_used: fourDaysAgo.toISOString(),
+        current_streak: 5,
       },
       error: null,
     });
 
     const result = await getStreakFreezeStatus(supabase, 'user-1');
     expect(result.available).toBe(true);
+  });
+
+  it('returns not available when no freezes remaining', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 0,
+        streak_freeze_last_used: null,
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.available).toBe(false);
+    expect(result.freezesRemaining).toBe(0);
   });
 
   it('returns not available when profile is missing', async () => {
@@ -171,12 +192,12 @@ describe('useStreakFreeze', () => {
     expect(result.error).toBe('Profile not found');
   });
 
-  it('returns error when freeze already used this week', async () => {
+  it('returns error when no freezes remaining', async () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: true,
-        streak_freeze_last_reset: new Date().toISOString(),
+        streak_freezes_remaining: 0,
+        streak_freeze_last_used: null,
         current_streak: 5,
       },
       error: null,
@@ -184,15 +205,31 @@ describe('useStreakFreeze', () => {
 
     const result = await useStreakFreeze(supabase);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Streak freeze already used this week');
+    expect(result.error).toContain('No freezes remaining');
+  });
+
+  it('returns error when on cooldown', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: new Date().toISOString(),
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    const result = await useStreakFreeze(supabase);
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Cooldown');
   });
 
   it('returns error when no active streak', async () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: false,
-        streak_freeze_last_reset: new Date().toISOString(),
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
         current_streak: 0,
       },
       error: null,
@@ -207,8 +244,8 @@ describe('useStreakFreeze', () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: false,
-        streak_freeze_last_reset: new Date().toISOString(),
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
         current_streak: 5,
       },
       error: null,
@@ -216,23 +253,25 @@ describe('useStreakFreeze', () => {
 
     const result = await useStreakFreeze(supabase);
     expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(1);
   });
 
-  it('succeeds when freeze was used but cooldown has passed', async () => {
+  it('succeeds when cooldown has expired (3+ days)', async () => {
     const { supabase, builder } = createMockSupabase();
-    const tenDaysAgo = new Date();
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    const fourDaysAgo = new Date();
+    fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
 
     builder.mockReturnValue({
       data: {
-        streak_freeze_used_this_week: true,
-        streak_freeze_last_reset: tenDaysAgo.toISOString(),
-        current_streak: 3,
+        streak_freezes_remaining: 3,
+        streak_freeze_last_used: fourDaysAgo.toISOString(),
+        current_streak: 10,
       },
       error: null,
     });
 
     const result = await useStreakFreeze(supabase);
     expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(2);
   });
 });

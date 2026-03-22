@@ -1,12 +1,25 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
+import { fireMilestoneConfetti } from '@/lib/confetti';
+import { playStreakMilestone } from '@/lib/sounds';
 import { useToast } from '@/components/Toast';
 import styles from './DailySummaryCard.module.css';
+
+const STREAK_MILESTONES = [7, 14, 30, 50, 100];
+
+function getMilestoneMessage(streak) {
+  if (streak >= 100) return { emoji: '\uD83D\uDC51', text: 'Legendary. 100 days locked in.' };
+  if (streak >= 50) return { emoji: '\uD83D\uDC8E', text: '50 days. Diamond hands.' };
+  if (streak >= 30) return { emoji: '\uD83D\uDD25', text: '30 days. Monthly master.' };
+  if (streak >= 14) return { emoji: '\u26A1', text: '2 weeks strong. Keep going.' };
+  if (streak >= 7) return { emoji: '\uD83C\uDFAF', text: 'One week locked in. W.' };
+  return null;
+}
 
 /**
  * Pick the right icon for the streak level:
@@ -41,6 +54,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
   const [freezeLoading, setFreezeLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
+  const milestoneFiredRef = useRef(false);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -50,15 +64,39 @@ export default function DailySummaryCard({ userId, refreshKey }) {
         today.setHours(0, 0, 0, 0);
         const todayISO = today.toISOString();
 
-        // Fetch pacts due today/overdue
-        const { data: activePacts } = await supabase
-          .from('pacts')
-          .select('id, deadline')
-          .eq('user_id', userId)
-          .eq('status', 'active');
-
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
+
+        // Run all independent queries in parallel
+        const [
+          { data: activePacts },
+          { data: focusSessions },
+          { data: completedToday },
+          { data: profile },
+        ] = await Promise.all([
+          supabase
+            .from('pacts')
+            .select('id, deadline')
+            .eq('user_id', userId)
+            .eq('status', 'active'),
+          supabase
+            .from('focus_sessions')
+            .select('duration_minutes')
+            .eq('user_id', userId)
+            .gte('started_at', todayISO)
+            .not('ended_at', 'is', null),
+          supabase
+            .from('pacts')
+            .select('id')
+            .eq('user_id', userId)
+            .eq('status', 'completed')
+            .gte('completed_at', todayISO),
+          supabase
+            .from('profiles')
+            .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
+            .eq('id', userId)
+            .single(),
+        ]);
 
         const dueToday = (activePacts || []).filter(p => {
           const d = new Date(p.deadline);
@@ -69,32 +107,9 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           new Date(p.deadline) < today
         ).length;
 
-        // Fetch focus sessions today
-        const { data: focusSessions } = await supabase
-          .from('focus_sessions')
-          .select('duration_minutes')
-          .eq('user_id', userId)
-          .gte('started_at', todayISO)
-          .not('ended_at', 'is', null);
-
         const focusMinutes = (focusSessions || []).reduce(
           (sum, s) => sum + (s.duration_minutes || 0), 0
         );
-
-        // Fetch completed pacts today
-        const { data: completedToday } = await supabase
-          .from('pacts')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('status', 'completed')
-          .gte('completed_at', todayISO);
-
-        // Streak info — also fetch last_activity_date to validate stale data
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
-          .eq('id', userId)
-          .single();
 
         // If last_activity_date is more than 1 day ago, streak is broken
         // regardless of what current_streak says (cron may not have reset it).
@@ -108,6 +123,12 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           if (daysSince > 1) streak = 0;
         }
 
+        // Check streak risk and freeze status in parallel
+        const [risk, freeze] = await Promise.all([
+          checkStreakAtRisk(supabase, userId),
+          getStreakFreezeStatus(supabase, userId),
+        ]);
+
         setSummary({
           dueToday,
           overdue,
@@ -119,12 +140,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           freezesRemaining: profile?.streak_freezes_remaining || 0,
         });
 
-        // Check streak risk
-        const risk = await checkStreakAtRisk(supabase, userId);
         setStreakRisk(risk);
-
-        // Always fetch freeze status (we show count in header, not just when at risk)
-        const freeze = await getStreakFreezeStatus(supabase, userId);
         setFreezeStatus(freeze);
       } catch (err) {
         console.error('Error loading summary:', err);
@@ -135,6 +151,19 @@ export default function DailySummaryCard({ userId, refreshKey }) {
 
     fetchSummary();
   }, [userId, supabase, refreshKey]);
+
+  // Milestone detection
+  const isMilestone = STREAK_MILESTONES.includes(summary?.streak);
+  const milestoneMessage = summary ? getMilestoneMessage(summary.streak) : null;
+
+  // Fire celebration effects once per session when a milestone is detected
+  useEffect(() => {
+    if (isMilestone && milestoneMessage && !milestoneFiredRef.current) {
+      milestoneFiredRef.current = true;
+      fireMilestoneConfetti();
+      playStreakMilestone();
+    }
+  }, [isMilestone, milestoneMessage]);
 
   const handleUseFreeze = async () => {
     setFreezeLoading(true);
@@ -190,6 +219,19 @@ export default function DailySummaryCard({ userId, refreshKey }) {
           )}
         </div>
       </div>
+
+      {/* Milestone celebration banner */}
+      {isMilestone && milestoneMessage && (
+        <motion.div
+          className={styles.milestoneBanner}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <span className={styles.milestoneEmoji}>{milestoneMessage.emoji}</span>
+          <span className={styles.milestoneText}>{milestoneMessage.text}</span>
+        </motion.div>
+      )}
 
       {/* At-risk banner with freeze controls */}
       {streakRisk?.atRisk && (

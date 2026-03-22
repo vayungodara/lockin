@@ -6,7 +6,6 @@ import { motion } from 'framer-motion';
 import styles from './Navbar.module.css';
 import ThemeToggle from './ThemeToggle';
 import { useState } from 'react';
-import { smoothSpring } from '@/lib/animations';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
@@ -39,12 +38,7 @@ export default function Navbar() {
     >
       <div className={styles.container}>
         <Link href="/" className={styles.logo}>
-          <motion.div
-            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            transition={smoothSpring}
-          >
+          <div className={styles.logoInner}>
             <Image
               src="/logos/indigo-lock.png"
               alt="LockIn"
@@ -61,7 +55,7 @@ export default function Navbar() {
               priority
               style={{ width: 'auto', height: '22px' }}
             />
-          </motion.div>
+          </div>
         </Link>
         
         <div className={styles.navLinks}>
@@ -87,12 +81,10 @@ export default function Navbar() {
         
         <div className={styles.navActions}>
           <ThemeToggle />
-          <motion.button 
-            onClick={handleGetStarted} 
-            className="btn btn-primary"
-            whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(99, 102, 241, 0.4)" }}
+          <motion.button
+            onClick={handleGetStarted}
+            className={`btn btn-primary ${styles.ctaBtn}`}
             whileTap={{ scale: 0.95 }}
-            transition={smoothSpring}
           >
             Get Started
           </motion.button>

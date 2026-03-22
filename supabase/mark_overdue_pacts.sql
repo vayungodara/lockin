@@ -41,6 +41,8 @@ begin
           while extract(dow from next_dl) in (0, 6) loop
             next_dl := next_dl + interval '1 day';
           end loop;
+        when 'monthly' then
+          next_dl := next_dl + interval '1 month';
         else
           next_dl := next_dl + interval '1 day';
       end case;
@@ -77,6 +79,8 @@ begin
           while extract(dow from next_dl) in (0, 6) loop
             next_dl := next_dl + interval '1 day';
           end loop;
+        when 'monthly' then
+          next_dl := next_dl + interval '1 month';
         else
           next_dl := next_dl + interval '1 day';
       end case;

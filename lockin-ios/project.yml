@@ -1,0 +1,53 @@
+name: LockIn
+options:
+  bundleIdPrefix: com.vayungodara
+  deploymentTarget:
+    iOS: "26.0"
+  xcodeVersion: "26.0"
+  generateEmptyDirectories: true
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+  GoogleSignIn:
+    url: https://github.com/google/GoogleSignIn-iOS
+    from: "8.0.0"
+
+targets:
+  LockIn:
+    type: application
+    platform: iOS
+    sources:
+      - LockIn
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.vayungodara.LockIn
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "1"
+        INFOPLIST_KEY_CFBundleDisplayName: LockIn
+        INFOPLIST_KEY_LSApplicationCategoryType: "public.app-category.productivity"
+        SWIFT_VERSION: "5.9"
+        INFOPLIST_KEY_UILaunchScreen_Generation: true
+        INFOPLIST_KEY_UISupportedInterfaceOrientations: "UIInterfaceOrientationPortrait"
+        INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad: "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight"
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - package: GoogleSignIn
+        product: GoogleSignIn
+      - sdk: AuthenticationServices.framework
+    info:
+      path: LockIn/Info.plist
+      properties:
+        CFBundleURLTypes:
+          - CFBundleURLSchemes:
+              - com.googleusercontent.apps.1090376824998-dj63pd59rk2slpd4jj8pmv6kdrko0e29
+          - CFBundleURLSchemes:
+              - com.vayungodara.LockIn
+        GIDClientID: "1090376824998-dj63pd59rk2slpd4jj8pmv6kdrko0e29.apps.googleusercontent.com"
+    entitlements:
+      path: LockIn/LockIn.entitlements
+      properties:
+        com.apple.developer.applesignin:
+          - Default

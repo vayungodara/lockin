@@ -14,7 +14,6 @@ import styles from './SettingsPage.module.css';
 const STORAGE_KEYS = {
   workDuration: 'lockin-work-duration',
   breakDuration: 'lockin-break-duration',
-  soundEnabled: 'lockin-sound-enabled',
 };
 
 export default function SettingsPageClient({ user }) {
@@ -40,11 +39,6 @@ export default function SettingsPageClient({ user }) {
     const saved = localStorage.getItem(STORAGE_KEYS.breakDuration);
     return saved ? parseInt(saved, 10) : 5;
   });
-  const [soundEnabled, setSoundEnabled] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    const saved = localStorage.getItem(STORAGE_KEYS.soundEnabled);
-    return saved === null ? true : saved === 'true';
-  });
   const [globalSoundEnabled, setGlobalSoundEnabledState] = useState(() => {
     if (typeof window === 'undefined') return true;
     try { return localStorage.getItem('lockin_sounds') !== 'false'; }
@@ -62,13 +56,6 @@ export default function SettingsPageClient({ user }) {
     setBreakDuration(value);
     localStorage.setItem(STORAGE_KEYS.breakDuration, value.toString());
     window.dispatchEvent(new StorageEvent('storage', { key: STORAGE_KEYS.breakDuration }));
-  };
-
-  const handleSoundToggle = () => {
-    const newValue = !soundEnabled;
-    setSoundEnabled(newValue);
-    localStorage.setItem(STORAGE_KEYS.soundEnabled, newValue.toString());
-    toast.success(newValue ? 'Sound effects enabled' : 'Sound effects disabled');
   };
 
   const handleGlobalSoundToggle = () => {
@@ -204,24 +191,6 @@ export default function SettingsPageClient({ user }) {
                 />
                 <span className={styles.sliderValue}>{breakDuration} min</span>
               </div>
-            </div>
-
-            <div className={styles.settingRow}>
-              <div className={styles.settingInfo}>
-                <span className={styles.settingLabel}>Sound Effects</span>
-                <span className={styles.settingDescription}>Play sound when timer completes</span>
-              </div>
-              <button
-                className={`${styles.toggle} ${soundEnabled ? styles.toggleOn : ''}`}
-                onClick={handleSoundToggle}
-                type="button"
-                aria-pressed={soundEnabled}
-              >
-                <span
-                  className={styles.toggleKnob}
-                  style={{ transform: `translateX(${soundEnabled ? 20 : 0}px)` }}
-                />
-              </button>
             </div>
           </div>
         </section>

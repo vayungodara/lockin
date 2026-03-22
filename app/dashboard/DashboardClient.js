@@ -4,11 +4,10 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
-import { staggerContainer, staggerItem, fadeInUp, cardHover, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { staggerContainer, staggerItem, fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
-import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
@@ -47,37 +46,57 @@ function useCountUp(target, duration = 800) {
   return count;
 }
 
+// Helper to request the layout-level CreatePactModal to open
+function requestCreatePact() {
+  window.dispatchEvent(new CustomEvent('open-create-pact'));
+}
+
 export default function DashboardClient({ user }) {
   const [pacts, setPacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcutsSafe();
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0 });
 
-  // Fetch streak data
+  // Fetch streak data with timezone-aware calculation
   useEffect(() => {
-    if (!user) return;
-    calculateStreak(supabase, user.id).then(data => {
+    if (!user?.id) return;
+    let timezone = 'UTC';
+    try {
+      timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+    } catch {
+      // Intl API unavailable — fall back to UTC
+    }
+    calculateStreak(supabase, user.id, timezone).then(data => {
       setStreakData(data);
     }).catch(err => console.error('Error fetching streak:', err));
-  }, [supabase, user, refreshKey]);
+  }, [supabase, user?.id, refreshKey]);
 
   const animatedStreak = useCountUp(streakData.currentStreak);
 
-  // Register keyboard shortcuts
+  // Register keyboard shortcuts — delegate to layout-level CreatePactModal
   useEffect(() => {
     registerCallbacks({
-      onNewPact: () => setIsModalOpen(true),
-      onCloseModal: () => setIsModalOpen(false),
+      onNewPact: requestCreatePact,
     });
 
     return () => {
-      unregisterCallbacks(['onNewPact', 'onCloseModal']);
+      unregisterCallbacks(['onNewPact']);
     };
   }, [registerCallbacks, unregisterCallbacks]);
+
+  // Listen for pact-created events from the layout-level CreatePactModal
+  useEffect(() => {
+    const handlePactCreated = (e) => {
+      if (e.detail) {
+        setPacts(prev => [...prev, e.detail].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
+      }
+    };
+    window.addEventListener('pact-created', handlePactCreated);
+    return () => window.removeEventListener('pact-created', handlePactCreated);
+  }, []);
 
   const fetchPacts = useCallback(async () => {
     try {
@@ -110,18 +129,14 @@ export default function DashboardClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, user]);
+  }, [supabase, user?.id]);
 
   // Fetch pacts on mount
   useEffect(() => {
-    if (user) {
+    if (user?.id) {
       fetchPacts();
     }
-  }, [user, fetchPacts]);
-
-  const handlePactCreated = (newPact) => {
-    setPacts(prev => [...prev, newPact].sort((a, b) => new Date(a.deadline) - new Date(b.deadline)));
-  };
+  }, [user?.id, fetchPacts]);
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
@@ -149,18 +164,6 @@ export default function DashboardClient({ user }) {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error.message || error);
-      }
-      window.location.href = '/';
-    } catch (err) {
-      console.error('Error signing out:', err);
-    }
-  };
-
   // Calculate stats
   const activePacts = pacts.filter(p => p.status === 'active');
   const completedPacts = pacts.filter(p => p.status === 'completed');
@@ -170,7 +173,6 @@ export default function DashboardClient({ user }) {
   const animatedCompleted = useCountUp(completedPacts.length);
   const animatedActive = useCountUp(activePacts.length);
   const animatedMissed = useCountUp(missedPacts.length);
-  const animatedTotal = useCountUp(pacts.length);
 
   // Dashboard shows active pacts first; if none, show a few recent completed ones
   const dashboardPacts = activePacts.length > 0
@@ -241,9 +243,9 @@ export default function DashboardClient({ user }) {
             <p className={styles.subGreeting}>Ready to lock in today?</p>
             <XPBar userId={user?.id} refreshKey={refreshKey} />
           </div>
-          <motion.button 
-            className="btn btn-primary" 
-            onClick={() => setIsModalOpen(true)}
+          <motion.button
+            className="btn btn-primary"
+            onClick={requestCreatePact}
             whileHover={buttonHover}
             whileTap={buttonTap}
           >
@@ -365,9 +367,9 @@ export default function DashboardClient({ user }) {
             </div>
             <h3>No pacts yet</h3>
             <p>Create your first pact to start building accountability.</p>
-            <motion.button 
-              className="btn btn-primary" 
-              onClick={() => setIsModalOpen(true)}
+            <motion.button
+              className="btn btn-primary"
+              onClick={requestCreatePact}
               whileHover={buttonHover}
               whileTap={buttonTap}
             >
@@ -429,13 +431,7 @@ export default function DashboardClient({ user }) {
           </motion.div>
         )}
       
-      <CreatePactModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onPactCreated={handlePactCreated}
-      />
-
-      <OnboardingModal userId={user?.id} onCreatePact={() => setIsModalOpen(true)} />
+      <OnboardingModal userId={user?.id} onCreatePact={requestCreatePact} />
     </>
   );
 }

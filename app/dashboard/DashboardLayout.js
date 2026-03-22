@@ -27,11 +27,13 @@ export default function DashboardLayout({ user, children }) {
   useEffect(() => {
     if (!user?.id) return;
     try {
-      const detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      if (detectedTimezone) {
+      const detected = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const cached = localStorage.getItem('lockin_timezone');
+      if (detected && detected !== cached) {
+        localStorage.setItem('lockin_timezone', detected);
         supabase
           .from('profiles')
-          .update({ timezone: detectedTimezone })
+          .update({ timezone: detected })
           .eq('id', user.id)
           .then(() => {}); // fire-and-forget
       }
@@ -54,6 +56,21 @@ export default function DashboardLayout({ user, children }) {
 
   const handleExpandChange = useCallback((expanded) => {
     setSidebarExpanded(expanded);
+  }, []);
+
+  // Listen for open-create-pact events dispatched by child pages
+  useEffect(() => {
+    const handleOpenCreatePact = () => setShowCreatePact(true);
+    window.addEventListener('open-create-pact', handleOpenCreatePact);
+    return () => window.removeEventListener('open-create-pact', handleOpenCreatePact);
+  }, []);
+
+  // When a pact is created, close the modal and notify child pages
+  const handlePactCreated = useCallback((newPact) => {
+    setShowCreatePact(false);
+    if (newPact) {
+      window.dispatchEvent(new CustomEvent('pact-created', { detail: newPact }));
+    }
   }, []);
 
   // Konami code easter egg
@@ -90,7 +107,7 @@ export default function DashboardLayout({ user, children }) {
             <CreatePactModal
               isOpen={showCreatePact}
               onClose={() => setShowCreatePact(false)}
-              onPactCreated={() => setShowCreatePact(false)}
+              onPactCreated={handlePactCreated}
             />
             <main
               id="main-content"

@@ -126,13 +126,14 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
     window.addEventListener('focus-session-completed', handleEvent);
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // Initial check — dispatch a custom event to trigger the handler
-    window.dispatchEvent(new CustomEvent('pact-created'));
+    // Initial check on mount (deferred to avoid synchronous setState in effect)
+    const timer = setTimeout(checkAndSync, 0);
 
     return () => {
       window.removeEventListener('pact-created', handleEvent);
       window.removeEventListener('focus-session-completed', handleEvent);
       document.removeEventListener('visibilitychange', handleVisibility);
+      clearTimeout(timer);
       if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [checkAndSync]);
@@ -174,7 +175,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   const dashOffset = CIRCUMFERENCE - (completedCount / STEPS.length) * CIRCUMFERENCE;
 
   return (
-    <div className={styles.card}>
+    <div className={`${styles.card} ${completedCount === 0 ? styles.cardNew : ''}`}>
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <svg className={styles.progressRing} viewBox="0 0 40 40">

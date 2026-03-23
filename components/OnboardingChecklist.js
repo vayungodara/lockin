@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getOnboardingState, detectProgress, syncProgress } from '@/lib/onboarding';
-import { XP_REWARDS } from '@/lib/gamification';
+import { XP_REWARDS, unlockAchievement } from '@/lib/gamification';
 import { celebrationBounce, fadeInScale, prefersReducedMotion } from '@/lib/animations';
 import { fireConfetti, fireMilestoneConfetti } from '@/lib/confetti';
 import { useToast } from '@/components/Toast';
@@ -79,6 +79,13 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
       return;
     }
 
+    // Previously dismissed — restore state from DB
+    if (state.onboarding_dismissed) {
+      setDismissed(true);
+      setLoading(false);
+      return;
+    }
+
     const detected = await detectProgress(supabase, userId);
     if (!detected) {
       setDbState(state);
@@ -109,6 +116,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
     if (result.updatedState.onboarding_completed_at) {
       setAllComplete(true);
       if (!prefersReducedMotion()) fireMilestoneConfetti();
+      await unlockAchievement(supabase, userId, 'onboarding_complete');
       toast.success('Achievement Unlocked: Challenge Accepted! 🏆');
       setShowSuccess(true);
       fadeTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);

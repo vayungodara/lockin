@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
@@ -21,6 +21,7 @@ const STORAGE_KEYS = {
 export default function SettingsPageClient({ user }) {
   const { theme, setTheme, accent, setAccent } = useTheme();
   const toast = useToast();
+  const supabase = useMemo(() => createClient(), []);
 
   // Preload all logo color variants for instant accent swaps
   useEffect(() => {
@@ -362,7 +363,6 @@ export default function SettingsPageClient({ user }) {
                 whileHover={buttonHover}
                 whileTap={buttonTap}
                 onClick={async () => {
-                  const supabase = createClient();
                   const success = await resetOnboarding(supabase, user?.id);
                   if (success) {
                     toast.success('Onboarding reset! Visit your dashboard to start the challenge.');

@@ -1,0 +1,311 @@
+'use client';
+
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
+import { getOnboardingState, detectProgress, syncProgress } from '@/lib/onboarding';
+import { XP_REWARDS, unlockAchievement } from '@/lib/gamification';
+import { celebrationBounce, fadeInScale, prefersReducedMotion } from '@/lib/animations';
+import { fireConfetti, fireMilestoneConfetti } from '@/lib/confetti';
+import { useToast } from '@/components/Toast';
+import styles from './OnboardingChecklist.module.css';
+
+const STEPS = [
+  {
+    field: 'has_created_pact',
+    title: 'Make a Pact',
+    description: 'Create your first commitment',
+    icon: '🎯',
+    actionLabel: 'Create a Pact',
+    xp: XP_REWARDS.ONBOARDING_PACT,
+    action: 'create-pact',
+  },
+  {
+    field: 'has_used_focus_timer',
+    title: 'Lock In',
+    description: 'Complete a focus session',
+    icon: '⏱️',
+    actionLabel: 'Start Focusing',
+    xp: XP_REWARDS.ONBOARDING_FOCUS,
+    action: 'navigate',
+    href: '/dashboard/focus',
+  },
+  {
+    field: 'has_joined_group',
+    title: 'Join the Squad',
+    description: 'Join or create a group',
+    icon: '👥',
+    actionLabel: 'Browse Groups',
+    xp: XP_REWARDS.ONBOARDING_GROUP,
+    action: 'navigate',
+    href: '/dashboard/groups',
+  },
+  {
+    field: 'has_built_momentum',
+    title: 'Build Momentum',
+    description: 'Hit a 2-day streak',
+    icon: '🔥',
+    xp: XP_REWARDS.ONBOARDING_MOMENTUM,
+    action: 'auto',
+  },
+];
+
+const CIRCUMFERENCE = 2 * Math.PI * 16;
+
+export default function OnboardingChecklist({ userId, onCreatePact }) {
+  // Dev preview: add ?onboarding=preview to URL to see empty card
+  // Deferred to useEffect to avoid SSR/client hydration mismatch
+  const [isPreview, setIsPreview] = useState(false);
+  const isPreviewRef = useRef(false);
+
+  const [dbState, setDbState] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [allComplete, setAllComplete] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [dismissed, setDismissed] = useState(false);
+  const [newlyDone, setNewlyDone] = useState(new Set());
+  const fadeTimerRef = useRef(null);
+  const newlyDoneTimerRef = useRef(null);
+  const syncInFlight = useRef(false);
+  const supabase = useMemo(() => createClient(), []);
+  const toast = useToast();
+
+  const completedCount = dbState
+    ? STEPS.filter(s => dbState[s.field]).length
+    : 0;
+
+  const checkAndSync = useCallback(async () => {
+    if (!userId || isPreview || isPreviewRef.current || syncInFlight.current) return;
+    syncInFlight.current = true;
+
+    try {
+      const state = await getOnboardingState(supabase, userId);
+      if (!state) { setLoading(false); return; }
+
+      if (state.onboarding_completed_at) {
+        setAllComplete(true);
+        setLoading(false);
+        return;
+      }
+
+      if (state.onboarding_dismissed) {
+        setDismissed(true);
+        setLoading(false);
+        return;
+      }
+
+      const detected = await detectProgress(supabase, userId);
+      if (!detected) {
+        setDbState(state);
+        setLoading(false);
+        return;
+      }
+
+      const result = await syncProgress(supabase, userId, state, detected);
+      if (!result) {
+        setDbState(state);
+        setLoading(false);
+        return;
+      }
+
+      setDbState(result.updatedState);
+      setLoading(false);
+
+      // Celebrate newly completed steps
+      if (result.newlyCompleted.length > 0) {
+        const fields = new Set(result.newlyCompleted.map(s => s.field));
+        setNewlyDone(fields);
+        // Clear the bounce animation after it plays
+        clearTimeout(newlyDoneTimerRef.current);
+        newlyDoneTimerRef.current = setTimeout(() => setNewlyDone(new Set()), 800);
+
+        for (const step of result.newlyCompleted) {
+          if (step.xpAwarded) {
+            if (!prefersReducedMotion()) fireConfetti();
+            const stepDef = STEPS.find(s => s.field === step.field);
+            if (stepDef) {
+              toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+            }
+          }
+        }
+      }
+
+      // All 4 done? Only celebrate if not already marked complete
+      if (result.updatedState.onboarding_completed_at && !allComplete) {
+        setAllComplete(true);
+        if (!prefersReducedMotion()) fireMilestoneConfetti();
+        await unlockAchievement(supabase, userId, 'onboarding_complete');
+        toast.success('Achievement Unlocked: Challenge Accepted! 🏆');
+        setShowSuccess(true);
+        fadeTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
+      }
+    } finally {
+      syncInFlight.current = false;
+    }
+  }, [userId, supabase, toast, isPreview, allComplete]);
+
+  // Detect preview mode after hydration to avoid SSR mismatch
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === 'preview') {
+      isPreviewRef.current = true;
+      setIsPreview(true);
+      setDbState({
+        has_created_pact: false, has_used_focus_timer: false,
+        has_joined_group: false, has_built_momentum: false,
+      });
+      setLoading(false);
+    }
+  }, []);
+
+  // Check on mount, custom events, and visibility change
+  useEffect(() => {
+    const handleEvent = () => checkAndSync();
+    let debounceTimer = null;
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(checkAndSync, 2000);
+      }
+    };
+
+    window.addEventListener('pact-created', handleEvent);
+    window.addEventListener('focus-session-completed', handleEvent);
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    // Initial check on mount
+    const mountTimer = setTimeout(checkAndSync, 0);
+
+    return () => {
+      window.removeEventListener('pact-created', handleEvent);
+      window.removeEventListener('focus-session-completed', handleEvent);
+      document.removeEventListener('visibilitychange', handleVisibility);
+      clearTimeout(mountTimer);
+      clearTimeout(debounceTimer);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      if (newlyDoneTimerRef.current) clearTimeout(newlyDoneTimerRef.current);
+    };
+  }, [checkAndSync]);
+
+  const handleAction = (step) => {
+    if (step.action === 'create-pact' && onCreatePact) {
+      onCreatePact();
+    } else if (step.action === 'navigate' && step.href) {
+      window.location.assign(step.href);
+    }
+  };
+
+  const handleDismiss = async () => {
+    if (!userId) return;
+    const { error } = await supabase
+      .from('user_onboarding')
+      .update({ onboarding_dismissed: true })
+      .eq('user_id', userId);
+    if (!error) setDismissed(true);
+  };
+
+  // Don't render until data is ready — avoids "Loading challenge..." flash
+  if (loading) return null;
+  if (dismissed) return null;
+  if (!dbState) return null;
+
+  // Soft persistence: can't dismiss until at least 1 step done
+  const canDismiss = completedCount > 0;
+
+  if (allComplete) {
+    if (!showSuccess) return null;
+    return (
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            className={`${styles.card} ${styles.successCard}`}
+            {...fadeInScale}
+            exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.3 } }}
+          >
+            <div className={styles.successTitle}>You&apos;re all set! LockIn is yours. 🎉</div>
+            <div className={styles.successDesc}>First Week Challenge complete!</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  const dashOffset = CIRCUMFERENCE - (completedCount / STEPS.length) * CIRCUMFERENCE;
+
+  return (
+    <motion.div
+      className={`${styles.card} ${completedCount === 0 ? styles.cardNew : ''}`}
+      initial={{ y: 20, scale: 0.97 }}
+      animate={{ y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <div className={styles.header}>
+        <div className={styles.headerLeft}>
+          <svg className={styles.progressRing} viewBox="0 0 40 40">
+            <circle className={styles.progressBg} cx="20" cy="20" r="16" />
+            <circle
+              className={styles.progressFill}
+              cx="20" cy="20" r="16"
+              strokeDasharray={CIRCUMFERENCE}
+              strokeDashoffset={dashOffset}
+            />
+            <text
+              className={styles.progressText}
+              x="20" y="20"
+              transform="rotate(90 20 20)"
+            >
+              {completedCount}/{STEPS.length}
+            </text>
+          </svg>
+          <span className={styles.title}>Your First Week Challenge</span>
+        </div>
+      </div>
+
+      <div className={styles.steps}>
+        {STEPS.map((step, i) => {
+          const done = dbState[step.field];
+          const justCompleted = newlyDone.has(step.field);
+          return (
+            <motion.div
+              key={step.field}
+              className={styles.step}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.3 + i * 0.08,
+              }}
+              {...(justCompleted ? celebrationBounce : {})}
+            >
+              <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
+                {done ? '✓' : step.icon}
+              </div>
+              <div className={styles.stepContent}>
+                <div className={`${styles.stepTitle} ${done ? styles.stepTitleDone : ''}`}>
+                  {step.title}
+                </div>
+                {!done && <div className={styles.stepDesc}>{step.description}</div>}
+              </div>
+              <div className={styles.stepAction}>
+                {done ? (
+                  <span className={styles.xpBadge}>+{step.xp} XP</span>
+                ) : step.action !== 'auto' ? (
+                  <button className={styles.actionBtn} onClick={() => handleAction(step)}>
+                    {step.actionLabel}
+                  </button>
+                ) : null}
+              </div>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {canDismiss && (
+        <button className={styles.dismissBtn} onClick={handleDismiss}>
+          Dismiss challenge
+        </button>
+      )}
+    </motion.div>
+  );
+}

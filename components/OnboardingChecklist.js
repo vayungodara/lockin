@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getOnboardingState, detectProgress, syncProgress } from '@/lib/onboarding';
 import { XP_REWARDS, unlockAchievement } from '@/lib/gamification';
-import { celebrationBounce, fadeInScale, prefersReducedMotion } from '@/lib/animations';
+import { celebrationBounce, fadeInScale, staggerItem, prefersReducedMotion } from '@/lib/animations';
 import { fireConfetti, fireMilestoneConfetti } from '@/lib/confetti';
 import { useToast } from '@/components/Toast';
 import styles from './OnboardingChecklist.module.css';
@@ -46,20 +46,28 @@ const STEPS = [
     description: 'Hit a 2-day streak',
     icon: '🔥',
     xp: XP_REWARDS.ONBOARDING_MOMENTUM,
-    action: 'auto', // no button — auto-detected
+    action: 'auto',
   },
 ];
 
-const CIRCUMFERENCE = 2 * Math.PI * 16; // radius=16 for 40px SVG
+const CIRCUMFERENCE = 2 * Math.PI * 16;
 
 export default function OnboardingChecklist({ userId, onCreatePact }) {
-  const [dbState, setDbState] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Dev preview: add ?onboarding=preview to URL to see empty card
+  const isPreview = typeof window !== 'undefined' &&
+    new URLSearchParams(window.location.search).get('onboarding') === 'preview';
+
+  const [dbState, setDbState] = useState(isPreview ? {
+    has_created_pact: false, has_used_focus_timer: false,
+    has_joined_group: false, has_built_momentum: false,
+  } : null);
+  const [loading, setLoading] = useState(!isPreview);
   const [allComplete, setAllComplete] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [newlyDone, setNewlyDone] = useState(new Set());
   const fadeTimerRef = useRef(null);
+  const syncInFlight = useRef(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
 
@@ -68,85 +76,96 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
     : 0;
 
   const checkAndSync = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || isPreview || syncInFlight.current) return;
+    syncInFlight.current = true;
 
-    const state = await getOnboardingState(supabase, userId);
-    if (!state) { setLoading(false); return; }
+    try {
+      const state = await getOnboardingState(supabase, userId);
+      if (!state) { setLoading(false); return; }
 
-    // Already completed — don't show
-    if (state.onboarding_completed_at) {
-      setAllComplete(true);
+      if (state.onboarding_completed_at) {
+        setAllComplete(true);
+        setLoading(false);
+        return;
+      }
+
+      if (state.onboarding_dismissed) {
+        setDismissed(true);
+        setLoading(false);
+        return;
+      }
+
+      const detected = await detectProgress(supabase, userId);
+      if (!detected) {
+        setDbState(state);
+        setLoading(false);
+        return;
+      }
+
+      const result = await syncProgress(supabase, userId, state, detected);
+      if (!result) {
+        setDbState(state);
+        setLoading(false);
+        return;
+      }
+
+      setDbState(result.updatedState);
       setLoading(false);
-      return;
-    }
 
-    // Previously dismissed — restore state from DB
-    if (state.onboarding_dismissed) {
-      setDismissed(true);
-      setLoading(false);
-      return;
-    }
+      // Celebrate newly completed steps
+      if (result.newlyCompleted.length > 0) {
+        const fields = new Set(result.newlyCompleted.map(s => s.field));
+        setNewlyDone(fields);
+        // Clear the bounce animation after it plays
+        setTimeout(() => setNewlyDone(new Set()), 800);
 
-    const detected = await detectProgress(supabase, userId);
-    if (!detected) {
-      setDbState(state);
-      setLoading(false);
-      return;
-    }
-
-    const result = await syncProgress(supabase, userId, state, detected);
-    if (!result) {
-      setDbState(state);
-      setLoading(false);
-      return;
-    }
-
-    setDbState(result.updatedState);
-    setLoading(false);
-
-    // Celebrate newly completed steps
-    if (result.newlyCompleted.length > 0) {
-      const fields = new Set(result.newlyCompleted.map(s => s.field));
-      setNewlyDone(fields);
-      for (const step of result.newlyCompleted) {
-        if (!prefersReducedMotion()) fireConfetti();
-        const stepDef = STEPS.find(s => s.field === step.field);
-        if (stepDef) {
-          toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+        for (const step of result.newlyCompleted) {
+          if (!prefersReducedMotion()) fireConfetti();
+          const stepDef = STEPS.find(s => s.field === step.field);
+          if (stepDef) {
+            toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+          }
         }
       }
-    }
 
-    // All 4 done?
-    if (result.updatedState.onboarding_completed_at) {
-      setAllComplete(true);
-      if (!prefersReducedMotion()) fireMilestoneConfetti();
-      await unlockAchievement(supabase, userId, 'onboarding_complete');
-      toast.success('Achievement Unlocked: Challenge Accepted! 🏆');
-      setShowSuccess(true);
-      fadeTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
+      // All 4 done? Only celebrate if not already marked complete
+      if (result.updatedState.onboarding_completed_at && !allComplete) {
+        setAllComplete(true);
+        if (!prefersReducedMotion()) fireMilestoneConfetti();
+        await unlockAchievement(supabase, userId, 'onboarding_complete');
+        toast.success('Achievement Unlocked: Challenge Accepted! 🏆');
+        setShowSuccess(true);
+        fadeTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
+      }
+    } finally {
+      syncInFlight.current = false;
     }
-  }, [userId, supabase, toast]);
+  }, [userId, supabase, toast, isPreview, allComplete]);
 
   // Check on mount, custom events, and visibility change
   useEffect(() => {
     const handleEvent = () => checkAndSync();
+    let debounceTimer = null;
     const handleVisibility = () => {
-      if (document.visibilityState === 'visible') checkAndSync();
+      if (document.visibilityState === 'visible') {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(checkAndSync, 2000);
+      }
     };
 
     window.addEventListener('pact-created', handleEvent);
     window.addEventListener('focus-session-completed', handleEvent);
     document.addEventListener('visibilitychange', handleVisibility);
 
-    // Initial check on mount (deferred to avoid synchronous setState in effect)
-    const timer = setTimeout(checkAndSync, 0);
+    // Initial check on mount
+    const mountTimer = setTimeout(checkAndSync, 0);
 
     return () => {
       window.removeEventListener('pact-created', handleEvent);
       window.removeEventListener('focus-session-completed', handleEvent);
       document.removeEventListener('visibilitychange', handleVisibility);
-      clearTimeout(timer);
+      clearTimeout(mountTimer);
+      clearTimeout(debounceTimer);
       if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
     };
   }, [checkAndSync]);
@@ -160,6 +179,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   };
 
   const handleDismiss = async () => {
+    if (!userId) return;
     setDismissed(true);
     await supabase
       .from('user_onboarding')
@@ -169,19 +189,27 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
 
   // Don't render if: loading failed (fail-open), already complete, or dismissed
   if (loading) return <div className={styles.loading}>Loading challenge...</div>;
-  if (allComplete && !showSuccess) return null;
   if (dismissed) return null;
   if (!dbState) return null;
 
   // Soft persistence: can't dismiss until at least 1 step done
   const canDismiss = completedCount > 0;
 
-  if (showSuccess) {
+  if (allComplete) {
+    if (!showSuccess) return null;
     return (
-      <motion.div className={`${styles.card} ${styles.successCard}`} {...fadeInScale}>
-        <div className={styles.successTitle}>You&apos;re all set! LockIn is yours. 🎉</div>
-        <div className={styles.successDesc}>+125 XP earned from the First Week Challenge</div>
-      </motion.div>
+      <AnimatePresence>
+        {showSuccess && (
+          <motion.div
+            className={`${styles.card} ${styles.successCard}`}
+            {...fadeInScale}
+            exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.3 } }}
+          >
+            <div className={styles.successTitle}>You&apos;re all set! LockIn is yours. 🎉</div>
+            <div className={styles.successDesc}>+125 XP earned from the First Week Challenge</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     );
   }
 
@@ -212,39 +240,37 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
       </div>
 
       <div className={styles.steps}>
-        <AnimatePresence>
-          {STEPS.map((step) => {
-            const done = dbState[step.field];
-            const justCompleted = newlyDone.has(step.field);
-            return (
-              <motion.div
-                key={step.field}
-                className={styles.step}
-                layout
-                {...(justCompleted ? celebrationBounce : {})}
-              >
-                <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
-                  {done ? '✓' : step.icon}
+        {STEPS.map((step, i) => {
+          const done = dbState[step.field];
+          const justCompleted = newlyDone.has(step.field);
+          return (
+            <motion.div
+              key={step.field}
+              className={styles.step}
+              {...(justCompleted ? celebrationBounce : staggerItem)}
+              custom={i}
+            >
+              <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
+                {done ? '✓' : step.icon}
+              </div>
+              <div className={styles.stepContent}>
+                <div className={`${styles.stepTitle} ${done ? styles.stepTitleDone : ''}`}>
+                  {step.title}
                 </div>
-                <div className={styles.stepContent}>
-                  <div className={`${styles.stepTitle} ${done ? styles.stepTitleDone : ''}`}>
-                    {step.title}
-                  </div>
-                  {!done && <div className={styles.stepDesc}>{step.description}</div>}
-                </div>
-                <div className={styles.stepAction}>
-                  {done ? (
-                    <span className={styles.xpBadge}>+{step.xp} XP</span>
-                  ) : step.action !== 'auto' ? (
-                    <button className={styles.actionBtn} onClick={() => handleAction(step)}>
-                      {step.actionLabel}
-                    </button>
-                  ) : null}
-                </div>
-              </motion.div>
-            );
-          })}
-        </AnimatePresence>
+                {!done && <div className={styles.stepDesc}>{step.description}</div>}
+              </div>
+              <div className={styles.stepAction}>
+                {done ? (
+                  <span className={styles.xpBadge}>+{step.xp} XP</span>
+                ) : step.action !== 'auto' ? (
+                  <button className={styles.actionBtn} onClick={() => handleAction(step)}>
+                    {step.actionLabel}
+                  </button>
+                ) : null}
+              </div>
+            </motion.div>
+          );
+        })}
       </div>
 
       {canDismiss && (

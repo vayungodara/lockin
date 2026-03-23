@@ -85,6 +85,13 @@ export default function ThemeProvider({ children }) {
 
   const prevResolvedTheme = useRef(resolvedTheme);
 
+  // Apply theme on mount and when user changes it.
+  // The inline themeScript in layout.js already sets data-theme before
+  // first paint, so the initial run here is a no-op for the attribute.
+  // We add data-theme-ready to enable CSS transitions only AFTER the
+  // first paint, preventing the light→dark background animation flash.
+  const themeReadyRef = useRef(false);
+
   useEffect(() => {
     if (!mounted) return;
 
@@ -93,6 +100,15 @@ export default function ThemeProvider({ children }) {
     prevResolvedTheme.current = resolvedTheme;
 
     applyAccentToDocument(accent, resolvedTheme === 'dark');
+
+    // Enable theme transitions after the first theme application,
+    // so only user-initiated toggles animate (not initial load).
+    if (!themeReadyRef.current) {
+      themeReadyRef.current = true;
+      requestAnimationFrame(() => {
+        root.setAttribute('data-theme-ready', '');
+      });
+    }
   }, [resolvedTheme, mounted, accent]);
 
   const setTheme = useCallback((newTheme) => {

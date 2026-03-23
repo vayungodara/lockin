@@ -83,7 +83,9 @@ export async function GET(request) {
       : Promise.resolve();
 
     const activityPromise = activityEntries.length > 0
-      ? supabase.from('activity_log').insert(activityEntries)
+      ? supabase.from('activity_log').insert(activityEntries).then(({ error: actError }) => {
+          if (actError) console.error('Batch activity log error:', actError);
+        })
       : Promise.resolve();
 
     await Promise.all([notificationPromise, activityPromise]);

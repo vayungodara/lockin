@@ -6,7 +6,13 @@ export async function GET(request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   // Validate redirect path to prevent open redirect attacks
+  // Only allow relative paths starting with "/" -- reject absolute URLs,
+  // protocol-relative URLs (//evil.com), and anything else an attacker
+  // could use to redirect to an external domain.
   let next = searchParams.get('next') ?? '/dashboard'
+  if (typeof next !== 'string' || !next.startsWith('/') || next.startsWith('//')) {
+    next = '/dashboard'
+  }
   try {
     const resolvedUrl = new URL(next, origin)
     if (resolvedUrl.origin !== origin) {
@@ -45,19 +51,11 @@ export async function GET(request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     
     if (!error) {
-      const forwardedHost = request.headers.get('x-forwarded-host')
-      const isLocalEnv = process.env.NODE_ENV === 'development'
-      
-      let redirectUrl
-      if (isLocalEnv) {
-        redirectUrl = `${origin}${next}`
-      } else if (forwardedHost) {
-        redirectUrl = `https://${forwardedHost}${next}`
-      } else {
-        redirectUrl = `${origin}${next}`
-      }
-
-      return NextResponse.redirect(redirectUrl)
+      // Use origin from the request URL (safe, server-controlled) or
+      // NEXT_PUBLIC_APP_URL as a fallback. Never use x-forwarded-host
+      // because it is a user-controlled header that enables open redirects.
+      const appOrigin = process.env.NEXT_PUBLIC_APP_URL || origin
+      return NextResponse.redirect(`${appOrigin}${next}`)
     } else {
       console.error('Auth callback error:', error.message)
     }

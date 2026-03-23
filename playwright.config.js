@@ -7,6 +7,8 @@ const { defineConfig, devices } = require('@playwright/test');
  */
 module.exports = defineConfig({
   testDir: './tests',
+  testIgnore: '**/unit/**',
+  testMatch: '*.spec.js',
 
   /* Maximum time one test can run */
   timeout: 30_000,

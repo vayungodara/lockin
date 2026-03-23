@@ -66,9 +66,16 @@ BEGIN
   -- Validate notification type
   IF p_type NOT IN (
     'pact_reminder', 'pact_completed', 'pact_overdue',
-    'group_invite', 'group_joined',
+    'pact_completed_in_group',
+    'group_invite', 'group_joined', 'group_member_joined',
     'task_assigned', 'task_completed',
-    'reaction', 'streak_milestone'
+    'reaction', 'reaction_received',
+    'streak_milestone', 'streak_broken', 'streak_at_risk',
+    'nudge_received',
+    'partner_request', 'partner_accepted', 'partner_pact_completed', 'partner_pact_missed',
+    'comment_on_activity',
+    'achievement_unlocked', 'level_up',
+    'challenge_created', 'challenge_ended'
   ) THEN
     RAISE EXCEPTION 'Invalid notification type: %', p_type;
   END IF;

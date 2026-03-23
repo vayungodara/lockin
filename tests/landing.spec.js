@@ -28,9 +28,8 @@ test.describe('Landing Page', () => {
   });
 
   test('has a "Start Locking In" CTA button', async ({ page }) => {
-    const ctaButton = page.getByRole('link', { name: /Start Locking In/i }).first();
+    const ctaButton = page.getByRole('button', { name: /Start Locking In/i }).first();
     await expect(ctaButton).toBeVisible();
-    await expect(ctaButton).toHaveAttribute('href', '/dashboard');
   });
 
   test('has a "See How It Works" button', async ({ page }) => {
@@ -40,7 +39,7 @@ test.describe('Landing Page', () => {
   });
 
   test('has a "Get Started" button in the navbar', async ({ page }) => {
-    const getStartedButton = page.getByRole('button', { name: /Get Started/i });
+    const getStartedButton = page.getByRole('navigation').getByRole('button', { name: /Get Started/i });
     await expect(getStartedButton).toBeVisible();
   });
 

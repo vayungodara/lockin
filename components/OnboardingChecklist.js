@@ -58,6 +58,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   const [allComplete, setAllComplete] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const [newlyDone, setNewlyDone] = useState(new Set());
   const fadeTimerRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
@@ -104,11 +105,15 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
     setLoading(false);
 
     // Celebrate newly completed steps
-    for (const step of result.newlyCompleted) {
-      if (!prefersReducedMotion()) fireConfetti();
-      const stepDef = STEPS.find(s => s.field === step.field);
-      if (stepDef) {
-        toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+    if (result.newlyCompleted.length > 0) {
+      const fields = new Set(result.newlyCompleted.map(s => s.field));
+      setNewlyDone(fields);
+      for (const step of result.newlyCompleted) {
+        if (!prefersReducedMotion()) fireConfetti();
+        const stepDef = STEPS.find(s => s.field === step.field);
+        if (stepDef) {
+          toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+        }
       }
     }
 
@@ -210,12 +215,13 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
         <AnimatePresence>
           {STEPS.map((step) => {
             const done = dbState[step.field];
+            const justCompleted = newlyDone.has(step.field);
             return (
               <motion.div
                 key={step.field}
                 className={styles.step}
                 layout
-                {...(done ? celebrationBounce : {})}
+                {...(justCompleted ? celebrationBounce : {})}
               >
                 <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
                   {done ? '✓' : step.icon}

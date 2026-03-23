@@ -6,8 +6,12 @@ ALTER TABLE public.user_onboarding
   ADD COLUMN IF NOT EXISTS has_built_momentum BOOLEAN DEFAULT false,
   ADD COLUMN IF NOT EXISTS onboarding_completed_at TIMESTAMPTZ DEFAULT NULL;
 
--- Reset onboarding_dismissed so old users see the new checklist
-UPDATE public.user_onboarding SET onboarding_dismissed = false;
+-- One-time migration: reset dismissed state so existing users see the new checklist
+-- Only resets users who dismissed the old modal but never completed onboarding
+UPDATE public.user_onboarding
+  SET onboarding_dismissed = false
+  WHERE onboarding_dismissed = true
+    AND onboarding_completed_at IS NULL;
 
 -- RLS policies for user_onboarding (safe — checks existence first)
 DO $$ BEGIN

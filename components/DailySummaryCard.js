@@ -186,7 +186,7 @@ export default function DailySummaryCard({ userId, refreshKey }) {
     }
   };
 
-  if (isLoading || !summary) return null;
+  if (isLoading || !summary) return <div style={{ height: '120px' }} />;
 
   const streakInfo = getStreakIcon(summary.streak);
   const freezesRemaining = freezeStatus?.freezesRemaining ?? summary.freezesRemaining;

@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getOnboardingState, detectProgress, syncProgress } from '@/lib/onboarding';
 import { XP_REWARDS, unlockAchievement } from '@/lib/gamification';
-import { celebrationBounce, fadeInScale, staggerContainer, staggerItem, prefersReducedMotion } from '@/lib/animations';
+import { celebrationBounce, fadeInScale, prefersReducedMotion } from '@/lib/animations';
 import { fireConfetti, fireMilestoneConfetti } from '@/lib/confetti';
 import { useToast } from '@/components/Toast';
 import styles from './OnboardingChecklist.module.css';
@@ -55,9 +55,8 @@ const CIRCUMFERENCE = 2 * Math.PI * 16;
 export default function OnboardingChecklist({ userId, onCreatePact }) {
   // Dev preview: add ?onboarding=preview to URL to see empty card
   // Deferred to useEffect to avoid SSR/client hydration mismatch
-  // (window is undefined on server, so isPreview would differ between passes,
-  //  causing React to reconcile synchronously and Framer Motion to skip initial state)
   const [isPreview, setIsPreview] = useState(false);
+  const isPreviewRef = useRef(false);
 
   const [dbState, setDbState] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +65,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   const [dismissed, setDismissed] = useState(false);
   const [newlyDone, setNewlyDone] = useState(new Set());
   const fadeTimerRef = useRef(null);
+  const newlyDoneTimerRef = useRef(null);
   const syncInFlight = useRef(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
@@ -75,7 +75,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
     : 0;
 
   const checkAndSync = useCallback(async () => {
-    if (!userId || isPreview || syncInFlight.current) return;
+    if (!userId || isPreview || isPreviewRef.current || syncInFlight.current) return;
     syncInFlight.current = true;
 
     try {
@@ -116,13 +116,16 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
         const fields = new Set(result.newlyCompleted.map(s => s.field));
         setNewlyDone(fields);
         // Clear the bounce animation after it plays
-        setTimeout(() => setNewlyDone(new Set()), 800);
+        clearTimeout(newlyDoneTimerRef.current);
+        newlyDoneTimerRef.current = setTimeout(() => setNewlyDone(new Set()), 800);
 
         for (const step of result.newlyCompleted) {
-          if (!prefersReducedMotion()) fireConfetti();
-          const stepDef = STEPS.find(s => s.field === step.field);
-          if (stepDef) {
-            toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+          if (step.xpAwarded) {
+            if (!prefersReducedMotion()) fireConfetti();
+            const stepDef = STEPS.find(s => s.field === step.field);
+            if (stepDef) {
+              toast.success(`+${stepDef.xp} XP — ${stepDef.title} complete!`);
+            }
           }
         }
       }
@@ -145,6 +148,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('onboarding') === 'preview') {
+      isPreviewRef.current = true;
       setIsPreview(true);
       setDbState({
         has_created_pact: false, has_used_focus_timer: false,
@@ -179,6 +183,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
       clearTimeout(mountTimer);
       clearTimeout(debounceTimer);
       if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+      if (newlyDoneTimerRef.current) clearTimeout(newlyDoneTimerRef.current);
     };
   }, [checkAndSync]);
 
@@ -192,15 +197,15 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
 
   const handleDismiss = async () => {
     if (!userId) return;
-    setDismissed(true);
-    await supabase
+    const { error } = await supabase
       .from('user_onboarding')
       .update({ onboarding_dismissed: true })
       .eq('user_id', userId);
+    if (!error) setDismissed(true);
   };
 
-  // Don't render if: loading failed (fail-open), already complete, or dismissed
-  if (loading) return <div className={styles.loading}>Loading challenge...</div>;
+  // Don't render until data is ready — avoids "Loading challenge..." flash
+  if (loading) return null;
   if (dismissed) return null;
   if (!dbState) return null;
 
@@ -218,7 +223,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.3 } }}
           >
             <div className={styles.successTitle}>You&apos;re all set! LockIn is yours. 🎉</div>
-            <div className={styles.successDesc}>+125 XP earned from the First Week Challenge</div>
+            <div className={styles.successDesc}>First Week Challenge complete!</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -228,7 +233,12 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
   const dashOffset = CIRCUMFERENCE - (completedCount / STEPS.length) * CIRCUMFERENCE;
 
   return (
-    <div className={`${styles.card} ${completedCount === 0 ? styles.cardNew : ''}`}>
+    <motion.div
+      className={`${styles.card} ${completedCount === 0 ? styles.cardNew : ''}`}
+      initial={{ y: 20, scale: 0.97 }}
+      animate={{ y: 0, scale: 1 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <svg className={styles.progressRing} viewBox="0 0 40 40">
@@ -251,7 +261,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
         </div>
       </div>
 
-      <motion.div className={styles.steps} variants={staggerContainer} initial="initial" animate="animate">
+      <div className={styles.steps}>
         {STEPS.map((step, i) => {
           const done = dbState[step.field];
           const justCompleted = newlyDone.has(step.field);
@@ -259,7 +269,13 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             <motion.div
               key={step.field}
               className={styles.step}
-              variants={justCompleted ? undefined : staggerItem}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                duration: 0.35,
+                ease: [0.22, 1, 0.36, 1],
+                delay: 0.3 + i * 0.08,
+              }}
               {...(justCompleted ? celebrationBounce : {})}
             >
               <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
@@ -283,13 +299,13 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             </motion.div>
           );
         })}
-      </motion.div>
+      </div>
 
       {canDismiss && (
         <button className={styles.dismissBtn} onClick={handleDismiss}>
           Dismiss challenge
         </button>
       )}
-    </div>
+    </motion.div>
   );
 }

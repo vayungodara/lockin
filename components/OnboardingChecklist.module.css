@@ -5,22 +5,11 @@
   border-left: 3px solid var(--accent-primary);
   padding: var(--space-5);
   margin-bottom: var(--space-4);
-  animation: cardEntrance 0.5s cubic-bezier(0.22, 1, 0.36, 1) 50ms both;
-}
-
-@keyframes cardEntrance {
-  from {
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    transform: translateY(0) scale(1);
-  }
 }
 
 /* First-visit attention pulse — runs once after entrance completes */
 .cardNew {
-  animation: cardEntrance 0.5s cubic-bezier(0.22, 1, 0.36, 1) 50ms both,
-             cardPulse 2s cubic-bezier(0.22, 1, 0.36, 1) 0.7s;
+  animation: cardPulse 2s cubic-bezier(0.22, 1, 0.36, 1) 0.7s;
 }
 
 @keyframes cardPulse {
@@ -29,7 +18,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .cardNew {
+  .cardNew {
     animation: none;
   }
 }

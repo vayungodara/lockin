@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getOnboardingState, detectProgress, syncProgress } from '@/lib/onboarding';
 import { XP_REWARDS, unlockAchievement } from '@/lib/gamification';
-import { celebrationBounce, fadeInScale, staggerItem, prefersReducedMotion } from '@/lib/animations';
+import { celebrationBounce, fadeInScale, staggerContainer, staggerItem, prefersReducedMotion } from '@/lib/animations';
 import { fireConfetti, fireMilestoneConfetti } from '@/lib/confetti';
 import { useToast } from '@/components/Toast';
 import styles from './OnboardingChecklist.module.css';
@@ -239,7 +239,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
         </div>
       </div>
 
-      <div className={styles.steps}>
+      <motion.div className={styles.steps} variants={staggerContainer} initial="initial" animate="animate">
         {STEPS.map((step, i) => {
           const done = dbState[step.field];
           const justCompleted = newlyDone.has(step.field);
@@ -247,8 +247,8 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             <motion.div
               key={step.field}
               className={styles.step}
-              {...(justCompleted ? celebrationBounce : staggerItem)}
-              custom={i}
+              variants={justCompleted ? undefined : staggerItem}
+              {...(justCompleted ? celebrationBounce : {})}
             >
               <div className={`${styles.stepIcon} ${done ? styles.stepIconDone : ''}`}>
                 {done ? '✓' : step.icon}
@@ -271,7 +271,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             </motion.div>
           );
         })}
-      </div>
+      </motion.div>
 
       {canDismiss && (
         <button className={styles.dismissBtn} onClick={handleDismiss}>

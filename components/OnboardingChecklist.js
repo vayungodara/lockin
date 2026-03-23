@@ -54,14 +54,13 @@ const CIRCUMFERENCE = 2 * Math.PI * 16;
 
 export default function OnboardingChecklist({ userId, onCreatePact }) {
   // Dev preview: add ?onboarding=preview to URL to see empty card
-  const isPreview = typeof window !== 'undefined' &&
-    new URLSearchParams(window.location.search).get('onboarding') === 'preview';
+  // Deferred to useEffect to avoid SSR/client hydration mismatch
+  // (window is undefined on server, so isPreview would differ between passes,
+  //  causing React to reconcile synchronously and Framer Motion to skip initial state)
+  const [isPreview, setIsPreview] = useState(false);
 
-  const [dbState, setDbState] = useState(isPreview ? {
-    has_created_pact: false, has_used_focus_timer: false,
-    has_joined_group: false, has_built_momentum: false,
-  } : null);
-  const [loading, setLoading] = useState(!isPreview);
+  const [dbState, setDbState] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [allComplete, setAllComplete] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
   const [dismissed, setDismissed] = useState(false);
@@ -141,6 +140,19 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
       syncInFlight.current = false;
     }
   }, [userId, supabase, toast, isPreview, allComplete]);
+
+  // Detect preview mode after hydration to avoid SSR mismatch
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('onboarding') === 'preview') {
+      setIsPreview(true);
+      setDbState({
+        has_created_pact: false, has_used_focus_timer: false,
+        has_joined_group: false, has_built_momentum: false,
+      });
+      setLoading(false);
+    }
+  }, []);
 
   // Check on mount, custom events, and visibility change
   useEffect(() => {

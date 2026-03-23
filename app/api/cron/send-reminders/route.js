@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { sendReminderEmail } from '@/lib/email';
+import { verifyCronSecret } from '@/lib/cronAuth';
 
 // Create Supabase client with service role (lazy-loaded)
 function getSupabaseClient() {
@@ -10,13 +11,9 @@ function getSupabaseClient() {
 }
 
 export async function GET(request) {
-  // Verify the request is from Vercel Cron or has correct secret
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Verify the request is from Vercel Cron using timing-safe comparison
+  const { authorized, response } = verifyCronSecret(request);
+  if (!authorized) return response;
 
   const supabase = getSupabaseClient();
 

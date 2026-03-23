@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
-import { createNotification, NOTIFICATION_TYPES } from '@/lib/notifications';
+import { NOTIFICATION_TYPES } from '@/lib/notifications';
+import { verifyCronSecret } from '@/lib/cronAuth';
 
 function getSupabaseClient() {
   return createClient(
@@ -9,12 +10,9 @@ function getSupabaseClient() {
 }
 
 export async function GET(request) {
-  const authHeader = request.headers.get('authorization');
-  const cronSecret = process.env.CRON_SECRET;
-
-  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-    return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  }
+  // Verify the request is from Vercel Cron using timing-safe comparison
+  const { authorized, response } = verifyCronSecret(request);
+  if (!authorized) return response;
 
   const supabase = getSupabaseClient();
 
@@ -55,17 +53,14 @@ export async function GET(request) {
       .select('user_id, group_id')
       .in('user_id', profileIds);
 
-    // Send notifications and activity logs (still per-user for custom messages)
-    const notificationPromises = profiles.map(profile =>
-      createNotification(
-        supabase,
-        profile.id,
-        NOTIFICATION_TYPES.STREAK_BROKEN,
-        'Streak Broken',
-        `Your ${profile.current_streak}-day streak has ended. Start a new one today!`,
-        { brokenStreak: profile.current_streak }
-      ).catch(err => console.error(`Notification error for ${profile.id}:`, err))
-    );
+    // Batch insert all notifications in a single DB round-trip
+    const notifications = profiles.map(profile => ({
+      user_id: profile.id,
+      type: NOTIFICATION_TYPES.STREAK_BROKEN,
+      title: 'Streak Broken',
+      message: `Your ${profile.current_streak}-day streak has ended. Start a new one today!`,
+      metadata: { brokenStreak: profile.current_streak },
+    }));
 
     // Build activity log entries in bulk
     const activityEntries = [];
@@ -81,11 +76,17 @@ export async function GET(request) {
       }
     }
 
+    const notificationPromise = notifications.length > 0
+      ? supabase.from('notifications').insert(notifications).then(({ error: notifError }) => {
+          if (notifError) console.error('Batch notification error:', notifError);
+        })
+      : Promise.resolve();
+
     const activityPromise = activityEntries.length > 0
       ? supabase.from('activity_log').insert(activityEntries)
       : Promise.resolve();
 
-    await Promise.all([...notificationPromises, activityPromise]);
+    await Promise.all([notificationPromise, activityPromise]);
 
     const broken = profiles.length;
 

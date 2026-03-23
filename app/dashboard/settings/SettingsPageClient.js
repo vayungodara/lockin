@@ -8,6 +8,8 @@ import { buttonHover, buttonTap } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import { ACCENT_PALETTES } from '@/lib/accentColors';
 import { setSoundEnabled as setGlobalSoundEnabled } from '@/lib/sounds';
+import { resetOnboarding } from '@/lib/onboarding';
+import { createClient } from '@/lib/supabase/client';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './SettingsPage.module.css';
 
@@ -332,6 +334,45 @@ export default function SettingsPageClient({ user }) {
                   <kbd className={styles.kbd}>Esc</kbd>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Help Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+              <path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="12" cy="17" r="0.5" fill="currentColor" stroke="currentColor" strokeWidth="1"/>
+            </svg>
+            Help
+          </h2>
+
+          <div className={styles.settingCard}>
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Restart Onboarding</span>
+                <span className={styles.settingDescription}>
+                  Show the First Week Challenge again on your dashboard
+                </span>
+              </div>
+              <motion.button
+                className="btn btn-secondary"
+                whileHover={buttonHover}
+                whileTap={buttonTap}
+                onClick={async () => {
+                  const supabase = createClient();
+                  const success = await resetOnboarding(supabase, user?.id);
+                  if (success) {
+                    toast.success('Onboarding reset! Visit your dashboard to start the challenge.');
+                  } else {
+                    toast.error('Failed to reset onboarding. Try again.');
+                  }
+                }}
+              >
+                Reset
+              </motion.button>
             </div>
           </div>
         </section>

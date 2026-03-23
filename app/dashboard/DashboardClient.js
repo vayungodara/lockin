@@ -12,7 +12,7 @@ import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
 import DailySummaryCard from '@/components/DailySummaryCard';
-import OnboardingModal from '@/components/OnboardingModal';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 import XPBar from '@/components/XPBar';
 import { SkeletonCard } from '@/components/Skeleton';
 
@@ -254,6 +254,8 @@ export default function DashboardClient({ user }) {
           </motion.button>
         </motion.header>
         
+        <OnboardingChecklist userId={user?.id} onCreatePact={requestCreatePact} />
+
         <DailySummaryCard userId={user?.id} refreshKey={refreshKey} />
 
         {/* Stats Overview */}
@@ -429,7 +431,6 @@ export default function DashboardClient({ user }) {
           </motion.div>
         )}
       
-      <OnboardingModal userId={user?.id} onCreatePact={requestCreatePact} />
     </>
   );
 }

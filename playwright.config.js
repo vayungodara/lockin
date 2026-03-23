@@ -44,9 +44,12 @@ module.exports = defineConfig({
     },
   ],
 
-  /* Run the dev server before starting the tests */
+  /* Run the appropriate server before starting the tests.
+   * In CI we always run `next start` (serves the pre-built production bundle)
+   * because the dev compiler is too slow and non-deterministic on cold runners.
+   * Locally we use `next dev` so hot-reload works as expected. */
   webServer: {
-    command: 'npm run dev',
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

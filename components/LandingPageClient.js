@@ -365,7 +365,7 @@ export default function LandingPageClient() {
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                className={`${styles.featureCard} ${index === 0 ? styles.featureCardLarge : ''}`}
+                className={`${styles.featureCard} ${index === 0 || index === features.length - 1 ? styles.featureCardLarge : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}

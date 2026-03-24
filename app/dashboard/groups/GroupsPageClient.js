@@ -230,6 +230,9 @@ export default function GroupsPageClient({ user }) {
           <button className={styles.emptyAction} onClick={() => setIsCreateModalOpen(true)}>
             + Create Your First Group
           </button>
+          <button className={styles.emptyActionSecondary} onClick={() => setIsJoinModalOpen(true)}>
+            Join a Group
+          </button>
         </motion.div>
       ) : (
         <div className={styles.groupsGrid}>

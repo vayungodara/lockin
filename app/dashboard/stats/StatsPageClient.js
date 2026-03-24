@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
+import { fadeInUp } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
@@ -195,11 +197,28 @@ export default function StatsPageClient({ user }) {
       <div className={styles.content}>
         {/* Top-level empty state when user has zero activity */}
         {pactStats.total === 0 && focusStats.sessionsCount === 0 && (
-          <div className={styles.emptyState}>
-            <span className={styles.emptyEmoji}>{'\uD83D\uDCCA'}</span>
-            <h3 className={styles.emptyTitle}>No stats yet.</h3>
-            <p className={styles.emptySubtext}>Complete some pacts and your streak will start building here.</p>
-          </div>
+          <motion.div className={styles.emptyState} {...fadeInUp}>
+            <motion.div
+              className={styles.emptyIllustration}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="20" y1="90" x2="100" y2="90" stroke="currentColor" strokeWidth="1" opacity="0.1" />
+                <line x1="20" y1="70" x2="100" y2="70" stroke="currentColor" strokeWidth="1" opacity="0.1" />
+                <line x1="20" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="1" opacity="0.1" />
+                <path d="M25 80L45 65L60 70L75 45L95 30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
+                <circle cx="25" cy="80" r="3" fill="currentColor" opacity="0.3" />
+                <circle cx="45" cy="65" r="3" fill="currentColor" opacity="0.35" />
+                <circle cx="60" cy="70" r="3" fill="currentColor" opacity="0.4" />
+                <circle cx="75" cy="45" r="3" fill="currentColor" opacity="0.45" />
+                <circle cx="95" cy="30" r="4" fill="currentColor" opacity="0.6" />
+                <path d="M90 28L95 30L93 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+              </svg>
+            </motion.div>
+            <h3 className={styles.emptyTitle}>Your story starts with day one.</h3>
+            <p className={styles.emptySubtext}>Complete pacts and focus sessions to see your progress here.</p>
+          </motion.div>
         )}
 
         {/* Streak Summary */}

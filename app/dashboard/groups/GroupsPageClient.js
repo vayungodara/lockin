@@ -206,26 +206,30 @@ export default function GroupsPageClient({ user }) {
         </div>
       ) : groups.length === 0 ? (
         <motion.div className={styles.emptyState} {...fadeInUp}>
-          <div className={styles.emptyIllustration}>
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="22" cy="24" r="8" stroke="var(--accent-primary)" strokeWidth="2" />
-              <circle cx="42" cy="24" r="8" stroke="var(--accent-primary)" strokeWidth="2" opacity="0.6" />
-              <path d="M10 48C10 40.268 16.268 34 24 34H28" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" />
-              <path d="M54 48C54 40.268 47.732 34 40 34H36" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
-              <path d="M28 40L32 44L36 40" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.8" />
-              <path d="M32 44V36" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" opacity="0.8" />
+          <motion.div
+            className={styles.emptyIllustration}
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="40" cy="55" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
+              <circle cx="60" cy="45" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.35" />
+              <circle cx="80" cy="55" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
+              <circle cx="40" cy="50" r="4" fill="currentColor" opacity="0.2" />
+              <path d="M32 62a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
+              <circle cx="60" cy="40" r="4" fill="currentColor" opacity="0.35" />
+              <path d="M52 52a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" />
+              <circle cx="80" cy="50" r="4" fill="currentColor" opacity="0.2" />
+              <path d="M72 62a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
+              <path d="M48 48L52 46" stroke="currentColor" strokeWidth="1" opacity="0.15" />
+              <path d="M68 46L72 48" stroke="currentColor" strokeWidth="1" opacity="0.15" />
             </svg>
-          </div>
-          <h3>Better with friends</h3>
-          <p>Accountability is a team sport. Start a group and keep each other honest.</p>
-          <div className={styles.emptyActions}>
-            <button className="btn btn-secondary" onClick={() => setIsJoinModalOpen(true)}>
-              Join Group
-            </button>
-            <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-              Create Group
-            </button>
-          </div>
+          </motion.div>
+          <h3 className={styles.emptyTitle}>Better together. Way better.</h3>
+          <p className={styles.emptySubtext}>Create a group to tackle projects with friends and hold each other accountable.</p>
+          <button className={styles.emptyAction} onClick={() => setIsCreateModalOpen(true)}>
+            + Create Your First Group
+          </button>
         </motion.div>
       ) : (
         <div className={styles.groupsGrid}>

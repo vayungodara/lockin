@@ -351,20 +351,22 @@ export default function DashboardClient({ user }) {
             </motion.button>
           </motion.div>
         ) : pacts.length === 0 ? (
-          <motion.div 
+          <motion.div
             className={styles.emptyState}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3 }}
+            {...fadeInUp}
           >
-            <div className={styles.emptyIcon}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <motion.div
+              className={styles.emptyIllustration}
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+            >
+              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M45 15L30 42H40L35 65L55 35H44L45 15Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" opacity="0.35" />
+                <path d="M45 15L30 42H40L35 65L55 35H44L45 15Z" fill="currentColor" opacity="0.05" />
               </svg>
-            </div>
-            <h3>No pacts yet</h3>
-            <p>Create your first pact to start building accountability.</p>
+            </motion.div>
+            <h3>Nothing here yet. Go make something happen.</h3>
+            <p>Create your first pact and start holding yourself accountable.</p>
             <motion.button
               className="btn btn-primary"
               onClick={requestCreatePact}

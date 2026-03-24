@@ -134,7 +134,7 @@ export default function PactsPageClient({ user }) {
           >
             {filter === tab.key && (
               <motion.div
-                layoutId="activeFilter"
+                layoutId="pacts-active-filter"
                 className={styles.filterIndicator}
                 transition={{ type: 'spring', stiffness: 500, damping: 30 }}
               />

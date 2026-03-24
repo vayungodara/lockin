@@ -100,6 +100,9 @@ export async function GET(request) {
 
     const broken = profiles.length;
 
+    // 207 Multi-Status: streak resets succeeded but notification/activity inserts failed.
+    // Vercel cron treats 2xx as success (no retry), which is correct here —
+    // retrying would re-process already-reset streaks. Monitor via console.error logs.
     if (batchErrors.length > 0) {
       return Response.json(
         { message: `Processed ${broken} broken streaks with partial failures`, batchErrors },

@@ -12,7 +12,7 @@ import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
 import DailySummaryCard from '@/components/DailySummaryCard';
-import OnboardingModal from '@/components/OnboardingModal';
+import OnboardingChecklist from '@/components/OnboardingChecklist';
 import XPBar from '@/components/XPBar';
 import { SkeletonCard } from '@/components/Skeleton';
 
@@ -228,7 +228,7 @@ export default function DashboardClient({ user }) {
   // User is signed in - show dashboard
   return (
     <>
-      <motion.header 
+      <motion.header
         className={styles.header}
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -254,6 +254,8 @@ export default function DashboardClient({ user }) {
           </motion.button>
         </motion.header>
         
+        <OnboardingChecklist userId={user?.id} onCreatePact={requestCreatePact} />
+
         <DailySummaryCard userId={user?.id} refreshKey={refreshKey} />
 
         {/* Stats Overview */}
@@ -320,15 +322,22 @@ export default function DashboardClient({ user }) {
         </motion.div>
         
         {/* Pacts List or Empty State */}
+        <AnimatePresence mode="wait">
         {isLoading ? (
-          <div className={styles.pactsGrid}>
+          <motion.div
+            key="skeletons"
+            className={styles.pactsGrid}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+          >
             <SkeletonCard height="140px" />
             <SkeletonCard height="140px" />
             <SkeletonCard height="140px" />
             <SkeletonCard height="140px" />
-          </div>
+          </motion.div>
         ) : error ? (
-          <motion.div 
+          <motion.div
+            key="error"
             className={styles.emptyState}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -352,6 +361,7 @@ export default function DashboardClient({ user }) {
           </motion.div>
         ) : pacts.length === 0 ? (
           <motion.div
+            key="empty"
             className={styles.emptyState}
             {...fadeInUp}
           >
@@ -380,7 +390,13 @@ export default function DashboardClient({ user }) {
             </motion.button>
           </motion.div>
         ) : (
-          <motion.div className={styles.pactsSection} variants={fadeInUp} initial="initial" animate="animate">
+          <motion.div
+            key="pacts"
+            className={styles.pactsSection}
+            variants={fadeInUp}
+            initial="initial"
+            animate="animate"
+          >
             <div className={styles.sectionHeader}>
               <h2>{activePacts.length > 0 ? 'Active Pacts' : 'Recent Pacts'}</h2>
               <a href="/dashboard/pacts" className={styles.viewAllLink}>View all</a>
@@ -389,8 +405,8 @@ export default function DashboardClient({ user }) {
               <motion.div className={styles.pactsGrid}>
                 <AnimatePresence mode="popLayout">
                   {dashboardPacts.map((pact) => (
-                    <motion.div 
-                      key={pact.id} 
+                    <motion.div
+                      key={pact.id}
                       layout
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
@@ -408,6 +424,7 @@ export default function DashboardClient({ user }) {
             </LayoutGroup>
           </motion.div>
         )}
+        </AnimatePresence>
 
         {!isLoading && pacts.length > 0 && (
           <motion.div 
@@ -431,7 +448,6 @@ export default function DashboardClient({ user }) {
           </motion.div>
         )}
       
-      <OnboardingModal userId={user?.id} onCreatePact={requestCreatePact} />
     </>
   );
 }

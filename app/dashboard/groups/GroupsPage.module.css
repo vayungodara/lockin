@@ -312,12 +312,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: var(--space-16);
-  background: var(--surface-1);
-  border: 1px dashed var(--border-default);
-  border-radius: var(--radius-xl);
   text-align: center;
+  padding: var(--space-16) var(--space-6);
+  gap: var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+}
+
+.emptyState h3 {
+  margin: 0;
+}
+
+.emptyState p {
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 400px;
 }
 
 .emptyIcon {
@@ -329,34 +339,65 @@
   background: var(--surface-2);
   color: var(--text-muted);
   border-radius: 50%;
-  margin-bottom: var(--space-6);
 }
 
 .emptyIllustration {
+  width: 120px;
+  height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 96px;
-  height: 96px;
-  background: var(--accent-glow);
-  border-radius: var(--radius-xl);
-  margin-bottom: var(--space-6);
-}
-
-.emptyState h3 {
-  font-size: var(--text-xl);
+  color: var(--accent-primary);
   margin-bottom: var(--space-2);
 }
 
-.emptyState p {
-  color: var(--text-secondary);
-  margin-bottom: var(--space-6);
-  max-width: 400px;
+.emptyTitle {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
 }
 
-.emptyActions {
-  display: flex;
-  gap: var(--space-3);
+.emptySubtext {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  margin: 0;
+  max-width: 320px;
+}
+
+.emptyAction {
+  margin-top: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  background: var(--accent-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.emptyAction:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.emptyActionSecondary {
+  padding: var(--space-3) var(--space-6);
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.emptyActionSecondary:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
 }
 
 /* ============================================
@@ -386,12 +427,7 @@
     grid-template-columns: 1fr;
   }
 
-  .emptyActions {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .emptyActions button {
+  .emptyAction {
     width: 100%;
   }
 }

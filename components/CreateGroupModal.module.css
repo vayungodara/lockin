@@ -132,7 +132,7 @@
   color: var(--text-primary);
   font-size: var(--text-base);
   font-family: inherit;
-  transition: all var(--transition-fast);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .input::placeholder,
@@ -140,11 +140,17 @@
   color: var(--text-muted);
 }
 
+.input:hover,
+.textarea:hover {
+  border-color: var(--border-strong);
+}
+
 .input:focus,
 .textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px var(--accent-glow);
+  transform: scale(1.005);
 }
 
 .textarea {
@@ -212,6 +218,18 @@
   color: var(--danger);
   border-radius: var(--radius-lg);
   font-size: var(--text-sm);
+  animation: slideUpFade 0.2s ease-out;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .actions {
@@ -307,5 +325,32 @@
 @media (max-width: 480px) {
   .actions {
     flex-direction: column-reverse;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    animation: none;
+  }
+
+  .modal {
+    animation: none;
+  }
+
+  .submitBtn.loading::after {
+    animation: none;
+  }
+
+  .spinner {
+    animation: none;
+  }
+
+  .input:focus,
+  .textarea:focus {
+    transform: none;
+  }
+
+  .error {
+    animation: none;
   }
 }

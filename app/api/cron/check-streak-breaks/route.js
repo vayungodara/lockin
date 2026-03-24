@@ -76,21 +76,36 @@ export async function GET(request) {
       }
     }
 
+    const batchErrors = [];
+
     const notificationPromise = notifications.length > 0
       ? supabase.from('notifications').insert(notifications).then(({ error: notifError }) => {
-          if (notifError) console.error('Batch notification error:', notifError);
+          if (notifError) {
+            console.error('Batch notification error:', notifError);
+            batchErrors.push({ target: 'notifications', error: notifError.message });
+          }
         })
       : Promise.resolve();
 
     const activityPromise = activityEntries.length > 0
       ? supabase.from('activity_log').insert(activityEntries).then(({ error: actError }) => {
-          if (actError) console.error('Batch activity log error:', actError);
+          if (actError) {
+            console.error('Batch activity log error:', actError);
+            batchErrors.push({ target: 'activity_log', error: actError.message });
+          }
         })
       : Promise.resolve();
 
     await Promise.all([notificationPromise, activityPromise]);
 
     const broken = profiles.length;
+
+    if (batchErrors.length > 0) {
+      return Response.json(
+        { message: `Processed ${broken} broken streaks with partial failures`, batchErrors },
+        { status: 207 }
+      );
+    }
 
     return Response.json({ message: `Processed ${broken} broken streaks` });
   } catch (err) {

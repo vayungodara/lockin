@@ -317,16 +317,16 @@
 .statCardStreak {
   position: relative;
   padding: var(--space-5) var(--space-5);
-  background: linear-gradient(135deg, rgba(255, 140, 50, 0.08), rgba(255, 80, 30, 0.04));
-  border: 1px solid rgba(255, 140, 50, 0.25);
+  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.08), rgba(var(--streak-color-rgb), 0.04));
+  border: 1px solid rgba(var(--streak-color-rgb), 0.25);
   border-radius: var(--radius-xl);
-  box-shadow: 0 0 20px rgba(255, 120, 40, 0.08);
+  box-shadow: 0 0 20px rgba(var(--streak-color-rgb), 0.08);
   overflow: hidden;
 }
 
 .statCardStreak:hover {
-  box-shadow: 0 0 28px rgba(255, 120, 40, 0.14);
-  border-color: rgba(255, 140, 50, 0.4);
+  box-shadow: 0 0 28px rgba(var(--streak-color-rgb), 0.14);
+  border-color: rgba(var(--streak-color-rgb), 0.4);
 }
 
 .streakFlame {
@@ -335,8 +335,8 @@
   justify-content: center;
   width: 56px;
   height: 56px;
-  background: rgba(255, 120, 40, 0.12);
-  color: #f57c20;
+  background: rgba(var(--streak-color-rgb), 0.12);
+  color: rgb(var(--streak-color-rgb));
   border-radius: var(--radius-xl);
   animation: flameGlow 2s ease-in-out infinite;
   flex-shrink: 0;
@@ -344,11 +344,11 @@
 
 @keyframes flameGlow {
   0%, 100% {
-    box-shadow: 0 0 8px rgba(255, 120, 40, 0.15);
+    box-shadow: 0 0 8px rgba(var(--streak-color-rgb), 0.15);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 18px rgba(255, 120, 40, 0.3);
+    box-shadow: 0 0 18px rgba(var(--streak-color-rgb), 0.3);
     transform: scale(1.04);
   }
 }
@@ -365,7 +365,7 @@
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
   color: var(--text-tertiary);
-  background: rgba(255, 120, 40, 0.08);
+  background: rgba(var(--streak-color-rgb), 0.08);
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-full);
   white-space: nowrap;

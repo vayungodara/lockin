@@ -49,6 +49,7 @@
   --accent-tertiary-rgb: 224, 64, 203;
   --accent-celebration: #F5A623;
   --accent-celebration-rgb: 245, 166, 35;
+  --streak-color-rgb: 255, 140, 50;
 
   /* Status colors — with personality */
   --success: #0DBF73;
@@ -230,6 +231,7 @@
   --shadow-glow: 0 0 40px rgba(var(--accent-primary-rgb), 0.25);
   --shadow-glow-lg: 0 0 60px rgba(var(--accent-primary-rgb), 0.35);
   --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.4);
+  --streak-color-rgb: 255, 140, 50;
 }
 
 /* System preference fallback — handled by inline script in layout.js

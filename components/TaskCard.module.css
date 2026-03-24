@@ -2,7 +2,7 @@
   position: relative;
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-item);
   padding: var(--space-4);
   transition: all var(--transition-base);
   cursor: default;

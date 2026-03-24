@@ -111,7 +111,7 @@
   border-radius: var(--radius-md);
   color: var(--text-primary);
   font-size: var(--text-base);
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .input::placeholder,
@@ -129,6 +129,7 @@
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.15), 0 0 16px rgba(var(--accent-primary-rgb), 0.1);
+  transform: scale(1.005);
 }
 
 .textarea {
@@ -171,6 +172,18 @@
   border-radius: var(--radius-lg);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
+  animation: slideUpFade 0.2s ease-out;
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .actions {
@@ -611,6 +624,15 @@
   }
 
   .spinner {
+    animation: none;
+  }
+
+  .input:focus,
+  .textarea:focus {
+    transform: none;
+  }
+
+  .error {
     animation: none;
   }
 }

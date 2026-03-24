@@ -39,10 +39,10 @@
 }
 
 .heroTitle {
-  font-size: clamp(3rem, 6vw, 4.5rem);
-  font-weight: 700;
+  font-size: clamp(3.25rem, 7vw, 5rem);
+  font-weight: 800;
   line-height: 1.05;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.04em;
   margin-bottom: var(--space-6);
 }
 
@@ -261,7 +261,7 @@
 
 .featureGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr 1fr;
   gap: var(--space-5);
 }
 
@@ -321,7 +321,13 @@
 }
 
 .featureCardLarge {
-  grid-column: span 1;
+  grid-column: span 2;
+  padding: var(--space-10) var(--space-10);
+  background: linear-gradient(
+    135deg,
+    var(--surface-1) 0%,
+    rgba(var(--accent-primary-rgb), 0.03) 100%
+  );
 }
 
 /* === App Preview Section === */
@@ -654,11 +660,21 @@
 }
 
 .stepNumber {
-  font-size: var(--text-3xl);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--accent-primary);
+  color: #fff;
+  font-size: var(--text-lg);
   font-weight: 800;
-  color: var(--accent-primary);
   line-height: 1;
-  margin-bottom: var(--space-5);
+  margin: 0 auto var(--space-5);
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
 }
 
 .step h3 {
@@ -673,6 +689,20 @@
   font-size: var(--text-base);
   line-height: 1.6;
 }
+
+/* Connecting line between step cards */
+.step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  right: calc(var(--space-6) * -1);
+  width: var(--space-6);
+  height: 2px;
+  background: var(--border-default);
+  transform: translateY(-50%);
+}
+
+/* Stagger offsets are handled via Framer Motion for compatibility with whileHover */
 
 .stepConnector {
   display: flex;
@@ -857,6 +887,11 @@
     gap: var(--space-4);
   }
 
+  .step:not(:last-child)::after {
+    right: calc(var(--space-4) * -1);
+    width: var(--space-4);
+  }
+
   .stepConnector {
     display: none;
   }
@@ -930,6 +965,10 @@
   .step {
     max-width: 100%;
     padding: var(--space-8) var(--space-6);
+  }
+
+  .step:not(:last-child)::after {
+    display: none;
   }
   
   .ctaCard {

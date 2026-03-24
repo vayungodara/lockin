@@ -121,30 +121,27 @@ export default function PactsPageClient({ user }) {
 
       {/* Filter Tabs */}
       <div className={styles.filterTabs}>
-        <button 
-          className={`${styles.filterTab} ${filter === 'all' ? styles.active : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          All ({pacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'active' ? styles.active : ''}`}
-          onClick={() => setFilter('active')}
-        >
-          Active ({activePacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'completed' ? styles.active : ''}`}
-          onClick={() => setFilter('completed')}
-        >
-          Completed ({completedPacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'missed' ? styles.active : ''}`}
-          onClick={() => setFilter('missed')}
-        >
-          Missed ({missedPacts.length})
-        </button>
+        {[
+          { key: 'all', label: 'All', count: pacts.length },
+          { key: 'active', label: 'Active', count: activePacts.length },
+          { key: 'completed', label: 'Completed', count: completedPacts.length },
+          { key: 'missed', label: 'Missed', count: missedPacts.length },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            className={`${styles.filterTab} ${filter === tab.key ? styles.active : ''}`}
+            onClick={() => setFilter(tab.key)}
+          >
+            {filter === tab.key && (
+              <motion.div
+                layoutId="pacts-active-filter"
+                className={styles.filterIndicator}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            )}
+            <span className={styles.filterLabel}>{tab.label} ({tab.count})</span>
+          </button>
+        ))}
       </div>
 
       {/* Pacts List */}
@@ -156,29 +153,31 @@ export default function PactsPageClient({ user }) {
         </div>
       ) : filteredPacts.length === 0 ? (
         <motion.div className={styles.emptyState} {...fadeInUp}>
-          <div className={styles.emptyIllustration}>
-            <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="12" y="8" width="40" height="48" rx="6" stroke="var(--accent-primary)" strokeWidth="2.5" strokeDasharray="4 3" opacity="0.35" />
-              <rect x="16" y="12" width="32" height="40" rx="4" stroke="var(--accent-primary)" strokeWidth="2" />
-              <path d="M24 26L29 31L40 20" stroke="var(--accent-primary)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-              <line x1="24" y1="38" x2="40" y2="38" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" opacity="0.4" />
-              <line x1="24" y1="44" x2="34" y2="44" stroke="var(--text-muted)" strokeWidth="2" strokeLinecap="round" opacity="0.25" />
+          <motion.div
+            className={styles.emptyIllustration}
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          >
+            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="60" cy="60" r="45" stroke="currentColor" strokeWidth="1.5" opacity="0.15" />
+              <circle cx="60" cy="60" r="30" stroke="currentColor" strokeWidth="1.5" opacity="0.25" />
+              <circle cx="60" cy="60" r="15" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
+              <circle cx="60" cy="60" r="4" fill="currentColor" opacity="0.6" />
+              <path d="M90 30L62 58" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+              <path d="M90 30L80 32M90 30L88 40" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
             </svg>
-          </div>
+          </motion.div>
           <h3 className={styles.emptyTitle}>
-            {filter === 'all' ? 'Your pact list is feeling lonely' : `No ${filter} pacts`}
+            {filter === 'all' ? 'No pacts yet? Your future self is judging you.' : `No ${filter} pacts`}
           </h3>
           <p className={styles.emptySubtext}>
             {filter === 'all'
-              ? 'Make a promise to yourself — future you will thank you.'
+              ? 'Create your first commitment and start building momentum.'
               : `${filter === 'completed' ? 'Nothing checked off yet. You got this.' : filter === 'missed' ? 'Clean record so far. Let\'s keep it that way.' : 'Time to commit to something new.'}`}
           </p>
           {filter === 'all' && (
-            <button className="btn btn-primary" onClick={() => setIsModalOpen(true)} style={{ marginTop: 'var(--space-2)' }}>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Make Your First Pact
+            <button className={styles.emptyAction} onClick={() => setIsModalOpen(true)}>
+              + Create Your First Pact
             </button>
           )}
         </motion.div>

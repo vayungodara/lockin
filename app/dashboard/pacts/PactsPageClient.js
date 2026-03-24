@@ -121,30 +121,27 @@ export default function PactsPageClient({ user }) {
 
       {/* Filter Tabs */}
       <div className={styles.filterTabs}>
-        <button 
-          className={`${styles.filterTab} ${filter === 'all' ? styles.active : ''}`}
-          onClick={() => setFilter('all')}
-        >
-          All ({pacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'active' ? styles.active : ''}`}
-          onClick={() => setFilter('active')}
-        >
-          Active ({activePacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'completed' ? styles.active : ''}`}
-          onClick={() => setFilter('completed')}
-        >
-          Completed ({completedPacts.length})
-        </button>
-        <button 
-          className={`${styles.filterTab} ${filter === 'missed' ? styles.active : ''}`}
-          onClick={() => setFilter('missed')}
-        >
-          Missed ({missedPacts.length})
-        </button>
+        {[
+          { key: 'all', label: 'All', count: pacts.length },
+          { key: 'active', label: 'Active', count: activePacts.length },
+          { key: 'completed', label: 'Completed', count: completedPacts.length },
+          { key: 'missed', label: 'Missed', count: missedPacts.length },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            className={`${styles.filterTab} ${filter === tab.key ? styles.active : ''}`}
+            onClick={() => setFilter(tab.key)}
+          >
+            {filter === tab.key && (
+              <motion.div
+                layoutId="activeFilter"
+                className={styles.filterIndicator}
+                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              />
+            )}
+            <span className={styles.filterLabel}>{tab.label} ({tab.count})</span>
+          </button>
+        ))}
       </div>
 
       {/* Pacts List */}

@@ -576,15 +576,18 @@ export default function LandingPageClient() {
           </motion.div>
           
           <div className={styles.steps}>
-            {steps.map((step, index) => (
-              <motion.div 
+            {steps.map((step, index) => {
+              // Stagger: odd cards (0, 2) shift down 8px, even card (1) shifts up 8px
+              const staggerY = index % 2 === 0 ? 8 : -8;
+              return (
+              <motion.div
                 key={step.number}
                 className={styles.step}
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                whileInView={{ opacity: 1, y: staggerY }}
                 viewport={{ once: true, amount: 0.3 }}
                 transition={{ duration: 0.4, delay: index * 0.1, ease: easeOutQuint }}
-                whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
+                whileHover={{ y: staggerY - 5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
                 <motion.div 
                   className={styles.stepNumber}
@@ -598,7 +601,8 @@ export default function LandingPageClient() {
                 <h3>{step.title}</h3>
                 <p>{step.description}</p>
               </motion.div>
-            ))}
+              );
+            })}
           </div>
         </section>
         

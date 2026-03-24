@@ -111,15 +111,16 @@
 }
 
 .filterTab {
+  position: relative;
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-sm);
   font-weight: 500;
   color: var(--text-secondary);
   background: transparent;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-item);
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: color 0.15s ease;
 }
 
 .filterTab:hover {
@@ -127,8 +128,21 @@
 }
 
 .filterTab.active {
-  background: var(--accent-primary);
-  color: white;
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.filterIndicator {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--accent-primary-rgb), 0.1);
+  border-radius: var(--radius-item);
+  z-index: 0;
+}
+
+.filterLabel {
+  position: relative;
+  z-index: 1;
 }
 
 /* Pacts Grid */

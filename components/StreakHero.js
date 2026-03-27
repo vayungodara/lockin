@@ -21,7 +21,7 @@ function getStreakTier(streak) {
   if (streak >= 14)  return { icon: '\u26A1', tier: 'electric', label: 'Electric' };
   if (streak >= 7)   return { icon: '\uD83D\uDD25', tier: 'fire', label: 'On fire' };
   if (streak >= 3)   return { icon: '\uD83D\uDD25', tier: 'warm', label: 'Warming up' };
-  return { icon: '\uD83D\uDD25', tier: 'default', label: '' };
+  return { icon: '\uD83D\uDD25', tier: 'base', label: '' };
 }
 
 function getMicroCopy(streak) {

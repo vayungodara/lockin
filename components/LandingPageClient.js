@@ -77,6 +77,7 @@ const features = [
     ),
     title: "Streaks & Stats",
     description: "Build momentum with streaks. See your progress over time and celebrate your wins.",
+    isHero: true,
   },
 ];
 

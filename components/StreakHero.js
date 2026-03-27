@@ -73,7 +73,7 @@ export default function StreakHero({ currentStreak, longestStreak }) {
           {longestStreak > 0 && (
             <div className={styles.secondary}>
               <span className={styles.bestLabel}>Best:</span>
-              <span className={styles.bestValue}>{longestStreak} days</span>
+              <span className={styles.bestValue}>{longestStreak} {longestStreak === 1 ? 'day' : 'days'}</span>
             </div>
           )}
         </div>

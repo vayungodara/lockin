@@ -50,15 +50,16 @@ export default function StreakHero({ currentStreak, longestStreak }) {
       <div className={styles.bgDecoration} aria-hidden="true" />
 
       <div className={styles.content}>
-        {/* Streak icon */}
-        <motion.div
-          className={styles.iconWrapper}
-          {...(isMilestone ? streakCelebration : {})}
-        >
-          <span className={styles.icon} role="img" aria-label="streak icon">
-            {icon}
-          </span>
-        </motion.div>
+        {/* Streak icon — celebration wraps inner span to avoid overriding CSS pulse */}
+        <div className={styles.iconWrapper}>
+          {isMilestone ? (
+            <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
+              <span className={styles.icon} role="img" aria-label="streak icon">{icon}</span>
+            </motion.span>
+          ) : (
+            <span className={styles.icon} role="img" aria-label="streak icon">{icon}</span>
+          )}
+        </div>
 
         {/* Streak count */}
         <div className={styles.stats}>

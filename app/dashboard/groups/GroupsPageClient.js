@@ -354,7 +354,7 @@ export default function GroupsPageClient({ user }) {
           </button>
         </motion.div>
       ) : (
-        <GroupSections groups={groups} setIsCreateModalOpen={setIsCreateModalOpen} />
+        <GroupSections groups={groups} />
       )}
 
       {/* Modals */}

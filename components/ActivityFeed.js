@@ -58,8 +58,12 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       channelConfig.filter = 'group_id=eq.' + groupId;
     }
 
+    const channelName = groupId
+      ? `activity-feed-group-${groupId}`
+      : 'activity-feed-global';
+
     const channel = supabase
-      .channel('activity-feed-realtime')
+      .channel(channelName)
       .on('postgres_changes', channelConfig, async (payload) => {
         const newRow = payload.new;
         if (!newRow) return;

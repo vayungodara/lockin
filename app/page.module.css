@@ -330,6 +330,46 @@
   );
 }
 
+/* === Social Proof Section === */
+
+.socialProof {
+  padding: var(--space-10) var(--space-6);
+  text-align: center;
+}
+
+.socialProofInner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.avatarStack {
+  display: flex;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--bg-primary);
+  margin-left: -10px;
+}
+
+.avatar:first-child {
+  margin-left: 0;
+}
+
+.socialProofText {
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+}
+
+.socialProofText strong {
+  color: var(--text-primary);
+}
+
 /* === App Preview Section === */
 
 .appPreview {
@@ -634,9 +674,21 @@
 
 .steps {
   display: flex;
-  align-items: stretch;
+  align-items: flex-start;
   justify-content: center;
   gap: var(--space-6);
+}
+
+.step:nth-child(1) {
+  transform: translateY(0);
+}
+
+.step:nth-child(2) {
+  transform: translateY(-12px);
+}
+
+.step:nth-child(3) {
+  transform: translateY(8px);
 }
 
 .step {
@@ -960,6 +1012,12 @@
   .steps {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .step:nth-child(1),
+  .step:nth-child(2),
+  .step:nth-child(3) {
+    transform: translateY(0);
   }
   
   .step {

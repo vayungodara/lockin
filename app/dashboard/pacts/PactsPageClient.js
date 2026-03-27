@@ -159,12 +159,23 @@ export default function PactsPageClient({ user }) {
             transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
           >
             <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="60" cy="60" r="45" stroke="currentColor" strokeWidth="1.5" opacity="0.15" />
-              <circle cx="60" cy="60" r="30" stroke="currentColor" strokeWidth="1.5" opacity="0.25" />
-              <circle cx="60" cy="60" r="15" stroke="currentColor" strokeWidth="1.5" opacity="0.4" />
-              <circle cx="60" cy="60" r="4" fill="currentColor" opacity="0.6" />
-              <path d="M90 30L62 58" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-              <path d="M90 30L80 32M90 30L88 40" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
+              {/* Target rings */}
+              <circle cx="55" cy="62" r="40" stroke="currentColor" strokeWidth="1.5" opacity="0.12" fill="rgba(var(--accent-primary-rgb), 0.03)" />
+              <circle cx="55" cy="62" r="28" stroke="currentColor" strokeWidth="1.5" opacity="0.2" fill="rgba(var(--accent-primary-rgb), 0.05)" />
+              <circle cx="55" cy="62" r="16" stroke="currentColor" strokeWidth="1.5" opacity="0.35" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+              <circle cx="55" cy="62" r="5" fill="currentColor" opacity="0.5" />
+              {/* Arrow shaft */}
+              <path d="M55 62L92 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+              {/* Arrowhead */}
+              <path d="M92 25L82 27" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+              <path d="M92 25L90 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
+              {/* Arrow fletching */}
+              <path d="M55 62L48 68" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+              <path d="M55 62L62 68" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
+              {/* Impact sparks */}
+              <path d="M49 55L45 51" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
+              <path d="M62 56L66 52" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
+              <path d="M52 70L48 74" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.15" />
             </svg>
           </motion.div>
           <h3 className={styles.emptyTitle}>

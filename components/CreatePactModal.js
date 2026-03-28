@@ -145,6 +145,12 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
       // Combine date and time for deadline
       const deadlineDateTime = new Date(`${deadline}T${deadlineTime}`);
 
+      if (deadlineDateTime < new Date()) {
+        setError('Deadline must be in the future');
+        setIsLoading(false);
+        return;
+      }
+
       const { data, error: insertError } = await supabase
         .from('pacts')
         .insert({

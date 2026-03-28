@@ -67,6 +67,7 @@ const features = [
     ),
     title: "Focus Timer",
     description: "Pomodoro-style focus sessions. Track your deep work and compete with your past self.",
+    isHero: true,
   },
   {
     icon: (
@@ -76,6 +77,7 @@ const features = [
     ),
     title: "Streaks & Stats",
     description: "Build momentum with streaks. See your progress over time and celebrate your wins.",
+    isHero: true,
   },
 ];
 
@@ -365,7 +367,7 @@ export default function LandingPageClient() {
             {features.map((feature, index) => (
               <motion.div
                 key={feature.title}
-                className={`${styles.featureCard} ${index === 0 || index === features.length - 1 ? styles.featureCardLarge : ''}`}
+                className={`${styles.featureCard} ${feature.isHero ? styles.featureCardLarge : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, amount: 0.3 }}
@@ -384,7 +386,26 @@ export default function LandingPageClient() {
             ))}
           </div>
         </section>
-        
+
+        <motion.section
+          className={styles.socialProof}
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.5 }}
+          transition={{ duration: 0.5, ease: easeOutQuint }}
+        >
+          <div className={styles.socialProofInner}>
+            <div className={styles.avatarStack}>
+              {['#5B5EF5', '#7C4DFF', '#E040CB', '#00C9A7', '#FF6B6B'].map((color, i) => (
+                <div key={i} className={styles.avatar} style={{ backgroundColor: color, zIndex: 5 - i }} />
+              ))}
+            </div>
+            <p className={styles.socialProofText}>
+              Join <strong>50+ students</strong> building better habits together
+            </p>
+          </div>
+        </motion.section>
+
         <section className={styles.appPreview}>
           <motion.div
             className={styles.sectionHeader}
@@ -577,8 +598,9 @@ export default function LandingPageClient() {
           
           <div className={styles.steps}>
             {steps.map((step, index) => {
-              // Stagger: odd cards (0, 2) shift down 8px, even card (1) shifts up 8px
-              const staggerY = index % 2 === 0 ? 8 : -8;
+              // Vertical rhythm stagger: step 1 baseline, step 2 raised, step 3 slightly lowered
+              const staggerOffsets = [0, -12, 8];
+              const staggerY = staggerOffsets[index] || 0;
               return (
               <motion.div
                 key={step.number}

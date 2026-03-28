@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { fadeInUp, streakCelebration } from '@/lib/animations';
+import { fadeInUp } from '@/lib/animations';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
@@ -19,17 +19,6 @@ function getMilestoneMessage(streak) {
   if (streak >= 14) return { emoji: '\u26A1', text: '2 weeks strong. Keep going.' };
   if (streak >= 7) return { emoji: '\uD83C\uDFAF', text: 'One week locked in. W.' };
   return null;
-}
-
-/**
- * Pick the right icon for the streak level:
- *   100+ days = crown, 30+ = diamond, 7+ = fire, otherwise fire
- */
-function getStreakIcon(streak) {
-  if (streak >= 100) return { emoji: '\uD83D\uDC51', tier: 'legendary' };  // crown
-  if (streak >= 30) return { emoji: '\uD83D\uDC8E', tier: 'diamond' };     // diamond
-  if (streak >= 7) return { emoji: '\uD83D\uDD25', tier: 'fire' };         // fire with glow
-  return { emoji: '\uD83D\uDD25', tier: 'default' };                       // plain fire
 }
 
 /**
@@ -188,7 +177,6 @@ export default function DailySummaryCard({ userId, refreshKey }) {
 
   if (isLoading || !summary) return <div style={{ height: '120px' }} />;
 
-  const streakInfo = getStreakIcon(summary.streak);
   const freezesRemaining = freezeStatus?.freezesRemaining ?? summary.freezesRemaining;
 
   return (
@@ -201,20 +189,6 @@ export default function DailySummaryCard({ userId, refreshKey }) {
             <div className={styles.freezeBadge} title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}>
               <span className={styles.freezeIcon}>{'\u2744\uFE0F'}</span>
               <span>{freezesRemaining}</span>
-            </div>
-          )}
-
-          {/* Streak badge with tier-based icon */}
-          {summary.streak > 0 && (
-            <div className={`${styles.streakBadge} ${styles[`streak_${streakInfo.tier}`] || ''}`}>
-              <span className={styles.streakIcon}>{streakInfo.emoji}</span>
-              {summary.streak >= 3 ? (
-                <motion.span {...streakCelebration}>
-                  {summary.streak} day streak
-                </motion.span>
-              ) : (
-                <span>{summary.streak} day streak</span>
-              )}
             </div>
           )}
         </div>

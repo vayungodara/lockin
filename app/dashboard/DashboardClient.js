@@ -12,6 +12,7 @@ import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import CompactActivityCard from '@/components/CompactActivityCard';
 import DailySummaryCard from '@/components/DailySummaryCard';
+import StreakHero from '@/components/StreakHero';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import XPBar from '@/components/XPBar';
 import { SkeletonCard } from '@/components/Skeleton';
@@ -71,8 +72,6 @@ export default function DashboardClient({ user }) {
       setStreakData(data);
     }).catch(err => console.error('Error fetching streak:', err));
   }, [supabase, user?.id, refreshKey]);
-
-  const animatedStreak = useCountUp(streakData.currentStreak);
 
   // Register keyboard shortcuts — delegate to layout-level CreatePactModal
   useEffect(() => {
@@ -258,6 +257,8 @@ export default function DashboardClient({ user }) {
 
         <DailySummaryCard userId={user?.id} refreshKey={refreshKey} />
 
+        <StreakHero currentStreak={streakData.currentStreak} longestStreak={streakData.longestStreak} />
+
         {/* Stats Overview */}
         <motion.div
           className={styles.statsGrid}
@@ -265,23 +266,6 @@ export default function DashboardClient({ user }) {
           initial="initial"
           animate="animate"
         >
-          {/* Streak card — visually distinct, larger with flame */}
-          <motion.div className={`${styles.statCard} ${styles.statCardStreak}`} variants={staggerItem}>
-            <div className={styles.streakFlame}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 23C16.5 23 20 19.5 20 15C20 11.5 18 8.5 16 6.5C15.5 9 13.5 10 12 9C12.5 7 12 4 9.5 2C9 4.5 7 7 5 9.5C3.5 11.5 4 15 4 15C4 19.5 7.5 23 12 23Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M12 23C14 23 16 21.5 16 18.5C16 16.5 14.5 15 13.5 14C13 15.5 12 16 11 15C11.5 13.5 11 12 10 11C9.5 12.5 8 14 8 16C8 18 8.5 19 9 20C9.5 21 10 23 12 23Z" fill="var(--bg-primary)" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.streakValue}>{animatedStreak}</span>
-              <span className={styles.statLabel}>Day Streak</span>
-            </div>
-            {streakData.longestStreak > 0 && (
-              <span className={styles.streakBest}>Best: {streakData.longestStreak}</span>
-            )}
-          </motion.div>
-
           <motion.div className={`${styles.statCard} ${styles.statCardCompleted}`} variants={staggerItem}>
             <div className={styles.statIcon}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -371,8 +355,17 @@ export default function DashboardClient({ user }) {
               transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
             >
               <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M45 15L30 42H40L35 65L55 35H44L45 15Z" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" opacity="0.35" />
-                <path d="M45 15L30 42H40L35 65L55 35H44L45 15Z" fill="currentColor" opacity="0.05" />
+                {/* Rocket body */}
+                <path d="M40 12C40 12 28 28 28 46C28 54 33 60 40 60C47 60 52 54 52 46C52 28 40 12 40 12Z" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                {/* Window */}
+                <circle cx="40" cy="36" r="5" stroke="var(--accent-primary)" strokeWidth="2" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                {/* Left fin */}
+                <path d="M28 50C28 50 20 52 18 58C18 58 24 58 28 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                {/* Right fin */}
+                <path d="M52 50C52 50 60 52 62 58C62 58 56 58 52 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                {/* Flame */}
+                <path d="M36 60C36 60 38 68 40 72C42 68 44 60 44 60" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+                <path d="M38 60C38 60 39 65 40 67C41 65 42 60 42 60" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
               </svg>
             </motion.div>
             <h3>Nothing here yet. Go make something happen.</h3>

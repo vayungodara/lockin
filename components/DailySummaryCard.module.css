@@ -30,14 +30,14 @@
   margin: 0;
 }
 
-/* Container for streak badge + freeze badge side by side */
+/* Container for header badges (freeze count) */
 .headerBadges {
   display: flex;
   align-items: center;
   gap: var(--space-2);
 }
 
-/* Freeze count badge — small pill next to streak */
+/* Freeze count badge — small pill in header */
 .freezeBadge {
   display: flex;
   align-items: center;
@@ -52,49 +52,6 @@
 
 .freezeIcon {
   font-size: 12px;
-}
-
-/* Base streak badge */
-.streakBadge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding: 2px 10px;
-  background: rgba(var(--accent-celebration-rgb), 0.15);
-  border-radius: var(--radius-full);
-  font-size: 12px;
-  font-weight: var(--font-semibold);
-  color: var(--accent-celebration);
-  transition: box-shadow 0.3s ease;
-}
-
-.streakIcon {
-  font-size: 14px;
-}
-
-/* 7+ day streak — orange glow */
-.streak_fire {
-  box-shadow: 0 0 10px rgba(var(--accent-celebration-rgb), 0.35);
-}
-
-/* 30+ day streak — diamond blue tint */
-.streak_diamond {
-  background: rgba(59, 123, 246, 0.15);
-  color: var(--info);
-  box-shadow: 0 0 12px var(--info-glow);
-}
-
-/* 100+ day streak — gold crown glow */
-.streak_legendary {
-  background: linear-gradient(135deg, rgba(var(--accent-celebration-rgb), 0.2), rgba(217, 70, 239, 0.15));
-  color: var(--accent-celebration);
-  box-shadow: 0 0 16px rgba(var(--accent-celebration-rgb), 0.4);
-  animation: legendaryPulse 3s ease-in-out infinite;
-}
-
-@keyframes legendaryPulse {
-  0%, 100% { box-shadow: 0 0 12px rgba(var(--accent-celebration-rgb), 0.3); }
-  50% { box-shadow: 0 0 22px rgba(var(--accent-celebration-rgb), 0.5); }
 }
 
 /* Milestone celebration banner */

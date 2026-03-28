@@ -47,6 +47,58 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     loadActivities();
   }, [loadActivities]);
 
+  // Real-time subscription for new activity
+  useEffect(() => {
+    const channelConfig = {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'activity_log',
+    };
+    if (groupId) {
+      channelConfig.filter = 'group_id=eq.' + groupId;
+    }
+
+    const channelName = groupId
+      ? `activity-feed-group-${groupId}`
+      : 'activity-feed-global';
+
+    const channel = supabase
+      .channel(channelName)
+      .on('postgres_changes', channelConfig, async (payload) => {
+        const newRow = payload.new;
+        if (!newRow) return;
+
+        try {
+          // Fetch the profile for this user so we have full data
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .eq('id', newRow.user_id)
+            .single();
+
+          const enriched = {
+            ...newRow,
+            user: profile || { full_name: 'Unknown', avatar_url: null },
+            reactions: { counts: {}, userReactions: [], total: 0 },
+            comment_count: 0,
+          };
+
+          setActivities(prev => {
+            // Final deduplicate check before prepending
+            if (prev.some(a => a.id === enriched.id)) return prev;
+            return [enriched, ...prev];
+          });
+        } catch (err) {
+          console.error('Error enriching realtime activity:', err);
+        }
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [supabase, groupId]);
+
   const loadMoreRef = useRef(null);
 
   const loadMore = useCallback(async () => {

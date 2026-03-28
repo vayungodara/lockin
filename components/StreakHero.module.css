@@ -1,0 +1,211 @@
+.hero {
+  position: relative;
+  width: 100%;
+  padding: var(--space-6) var(--space-8);
+  background: rgba(var(--accent-primary-rgb), 0.04);
+  border: 1px solid rgba(var(--accent-primary-rgb), 0.12);
+  border-radius: var(--radius-xl);
+  margin-bottom: var(--space-8);
+  overflow: hidden;
+  transition: all var(--transition-base);
+}
+
+.hero:hover {
+  border-color: rgba(var(--accent-primary-rgb), 0.2);
+  box-shadow: 0 0 24px rgba(var(--accent-primary-rgb), 0.06);
+}
+
+/* ── Tier-based background tints ── */
+.warm {
+  background: rgba(var(--accent-primary-rgb), 0.04);
+  border-color: rgba(var(--accent-primary-rgb), 0.1);
+}
+
+.fire {
+  background: rgba(var(--streak-color-rgb), 0.06);
+  border-color: rgba(var(--streak-color-rgb), 0.18);
+}
+
+.electric {
+  background: rgba(var(--streak-color-rgb), 0.06);
+  border-color: rgba(var(--streak-color-rgb), 0.2);
+}
+
+.diamond {
+  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.06), rgba(var(--accent-primary-rgb), 0.04));
+  border-color: rgba(var(--streak-color-rgb), 0.22);
+}
+
+.legendary {
+  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.08), rgba(var(--accent-primary-rgb), 0.06));
+  border-color: rgba(var(--streak-color-rgb), 0.28);
+  box-shadow: 0 0 32px rgba(var(--streak-color-rgb), 0.08);
+}
+
+/* ── Background decoration ── */
+.bgDecoration {
+  position: absolute;
+  top: -40%;
+  right: -10%;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.06) 0%, transparent 70%);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+/* ── Layout ── */
+.content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+  z-index: 1;
+}
+
+/* ── Icon ── */
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+  background: rgba(var(--accent-primary-rgb), 0.08);
+  border-radius: var(--radius-xl);
+}
+
+.fire .iconWrapper,
+.electric .iconWrapper,
+.diamond .iconWrapper,
+.legendary .iconWrapper {
+  background: rgba(var(--streak-color-rgb), 0.12);
+  animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(var(--accent-primary-rgb), 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.1);
+    transform: scale(1.03);
+  }
+}
+
+.icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+/* ── Stats text ── */
+.stats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.primary {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.count {
+  font-size: var(--text-5xl, 3rem);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.label {
+  font-size: var(--text-lg);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+}
+
+.microCopy {
+  font-size: var(--text-sm);
+  color: var(--text-tertiary);
+  margin: var(--space-1) 0 0;
+  line-height: 1.4;
+}
+
+.secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--text-tertiary);
+  background: rgba(var(--accent-primary-rgb), 0.06);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  width: fit-content;
+}
+
+.bestLabel {
+  font-weight: var(--font-medium);
+}
+
+.bestValue {
+  font-weight: var(--font-semibold);
+  color: var(--text-secondary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .hero {
+    padding: var(--space-5) var(--space-5);
+    margin-bottom: var(--space-6);
+  }
+
+  .iconWrapper {
+    width: 52px;
+    height: 52px;
+  }
+
+  .icon {
+    font-size: 1.6rem;
+  }
+
+  .count {
+    font-size: var(--text-4xl, 2.25rem);
+  }
+
+  .label {
+    font-size: var(--text-base);
+  }
+
+  .bgDecoration {
+    width: 140px;
+    height: 140px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: var(--space-4);
+    margin-bottom: var(--space-5);
+  }
+
+  .content {
+    gap: var(--space-4);
+  }
+
+  .iconWrapper {
+    width: 44px;
+    height: 44px;
+  }
+
+  .icon {
+    font-size: 1.3rem;
+  }
+
+  .count {
+    font-size: var(--text-3xl);
+  }
+}

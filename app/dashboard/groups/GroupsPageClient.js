@@ -9,25 +9,136 @@ import { motion } from 'framer-motion';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import { fadeInUp } from '@/lib/animations';
+import { ACCENT_PALETTES, hexToRgb } from '@/lib/accentColors';
 
-// Deterministic color based on group name — consistent across renders
-const GROUP_COLORS = [
-  { bg: 'rgba(99, 102, 241, 0.12)', text: '#6366F1' },   // indigo
-  { bg: 'rgba(139, 92, 246, 0.12)', text: '#8B5CF6' },   // purple
-  { bg: 'rgba(236, 72, 153, 0.12)', text: '#EC4899' },    // pink
-  { bg: 'rgba(16, 185, 129, 0.12)', text: '#10B981' },    // emerald
-  { bg: 'rgba(245, 158, 11, 0.12)', text: '#F59E0B' },    // amber
-  { bg: 'rgba(59, 130, 246, 0.12)', text: '#3B82F6' },    // blue
-  { bg: 'rgba(239, 68, 68, 0.12)', text: '#EF4444' },     // red
-  { bg: 'rgba(20, 184, 166, 0.12)', text: '#14B8A6' },    // teal
-];
-
+// Cycle through accent palettes for group icon colors
 function getGroupColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  return GROUP_COLORS[Math.abs(hash) % GROUP_COLORS.length];
+  const palette = ACCENT_PALETTES[Math.abs(hash) % ACCENT_PALETTES.length];
+  const rgb = hexToRgb(palette.primary);
+  return {
+    bg: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
+    text: palette.primary,
+  };
+}
+
+function GroupCard({ group }) {
+  const color = getGroupColor(group.name);
+  const displayMembers = (group.members || []).slice(0, 4);
+  const extraMembers = Math.max(0, (group.members || []).length - 4);
+  const progressPct = group.taskCount > 0
+    ? Math.round((group.tasksDone / group.taskCount) * 100)
+    : 0;
+
+  return (
+    <Link href={`/dashboard/groups/${group.id}`} className={styles.groupCard}>
+      <div className={styles.groupHeader}>
+        <div
+          className={styles.groupIcon}
+          style={{ background: color.bg, color: color.text }}
+        >
+          {group.name.charAt(0).toUpperCase()}
+        </div>
+        <div className={styles.groupInfo}>
+          <div className={styles.groupTitleRow}>
+            <h3>{group.name}</h3>
+            {group.role === 'owner' && (
+              <span className={styles.ownerBadge}>Owner</span>
+            )}
+          </div>
+          <p className={styles.groupMeta}>
+            {group.memberCount} member{group.memberCount !== 1 ? 's' : ''}
+            <span className={styles.metaDot}></span>
+            {group.taskCount} task{group.taskCount !== 1 ? 's' : ''}
+          </p>
+        </div>
+      </div>
+
+      {group.description && (
+        <p className={styles.groupDescription}>{group.description}</p>
+      )}
+
+      {group.taskCount > 0 && (
+        <div className={styles.progressSection}>
+          <div className={styles.progressLabel}>
+            <span>{group.tasksDone} of {group.taskCount} done</span>
+            <span>{progressPct}%</span>
+          </div>
+          <div className={styles.progressBar}>
+            <div
+              className={styles.progressFill}
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div className={styles.cardFooter}>
+        <div className={styles.avatarStack}>
+          {displayMembers.map((member, i) => (
+            <div
+              key={member.user_id}
+              className={styles.avatar}
+              style={{ zIndex: displayMembers.length - i }}
+              title={member.full_name || 'Member'}
+            >
+              {member.avatar_url ? (
+                <Image
+                  src={member.avatar_url}
+                  alt={member.full_name || 'Member'}
+                  width={28}
+                  height={28}
+                  className={styles.avatarImg}
+                />
+              ) : (
+                <span className={styles.avatarFallback}>
+                  {(member.full_name || '?').charAt(0).toUpperCase()}
+                </span>
+              )}
+            </div>
+          ))}
+          {extraMembers > 0 && (
+            <div className={styles.avatarExtra}>
+              +{extraMembers}
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function GroupSections({ groups }) {
+  const ownedGroups = groups.filter(g => g.role === 'owner');
+  const joinedGroups = groups.filter(g => g.role !== 'owner');
+
+  return (
+    <div>
+      {ownedGroups.length > 0 && (
+        <>
+          <h3 className={styles.sectionHeader}>Your Groups</h3>
+          <div className={styles.groupsGrid}>
+            {ownedGroups.map(group => (
+              <GroupCard key={group.id} group={group} />
+            ))}
+          </div>
+        </>
+      )}
+      {joinedGroups.length > 0 && (
+        <>
+          <h3 className={styles.sectionHeader}>Joined Groups</h3>
+          <div className={styles.groupsGrid}>
+            {joinedGroups.map(group => (
+              <GroupCard key={group.id} group={group} />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
 }
 
 export default function GroupsPageClient({ user }) {
@@ -212,17 +323,25 @@ export default function GroupsPageClient({ user }) {
             transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
           >
             <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="40" cy="55" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
-              <circle cx="60" cy="45" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.35" />
-              <circle cx="80" cy="55" r="20" stroke="currentColor" strokeWidth="1.5" opacity="0.2" />
-              <circle cx="40" cy="50" r="4" fill="currentColor" opacity="0.2" />
-              <path d="M32 62a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
-              <circle cx="60" cy="40" r="4" fill="currentColor" opacity="0.35" />
-              <path d="M52 52a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.35" strokeLinecap="round" />
-              <circle cx="80" cy="50" r="4" fill="currentColor" opacity="0.2" />
-              <path d="M72 62a8 8 0 0116 0" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
-              <path d="M48 48L52 46" stroke="currentColor" strokeWidth="1" opacity="0.15" />
-              <path d="M68 46L72 48" stroke="currentColor" strokeWidth="1" opacity="0.15" />
+              {/* Left person */}
+              <circle cx="42" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+              <path d="M42 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
+              <path d="M42 68L34 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M42 68L50 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M42 52L28 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M42 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
+              {/* Right person */}
+              <circle cx="78" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+              <path d="M78 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
+              <path d="M78 68L70 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M78 68L86 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M78 52L92 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
+              <path d="M78 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
+              {/* High-five burst */}
+              <circle cx="60" cy="28" r="3" fill="currentColor" opacity="0.3" />
+              <path d="M60 18V22" stroke="currentColor" strokeWidth="1.5" opacity="0.25" strokeLinecap="round" />
+              <path d="M52 22L55 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
+              <path d="M68 22L65 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
             </svg>
           </motion.div>
           <h3 className={styles.emptyTitle}>Better together. Way better.</h3>
@@ -235,95 +354,7 @@ export default function GroupsPageClient({ user }) {
           </button>
         </motion.div>
       ) : (
-        <div className={styles.groupsGrid}>
-          {groups.map((group) => {
-            const color = getGroupColor(group.name);
-            const displayMembers = (group.members || []).slice(0, 4);
-            const extraMembers = Math.max(0, (group.members || []).length - 4);
-            const progressPct = group.taskCount > 0
-              ? Math.round((group.tasksDone / group.taskCount) * 100)
-              : 0;
-
-            return (
-              <Link href={`/dashboard/groups/${group.id}`} key={group.id} className={styles.groupCard}>
-                <div className={styles.groupHeader}>
-                  <div
-                    className={styles.groupIcon}
-                    style={{ background: color.bg, color: color.text }}
-                  >
-                    {group.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className={styles.groupInfo}>
-                    <div className={styles.groupTitleRow}>
-                      <h3>{group.name}</h3>
-                      {group.role === 'owner' && (
-                        <span className={styles.ownerBadge}>Owner</span>
-                      )}
-                    </div>
-                    <p className={styles.groupMeta}>
-                      {group.memberCount} member{group.memberCount !== 1 ? 's' : ''}
-                      <span className={styles.metaDot}></span>
-                      {group.taskCount} task{group.taskCount !== 1 ? 's' : ''}
-                    </p>
-                  </div>
-                </div>
-
-                {group.description && (
-                  <p className={styles.groupDescription}>{group.description}</p>
-                )}
-
-                {/* Task progress bar */}
-                {group.taskCount > 0 && (
-                  <div className={styles.progressSection}>
-                    <div className={styles.progressLabel}>
-                      <span>{group.tasksDone} of {group.taskCount} done</span>
-                      <span>{progressPct}%</span>
-                    </div>
-                    <div className={styles.progressBar}>
-                      <div
-                        className={styles.progressFill}
-                        style={{ width: `${progressPct}%` }}
-                      />
-                    </div>
-                  </div>
-                )}
-
-                {/* Member avatar stack + stats footer */}
-                <div className={styles.cardFooter}>
-                  <div className={styles.avatarStack}>
-                    {displayMembers.map((member, i) => (
-                      <div
-                        key={member.user_id}
-                        className={styles.avatar}
-                        style={{ zIndex: displayMembers.length - i }}
-                        title={member.full_name || 'Member'}
-                      >
-                        {member.avatar_url ? (
-                          <Image
-                            src={member.avatar_url}
-                            alt={member.full_name || 'Member'}
-                            width={28}
-                            height={28}
-                            className={styles.avatarImg}
-                          />
-                        ) : (
-                          <span className={styles.avatarFallback}>
-                            {(member.full_name || '?').charAt(0).toUpperCase()}
-                          </span>
-                        )}
-                      </div>
-                    ))}
-                    {extraMembers > 0 && (
-                      <div className={styles.avatarExtra}>
-                        +{extraMembers}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        <GroupSections groups={groups} />
       )}
 
       {/* Modals */}

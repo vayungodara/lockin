@@ -59,6 +59,24 @@
 }
 
 /* ============================================
+   Section Headers
+   ============================================ */
+
+.sectionHeader {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: var(--space-3);
+  margin-top: var(--space-6);
+}
+
+.sectionHeader:first-child {
+  margin-top: 0;
+}
+
+/* ============================================
    Group Cards
    ============================================ */
 

@@ -52,8 +52,17 @@ function ActivityItem({ activity }) {
   const targetName = getTargetName();
   const hasReactions = Object.keys(reactionCounts).length > 0;
 
+  const COLOR_CLASS_MAP = {
+    purple: styles.iconPurple,
+    green: styles.iconGreen,
+    yellow: styles.iconYellow,
+    blue: styles.iconBlue,
+    red: styles.iconRed,
+    gray: styles.iconGray,
+  };
+
   const renderIcon = () => {
-    const iconClass = `${styles.icon} ${styles[`icon${actionInfo.color.charAt(0).toUpperCase() + actionInfo.color.slice(1)}`]}`;
+    const iconClass = `${styles.icon} ${COLOR_CLASS_MAP[actionInfo.color] || styles.iconGray}`;
 
     switch (actionInfo.icon) {
       case 'check':

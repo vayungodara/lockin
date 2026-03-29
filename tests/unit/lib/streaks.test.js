@@ -1,5 +1,5 @@
-import { describe, it, expect } from 'vitest';
-import { formatUTCDate, calculateStreak } from '@/lib/streaks';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { formatUTCDate, formatDateInTimezone, getHourInTimezone, calculateStreak } from '@/lib/streaks';
 import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatUTCDate', () => {
@@ -96,5 +96,65 @@ describe('calculateStreak', () => {
     const result = await calculateStreak(supabase, 'user-1');
     expect(result.currentStreak).toBe(0);
     expect(result.totalCompleted).toBe(2);
+  });
+});
+
+describe('formatDateInTimezone', () => {
+  it('formats a date in UTC', () => {
+    const date = new Date('2024-06-15T23:00:00Z');
+    expect(formatDateInTimezone(date, 'UTC')).toBe('2024-06-15');
+  });
+
+  it('converts to a different timezone', () => {
+    // 11pm UTC on June 15 is still June 15 in UTC but June 16 in UTC+2
+    const date = new Date('2024-06-15T23:00:00Z');
+    const result = formatDateInTimezone(date, 'Europe/Helsinki'); // UTC+3 in summer
+    expect(result).toBe('2024-06-16');
+  });
+
+  it('falls back to UTC for invalid timezone', () => {
+    const date = new Date('2024-06-15T12:00:00Z');
+    const result = formatDateInTimezone(date, 'Invalid/Timezone');
+    expect(result).toBe('2024-06-15');
+  });
+
+  it('defaults to UTC when no timezone provided', () => {
+    const date = new Date('2024-06-15T12:00:00Z');
+    expect(formatDateInTimezone(date)).toBe('2024-06-15');
+  });
+
+  it('handles date near midnight correctly', () => {
+    // 1am UTC on Jan 1 is still Dec 31 in US Pacific (UTC-8)
+    const date = new Date('2024-01-01T01:00:00Z');
+    const result = formatDateInTimezone(date, 'America/Los_Angeles');
+    expect(result).toBe('2023-12-31');
+  });
+});
+
+describe('getHourInTimezone', () => {
+  it('returns UTC hour by default', () => {
+    const date = new Date('2024-06-15T14:30:00Z');
+    expect(getHourInTimezone(date)).toBe(14);
+  });
+
+  it('returns hour in specified timezone', () => {
+    // 2pm UTC = 7am in US Pacific (PDT, UTC-7)
+    const date = new Date('2024-06-15T14:00:00Z');
+    expect(getHourInTimezone(date, 'America/Los_Angeles')).toBe(7);
+  });
+
+  it('falls back to UTC hours for invalid timezone', () => {
+    const date = new Date('2024-06-15T14:00:00Z');
+    expect(getHourInTimezone(date, 'Invalid/TZ')).toBe(14);
+  });
+
+  it('handles midnight correctly', () => {
+    const date = new Date('2024-06-15T00:00:00Z');
+    expect(getHourInTimezone(date, 'UTC')).toBe(0);
+  });
+
+  it('handles 11pm correctly', () => {
+    const date = new Date('2024-06-15T23:00:00Z');
+    expect(getHourInTimezone(date, 'UTC')).toBe(23);
   });
 });

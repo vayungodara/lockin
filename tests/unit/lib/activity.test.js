@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatRelativeTime, getActionInfo } from '@/lib/activity';
+import { formatRelativeTime, getActionInfo, logActivity } from '@/lib/activity';
+import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatRelativeTime', () => {
   beforeEach(() => {
@@ -126,5 +127,56 @@ describe('getActionInfo', () => {
       // Should NOT be the fallback
       expect(info.color).not.toBe('gray');
     });
+  });
+});
+
+describe('logActivity', () => {
+  it('logs an activity successfully', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_completed', null, { pactTitle: 'Test' });
+    expect(result.success).toBe(true);
+  });
+
+  it('returns error when not authenticated', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({
+      data: { user: null },
+      error: null,
+    });
+
+    const result = await logActivity(supabase, 'pact_completed', null, {});
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Not authenticated');
+  });
+
+  it('returns error on auth failure', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Auth error' },
+    });
+
+    const result = await logActivity(supabase, 'pact_completed', null);
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('returns error on insert failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'Insert failed', code: '42501' } });
+
+    const result = await logActivity(supabase, 'pact_completed', 'group-1', {});
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('handles non-object metadata gracefully', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_completed', null, 'not-an-object');
+    expect(result.success).toBe(true);
   });
 });

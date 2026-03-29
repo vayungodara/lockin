@@ -240,7 +240,7 @@ export default function StatsPageClient({ user }) {
           </div>
           <div className={styles.streakDivider} />
           <div className={styles.streakItem}>
-            <span className={styles.streakIcon}>✓</span>
+            <span className={styles.streakIcon}>✅</span>
             <div className={styles.streakInfo}>
               <span className={styles.streakValue}>{streakData.totalCompleted}</span>
               <span className={styles.streakLabel}>Total Completed</span>

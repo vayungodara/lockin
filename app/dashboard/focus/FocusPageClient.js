@@ -60,7 +60,7 @@ export default function FocusPageClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user.id]);
 
   useEffect(() => {
     fetchSessions();

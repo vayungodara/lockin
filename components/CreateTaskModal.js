@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useModalScrollLock } from '@/lib/useModalScrollLock';
-import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
+import { modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateTaskModal.module.css';
 
 export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupId, members = [] }) {

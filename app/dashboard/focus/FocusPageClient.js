@@ -28,6 +28,7 @@ export default function FocusPageClient({ user }) {
   }, [registerCallbacks, unregisterCallbacks, toggleTimer]);
 
   const fetchSessions = useCallback(async () => {
+    setError(null);
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);

@@ -281,6 +281,10 @@
 }
 
 .level3 .dayNumber {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .level3 .dayNumber {
   color: white;
 }
 
@@ -293,6 +297,10 @@
 }
 
 .level4 .dayNumber {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .level4 .dayNumber {
   color: white;
 }
 

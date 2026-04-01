@@ -35,24 +35,33 @@ export default function FocusPageClient({ user }) {
       const weekAgo = new Date();
       weekAgo.setDate(weekAgo.getDate() - 7);
 
-      const { data, error } = await supabase
-        .from('focus_sessions')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('started_at', { ascending: false })
-        .limit(10);
+      // Fetch recent sessions (for display list) and all sessions (for stats) in parallel
+      const [recentResult, allResult] = await Promise.all([
+        supabase
+          .from('focus_sessions')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('started_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('focus_sessions')
+          .select('id, started_at, duration_minutes')
+          .eq('user_id', user.id),
+      ]);
 
-      if (error) throw error;
+      if (recentResult.error) throw recentResult.error;
+      if (allResult.error) throw allResult.error;
 
-      setSessions(data || []);
+      setSessions(recentResult.data || []);
 
-      const todaySessions = (data || []).filter(s => new Date(s.started_at) >= today);
-      const weekSessions = (data || []).filter(s => new Date(s.started_at) >= weekAgo);
+      const allSessions = allResult.data || [];
+      const todaySessions = allSessions.filter(s => new Date(s.started_at) >= today);
+      const weekSessions = allSessions.filter(s => new Date(s.started_at) >= weekAgo);
 
       setStats({
         today: todaySessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0),
         week: weekSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0),
-        total: (data || []).reduce((acc, s) => acc + (s.duration_minutes || 0), 0)
+        total: allSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0)
       });
     } catch (err) {
       console.error('Error fetching sessions:', err);
@@ -60,7 +69,7 @@ export default function FocusPageClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [supabase, user.id]);
 
   useEffect(() => {
     fetchSessions();

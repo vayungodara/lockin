@@ -23,23 +23,31 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
   hasMoreRef.current = hasMore;
   const isLoadingMoreRef = useRef(isLoadingMore);
   isLoadingMoreRef.current = isLoadingMore;
+  const groupIdRef = useRef(groupId);
+  groupIdRef.current = groupId;
 
   const loadActivities = useCallback(async () => {
+    const requestGroupId = groupId;
     setIsLoading(true);
     try {
       let result;
-      if (groupId) {
-        result = await getGroupActivity(supabase, groupId, pageSize, 0);
+      if (requestGroupId) {
+        result = await getGroupActivity(supabase, requestGroupId, pageSize, 0);
       } else {
         result = await getAllActivity(supabase, pageSize);
       }
+
+      // Guard against stale responses from a previous groupId
+      if (groupIdRef.current !== requestGroupId) return;
 
       setActivities(result.data || []);
       setHasMore((result.data?.length || 0) === pageSize);
     } catch (err) {
       console.error('Error loading activities:', err);
     } finally {
-      setIsLoading(false);
+      if (groupIdRef.current === requestGroupId) {
+        setIsLoading(false);
+      }
     }
   }, [groupId, pageSize, supabase]);
 

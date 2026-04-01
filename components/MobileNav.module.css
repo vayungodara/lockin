@@ -27,7 +27,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
-  min-width: 64px;
+  min-width: 48px;
   min-height: 44px;
   color: var(--text-tertiary);
   text-decoration: none;

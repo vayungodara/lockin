@@ -105,9 +105,9 @@
 }
 
 .level0 { background: var(--surface-3); }
-.level1 { background: rgba(99, 102, 241, 0.25); }
-.level2 { background: rgba(99, 102, 241, 0.5); }
-.level3 { background: rgba(99, 102, 241, 0.75); }
+.level1 { background: rgba(var(--accent-primary-rgb), 0.25); }
+.level2 { background: rgba(var(--accent-primary-rgb), 0.5); }
+.level3 { background: rgba(var(--accent-primary-rgb), 0.75); }
 .level4 { background: var(--accent-primary); }
 
 /* Empty/padding cells - non-interactive */

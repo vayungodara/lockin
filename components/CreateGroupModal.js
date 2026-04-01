@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useModalScrollLock } from '@/lib/useModalScrollLock';
-import { modalOverlay, modalContent, buttonHover, buttonTap } from '@/lib/animations';
+import { modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateGroupModal.module.css';
 
 // Generate a random invite code

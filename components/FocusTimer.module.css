@@ -92,7 +92,7 @@
 
 .workProgress {
   stroke: url(#timerGradient);
-  filter: drop-shadow(0 0 12px rgba(99, 102, 241, 0.4));
+  filter: drop-shadow(0 0 12px rgba(var(--accent-primary-rgb), 0.4));
 }
 
 .breakProgress {
@@ -142,7 +142,7 @@
 
 .playBtn:hover {
   transform: scale(1.08);
-  box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 40px rgba(var(--accent-primary-rgb), 0.4);
 }
 
 .playBtn:active {

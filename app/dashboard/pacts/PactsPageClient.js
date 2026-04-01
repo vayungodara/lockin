@@ -37,7 +37,7 @@ export default function PactsPageClient({ user }) {
     } finally {
       setIsLoading(false);
     }
-  }, [supabase, user]);
+  }, [supabase, user.id]);
 
   useEffect(() => {
     fetchPacts();

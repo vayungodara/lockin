@@ -26,7 +26,7 @@
   --text-primary: #161529;
   --text-secondary: #524E68;
   --text-tertiary: #656180;
-  --text-muted: #A9A5BC;
+  --text-muted: #706C8A;
   --text-inverse: #FFFFFF;
 
   /* Gradient Accents — clean 2-stop indigo family */
@@ -184,11 +184,11 @@
   --bg-hover: #252528;
 
   /* Surface colors — gentle lift, translucent */
-  --surface-1: rgba(24, 24, 27, 0.9);
+  --surface-1: rgba(30, 30, 34, 0.95);
   --surface-2: rgba(30, 30, 34, 0.8);
   --surface-3: rgba(38, 38, 43, 0.75);
   --surface-overlay: rgba(91, 94, 245, 0.04);
-  --surface-glass: rgba(20, 20, 23, 0.35);
+  --surface-glass: rgba(20, 20, 23, 0.65);
 
   /* Text colors — adjusted for WCAG AA contrast (4.5:1 min against #08090D) */
   --text-primary: #F0F0FF;
@@ -221,7 +221,7 @@
 
   /* Borders — soft card edges */
   --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-default: rgba(255, 255, 255, 0.09);
+  --border-default: rgba(255, 255, 255, 0.12);
   --border-strong: rgba(255, 255, 255, 0.14);
   --border-focus: rgba(var(--accent-primary-rgb), 0.6);
 

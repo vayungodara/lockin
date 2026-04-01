@@ -261,7 +261,7 @@
 }
 
 .level1 {
-  background: rgba(91, 94, 245, 0.15);
+  background: rgba(var(--accent-primary-rgb), 0.15);
 }
 
 .level1 .dayNumber {
@@ -269,7 +269,7 @@
 }
 
 .level2 {
-  background: rgba(124, 77, 255, 0.3);
+  background: rgba(var(--accent-primary-rgb), 0.3);
 }
 
 .level2 .dayNumber {
@@ -277,10 +277,14 @@
 }
 
 .level3 {
-  background: rgba(180, 74, 230, 0.45);
+  background: rgba(var(--accent-primary-rgb), 0.45);
 }
 
 .level3 .dayNumber {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .level3 .dayNumber {
   color: white;
 }
 
@@ -289,10 +293,14 @@
 }
 
 .level4 {
-  background: rgba(224, 64, 203, 0.6);
+  background: rgba(var(--accent-primary-rgb), 0.6);
 }
 
 .level4 .dayNumber {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .level4 .dayNumber {
   color: white;
 }
 

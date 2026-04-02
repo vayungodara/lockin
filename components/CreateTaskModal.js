@@ -74,7 +74,7 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
       onClose();
     } catch (err) {
       console.error('Error creating task:', err);
-      setError(err.message || 'Failed to create task. Please try again.');
+      setError('Failed to create task. Please try again.');
     } finally {
       setIsLoading(false);
     }

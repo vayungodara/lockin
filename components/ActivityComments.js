@@ -80,21 +80,21 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
                 {comments.map(comment => (
                   <div key={comment.id} className={styles.comment}>
                     <div className={styles.commentAvatar}>
-                      {comment.user.avatar_url ? (
+                      {comment.user?.avatar_url ? (
                         <Image
                           src={comment.user.avatar_url}
-                          alt={comment.user.full_name}
+                          alt={comment.user?.full_name || 'User'}
                           width={20}
                           height={20}
                           className={styles.commentAvatarImg}
                         />
                       ) : (
-                        <span>{(comment.user.full_name || 'U').charAt(0)}</span>
+                        <span>{(comment.user?.full_name || 'U').charAt(0)}</span>
                       )}
                     </div>
                     <div className={styles.commentBody}>
                       <div className={styles.commentMeta}>
-                        <span className={styles.commentAuthor}>{comment.user.full_name}</span>
+                        <span className={styles.commentAuthor}>{comment.user?.full_name || 'Unknown'}</span>
                         <span className={styles.commentTime}>{formatRelativeTime(comment.created_at)}</span>
                       </div>
                       <p className={styles.commentText}>{comment.comment_text}</p>

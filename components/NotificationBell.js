@@ -35,6 +35,7 @@ export default function NotificationBell() {
   useEffect(() => {
     if (unreadCount > prevUnreadRef.current) {
       setWiggle(true);
+      prevUnreadRef.current = unreadCount;
       const timer = setTimeout(() => setWiggle(false), 600);
       return () => clearTimeout(timer);
     }

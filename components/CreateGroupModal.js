@@ -90,7 +90,7 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
       if (err.code === '23505') {
         setError('A group with this invite code already exists. Please try again.');
       } else {
-        setError(err.message || 'Failed to create group. Please try again.');
+        setError('Failed to create group. Please try again.');
       }
     } finally {
       setIsLoading(false);

@@ -149,12 +149,6 @@
   color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .input[type="date"],
-  :root:not([data-theme="light"]) .input[type="time"] {
-    color-scheme: dark;
-  }
-}
 
 .deadlineRow {
   display: grid;

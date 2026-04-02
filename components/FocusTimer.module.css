@@ -97,7 +97,7 @@
 
 .breakProgress {
   stroke: var(--success);
-  filter: drop-shadow(0 0 12px rgba(16, 185, 129, 0.4));
+  filter: drop-shadow(0 0 12px rgba(var(--success-rgb), 0.4));
 }
 
 .timeDisplay {
@@ -152,7 +152,7 @@
 .pauseBtn {
   background: var(--gradient-warm);
   color: white;
-  box-shadow: 0 0 24px rgba(245, 158, 11, 0.3);
+  box-shadow: 0 0 24px rgba(var(--warning-rgb), 0.3);
 }
 
 .pauseBtn:hover {
@@ -222,4 +222,29 @@
   width: 1px;
   height: 40px;
   background: var(--border-subtle);
+}
+
+/* Dark mode overrides for timer ring visibility */
+:global([data-theme="dark"]) .progressBg {
+  stroke: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .workProgress {
+  filter: drop-shadow(0 0 16px rgba(var(--accent-primary-rgb), 0.6));
+}
+
+:global([data-theme="dark"]) .breakProgress {
+  filter: drop-shadow(0 0 16px rgba(var(--success-rgb), 0.6));
+}
+
+:global([data-theme="dark"]) .timerRing::after {
+  box-shadow: 0 0 40px rgba(var(--accent-primary-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .playBtn:hover {
+  box-shadow: 0 0 50px rgba(var(--accent-primary-rgb), 0.55);
+}
+
+:global([data-theme="dark"]) .pauseBtn {
+  box-shadow: 0 0 30px rgba(var(--warning-rgb), 0.45);
 }

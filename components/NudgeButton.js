@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { sendNudge } from '@/lib/nudges';
@@ -13,6 +13,13 @@ export default function NudgeButton({ userId, userName }) {
   const [nudged, setNudged] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
 
   const handleNudge = async () => {
     if (isLoading || nudged) return;
@@ -23,7 +30,7 @@ export default function NudgeButton({ userId, userName }) {
       setNudged(true);
       toast.success(`Nudged ${userName}!`);
       // Reset after 1 hour
-      setTimeout(() => setNudged(false), 60 * 60 * 1000);
+      timerRef.current = setTimeout(() => setNudged(false), 60 * 60 * 1000);
     } else {
       toast.error(result.error || 'Failed to nudge');
     }

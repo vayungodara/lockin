@@ -252,13 +252,13 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               <span className={`${styles.navIcon} ${active ? styles.navIconActive : ''}`}>
                 {item.icon}
               </span>
-              {/* Always mounted -- fade + slide */}
+              {/* Always mounted -- fade + collapse width to prevent truncated text */}
               <motion.span
                 className={styles.navLabel}
                 initial={false}
                 animate={{
                   opacity: isExpanded ? 1 : 0,
-                  x: isExpanded ? 0 : -8,
+                  width: isExpanded ? 'auto' : 0,
                 }}
                 transition={expandTransition}
                 style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}

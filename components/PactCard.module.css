@@ -152,7 +152,7 @@
   background: var(--success);
   color: white;
   transform: scale(1.08);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 12px rgba(var(--success-rgb), 0.3);
 }
 
 .missBtn {
@@ -208,6 +208,25 @@
 
 .card.completed:hover {
   opacity: 1;
+}
+
+/* Dark mode: boost completed card contrast since opacity + faint colors compound */
+:global([data-theme="dark"]) .card.completed {
+  opacity: 0.85;
+}
+
+:global([data-theme="dark"]) .card.completed .title {
+  color: var(--text-secondary);
+  text-decoration-color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .card.completed .description {
+  color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .badge.completed {
+  color: var(--success);
+  background: var(--success-light);
 }
 
 /* Shimmer sweep on the complete button when just completed */

@@ -152,6 +152,10 @@
   font-weight: var(--font-medium);
 }
 
+:global([data-theme="dark"]) .statLabel {
+  color: var(--text-secondary);
+}
+
 .divider {
   width: 1px;
   height: 28px;

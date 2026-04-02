@@ -11,7 +11,7 @@ test.describe('Landing Page', () => {
   });
 
   test('displays the logo in the navbar', async ({ page }) => {
-    const logo = page.locator('nav img[alt="LockIn"]');
+    const logo = page.locator('nav img[alt="LockIn"]').first();
     await expect(logo).toBeVisible();
   });
 
@@ -23,7 +23,7 @@ test.describe('Landing Page', () => {
   });
 
   test('displays the hero description / tagline', async ({ page }) => {
-    const description = page.getByText('The app that makes sure tomorrow actually comes.');
+    const description = page.getByText('The app that makes sure tomorrow actually comes.').first();
     await expect(description).toBeVisible();
   });
 

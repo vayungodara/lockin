@@ -92,7 +92,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
       onClose();
     } catch (err) {
       console.error('Error joining group:', err);
-      setError(err.message || 'Failed to join group. Please try again.');
+      setError('Failed to join group. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -115,7 +115,8 @@ export default function DashboardClient({ user }) {
         .from('pacts')
         .select('*')
         .eq('user_id', user.id)
-        .order('deadline', { ascending: true });
+        .order('deadline', { ascending: true })
+        .limit(200);
 
       if (error) throw error;
       

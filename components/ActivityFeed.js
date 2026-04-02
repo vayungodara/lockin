@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { staggerContainer } from '@/lib/animations';
 import { createClient } from '@/lib/supabase/client';
-import { getGroupActivity, getAllActivity } from '@/lib/activity';
+import { getGroupActivity, getAllActivity, HIDDEN_FEED_ACTIONS, TEST_DATA_PATTERNS } from '@/lib/activity';
 import ActivityItem from './ActivityItem';
 import styles from './ActivityFeed.module.css';
 
@@ -70,11 +70,18 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       ? `activity-feed-group-${groupId}`
       : 'activity-feed-global';
 
+    // Use shared filter constants from lib/activity.js
+
     const channel = supabase
       .channel(channelName)
       .on('postgres_changes', channelConfig, async (payload) => {
         const newRow = payload.new;
         if (!newRow) return;
+
+        // Skip hidden action types and test data in realtime updates
+        if (!groupId && HIDDEN_FEED_ACTIONS.includes(newRow.action)) return;
+        const title = newRow.metadata?.title || newRow.metadata?.name || '';
+        if (TEST_DATA_PATTERNS.some(p => p.test(title))) return;
 
         try {
           // Fetch the profile for this user so we have full data

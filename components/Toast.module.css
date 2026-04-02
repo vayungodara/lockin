@@ -50,50 +50,50 @@
 
 .success {
   --toast-type-color: var(--success);
-  border-color: rgba(var(--success-rgb, 13, 191, 115), 0.2);
+  border-color: rgba(var(--success-rgb), 0.2);
   border-left: 4px solid var(--success);
-  box-shadow: var(--shadow-lg), -4px 0 12px rgba(13, 191, 115, 0.2);
+  box-shadow: var(--shadow-lg), -4px 0 12px rgba(var(--success-rgb), 0.2);
 }
 
 .success .icon {
-  background: rgba(34, 197, 94, 0.15);
+  background: rgba(var(--success-rgb), 0.15);
   color: var(--success);
 }
 
 .error {
   --toast-type-color: var(--danger);
   --toast-duration: 6s;
-  border-color: rgba(239, 68, 68, 0.2);
+  border-color: rgba(var(--danger-rgb), 0.2);
   border-left: 4px solid var(--danger);
-  box-shadow: var(--shadow-lg), -4px 0 12px rgba(239, 68, 68, 0.2);
+  box-shadow: var(--shadow-lg), -4px 0 12px rgba(var(--danger-rgb), 0.2);
 }
 
 .error .icon {
-  background: rgba(239, 68, 68, 0.15);
+  background: rgba(var(--danger-rgb), 0.15);
   color: var(--danger);
 }
 
 .warning {
   --toast-type-color: var(--warning);
-  border-color: rgba(245, 158, 11, 0.2);
+  border-color: rgba(var(--warning-rgb), 0.2);
   border-left: 4px solid var(--warning);
-  box-shadow: var(--shadow-lg), -4px 0 12px rgba(245, 158, 11, 0.2);
+  box-shadow: var(--shadow-lg), -4px 0 12px rgba(var(--warning-rgb), 0.2);
 }
 
 .warning .icon {
-  background: rgba(245, 158, 11, 0.15);
+  background: rgba(var(--warning-rgb), 0.15);
   color: var(--warning);
 }
 
 .info {
   --toast-type-color: var(--info);
-  border-color: rgba(59, 123, 246, 0.2);
+  border-color: rgba(var(--info-rgb), 0.2);
   border-left: 4px solid var(--info);
-  box-shadow: var(--shadow-lg), -4px 0 12px rgba(59, 123, 246, 0.2);
+  box-shadow: var(--shadow-lg), -4px 0 12px rgba(var(--info-rgb), 0.2);
 }
 
 .info .icon {
-  background: rgba(59, 123, 246, 0.15);
+  background: rgba(var(--info-rgb), 0.15);
   color: var(--info);
 }
 

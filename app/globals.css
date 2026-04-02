@@ -56,18 +56,22 @@
   --success-light: #CFFCE8;
   --success-bg: rgba(13, 191, 115, 0.1);
   --success-glow: rgba(13, 191, 115, 0.25);
+  --success-rgb: 13, 191, 115;
   --warning: #F5A623;
   --warning-light: #FFF4DC;
   --warning-bg: rgba(245, 166, 35, 0.1);
   --warning-glow: rgba(245, 166, 35, 0.25);
+  --warning-rgb: 245, 166, 35;
   --danger: #EF4444;
   --danger-light: #FEE2E2;
   --danger-bg: rgba(239, 68, 68, 0.1);
   --danger-glow: rgba(239, 68, 68, 0.25);
+  --danger-rgb: 239, 68, 68;
   --info: #3B7BF6;
   --info-light: #DBEAFE;
   --info-bg: rgba(59, 123, 246, 0.1);
   --info-glow: rgba(59, 123, 246, 0.25);
+  --info-rgb: 59, 123, 246;
 
   /* Borders */
   --border-subtle: rgba(0, 0, 0, 0.06);
@@ -206,18 +210,22 @@
   --success-light: rgba(45, 223, 142, 0.15);
   --success-bg: rgba(45, 223, 142, 0.12);
   --success-glow: rgba(45, 223, 142, 0.35);
+  --success-rgb: 45, 223, 142;
   --warning: #FFB84D;
   --warning-light: rgba(255, 184, 77, 0.15);
   --warning-bg: rgba(255, 184, 77, 0.12);
   --warning-glow: rgba(255, 184, 77, 0.35);
+  --warning-rgb: 255, 184, 77;
   --danger: #FF6B6B;
   --danger-light: rgba(255, 107, 107, 0.15);
   --danger-bg: rgba(255, 107, 107, 0.12);
   --danger-glow: rgba(255, 107, 107, 0.35);
+  --danger-rgb: 255, 107, 107;
   --info: #6EA8FE;
   --info-light: rgba(110, 168, 254, 0.15);
   --info-bg: rgba(110, 168, 254, 0.12);
   --info-glow: rgba(110, 168, 254, 0.35);
+  --info-rgb: 110, 168, 254;
 
   /* Borders — soft card edges */
   --border-subtle: rgba(255, 255, 255, 0.04);

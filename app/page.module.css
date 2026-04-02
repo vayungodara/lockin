@@ -628,9 +628,9 @@
 }
 
 .mockLevel0 { background: var(--bg-tertiary); }
-.mockLevel1 { background: rgba(99, 102, 241, 0.2); }
-.mockLevel2 { background: rgba(99, 102, 241, 0.45); }
-.mockLevel3 { background: rgba(99, 102, 241, 0.75); }
+.mockLevel1 { background: rgba(var(--accent-primary-rgb), 0.2); }
+.mockLevel2 { background: rgba(var(--accent-primary-rgb), 0.45); }
+.mockLevel3 { background: rgba(var(--accent-primary-rgb), 0.75); }
 
 .mockCheckboxClickable {
   cursor: pointer;

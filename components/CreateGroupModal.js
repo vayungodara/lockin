@@ -8,12 +8,13 @@ import { useModalScrollLock } from '@/lib/useModalScrollLock';
 import { modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateGroupModal.module.css';
 
-// Generate a random invite code
+// Generate a cryptographically secure invite code
 const generateInviteCode = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
   let code = '';
   for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
+    code += chars.charAt(bytes[i] % chars.length);
   }
   return code;
 };

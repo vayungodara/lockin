@@ -199,6 +199,8 @@
 
 .navLabel {
   overflow: hidden;
+  white-space: nowrap;
+  width: auto;
 }
 
 .miniTimer {
@@ -213,7 +215,7 @@
   position: relative;
   overflow: hidden;
   z-index: 1;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 4px 12px rgba(var(--accent-primary-rgb), 0.3);
   transition: padding 0.2s ease, margin 0.2s ease;
 }
 

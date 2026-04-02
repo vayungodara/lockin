@@ -19,6 +19,31 @@ const nextConfig = {
         destination: '/',
         permanent: false,
       },
+      {
+        source: '/pacts',
+        destination: '/dashboard/pacts',
+        permanent: false,
+      },
+      {
+        source: '/groups',
+        destination: '/dashboard/groups',
+        permanent: false,
+      },
+      {
+        source: '/focus',
+        destination: '/dashboard/focus',
+        permanent: false,
+      },
+      {
+        source: '/stats',
+        destination: '/dashboard/stats',
+        permanent: false,
+      },
+      {
+        source: '/settings',
+        destination: '/dashboard/settings',
+        permanent: false,
+      },
     ];
   },
   async headers() {

@@ -17,11 +17,6 @@
   background: linear-gradient(180deg, var(--surface-1), var(--bg-primary));
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .sidebar {
-    background: linear-gradient(180deg, var(--surface-1), var(--bg-primary));
-  }
-}
 
 .header {
   display: flex;

@@ -1,0 +1,40 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  padding: var(--space-8);
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.block {
+  background: var(--surface-2);
+  border-radius: var(--radius-md);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.wide {
+  height: 80px;
+  width: 100%;
+}
+
+.half {
+  height: 120px;
+  width: 50%;
+}
+
+.narrow {
+  height: 48px;
+  width: 60%;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 0.15; }
+}

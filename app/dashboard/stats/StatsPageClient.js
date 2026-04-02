@@ -74,7 +74,8 @@ export default function StatsPageClient({ user }) {
         .from('focus_sessions')
         .select('*')
         .eq('user_id', user.id)
-        .order('started_at', { ascending: false });
+        .order('started_at', { ascending: false })
+        .limit(10000);
 
       if (focusError) throw focusError;
 

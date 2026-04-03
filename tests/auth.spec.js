@@ -5,19 +5,25 @@ test.describe('Authentication', () => {
   test('unauthenticated user visiting /dashboard sees the sign-in page', async ({ page }) => {
     await page.goto('/dashboard');
 
-    // The dashboard shows a sign-in card when there is no authenticated user
-    const welcomeHeading = page.getByText('Welcome back');
-    await expect(welcomeHeading).toBeVisible();
+    // dashboard/layout.js redirects unauthenticated users to /
+    // The landing page is the sign-in entry point
+    await expect(page).toHaveURL('/');
 
-    const signInPrompt = page.getByText(/Sign in with your Google account/);
-    await expect(signInPrompt).toBeVisible();
+    // The landing page hero is visible
+    const heroTitle = page.getByText('Stop saying', { exact: false });
+    await expect(heroTitle).toBeVisible();
   });
 
   test('sign-in page has a Google sign-in button', async ({ page }) => {
     await page.goto('/dashboard');
 
-    const googleButton = page.getByRole('button', { name: /Sign in with Google/i });
-    await expect(googleButton).toBeVisible();
+    // Redirects to landing page; wait for client-side loading to finish
+    await expect(page).toHaveURL('/');
+
+    // The primary CTA button triggers Google OAuth via handleSignIn
+    // It is rendered as a <button> with text "Start Locking In"
+    const ctaButton = page.getByRole('button', { name: /Start Locking In/i }).first();
+    await expect(ctaButton).toBeVisible();
   });
 
   test('sign-in page shows LockIn branding', async ({ page }) => {
@@ -28,21 +34,20 @@ test.describe('Authentication', () => {
   });
 
   test('unauthenticated user visiting a protected sub-page gets redirected or shown sign-in', async ({ page }) => {
-    // Visiting /dashboard/pacts without auth should either redirect to /dashboard
-    // or show the sign-in screen (depends on middleware/layout behavior)
+    // Visiting /dashboard/pacts without auth should redirect to / via dashboard/layout.js
     await page.goto('/dashboard/pacts');
 
-    // Should either show the sign-in page or redirect to a page with sign-in
-    // We check that the page does NOT show authenticated dashboard content
-    const signInButton = page.getByRole('button', { name: /Sign in with Google/i });
-    const isSignInVisible = await signInButton.isVisible().catch(() => false);
+    // Should have been redirected to the landing page
+    const url = page.url();
+    expect(url).toMatch(/\/$/);
 
-    // If sign-in button is visible, we are on the auth page (expected)
-    // If not, check we were redirected to the landing or login page
-    if (!isSignInVisible) {
-      // Should have been redirected somewhere safe (landing page or sign-in)
-      const url = page.url();
-      expect(url).toMatch(/\/(dashboard)?$/);
+    // The CTA button should be visible on the landing page
+    const ctaButton = page.getByRole('button', { name: /Start Locking In/i }).first();
+    const isCtaVisible = await ctaButton.isVisible().catch(() => false);
+
+    if (!isCtaVisible) {
+      // Fallback: confirm we are not on a dashboard sub-page
+      expect(url).not.toContain('/dashboard/pacts');
     }
   });
 

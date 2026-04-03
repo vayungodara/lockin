@@ -148,12 +148,8 @@
 
 .statLabel {
   font-size: 11px;
-  color: var(--text-tertiary);
-  font-weight: var(--font-medium);
-}
-
-:global([data-theme="dark"]) .statLabel {
   color: var(--text-secondary);
+  font-weight: var(--font-medium);
 }
 
 .divider {

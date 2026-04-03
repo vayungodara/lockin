@@ -243,7 +243,7 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--surface-1);
+  border: 2px solid var(--border-default);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -277,7 +277,7 @@
   width: 28px;
   height: 28px;
   border-radius: var(--radius-full);
-  border: 2px solid var(--surface-1);
+  border: 2px solid var(--border-default);
   background: var(--surface-2);
   display: flex;
   align-items: center;

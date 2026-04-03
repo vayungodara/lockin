@@ -43,7 +43,8 @@ export default function StatsPageClient({ user }) {
       const { data: pacts, error: pactsError } = await supabase
         .from('pacts')
         .select('status, completed_at, created_at')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .limit(10000);
 
       if (pactsError) throw pactsError;
 

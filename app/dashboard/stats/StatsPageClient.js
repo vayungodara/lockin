@@ -12,7 +12,7 @@ import styles from './StatsPage.module.css';
 export default function StatsPageClient({ user }) {
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0, totalCompleted: 0 });
   const [pactStats, setPactStats] = useState({ total: 0, completed: 0, missed: 0, active: 0, thisWeek: 0, thisMonth: 0 });
-  const [focusStats, setFocusStats] = useState({ totalMinutes: 0, sessionsCount: 0, avgDuration: 0 });
+  const [focusStats, setFocusStats] = useState({ totalMinutes: 0, sessionsCount: 0, avgDuration: 0, thisWeekSessions: 0, thisMonthSessions: 0, avgPerDay: 0 });
   const [recentSessions, setRecentSessions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -82,11 +82,24 @@ export default function StatsPageClient({ user }) {
 
       const totalMinutes = (sessions || []).reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
       const sessionsCount = (sessions || []).length;
+      const thisWeekSessions = (sessions || []).filter(s =>
+        s.started_at && new Date(s.started_at) >= weekAgo
+      ).length;
+      const thisMonthSessions = (sessions || []).filter(s =>
+        s.started_at && new Date(s.started_at) >= monthAgo
+      ).length;
+      const daysSinceFirst = sessionsCount > 0
+        ? Math.max(1, Math.ceil((now - new Date((sessions || [])[(sessions || []).length - 1].started_at)) / (1000 * 60 * 60 * 24)))
+        : 1;
+      const avgPerDay = sessionsCount > 0 ? Math.round(totalMinutes / daysSinceFirst) : 0;
 
       setFocusStats({
         totalMinutes,
         sessionsCount,
-        avgDuration: sessionsCount > 0 ? Math.round(totalMinutes / sessionsCount) : 0
+        avgDuration: sessionsCount > 0 ? Math.round(totalMinutes / sessionsCount) : 0,
+        thisWeekSessions,
+        thisMonthSessions,
+        avgPerDay
       });
 
       // Get recent sessions (last 7 days, grouped by day)
@@ -318,6 +331,23 @@ export default function StatsPageClient({ user }) {
               <div className={styles.statBox}>
                 <span className={styles.statValue}>{focusStats.avgDuration}m</span>
                 <span className={styles.statLabel}>Avg Duration</span>
+              </div>
+            </div>
+            <div className={styles.breakdown}>
+              <div className={styles.breakdownItem}>
+                <span className={styles.breakdownDot} style={{ background: 'var(--accent-primary)' }} />
+                <span className={styles.breakdownLabel}>This Week</span>
+                <span className={styles.breakdownValue}>{focusStats.thisWeekSessions} session{focusStats.thisWeekSessions !== 1 ? 's' : ''}</span>
+              </div>
+              <div className={styles.breakdownItem}>
+                <span className={styles.breakdownDot} style={{ background: 'var(--info)' }} />
+                <span className={styles.breakdownLabel}>This Month</span>
+                <span className={styles.breakdownValue}>{focusStats.thisMonthSessions} session{focusStats.thisMonthSessions !== 1 ? 's' : ''}</span>
+              </div>
+              <div className={styles.breakdownItem}>
+                <span className={styles.breakdownDot} style={{ background: 'var(--success)' }} />
+                <span className={styles.breakdownLabel}>Avg per Day</span>
+                <span className={styles.breakdownValue}>{focusStats.avgPerDay}m</span>
               </div>
             </div>
           </div>

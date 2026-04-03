@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -99,9 +99,8 @@ const steps = [
   },
 ];
 
-export default function LandingPageClient() {
+export default function LandingPageClient({ isAuthenticated = false }) {
   const router = useRouter();
-  const [isLoading, setIsLoading] = useState(true);
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
 
   const streakCount = 7 + Object.values(checkedPacts).filter(Boolean).length - 1;
@@ -109,8 +108,7 @@ export default function LandingPageClient() {
 
   const calendarLevels = [3,1,2,0,3,2,1,3,2,3,1,0,2,3,2,1,3,0,2,3,1,2,3,2,0,1,3,2];
   const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
-  // Light up empty cells based on how many pacts are checked (beyond the initial one)
-  const extraChecks = checkedCount - 1; // subtract the pre-checked one
+  const extraChecks = checkedCount - 1;
   let emptyFilled = 0;
   const activeLevels = calendarLevels.map((level) => {
     if (level === 0 && emptyFilled < extraChecks) {
@@ -120,18 +118,11 @@ export default function LandingPageClient() {
     return level;
   });
 
-  useEffect(() => {
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) {
-        router.replace('/dashboard');
-      } else {
-        setIsLoading(false);
-      }
-    });
-  }, [router]);
-
-  const handleSignIn = async () => {
+  const handleCta = async () => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
@@ -143,10 +134,6 @@ export default function LandingPageClient() {
       console.error('Error signing in:', error.message);
     }
   };
-
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <>
@@ -276,7 +263,7 @@ export default function LandingPageClient() {
             transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
           >
             <motion.div whileHover={buttonHover} whileTap={buttonTap}>
-              <button onClick={handleSignIn} className={`btn btn-primary ${styles.ctaButton}`}>
+              <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
                 Start Locking In
                 <motion.svg
                   width="18"
@@ -572,7 +559,7 @@ export default function LandingPageClient() {
               >
                 <p>See? That felt good. Imagine that every day.</p>
                 <motion.div whileHover={buttonHover} whileTap={buttonTap}>
-                  <button onClick={handleSignIn} className={`btn btn-primary ${styles.ctaButton}`}>
+                  <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
                     Start Locking In
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                       <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -660,7 +647,7 @@ export default function LandingPageClient() {
               viewport={{ once: true }}
               transition={{ delay: 0.2, duration: 0.4, ease: easeOutQuint }}
             >
-              <button onClick={handleSignIn} className={`btn btn-primary ${styles.ctaButton}`}>
+              <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
                 Start Locking In
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -700,7 +687,7 @@ export default function LandingPageClient() {
                   <h4 className={styles.footerColumnTitle}>Product</h4>
                   <a href="#features" className={styles.footerLink}>Features</a>
                   <a href="#how-it-works" className={styles.footerLink}>How It Works</a>
-                  <button onClick={handleSignIn} className={styles.footerLink}>Get Started</button>
+                  <button onClick={handleCta} className={styles.footerLink}>Get Started</button>
                 </div>
                 <div className={styles.footerColumn}>
                   <h4 className={styles.footerColumnTitle}>Project</h4>

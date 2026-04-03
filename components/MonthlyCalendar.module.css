@@ -39,37 +39,6 @@
   color: var(--accent-primary);
 }
 
-.streakBadges {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.streakBadge {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  background: rgba(var(--accent-celebration-rgb), 0.15);
-  color: var(--accent-celebration);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
-}
-
-.fireIcon,
-.trophyIcon {
-  font-size: 14px;
-}
-
-.streakValue {
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
-}
-
-.streakLabel {
-  color: var(--text-tertiary);
-}
-
 .shareBtn {
   display: flex;
   align-items: center;
@@ -417,11 +386,6 @@
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-3);
-  }
-
-  .streakBadges {
-    width: 100%;
-    justify-content: flex-start;
   }
 
   .monthTitle {

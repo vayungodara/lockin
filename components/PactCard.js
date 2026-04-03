@@ -5,7 +5,7 @@ import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useConfetti } from '@/lib/confetti';
-import { cardHover, buttonHover, buttonTap, celebrationBounce } from '@/lib/animations';
+import { cardHover, buttonHover, buttonTap, celebrationBounce, celebrationGlow } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import { playCompletionSound, playMissSound } from '@/lib/sounds';
 import styles from './PactCard.module.css';
@@ -233,6 +233,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       ref={cardRef}
       className={`${styles.card} ${getStatusClass()}`}
       whileHover={pact.status === 'active' ? cardHover : undefined}
+      animate={showBounce ? celebrationGlow.animate : undefined}
       style={{ position: 'relative' }}
     >
       {ConfettiComponent}

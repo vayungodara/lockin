@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
@@ -10,8 +10,13 @@ import styles from './ShareStreak.module.css';
 export default function ShareStreakClient({ user, profile, streakData }) {
   const [copied, setCopied] = useState(false);
   const router = useRouter();
-  
-  const shareUrl = typeof window !== 'undefined' 
+  const timerRef = useRef(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
+
+  const shareUrl = typeof window !== 'undefined'
     ? `${window.location.origin}/share/streak?streak=${streakData.currentStreak}&name=${encodeURIComponent(profile?.full_name || 'A LockIn user')}`
     : '';
 
@@ -19,7 +24,8 @@ export default function ShareStreakClient({ user, profile, streakData }) {
     try {
       await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Failed to copy:', err);
     }

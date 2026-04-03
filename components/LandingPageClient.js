@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import ParticleBackground from '@/components/ParticleBackground';
+import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import styles from '../app/page.module.css';
 import { 
@@ -101,6 +102,7 @@ const steps = [
 
 export default function LandingPageClient({ isAuthenticated = false }) {
   const router = useRouter();
+  const toast = useToast();
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
 
   const streakCount = 7 + Object.values(checkedPacts).filter(Boolean).length - 1;
@@ -132,6 +134,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
     });
     if (error) {
       console.error('Error signing in:', error.message);
+      toast.error('Sign in failed. Please try again.');
     }
   };
 

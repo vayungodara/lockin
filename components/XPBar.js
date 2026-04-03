@@ -17,11 +17,16 @@ export default function XPBar({ userId, refreshKey }) {
 
   useEffect(() => {
     async function fetchXP() {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('total_xp, level')
         .eq('id', userId)
         .single();
+
+      if (error) {
+        console.error('Failed to fetch XP:', error);
+        return;
+      }
 
       if (data) {
         const newXP = data.total_xp || 0;

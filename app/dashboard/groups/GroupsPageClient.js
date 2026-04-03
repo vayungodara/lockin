@@ -176,7 +176,7 @@ export default function GroupsPageClient({ user }) {
         .from('groups')
         .select('*')
         .in('id', groupIds)
-        .limit(100);
+        .limit(250);
 
       if (groupsError) {
         console.error('Groups query error:', groupsError);

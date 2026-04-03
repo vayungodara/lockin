@@ -34,7 +34,8 @@ export default function PactsPageClient({ user }) {
         .from('pacts')
         .select('*')
         .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(500);
 
       if (error) throw error;
 

@@ -175,8 +175,7 @@ export default function GroupsPageClient({ user }) {
       const { data: groupsData, error: groupsError } = await supabase
         .from('groups')
         .select('*')
-        .in('id', groupIds)
-        .limit(100);
+        .in('id', groupIds);
 
       if (groupsError) {
         console.error('Groups query error:', groupsError);

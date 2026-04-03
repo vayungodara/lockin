@@ -6,10 +6,12 @@ import { motion } from 'framer-motion';
 import styles from './Navbar.module.css';
 import ThemeToggle from './ThemeToggle';
 import { useState } from 'react';
+import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 
 export default function Navbar() {
   const [hoveredLink, setHoveredLink] = useState(null);
+  const toast = useToast();
 
   const handleGetStarted = async () => {
     const supabase = createClient();
@@ -21,6 +23,7 @@ export default function Navbar() {
     });
     if (error) {
       console.error('Error signing in:', error.message);
+      toast.error('Sign in failed. Please try again.');
     }
   };
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
+import { getActivityHeatmap } from '@/lib/streaks';
 import { staggerContainer, staggerItem } from '@/lib/animations';
 import styles from './MonthlyCalendar.module.css';
 
@@ -15,7 +15,6 @@ export default function MonthlyCalendar({ userId }) {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDay, setSelectedDay] = useState(null);
   const [heatmapData, setHeatmapData] = useState([]);
-  const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0, totalCompleted: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [slideDirection, setSlideDirection] = useState(0);
   const supabase = useMemo(() => createClient(), []);
@@ -23,13 +22,8 @@ export default function MonthlyCalendar({ userId }) {
 
   const fetchData = useCallback(async () => {
     try {
-      const [heatmap, streak] = await Promise.all([
-        getActivityHeatmap(supabase, userId, 365),
-        calculateStreak(supabase, userId)
-      ]);
-
+      const heatmap = await getActivityHeatmap(supabase, userId, 365);
       setHeatmapData(heatmap.data || []);
-      setStreakData(streak);
     } catch (err) {
       console.error('Error fetching calendar data:', err);
     } finally {
@@ -184,30 +178,18 @@ export default function MonthlyCalendar({ userId }) {
           </svg>
           Activity Calendar
         </h3>
-        <div className={styles.streakBadges}>
-          <div className={styles.streakBadge}>
-            <span className={styles.fireIcon}>🔥</span>
-            <span className={styles.streakValue}>{streakData.currentStreak}</span>
-            <span className={styles.streakLabel}>day streak</span>
-          </div>
-          <div className={styles.streakBadge}>
-            <span className={styles.trophyIcon}>🏆</span>
-            <span className={styles.streakValue}>{streakData.longestStreak}</span>
-            <span className={styles.streakLabel}>best</span>
-          </div>
-          <button
-            type="button"
-            className={styles.shareBtn}
-            onClick={() => router.push('/share/streak')}
-            aria-label="Share your streak"
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M4 12V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <polyline points="16,6 12,2 8,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
-        </div>
+        <button
+          type="button"
+          className={styles.shareBtn}
+          onClick={() => router.push('/share/streak')}
+          aria-label="Share your streak"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M4 12V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <polyline points="16,6 12,2 8,6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <line x1="12" y1="2" x2="12" y2="15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
       </div>
 
       {/* Month Navigation */}

@@ -34,7 +34,8 @@ export default function GroupDetailClient({ user, group, userRole }) {
           .from('tasks')
           .select('*')
           .eq('group_id', group.id)
-          .order('created_at', { ascending: false }),
+          .order('created_at', { ascending: false })
+          .limit(500),
       ]);
 
       if (membersResult.error) throw membersResult.error;

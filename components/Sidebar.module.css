@@ -406,6 +406,15 @@
   transform: scale(1.1);
 }
 
+.landingBtn {
+  background: rgba(var(--accent-primary-rgb, 91, 94, 245), 0.12);
+  border: 1px solid rgba(var(--accent-primary-rgb, 91, 94, 245), 0.18);
+}
+
+.landingBtn:hover {
+  background: rgba(var(--accent-primary-rgb, 91, 94, 245), 0.22);
+}
+
 .signOutBtn:hover {
   color: var(--danger);
   background: var(--danger-bg);

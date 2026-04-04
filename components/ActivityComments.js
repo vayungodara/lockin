@@ -20,8 +20,14 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
   const fetchComments = useCallback(async () => {
     setIsLoading(true);
     const result = await getComments(supabase, activityId);
-    setComments(result.data);
-    setCommentCount(result.data.length);
+    if (result.error) {
+      console.warn('Failed to load comments:', result.error);
+      setComments([]);
+      setCommentCount(0);
+    } else {
+      setComments(result.data);
+      setCommentCount(result.data.length);
+    }
     setIsLoading(false);
   }, [supabase, activityId]);
 
@@ -41,6 +47,8 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
     if (result.success) {
       setNewComment('');
       await fetchComments();
+    } else {
+      console.warn('Failed to post comment:', result.error);
     }
     setIsSubmitting(false);
   };
@@ -49,6 +57,8 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
     const result = await deleteComment(supabase, commentId);
     if (result.success) {
       await fetchComments();
+    } else {
+      console.warn('Failed to delete comment:', result.error);
     }
   };
 

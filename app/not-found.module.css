@@ -16,7 +16,7 @@
 .heading {
   font-size: var(--text-6xl);
   font-weight: var(--font-extrabold);
-  margin-bottom: 16px;
+  margin-bottom: var(--space-4);
   background: var(--gradient-primary);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -26,12 +26,12 @@
 .message {
   font-size: var(--text-xl);
   color: var(--text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: var(--space-8);
 }
 
 .link {
   display: inline-block;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-6);
   background: var(--gradient-primary);
   color: white;
   border-radius: var(--radius-lg);

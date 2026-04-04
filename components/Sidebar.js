@@ -394,7 +394,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             {getThemeIcon()}
           </motion.button>
 
-          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+          <motion.div layout whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
             <Link
               href="/?preview=true"
               className={`${styles.actionBtn} ${styles.landingBtn}`}

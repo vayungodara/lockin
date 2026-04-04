@@ -212,16 +212,20 @@
 
 /* Dark mode: boost completed card contrast since opacity + faint colors compound */
 :global([data-theme="dark"]) .card.completed {
-  opacity: 0.85;
+  opacity: 0.9;
 }
 
 :global([data-theme="dark"]) .card.completed .title {
-  color: var(--text-secondary);
-  text-decoration-color: var(--text-tertiary);
+  color: var(--text-primary);
+  text-decoration-color: var(--text-muted);
 }
 
 :global([data-theme="dark"]) .card.completed .description {
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .card.completed .deadline {
+  color: var(--text-secondary);
 }
 
 :global([data-theme="dark"]) .badge.completed {

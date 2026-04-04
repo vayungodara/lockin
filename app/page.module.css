@@ -83,6 +83,16 @@
   border-radius: var(--radius-lg);
 }
 
+:global([data-theme="dark"]) .heroCtas .btn:global(.btn-primary) {
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .heroCtas .btn:global(.btn-primary):hover {
+  border-color: rgba(255, 255, 255, 0.35);
+  box-shadow: var(--shadow-xl), 0 0 28px rgba(255, 255, 255, 0.18);
+}
+
 /* === Product Showcase === */
 
 .productShowcase {
@@ -823,6 +833,17 @@
   z-index: 1;
   padding: var(--space-4) var(--space-10);
   font-size: var(--text-base);
+}
+
+:global([data-theme="dark"]) .ctaCard .btn {
+  background: white;
+  color: var(--bg-primary);
+  border: none;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.15), var(--shadow-lg);
+}
+
+:global([data-theme="dark"]) .ctaCard .btn:hover {
+  box-shadow: 0 0 32px rgba(255, 255, 255, 0.25), var(--shadow-xl);
 }
 
 .footer {

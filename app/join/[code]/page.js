@@ -46,9 +46,7 @@ export default async function JoinPage({ params }) {
   }
 
   const { data: group, error: groupError } = await supabase
-    .from('groups')
-    .select('id, name, description, invite_code')
-    .eq('invite_code', code.toUpperCase())
+    .rpc('get_group_by_invite_code', { p_invite_code: code.toUpperCase() })
     .single();
   
   if (groupError || !group) {

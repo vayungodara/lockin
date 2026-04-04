@@ -40,11 +40,9 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
         return;
       }
 
-      // Find the group by invite code
+      // Find the group by invite code (uses SECURITY DEFINER RPC to bypass RLS)
       const { data: group, error: groupError } = await supabase
-        .from('groups')
-        .select('*')
-        .eq('invite_code', code)
+        .rpc('get_group_by_invite_code', { p_invite_code: code })
         .single();
 
       if (groupError || !group) {

@@ -58,10 +58,10 @@ export default function DailySummaryCard({ userId, refreshKey }) {
 
         // Run all independent queries in parallel
         const [
-          { data: activePacts },
-          { data: focusSessions },
-          { data: completedToday },
-          { data: profile },
+          { data: activePacts, error: pactsError },
+          { data: focusSessions, error: focusError },
+          { data: completedToday, error: completedError },
+          { data: profile, error: profileError },
         ] = await Promise.all([
           supabase
             .from('pacts')
@@ -86,6 +86,12 @@ export default function DailySummaryCard({ userId, refreshKey }) {
             .eq('id', userId)
             .single(),
         ]);
+
+        // Log any query errors and fall back to safe defaults
+        if (pactsError) console.warn('DailySummaryCard: failed to fetch active pacts', pactsError);
+        if (focusError) console.warn('DailySummaryCard: failed to fetch focus sessions', focusError);
+        if (completedError) console.warn('DailySummaryCard: failed to fetch completed pacts', completedError);
+        if (profileError) console.warn('DailySummaryCard: failed to fetch profile', profileError);
 
         const dueToday = (activePacts || []).filter(p => {
           const d = new Date(p.deadline);

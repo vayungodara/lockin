@@ -266,6 +266,7 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   overflow-x: clip;
+  scrollbar-gutter: stable;
   width: 100%;
 }
 
@@ -325,6 +326,10 @@ html[data-theme-ready] body {
 
 html[data-theme-ready] body::before {
   transition: opacity var(--transition-slow);
+}
+
+html[data-theme-ready] *::-webkit-scrollbar-thumb {
+  transition: background var(--transition-slow);
 }
 
 

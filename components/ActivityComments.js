@@ -19,16 +19,17 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
 
   const fetchComments = useCallback(async () => {
     setIsLoading(true);
-    const result = await getComments(supabase, activityId);
-    if (result.error) {
-      console.warn('Failed to load comments:', result.error);
-      setComments([]);
-      setCommentCount(0);
-    } else {
-      setComments(result.data);
-      setCommentCount(result.data.length);
+    try {
+      const result = await getComments(supabase, activityId);
+      if (result.error) {
+        console.warn('Failed to load comments:', result.error);
+      } else {
+        setComments(result.data);
+        setCommentCount(result.data.length);
+      }
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }, [supabase, activityId]);
 
   const toggleComments = () => {

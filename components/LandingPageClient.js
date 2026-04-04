@@ -346,7 +346,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.sectionHeader}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
+            viewport={{ amount: 0.5 }}
             transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>Everything you need to <span className="text-gradient">get stuff done</span></h2>
@@ -360,7 +360,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                 className={`${styles.featureCard} ${feature.isHero ? styles.featureCardLarge : ''}`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.4, delay: index * 0.06, ease: easeOutQuint }}
                 whileHover={{ y: -5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
@@ -381,7 +381,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           className={styles.socialProof}
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.5 }}
+          viewport={{ amount: 0.5 }}
           transition={{ duration: 0.5, ease: easeOutQuint }}
         >
           <div className={styles.socialProofInner}>
@@ -401,7 +401,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.sectionHeader}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
+            viewport={{ amount: 0.5 }}
             transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>Your accountability <span className="text-gradient">command center</span></h2>
@@ -412,7 +412,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.browserFrame}
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
+            viewport={{ amount: 0.2 }}
             transition={{ duration: 0.6, ease: easeOutQuint }}
           >
             <div className={styles.browserBar}>
@@ -484,7 +484,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                       className={styles.mockPactCard}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
+                      viewport={{ amount: 0.3 }}
                       transition={{ delay: 0.3 + i * 0.1, duration: 0.4, ease: easeOutQuint }}
                     >
                       <div className={styles.mockPactHeader}>
@@ -528,7 +528,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                   className={styles.mockCalendar}
                   initial={{ opacity: 0, y: 10 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
+                  viewport={{ amount: 0.3 }}
                   transition={{ delay: 0.6, duration: 0.4, ease: easeOutQuint }}
                 >
                   <div className={styles.mockCalendarHeader}>
@@ -579,7 +579,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.sectionHeader}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.5 }}
+            viewport={{ amount: 0.5 }}
             transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>Get started in <span className="text-gradient">3 simple steps</span></h2>
@@ -597,7 +597,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                 className={styles.step}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: staggerY }}
-                viewport={{ once: true, amount: 0.3 }}
+                viewport={{ amount: 0.3 }}
                 transition={{ duration: 0.4, delay: index * 0.1, ease: easeOutQuint }}
                 whileHover={{ y: staggerY - 5, transition: { duration: 0.2, ease: easeOutQuint } }}
               >
@@ -605,7 +605,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                   className={styles.stepNumber}
                   initial={{ scale: 0.8, opacity: 0 }}
                   whileInView={{ scale: 1, opacity: 1 }}
-                  viewport={{ once: true }}
+                  viewport={{ amount: 0.3 }}
                   transition={{ delay: 0.15 + index * 0.08, duration: 0.35, ease: easeOutQuint }}
                 >
                   {step.number}
@@ -623,13 +623,13 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.ctaCard}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.4 }}
+            viewport={{ amount: 0.4 }}
             transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <motion.h2
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ delay: 0.1, duration: 0.4, ease: easeOutQuint }}
             >
               Ready to stop making excuses?
@@ -637,17 +637,17 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ delay: 0.15, duration: 0.4, ease: easeOutQuint }}
             >
               Join students who are finally getting things done. Free, simple, and it works.
             </motion.p>
-            <motion.div 
+            <motion.div
               whileHover={buttonHover}
               whileTap={buttonTap}
               initial={{ opacity: 0, y: 12 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.3 }}
               transition={{ delay: 0.2, duration: 0.4, ease: easeOutQuint }}
             >
               <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
@@ -664,7 +664,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           className={styles.footer}
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
+          viewport={{ amount: 0.1 }}
           transition={{ duration: 0.5, ease: easeOutQuint }}
         >
           <div className={styles.footerContent}>

@@ -1,7 +1,7 @@
 import { updateSession } from '@/lib/supabase/middleware'
 import { NextResponse } from 'next/server'
 
-export default async function proxy(request) {
+export default async function middleware(request) {
   const { pathname, searchParams } = request.nextUrl
   if (pathname === '/' && searchParams.has('code')) {
     const url = request.nextUrl.clone()

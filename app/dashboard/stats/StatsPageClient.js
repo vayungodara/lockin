@@ -44,7 +44,7 @@ export default function StatsPageClient({ user }) {
         .from('pacts')
         .select('status, completed_at, created_at')
         .eq('user_id', user.id)
-        .limit(10000);
+        .limit(1000);
 
       if (pactsError) throw pactsError;
 
@@ -76,7 +76,7 @@ export default function StatsPageClient({ user }) {
         .select('*')
         .eq('user_id', user.id)
         .order('started_at', { ascending: false })
-        .limit(10000);
+        .limit(1000);
 
       if (focusError) throw focusError;
 

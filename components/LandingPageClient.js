@@ -133,7 +133,6 @@ export default function LandingPageClient({ isAuthenticated = false }) {
       },
     });
     if (error) {
-      console.error('Error signing in:', error.message);
       toast.error('Sign in failed. Please try again.');
     }
   };

@@ -73,7 +73,7 @@ export default function StatsPageClient({ user }) {
       // Fetch focus stats
       const { data: sessions, error: focusError } = await supabase
         .from('focus_sessions')
-        .select('*')
+        .select('id, started_at, duration_minutes, ended_at')
         .eq('user_id', user.id)
         .order('started_at', { ascending: false })
         .limit(1000);

@@ -21,6 +21,7 @@ export function createMockSupabase() {
     in: vi.fn(),
     not: vi.fn(),
     gte: vi.fn(),
+    or: vi.fn(),
     order: vi.fn(),
     range: vi.fn(),
     single: vi.fn(),
@@ -43,7 +44,7 @@ export function createMockSupabase() {
 
   // Every method returns the builder for chaining
   const chainMethods = [
-    'select', 'eq', 'neq', 'in', 'not', 'gte',
+    'select', 'eq', 'neq', 'in', 'not', 'gte', 'or',
     'order', 'range', 'single', 'maybeSingle',
     'insert', 'update', 'delete',
   ];

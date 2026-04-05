@@ -1,5 +1,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatRelativeTime, getActionInfo } from '@/lib/activity';
+import {
+  formatRelativeTime,
+  getActionInfo,
+  logActivity,
+  HIDDEN_FEED_ACTIONS,
+  TEST_DATA_PATTERNS,
+} from '@/lib/activity';
+import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatRelativeTime', () => {
   beforeEach(() => {
@@ -126,5 +133,93 @@ describe('getActionInfo', () => {
       // Should NOT be the fallback
       expect(info.color).not.toBe('gray');
     });
+  });
+});
+
+describe('HIDDEN_FEED_ACTIONS', () => {
+  it('is an array containing task_deleted', () => {
+    expect(Array.isArray(HIDDEN_FEED_ACTIONS)).toBe(true);
+    expect(HIDDEN_FEED_ACTIONS).toContain('task_deleted');
+  });
+});
+
+describe('TEST_DATA_PATTERNS', () => {
+  it('is an array of RegExp patterns', () => {
+    expect(Array.isArray(TEST_DATA_PATTERNS)).toBe(true);
+    TEST_DATA_PATTERNS.forEach((pattern) => {
+      expect(pattern).toBeInstanceOf(RegExp);
+    });
+  });
+
+  it('matches "Bulk Test" titles', () => {
+    const matches = TEST_DATA_PATTERNS.some((p) => p.test('Bulk Test items'));
+    expect(matches).toBe(true);
+  });
+
+  it('matches "Test #123" titles', () => {
+    const matches = TEST_DATA_PATTERNS.some((p) => p.test('Test #42'));
+    expect(matches).toBe(true);
+  });
+
+  it('matches "[TEST]" titles', () => {
+    const matches = TEST_DATA_PATTERNS.some((p) => p.test('[TEST] my pact'));
+    expect(matches).toBe(true);
+  });
+
+  it('does not match normal titles', () => {
+    const matches = TEST_DATA_PATTERNS.some((p) => p.test('Study for exam'));
+    expect(matches).toBe(false);
+  });
+});
+
+describe('logActivity', () => {
+  it('returns success when insert succeeds', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_created', null, { title: 'Test' });
+    expect(result).toEqual({ success: true });
+  });
+
+  it('returns failure when user is not authenticated', async () => {
+    const { supabase, builder } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({
+      data: { user: null },
+      error: null,
+    });
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_created', null);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Not authenticated');
+  });
+
+  it('returns failure when auth throws an error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'Auth failed' },
+    });
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_created', null);
+    expect(result.success).toBe(false);
+  });
+
+  it('returns failure when insert returns an error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'Insert failed' } });
+
+    const result = await logActivity(supabase, 'pact_created', null, { title: 'Test' });
+    expect(result.success).toBe(false);
+    expect(result.error).toEqual({ message: 'Insert failed' });
+  });
+
+  it('handles non-object metadata gracefully', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_created', null, 'not-an-object');
+    expect(result.success).toBe(true);
   });
 });

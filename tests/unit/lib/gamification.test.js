@@ -4,7 +4,10 @@ import {
   getLevelFromXP,
   getProgressToNextLevel,
   ACHIEVEMENTS,
+  awardXP,
+  getUserAchievements,
 } from '@/lib/gamification';
+import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('getLevelFromXP', () => {
   it('returns level 1 for 0 XP', () => {
@@ -117,6 +120,93 @@ describe('ACHIEVEMENTS', () => {
   it('achievement keys match their object keys', () => {
     Object.entries(ACHIEVEMENTS).forEach(([objKey, achievement]) => {
       expect(achievement.key).toBe(objKey);
+    });
+  });
+
+  it('includes the onboarding_complete achievement', () => {
+    expect(ACHIEVEMENTS).toHaveProperty('onboarding_complete');
+    expect(ACHIEVEMENTS.onboarding_complete.name).toBe('Challenge Accepted');
+  });
+});
+
+describe('awardXP', () => {
+  it('returns success when rpc succeeds', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.rpc.mockResolvedValue({ data: null, error: null });
+
+    const result = await awardXP(supabase, 'user-1', 'PACT_COMPLETED', 10);
+    expect(result).toEqual({ success: true });
+    expect(supabase.rpc).toHaveBeenCalledWith('award_xp', {
+      p_user_id: 'user-1',
+      p_event_type: 'PACT_COMPLETED',
+      p_xp_amount: 10,
+      p_metadata: {},
+    });
+  });
+
+  it('returns failure when rpc returns an error', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC failed' } });
+
+    const result = await awardXP(supabase, 'user-1', 'PACT_COMPLETED', 10);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('RPC failed');
+  });
+
+  it('passes custom metadata to rpc', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.rpc.mockResolvedValue({ data: null, error: null });
+
+    await awardXP(supabase, 'user-1', 'PACT_COMPLETED', 10, { bonus: true });
+    expect(supabase.rpc).toHaveBeenCalledWith('award_xp', {
+      p_user_id: 'user-1',
+      p_event_type: 'PACT_COMPLETED',
+      p_xp_amount: 10,
+      p_metadata: { bonus: true },
+    });
+  });
+});
+
+describe('getUserAchievements', () => {
+  it('returns enriched achievements with unlock status', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: [
+        { achievement_key: 'first_pact', unlocked_at: '2024-06-10T00:00:00Z' },
+      ],
+      error: null,
+    });
+
+    const result = await getUserAchievements(supabase, 'user-1');
+    expect(result.error).toBeNull();
+    expect(result.data.length).toBe(Object.keys(ACHIEVEMENTS).length);
+
+    const firstPact = result.data.find((a) => a.key === 'first_pact');
+    expect(firstPact.unlocked).toBe(true);
+    expect(firstPact.unlockedAt).toBe('2024-06-10T00:00:00Z');
+
+    const streak7 = result.data.find((a) => a.key === 'streak_7');
+    expect(streak7.unlocked).toBe(false);
+    expect(streak7.unlockedAt).toBeUndefined();
+  });
+
+  it('returns empty data on DB error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getUserAchievements(supabase, 'user-1');
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('handles no unlocked achievements', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getUserAchievements(supabase, 'user-1');
+    expect(result.error).toBeNull();
+    result.data.forEach((a) => {
+      expect(a.unlocked).toBe(false);
     });
   });
 });

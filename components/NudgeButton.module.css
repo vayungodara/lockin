@@ -29,3 +29,17 @@
   background: var(--success-bg);
   color: var(--success);
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .nudgeBtn {
+  background: rgba(var(--warning-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .nudgeBtn:hover:not(:disabled) {
+  background: rgba(var(--warning-rgb), 0.22);
+  box-shadow: 0 0 16px rgba(var(--warning-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .nudgeBtn.nudged {
+  background: rgba(var(--success-rgb), 0.15);
+}

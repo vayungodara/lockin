@@ -147,3 +147,23 @@
 .mobileTimerBtn:active {
   background: rgba(255, 255, 255, 0.3);
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .mobileNav {
+  background: rgba(12, 12, 14, 0.82);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-top-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .navItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .activeDot {
+  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.6);
+}
+
+:global([data-theme="dark"]) .mobileTimer {
+  box-shadow: var(--shadow-xl), 0 0 24px rgba(var(--accent-primary-rgb), 0.2);
+}

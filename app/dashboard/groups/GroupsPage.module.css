@@ -449,3 +449,70 @@
     width: 100%;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .groupCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .groupCard:hover {
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-lg), 0 0 0 1px var(--accent-primary), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+}
+
+:global([data-theme="dark"]) .progressBar {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .progressFill {
+  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.4);
+}
+
+:global([data-theme="dark"]) .ownerBadge {
+  background: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .cardFooter {
+  border-top-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .avatar {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .avatarExtra {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .emptyState {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .emptyAction {
+  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .emptyAction:hover {
+  box-shadow: 0 0 28px rgba(var(--accent-primary-rgb), 0.35);
+}
+
+:global([data-theme="dark"]) .emptyActionSecondary {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .emptyActionSecondary:hover {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.15);
+}

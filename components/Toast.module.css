@@ -132,3 +132,36 @@
     max-width: none;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .toast {
+  background: rgba(20, 20, 23, 0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xl);
+}
+
+:global([data-theme="dark"]) .success {
+  border-color: rgba(var(--success-rgb), 0.3);
+  box-shadow: var(--shadow-xl), -4px 0 16px rgba(var(--success-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .error {
+  border-color: rgba(var(--danger-rgb), 0.3);
+  box-shadow: var(--shadow-xl), -4px 0 16px rgba(var(--danger-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .warning {
+  border-color: rgba(var(--warning-rgb), 0.3);
+  box-shadow: var(--shadow-xl), -4px 0 16px rgba(var(--warning-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .info {
+  border-color: rgba(var(--info-rgb), 0.3);
+  box-shadow: var(--shadow-xl), -4px 0 16px rgba(var(--info-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .close:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

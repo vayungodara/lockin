@@ -172,3 +172,31 @@
     gap: var(--space-1);
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .card {
+  background: rgba(20, 20, 23, 0.7);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .card:hover {
+  box-shadow: var(--shadow-xl), 0 0 24px rgba(var(--accent-primary-rgb), 0.08);
+}
+
+:global([data-theme="dark"]) .riskBanner {
+  background: rgba(var(--danger-rgb), 0.15);
+  border-color: rgba(var(--danger-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .freezeBtn {
+  background: rgba(var(--info-rgb), 0.15);
+  border-color: rgba(var(--info-rgb), 0.4);
+}
+
+:global([data-theme="dark"]) .freezeBtn:hover:not(:disabled) {
+  box-shadow: 0 0 16px rgba(var(--info-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .milestoneBanner {
+  background: rgba(var(--accent-primary-rgb), 0.14);
+}

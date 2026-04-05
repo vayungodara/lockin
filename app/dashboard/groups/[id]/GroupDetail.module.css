@@ -463,3 +463,75 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .kanbanColumn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .columnHeader {
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .columnCount {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .leaderboardCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-md);
+}
+
+:global([data-theme="dark"]) .leaderboardItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .leaderboardTime {
+  background: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .memberCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .memberCard:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .inviteBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .inviteBtn:hover {
+  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .lockedInBadge {
+  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.6);
+}
+
+:global([data-theme="dark"]) .dotTodo {
+  background: var(--text-muted);
+}
+
+:global([data-theme="dark"]) .youBadge {
+  background: rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .ownerBadge {
+  background: rgba(var(--warning-rgb), 0.15);
+}

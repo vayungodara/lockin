@@ -317,3 +317,35 @@
     flex-direction: column-reverse;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .overlay {
+  background: rgba(0, 0, 0, 0.6);
+}
+
+:global([data-theme="dark"]) .modal {
+  background: rgba(20, 20, 23, 0.88);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .input,
+:global([data-theme="dark"]) .textarea,
+:global([data-theme="dark"]) .select {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .input:focus,
+:global([data-theme="dark"]) .textarea:focus,
+:global([data-theme="dark"]) .select:focus {
+  box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .titleInput {
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .cancelBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}

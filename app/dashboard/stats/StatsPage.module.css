@@ -364,3 +364,44 @@
     font-size: 24px;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .streakCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .analyticsCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .statBox {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .sessionsCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .sessionItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .sessionIcon {
+  background: rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .dayHeader {
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .breakdown {
+  border-top-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .emptyState {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}

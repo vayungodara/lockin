@@ -243,3 +243,35 @@
   color: var(--text-tertiary);
   margin: var(--space-1) 0 0;
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .card {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .card:hover {
+  box-shadow: 0 4px 24px -4px rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .tooltip {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-xl);
+}
+
+:global([data-theme="dark"]) .tooltip::after {
+  border-top-color: var(--bg-elevated);
+}
+
+:global([data-theme="dark"]) .tooltipBelow::after {
+  border-top-color: transparent;
+  border-bottom-color: var(--bg-elevated);
+}
+
+:global([data-theme="dark"]) .level0 {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .dayCell:hover {
+  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.25);
+}

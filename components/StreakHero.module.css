@@ -209,3 +209,54 @@
     font-size: var(--text-3xl);
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .hero {
+  background: rgba(var(--accent-primary-rgb), 0.08);
+  border-color: rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .hero:hover {
+  border-color: rgba(var(--accent-primary-rgb), 0.3);
+  box-shadow: 0 0 32px rgba(var(--accent-primary-rgb), 0.12);
+}
+
+:global([data-theme="dark"]) .fire {
+  background: rgba(var(--streak-color-rgb), 0.1);
+  border-color: rgba(var(--streak-color-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .electric {
+  background: rgba(var(--streak-color-rgb), 0.1);
+  border-color: rgba(var(--streak-color-rgb), 0.28);
+}
+
+:global([data-theme="dark"]) .diamond {
+  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.1), rgba(var(--accent-primary-rgb), 0.08));
+  border-color: rgba(var(--streak-color-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .legendary {
+  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.14), rgba(var(--accent-primary-rgb), 0.1));
+  border-color: rgba(var(--streak-color-rgb), 0.35);
+  box-shadow: 0 0 40px rgba(var(--streak-color-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .iconWrapper {
+  background: rgba(var(--accent-primary-rgb), 0.14);
+}
+
+:global([data-theme="dark"]) .fire .iconWrapper,
+:global([data-theme="dark"]) .electric .iconWrapper,
+:global([data-theme="dark"]) .diamond .iconWrapper,
+:global([data-theme="dark"]) .legendary .iconWrapper {
+  background: rgba(var(--streak-color-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .secondary {
+  background: rgba(var(--accent-primary-rgb), 0.1);
+}
+
+:global([data-theme="dark"]) .bgDecoration {
+  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.1) 0%, transparent 70%);
+}

@@ -66,3 +66,20 @@
     animation: none;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .skeleton {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .skeleton::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+}
+
+:global([data-theme="dark"]) .skeletonText {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .skeletonText::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+}

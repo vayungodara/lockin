@@ -271,3 +271,40 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .statsBar {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .filterTabs {
+  border: 1px solid var(--border-subtle);
+}
+
+:global([data-theme="dark"]) .filterTab:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+:global([data-theme="dark"]) .emptyState {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .emptyAction {
+  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .emptyAction:hover {
+  box-shadow: 0 0 28px rgba(var(--accent-primary-rgb), 0.35);
+}

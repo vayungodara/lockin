@@ -553,3 +553,61 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .statCard {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .statCard:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardCompleted {
+  border-left-color: var(--success);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--success-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statCardPacts {
+  border-left-color: var(--warning);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--warning-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statCardMissed {
+  border-left-color: var(--danger);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--danger-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .emptyState {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .emptyIcon {
+  background: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .authCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-2xl);
+}
+
+:global([data-theme="dark"]) .googleButton {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .googleButton:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:global([data-theme="dark"]) .navItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .signOutBtn:hover {
+  background: rgba(var(--danger-rgb), 0.15);
+}

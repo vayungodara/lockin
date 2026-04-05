@@ -210,3 +210,31 @@
     left: 0;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .bellButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .dropdown {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-2xl);
+}
+
+:global([data-theme="dark"]) .notificationItem:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .notificationItem.unread {
+  background: rgba(var(--accent-primary-rgb), 0.08);
+}
+
+:global([data-theme="dark"]) .notificationIcon {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .badge {
+  border-color: var(--bg-elevated);
+  box-shadow: 0 0 8px rgba(var(--danger-rgb), 0.4);
+}

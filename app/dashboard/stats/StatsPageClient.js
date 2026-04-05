@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { fadeInUp } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
+import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import styles from './StatsPage.module.css';
 
@@ -212,12 +213,8 @@ export default function StatsPageClient({ user }) {
       <div className={styles.content}>
         {/* Top-level empty state when user has zero activity */}
         {pactStats.total === 0 && focusStats.sessionsCount === 0 && (
-          <motion.div className={styles.emptyState} {...fadeInUp}>
-            <motion.div
-              className={styles.emptyIllustration}
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
+          <EmptyState
+            icon={
               <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <line x1="20" y1="90" x2="100" y2="90" stroke="currentColor" strokeWidth="1" opacity="0.1" />
                 <line x1="20" y1="70" x2="100" y2="70" stroke="currentColor" strokeWidth="1" opacity="0.1" />
@@ -230,10 +227,10 @@ export default function StatsPageClient({ user }) {
                 <circle cx="95" cy="30" r="4" fill="currentColor" opacity="0.6" />
                 <path d="M90 28L95 30L93 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
               </svg>
-            </motion.div>
-            <h3 className={styles.emptyTitle}>Your story starts with day one.</h3>
-            <p className={styles.emptySubtext}>Complete pacts and focus sessions to see your progress here.</p>
-          </motion.div>
+            }
+            title="Your story starts with day one."
+            description="Complete pacts and focus sessions to see your progress here."
+          />
         )}
 
         {/* Streak Summary */}

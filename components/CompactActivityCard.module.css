@@ -9,8 +9,8 @@
 }
 
 .card:hover {
-  border-color: var(--border-default);
-  box-shadow: 0 4px 24px -4px rgba(var(--accent-primary-rgb), 0.10);
+  border-color: rgba(var(--accent-primary-rgb), 0.3);
+  background: var(--surface-2);
 }
 
 .header {
@@ -250,7 +250,8 @@
 }
 
 :global([data-theme="dark"]) .card:hover {
-  box-shadow: 0 4px 24px -4px rgba(var(--accent-primary-rgb), 0.18);
+  border-color: rgba(var(--accent-primary-rgb), 0.4);
+  background: var(--surface-2);
 }
 
 :global([data-theme="dark"]) .tooltip {

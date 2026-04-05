@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import styles from './PactsPage.module.css';
 import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
+import EmptyState from '@/components/EmptyState';
 import { SkeletonRow } from '@/components/Skeleton';
 import { fadeInUp } from '@/lib/animations';
 
@@ -160,46 +161,33 @@ export default function PactsPageClient({ user }) {
           <SkeletonRow />
         </div>
       ) : filteredPacts.length === 0 ? (
-        <motion.div className={styles.emptyState} {...fadeInUp}>
-          <motion.div
-            className={styles.emptyIllustration}
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          >
+        <EmptyState
+          icon={
             <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Target rings */}
               <circle cx="55" cy="62" r="40" stroke="currentColor" strokeWidth="1.5" opacity="0.12" fill="rgba(var(--accent-primary-rgb), 0.03)" />
               <circle cx="55" cy="62" r="28" stroke="currentColor" strokeWidth="1.5" opacity="0.2" fill="rgba(var(--accent-primary-rgb), 0.05)" />
               <circle cx="55" cy="62" r="16" stroke="currentColor" strokeWidth="1.5" opacity="0.35" fill="rgba(var(--accent-primary-rgb), 0.08)" />
               <circle cx="55" cy="62" r="5" fill="currentColor" opacity="0.5" />
-              {/* Arrow shaft */}
               <path d="M55 62L92 25" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
-              {/* Arrowhead */}
               <path d="M92 25L82 27" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
               <path d="M92 25L90 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
-              {/* Arrow fletching */}
               <path d="M55 62L48 68" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
               <path d="M55 62L62 68" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.3" />
-              {/* Impact sparks */}
               <path d="M49 55L45 51" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
               <path d="M62 56L66 52" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.2" />
               <path d="M52 70L48 74" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" opacity="0.15" />
             </svg>
-          </motion.div>
-          <h3 className={styles.emptyTitle}>
-            {filter === 'all' ? 'No pacts yet? Your future self is judging you.' : `No ${filter} pacts`}
-          </h3>
-          <p className={styles.emptySubtext}>
-            {filter === 'all'
+          }
+          title={filter === 'all' ? 'No pacts yet? Your future self is judging you.' : `No ${filter} pacts`}
+          description={
+            filter === 'all'
               ? 'Create your first commitment and start building momentum.'
-              : `${filter === 'completed' ? 'Nothing checked off yet. You got this.' : filter === 'missed' ? 'Clean record so far. Let\'s keep it that way.' : 'Time to commit to something new.'}`}
-          </p>
-          {filter === 'all' && (
-            <button className={styles.emptyAction} onClick={() => setIsModalOpen(true)}>
-              + Create Your First Pact
-            </button>
-          )}
-        </motion.div>
+              : filter === 'completed' ? 'Nothing checked off yet. You got this.'
+              : filter === 'missed' ? "Clean record so far. Let's keep it that way."
+              : 'Time to commit to something new.'
+          }
+          action={filter === 'all' ? { label: '+ Create Your First Pact', onClick: () => setIsModalOpen(true) } : null}
+        />
       ) : (
         <LayoutGroup>
           <motion.div className={styles.pactsGrid}>

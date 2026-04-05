@@ -3,9 +3,11 @@
 import { motion } from 'framer-motion';
 import { useFocus } from '@/lib/FocusContext';
 import { useConfetti } from '@/lib/confetti';
+import { useTheme } from '@/components/ThemeProvider';
+import { ACCENT_PALETTES, DEFAULT_PALETTE_ID } from '@/lib/accentColors';
 import { buttonTap, pulseGlow } from '@/lib/animations';
 import styles from './FocusTimer.module.css';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useMemo } from 'react';
 
 export default function FocusTimer() {
   const {
@@ -21,8 +23,18 @@ export default function FocusTimer() {
     WORK_DURATION,
   } = useFocus();
 
+  const { accent } = useTheme();
   const prevSessionsRef = useRef(sessionsCompleted);
   const { fire: triggerConfetti, ConfettiComponent } = useConfetti();
+
+  // Derive accent colors for SVG gradient stops directly from palette data.
+  // SVG <stop> elements don't reliably support CSS custom properties,
+  // so we resolve hex values from the palette definition instead.
+  const defaultPalette = ACCENT_PALETTES.find(p => p.id === DEFAULT_PALETTE_ID);
+  const gradientColors = useMemo(() => {
+    const palette = ACCENT_PALETTES.find(p => p.id === accent) || defaultPalette;
+    return [palette.primary, palette.secondary, palette.tertiary];
+  }, [accent, defaultPalette]);
 
   useEffect(() => {
     if (sessionsCompleted > prevSessionsRef.current) {
@@ -68,9 +80,9 @@ export default function FocusTimer() {
           <svg className={styles.progressRing} viewBox="0 0 120 120">
             <defs>
               <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="0%" gradientTransform={`rotate(${progress * 3.6}, 0.5, 0.5)`} gradientUnits="objectBoundingBox">
-                <stop offset="0%" stopColor="#6366F1" />
-                <stop offset="50%" stopColor="#8B5CF6" />
-                <stop offset="100%" stopColor="#D946EF" />
+                <stop offset="0%" stopColor={gradientColors[0]} />
+                <stop offset="50%" stopColor={gradientColors[1]} />
+                <stop offset="100%" stopColor={gradientColors[2]} />
               </linearGradient>
             </defs>
             <circle

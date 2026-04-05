@@ -148,3 +148,21 @@
 .submitBtn:hover:not(:disabled) {
   opacity: 0.9;
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .container {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+:global([data-theme="dark"]) .toggleButton:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .input {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .input:focus {
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.2), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+}

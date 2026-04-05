@@ -122,3 +122,19 @@
     height: 40px !important;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .navbar {
+  background: rgba(12, 12, 14, 0.82);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .logoIcon {
+  box-shadow: 0 0 24px rgba(var(--accent-primary-rgb), 0.35);
+}
+
+:global([data-theme="dark"]) .ctaBtn:hover {
+  box-shadow: 0 0 24px rgba(var(--accent-primary-rgb), 0.4);
+}

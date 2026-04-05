@@ -224,7 +224,8 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   const getStatusClass = () => {
     if (pact.status === 'completed') return styles.completed;
-    if (pact.status === 'missed' || isOverdue) return styles.missed;
+    if (pact.status === 'missed') return styles.missed;
+    if (isOverdue) return `${styles.missed} ${styles.overdue}`;
     return styles.active;
   };
 

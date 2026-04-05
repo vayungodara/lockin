@@ -3,7 +3,7 @@
 import { useState, useCallback, useMemo, memo } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { staggerItem } from '@/lib/animations';
+import { staggerItem, buttonTap, buttonHover, iconHover, fadeIn, navPillSpring } from '@/lib/animations';
 import { formatRelativeTime, getActionInfo } from '@/lib/activity';
 import { REACTIONS, getReactions, toggleReaction } from '@/lib/reactions';
 import { createClient } from '@/lib/supabase/client';
@@ -223,8 +223,8 @@ function ActivityItem({ activity }) {
                     key={r.key}
                     className={`${styles.reactionBubble} ${userReactions.includes(r.key) ? styles.active : ''}`}
                     onClick={() => handleReaction(r.key)}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={buttonHover}
+                    whileTap={buttonTap}
                   >
                     <span>{r.emoji}</span>
                     <span className={styles.reactionCount}>{reactionCounts[r.key]}</span>
@@ -236,7 +236,7 @@ function ActivityItem({ activity }) {
             <motion.div
               className={`${styles.reactionTrigger} ${showReactions ? styles.reactionTriggerOpen : ''}`}
               layout
-              transition={{ type: "spring", stiffness: 400, damping: 28, mass: 0.8 }}
+              transition={navPillSpring}
               onClick={() => !showReactions && setShowReactions(true)}
             >
               <AnimatePresence mode="wait">
@@ -244,12 +244,9 @@ function ActivityItem({ activity }) {
                   <motion.button
                     key="trigger"
                     className={styles.addReactionBtn}
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.5 }}
-                    transition={{ duration: 0.15 }}
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    {...fadeIn}
+                    whileHover={iconHover}
+                    whileTap={buttonTap}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
@@ -262,10 +259,7 @@ function ActivityItem({ activity }) {
                   <motion.div
                     key="picker"
                     className={styles.reactionPickerInline}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.15, delay: 0.05 }}
+                    {...fadeIn}
                   >
                     {REACTIONS.map((r, i) => (
                       <motion.button
@@ -274,9 +268,10 @@ function ActivityItem({ activity }) {
                         onClick={(e) => { e.stopPropagation(); handleReaction(r.key); }}
                         initial={{ opacity: 0, scale: 0 }}
                         animate={{ opacity: 1, scale: 1 }}
+                        // Per-item stagger delay unique to this picker
                         transition={{ delay: i * 0.03, type: "spring", stiffness: 500, damping: 25 }}
-                        whileHover={{ scale: 1.3 }}
-                        whileTap={{ scale: 0.85 }}
+                        whileHover={iconHover}
+                        whileTap={buttonTap}
                         title={r.label}
                       >
                         {r.emoji}
@@ -288,8 +283,8 @@ function ActivityItem({ activity }) {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.15 }}
-                      whileHover={{ scale: 1.1 }}
-                      whileTap={{ scale: 0.9 }}
+                      whileHover={iconHover}
+                      whileTap={buttonTap}
                     >
                       <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
                         <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"/>

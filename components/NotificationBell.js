@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNotifications } from '@/lib/NotificationContext';
 import { getNotificationIcon } from '@/lib/notifications';
+import { buttonTap, fadeInScale, scaleIn } from '@/lib/animations';
 import styles from './NotificationBell.module.css';
 
 function formatTimeAgo(dateStr) {
@@ -112,7 +113,7 @@ export default function NotificationBell() {
         ref={buttonRef}
         className={`${styles.bellButton} ${wiggle ? styles.wiggle : ''}`}
         onClick={handleToggle}
-        whileTap={{ scale: 0.9 }}
+        whileTap={buttonTap}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -122,9 +123,7 @@ export default function NotificationBell() {
         {unreadCount > 0 && (
           <motion.span
             className={styles.badge}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+            {...scaleIn}
           >
             {unreadCount > 9 ? '9+' : unreadCount}
           </motion.span>
@@ -136,10 +135,7 @@ export default function NotificationBell() {
           <motion.div
             className={styles.dropdown}
             style={{ bottom: dropdownPosition.bottom, left: dropdownPosition.left }}
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            transition={{ duration: 0.15 }}
+            {...fadeInScale}
           >
             <div className={styles.header}>
               <h3>Notifications</h3>

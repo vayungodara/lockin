@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap } from '@/lib/streaks';
-import { staggerContainer, staggerItem } from '@/lib/animations';
+import { staggerContainer, staggerItem, staggerItemScale, easeOutQuint, smoothTransition } from '@/lib/animations';
 import styles from './MonthlyCalendar.module.css';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -236,7 +236,7 @@ export default function MonthlyCalendar({ userId }) {
             initial="enter"
             animate="center"
             exit="exit"
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.25, ease: easeOutQuint }}
             className={styles.daysGrid}
           >
             {monthDays.map(({ date, isCurrentMonth }, index) => {
@@ -254,8 +254,7 @@ export default function MonthlyCalendar({ userId }) {
               return (
                 <motion.div
                   key={dateKey}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
+                  {...staggerItemScale}
                   transition={{ delay: index * 0.008, duration: 0.2 }}
                   className={`
                     ${styles.dayCell}
@@ -291,7 +290,7 @@ export default function MonthlyCalendar({ userId }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ ...smoothTransition, ease: easeOutQuint }}
           >
             <div className={styles.detailContent}>
               <div className={styles.detailHeader}>

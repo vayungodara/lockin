@@ -5,7 +5,15 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { navPillSpring } from '@/lib/animations';
+import {
+  navPillSpring,
+  sidebarSpring,
+  sidebarExpandTransition,
+  sidebarTap,
+  timerPulse,
+  snappyTransition,
+  smoothTransition,
+} from '@/lib/animations';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
 import NotificationBell from './NotificationBell';
@@ -89,10 +97,6 @@ const navItems = [
     ),
   },
 ];
-
-// Shared transition for all expand/collapse inner elements.
-// Using a short tween instead of spring avoids queued spring settle frames.
-const expandTransition = { duration: 0.2, ease: [0.25, 1, 0.5, 1] };
 
 export default function Sidebar({ user, onSignOut, onExpandChange }) {
   const pathname = usePathname();
@@ -196,7 +200,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       animate={{ width: isExpanded ? 260 : 72 }}
-      transition={{ type: 'spring', stiffness: 200, damping: 25, mass: 1 }}
+      transition={sidebarSpring}
     >
       <div className={styles.header}>
         <Link href="/dashboard" className={styles.logoLink}>
@@ -218,7 +222,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               opacity: isExpanded ? 1 : 0,
               width: isExpanded ? 120 : 0,
             }}
-            transition={expandTransition}
+            transition={sidebarExpandTransition}
           >
             <Image
               src={textSrc}
@@ -260,7 +264,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
                   opacity: isExpanded ? 1 : 0,
                   width: isExpanded ? 'auto' : 0,
                 }}
-                transition={expandTransition}
+                transition={sidebarExpandTransition}
                 style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
               >
                 {item.label}
@@ -274,12 +278,11 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         <motion.div
           className={`${styles.miniTimer} ${isExpanded ? styles.miniTimerExpanded : styles.miniTimerCollapsed}`}
           layout="position"
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          transition={snappyTransition}
         >
           <motion.div
             className={styles.miniTimerPulse}
-            animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
-            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            {...timerPulse}
           />
 
           <Link href="/dashboard/focus" className={styles.miniTimerLink}>
@@ -314,7 +317,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               opacity: isExpanded ? 1 : 0,
               scale: isExpanded ? 1 : 0.5,
             }}
-            whileTap={{ scale: 0.95 }}
+            whileTap={sidebarTap}
             transition={{ duration: 0.15 }}
             title="Pause timer"
             style={{ pointerEvents: isExpanded ? 'auto' : 'none' }}
@@ -331,15 +334,15 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
       <motion.div
         className={`${styles.footer} ${isExpanded ? styles.footerExpanded : ''}`}
         layout
-        transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+        transition={snappyTransition}
       >
         {/* User Section - Avatar + optional name/email */}
         <motion.div
           className={`${styles.userSection} ${isExpanded ? styles.userSectionExpanded : ''}`}
           layout
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          transition={snappyTransition}
         >
-          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+          <motion.div layout transition={snappyTransition}>
             {user?.user_metadata?.avatar_url ? (
               <Image
                 src={user.user_metadata.avatar_url}
@@ -363,7 +366,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               opacity: isExpanded ? 1 : 0,
               width: isExpanded ? 150 : 0,
             }}
-            transition={expandTransition}
+            transition={sidebarExpandTransition}
           >
             <span className={styles.userName}>
               {user?.user_metadata?.full_name || 'User'}
@@ -376,9 +379,9 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         <motion.div
           className={`${styles.footerActions} ${isExpanded ? styles.footerActionsExpanded : ''}`}
           layout
-          transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+          transition={snappyTransition}
         >
-          <motion.div layout transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+          <motion.div layout transition={snappyTransition}>
             <NotificationBell />
           </motion.div>
 
@@ -388,13 +391,13 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             className={styles.actionBtn}
             aria-label={`Change theme. Current: ${getThemeLabel()}`}
             title={getThemeLabel()}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            whileTap={{ scale: 0.95 }}
+            transition={snappyTransition}
+            whileTap={sidebarTap}
           >
             {getThemeIcon()}
           </motion.button>
 
-          <motion.div layout whileTap={{ scale: 0.95 }} transition={{ type: 'spring', stiffness: 400, damping: 30 }}>
+          <motion.div layout whileTap={sidebarTap} transition={snappyTransition}>
             <Link
               href="/?preview=true"
               className={`${styles.actionBtn} ${styles.landingBtn}`}
@@ -415,8 +418,8 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             className={`${styles.actionBtn} ${styles.signOutBtn}`}
             aria-label="Sign out"
             title="Sign out"
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            whileTap={{ scale: 0.95 }}
+            transition={snappyTransition}
+            whileTap={sidebarTap}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -431,7 +434,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
         className={styles.collapseBtn}
         onClick={handleCollapseToggle}
         aria-label={isCollapsed ? 'Pin sidebar' : 'Collapse sidebar'}
-        whileTap={{ scale: 0.95 }}
+        whileTap={sidebarTap}
       >
         <motion.svg
           width="16"
@@ -440,7 +443,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           animate={{ rotate: isCollapsed ? 0 : 180 }}
-          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          transition={smoothTransition}
         >
           <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
         </motion.svg>

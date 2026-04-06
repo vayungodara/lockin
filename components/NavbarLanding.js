@@ -56,9 +56,12 @@ export default function NavbarLanding() {
     <nav className={styles.navbar}>
       <div
         className={`${styles.navInner} ${isPill ? styles.navPill : ''} ${reducedMotion ? '' : styles.navAnimated}`}
-        onClick={() => isScrolled && setIsExpanded((p) => !p)}
-        onMouseEnter={() => isScrolled && setIsExpanded(true)}
-        onMouseLeave={() => setIsExpanded(false)}
+        onClick={(e) => {
+          // Only toggle on click in the pill "dead zone" (not on buttons/links)
+          if (isScrolled && !e.target.closest('a') && !e.target.closest('button')) {
+            setIsExpanded((p) => !p);
+          }
+        }}
       >
         <Link href="/" className={styles.logo}>
           <div className={styles.logoInner}>

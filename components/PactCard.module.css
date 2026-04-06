@@ -46,6 +46,23 @@
   box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.5);
 }
 
+/* Overdue pacts get extra visual weight — wider left bar + danger shadow */
+.card.overdue {
+  border-color: rgba(var(--danger-rgb), 0.25);
+  padding-left: calc(var(--space-5) + 2px);
+}
+
+.card.overdue::before {
+  width: 5px;
+  background: var(--danger);
+  opacity: 1;
+  box-shadow: 0 0 16px var(--danger-glow);
+}
+
+.card.overdue:hover {
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(var(--danger-rgb), 0.15);
+}
+
 .content {
   display: flex;
   flex-direction: column;
@@ -189,6 +206,12 @@
   color: var(--danger);
   font-weight: var(--font-bold);
   animation: urgencyPulse 2s ease-in-out infinite;
+}
+
+/* Cards with critical urgency get a subtle danger accent on the card itself */
+.card:has(.urgencyCritical) {
+  border-color: rgba(var(--danger-rgb), 0.2);
+  box-shadow: var(--shadow-sm), inset 0 0 0 1px rgba(var(--danger-rgb), 0.06);
 }
 
 @keyframes urgencyPulse {

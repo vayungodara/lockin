@@ -40,3 +40,14 @@
   text-align: left;
   transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .toggle {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .toggle:hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.15), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+}

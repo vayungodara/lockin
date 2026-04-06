@@ -149,3 +149,13 @@
     flex: 1;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .container {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .feedSpinner {
+  border-color: rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-primary);
+}

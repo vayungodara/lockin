@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
+import EmptyState from '@/components/EmptyState';
 import { fadeInUp } from '@/lib/animations';
 import { ACCENT_PALETTES, hexToRgb } from '@/lib/accentColors';
 
@@ -25,7 +26,7 @@ function getGroupColor(name) {
   };
 }
 
-function GroupCard({ group }) {
+function GroupCard({ group, isHero = false }) {
   const color = getGroupColor(group.name);
   const displayMembers = (group.members || []).slice(0, 4);
   const extraMembers = Math.max(0, (group.members || []).length - 4);
@@ -34,7 +35,7 @@ function GroupCard({ group }) {
     : 0;
 
   return (
-    <Link href={`/dashboard/groups/${group.id}`} className={styles.groupCard}>
+    <Link href={`/dashboard/groups/${group.id}`} className={`${styles.groupCard} ${isHero ? styles.groupCardHero : ''}`}>
       <div className={styles.groupHeader}>
         <div
           className={styles.groupIcon}
@@ -115,6 +116,12 @@ function GroupSections({ groups }) {
   const ownedGroups = groups.filter(g => g.role === 'owner');
   const joinedGroups = groups.filter(g => g.role !== 'owner');
 
+  // Identify the most active group (highest task count) for hero treatment.
+  // Only apply hero when there are 3+ groups to avoid odd layout with 1-2 cards.
+  const mostActiveId = groups.length >= 3
+    ? groups.reduce((best, g) => (g.taskCount > (best?.taskCount || 0) ? g : best), null)?.id
+    : null;
+
   return (
     <div>
       {ownedGroups.length > 0 && (
@@ -122,7 +129,7 @@ function GroupSections({ groups }) {
           <h3 className={styles.sectionHeader}>Your Groups</h3>
           <div className={styles.groupsGrid}>
             {ownedGroups.map(group => (
-              <GroupCard key={group.id} group={group} />
+              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
             ))}
           </div>
         </>
@@ -132,7 +139,7 @@ function GroupSections({ groups }) {
           <h3 className={styles.sectionHeader}>Joined Groups</h3>
           <div className={styles.groupsGrid}>
             {joinedGroups.map(group => (
-              <GroupCard key={group.id} group={group} />
+              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
             ))}
           </div>
         </>
@@ -300,60 +307,54 @@ export default function GroupsPageClient({ user }) {
 
       {/* Groups List */}
       {error ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}>
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <EmptyState
+          floating={false}
+          icon={
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
               <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
               <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
             </svg>
-          </div>
-          <h3>Something went wrong</h3>
-          <p>{error}</p>
-          <button className="btn btn-primary" onClick={fetchGroups}>Try Again</button>
-        </div>
+          }
+          title="Something went wrong"
+          description={error}
+          action={{ label: 'Try Again', onClick: fetchGroups }}
+        />
       ) : isLoading ? (
         <div className={styles.loadingState}>
           <div className={styles.spinner}></div>
           <p>Loading your groups...</p>
         </div>
       ) : groups.length === 0 ? (
-        <motion.div className={styles.emptyState} {...fadeInUp}>
-          <motion.div
-            className={styles.emptyIllustration}
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3.5, repeat: Infinity, ease: 'easeInOut' }}
-          >
+        <EmptyState
+          icon={
             <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* Left person */}
               <circle cx="42" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
               <path d="M42 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
               <path d="M42 68L34 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M42 68L50 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M42 52L28 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M42 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
-              {/* Right person */}
               <circle cx="78" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
               <path d="M78 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
               <path d="M78 68L70 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M78 68L86 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M78 52L92 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
               <path d="M78 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
-              {/* High-five burst */}
               <circle cx="60" cy="28" r="3" fill="currentColor" opacity="0.3" />
               <path d="M60 18V22" stroke="currentColor" strokeWidth="1.5" opacity="0.25" strokeLinecap="round" />
               <path d="M52 22L55 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
               <path d="M68 22L65 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
             </svg>
-          </motion.div>
-          <h3 className={styles.emptyTitle}>Better together. Way better.</h3>
-          <p className={styles.emptySubtext}>Create a group to tackle projects with friends and hold each other accountable.</p>
-          <button className={styles.emptyAction} onClick={() => setIsCreateModalOpen(true)}>
-            + Create Your First Group
-          </button>
-          <button className={styles.emptyActionSecondary} onClick={() => setIsJoinModalOpen(true)}>
-            Join a Group
-          </button>
-        </motion.div>
+          }
+          title="Better together. Way better."
+          description="Create a group to tackle projects with friends and hold each other accountable."
+          action={{ label: '+ Create Your First Group', onClick: () => setIsCreateModalOpen(true) }}
+          secondaryAction={
+            <button className={styles.emptyActionSecondary} onClick={() => setIsJoinModalOpen(true)}>
+              Join a Group
+            </button>
+          }
+        />
       ) : (
         <GroupSections groups={groups} />
       )}

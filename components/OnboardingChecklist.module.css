@@ -195,3 +195,33 @@
   color: var(--text-muted);
   font-size: var(--text-sm);
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .card {
+  border-color: var(--border-default);
+  border-left-color: var(--accent-primary);
+}
+
+:global([data-theme="dark"]) .step:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .stepIcon {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .stepIconDone {
+  background: rgba(var(--success-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .actionBtn {
+  border-color: rgba(var(--accent-primary-rgb), 0.5);
+}
+
+:global([data-theme="dark"]) .actionBtn:hover {
+  box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .progressBg {
+  stroke: rgba(255, 255, 255, 0.08);
+}

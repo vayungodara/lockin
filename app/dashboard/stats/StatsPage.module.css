@@ -361,6 +361,14 @@
   box-shadow: var(--shadow-sm);
 }
 
+:global([data-theme="dark"]) .streakCard::before {
+  opacity: 0.8;
+}
+
+:global([data-theme="dark"]) .streakDivider {
+  background: var(--border-default);
+}
+
 :global([data-theme="dark"]) .analyticsCard {
   border-color: var(--border-default);
   box-shadow: var(--shadow-sm);

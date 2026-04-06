@@ -535,3 +535,20 @@
 :global([data-theme="dark"]) .ownerBadge {
   background: rgba(var(--warning-rgb), 0.15);
 }
+
+:global([data-theme="dark"]) .leaderboardItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .columnEmpty p {
+  color: var(--text-muted);
+}
+
+:global([data-theme="dark"]) .columnCount {
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .spinner {
+  border-color: rgba(255, 255, 255, 0.08);
+  border-top-color: var(--accent-primary);
+}

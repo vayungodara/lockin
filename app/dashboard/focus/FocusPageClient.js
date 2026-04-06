@@ -48,7 +48,8 @@ export default function FocusPageClient({ user }) {
           .from('focus_sessions')
           .select('id, started_at, duration_minutes')
           .eq('user_id', user.id)
-          .limit(1000),
+          .order('started_at', { ascending: false })
+          .limit(5000),
       ]);
 
       if (recentResult.error) throw recentResult.error;

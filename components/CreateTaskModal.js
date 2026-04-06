@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
@@ -17,6 +17,8 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const supabase = useMemo(() => createClient(), []);
+  const modalRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useModalScrollLock(isOpen);
 
@@ -80,14 +82,38 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
     }
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setTitle('');
     setDescription('');
     setOwnerId('');
     setDeadline('');
     setError('');
     onClose();
-  };
+  }, [onClose]);
+
+  // Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose]);
+
+  // Focus management
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement;
+      requestAnimationFrame(() => {
+        const first = modalRef.current?.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+        first?.focus();
+      });
+    }
+    return () => {
+      if (previousFocusRef.current) previousFocusRef.current.focus();
+    };
+  }, [isOpen]);
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -95,17 +121,18 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
     <>
       {isOpen && createPortal(
         <div className={styles.overlay} onClick={handleClose}>
-          <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
+          <motion.div ref={modalRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="create-task-title" onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
               <div className={styles.headerLeft}>
                 <svg className={styles.headerIcon} width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <h2>Quick Task</h2>
+                <h2 id="create-task-title">Quick Task</h2>
               </div>
               <motion.button
                 className={styles.closeBtn}
                 onClick={handleClose}
+                aria-label="Close"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
               >

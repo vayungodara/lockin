@@ -72,7 +72,8 @@ export default function GroupDetailClient({ user, group, userRole }) {
           .from('focus_sessions')
           .select('user_id, duration_minutes, started_at, ended_at')
           .in('user_id', memberUserIds)
-          .gte('started_at', sevenDaysAgo);
+          .gte('started_at', sevenDaysAgo)
+          .limit(100);
 
         if (!focusError && focusData) {
           const active = new Set();

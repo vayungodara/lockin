@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
@@ -25,8 +25,41 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const supabase = useMemo(() => createClient(), []);
+  const modalRef = useRef(null);
+  const previousFocusRef = useRef(null);
 
   useModalScrollLock(isOpen);
+
+  const handleClose = useCallback(() => {
+    setName('');
+    setDescription('');
+    setError('');
+    onClose();
+  }, [onClose]);
+
+  // Escape key handler
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, handleClose]);
+
+  // Focus management
+  useEffect(() => {
+    if (isOpen) {
+      previousFocusRef.current = document.activeElement;
+      requestAnimationFrame(() => {
+        const first = modalRef.current?.querySelector('button, input, textarea, select, [tabindex]:not([tabindex="-1"])');
+        first?.focus();
+      });
+    }
+    return () => {
+      if (previousFocusRef.current) previousFocusRef.current.focus();
+    };
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -100,16 +133,17 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
   return (
     <>
       {isOpen && createPortal(
-        <div className={styles.overlay} onClick={onClose}>
-          <motion.div className={styles.modal} onClick={(e) => e.stopPropagation()} {...modalContent}>
+        <div className={styles.overlay} onClick={handleClose}>
+          <motion.div ref={modalRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="create-group-title" onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
               <div className={styles.headerText}>
-                <h2>Start a Group</h2>
+                <h2 id="create-group-title">Start a Group</h2>
                 <p className={styles.subtitle}>Accountability is better together</p>
               </div>
               <motion.button
                 className={styles.closeBtn}
-                onClick={onClose}
+                onClick={handleClose}
+                aria-label="Close"
                 whileHover={{ scale: 1.1, rotate: 90 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -182,9 +216,9 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
               </AnimatePresence>
 
               <div className={styles.actions}>
-                <motion.button 
-                  type="button" 
-                  onClick={onClose} 
+                <motion.button
+                  type="button"
+                  onClick={handleClose}
                   className={styles.cancelBtn}
                   whileHover={buttonHover}
                   whileTap={buttonTap}

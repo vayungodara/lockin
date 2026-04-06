@@ -13,6 +13,7 @@
   background-size: 32px 32px;
   color: var(--landing-ink);
   font-family: var(--font-body);
+  overflow-x: clip;
 }
 
 :global([data-theme="dark"]) .main {
@@ -30,7 +31,7 @@
   padding: 160px var(--space-6) var(--space-20);
   max-width: 1280px;
   margin: 0 auto;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .heroGrid {
@@ -225,7 +226,7 @@
 /* Completed card — top right, slight left rotation */
 .cardCompleted {
   top: 16px;
-  right: 0;
+  right: 24px;
   width: 288px;
   transform: rotate(-2deg);
 }

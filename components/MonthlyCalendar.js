@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap } from '@/lib/streaks';
-import { staggerContainer, staggerItem, staggerItemScale, easeOutQuint, smoothTransition } from '@/lib/animations';
+import { staggerContainer, staggerItem, easeOutQuint, smoothTransition } from '@/lib/animations';
 import styles from './MonthlyCalendar.module.css';
 
 const WEEKDAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -254,8 +254,9 @@ export default function MonthlyCalendar({ userId }) {
               return (
                 <motion.div
                   key={dateKey}
-                  {...staggerItemScale}
-                  transition={{ delay: index * 0.008, duration: 0.2 }}
+                  initial={{ opacity: 0, scale: 0.94 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: index * 0.008, duration: 0.2, ease: easeOutQuint }}
                   className={`
                     ${styles.dayCell}
                     ${!isCurrentMonth ? styles.otherMonth : ''}

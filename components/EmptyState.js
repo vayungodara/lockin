@@ -1,7 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { fadeInUp } from '@/lib/animations';
+import { fadeInUp, prefersReducedMotion } from '@/lib/animations';
 import styles from './EmptyState.module.css';
 
 /**
@@ -36,8 +36,8 @@ export default function EmptyState({
       {icon && (
         <motion.div
           className={styles.illustration}
-          animate={floating ? { y: [0, -6, 0] } : undefined}
-          transition={floating ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : undefined}
+          animate={floating && !prefersReducedMotion() ? { y: [0, -6, 0] } : undefined}
+          transition={floating && !prefersReducedMotion() ? { duration: 4, repeat: Infinity, ease: 'easeInOut' } : undefined}
         >
           {icon}
         </motion.div>
@@ -57,7 +57,7 @@ export default function EmptyState({
             action
           ) : null}
 
-          {secondaryAction && secondaryAction}
+          {secondaryAction}
         </div>
       )}
     </motion.div>

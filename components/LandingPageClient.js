@@ -14,14 +14,8 @@ import {
   buttonHover,
   buttonTap,
   iconHover,
-  fadeIn,
-  fadeInUp,
-  fadeInDown,
-  heroText,
   revealUp,
   cardHover,
-  staggerItem,
-  counterAnimation,
   smoothTransition,
   quickTransition,
   easeOutQuint,
@@ -156,8 +150,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
         <section className={styles.hero}>
           <motion.div
             className={styles.heroVisual}
-            {...fadeIn}
-            transition={{ ...fadeIn.animate.transition, duration: 0.8, delay: 0.3 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.3, ease: easeOutQuint }}
           >
             {/* Floating cards: entrance slide + ambientFloat-style infinite bob.
                Kept inline because they combine per-property transitions with staggered delays. */}
@@ -223,8 +218,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
           <motion.div
             className={styles.heroTag}
-            {...fadeInDown}
-            transition={{ ...fadeInDown.animate.transition, duration: 0.5 }}
+            initial={{ opacity: 0, y: -14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             {/* Ambient pulse dot — unique small loop, kept inline */}
             <motion.span
@@ -237,8 +233,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           
           <motion.h1
             className={styles.heroTitle}
-            {...heroText}
-            transition={{ ...heroText.animate.transition, delay: 0.15 }}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.15, ease: easeOutQuint }}
           >
             <span className={styles.titleLine}>
               Stop saying {/* Strikethrough wipe — unique backgroundSize animation, no preset equivalent */}
@@ -251,8 +248,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             </span>
             <br />
             <motion.span
-              {...fadeIn}
-              transition={{ ...fadeIn.animate.transition, delay: 0.4, duration: 0.6 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.6, ease: easeOutQuint }}
             >
               Start locking in <span className="text-gradient">today</span>
             </motion.span>
@@ -260,8 +258,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           
           <motion.p
             className={styles.heroDescription}
-            {...fadeInUp}
-            transition={{ ...fadeInUp.animate.transition, duration: 0.5, delay: 0.3 }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
           >
             The app that makes sure tomorrow actually comes.
             {' '}Track commitments, keep your group honest, and finally stop procrastinating.
@@ -269,8 +268,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           
           <motion.div
             className={styles.heroCtas}
-            {...fadeInUp}
-            transition={{ ...fadeInUp.animate.transition, duration: 0.5, delay: 0.4 }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
           >
             <motion.div whileHover={buttonHover} whileTap={buttonTap}>
               <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
@@ -297,8 +297,9 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           
           <motion.div
             className={styles.heroStats}
-            {...fadeInUp}
-            transition={{ ...fadeInUp.animate.transition, duration: 0.5, delay: 0.55 }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.55, ease: easeOutQuint }}
           >
             {[
               { number: "100%", label: "Free forever" },
@@ -308,13 +309,15 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               <motion.div
                 key={stat.label}
                 className={styles.stat}
-                {...staggerItem}
-                transition={{ ...staggerItem.animate.transition, delay: 0.65 + i * 0.08, duration: 0.4 }}
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.65 + i * 0.08, duration: 0.4, ease: easeOutQuint }}
               >
                 <motion.span
                   className={styles.statNumber}
-                  {...counterAnimation}
-                  transition={{ ...counterAnimation.animate.transition, delay: 0.7 + i * 0.08, duration: 0.35 }}
+                  initial={{ opacity: 0, scale: 0.75 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.7 + i * 0.08, duration: 0.35, ease: easeOutQuint }}
                 >
                   {stat.number}
                 </motion.span>
@@ -339,8 +342,10 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               <motion.div
                 key={feature.title}
                 className={`${styles.featureCard} ${feature.isHero ? styles.featureCardLarge : ''}`}
-                {...revealUp}
-                transition={{ ...revealUp.whileInView.transition, delay: index * 0.06 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.3 }}
+                transition={{ duration: 0.5, delay: index * 0.06, ease: easeOutQuint }}
                 whileHover={cardHover}
               >
                 <motion.div
@@ -391,9 +396,10 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
           <motion.div
             className={styles.browserFrame}
-            {...revealUp}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.2 }}
-            transition={{ ...revealUp.whileInView.transition, duration: 0.6 }}
+            transition={{ duration: 0.6, ease: easeOutQuint }}
           >
             <div className={styles.browserBar}>
               <div className={styles.browserDots}>
@@ -506,8 +512,10 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
                 <motion.div
                   className={styles.mockCalendar}
-                  {...revealUp}
-                  transition={{ ...revealUp.whileInView.transition, delay: 0.6 }}
+                  initial={{ opacity: 0, y: 24 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ amount: 0.3 }}
+                  transition={{ duration: 0.5, delay: 0.6, ease: easeOutQuint }}
                 >
                   <div className={styles.mockCalendarHeader}>
                     <span>Activity</span>
@@ -533,9 +541,10 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             {allComplete && (
               <motion.div
                 className={styles.mockCelebration}
-                {...fadeInUp}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
-                transition={{ ...fadeInUp.animate.transition, duration: 0.5 }}
+                transition={{ duration: 0.5, ease: easeOutQuint }}
               >
                 <p>See? That felt good. Imagine that every day.</p>
                 <motion.div whileHover={buttonHover} whileTap={buttonTap}>
@@ -570,20 +579,18 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               <motion.div
                 key={step.number}
                 className={styles.step}
-                initial={revealUp.initial}
-                whileInView={{ ...revealUp.whileInView, y: staggerY }}
-                viewport={revealUp.viewport}
-                transition={{ ...revealUp.whileInView.transition, delay: index * 0.1 }}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: staggerY }}
+                viewport={{ amount: 0.3 }}
+                transition={{ duration: 0.5, delay: index * 0.1, ease: easeOutQuint }}
                 whileHover={{ y: staggerY + cardHover.y, transition: cardHover.transition }}
               >
                 <motion.div
                   className={styles.stepNumber}
-                  {...counterAnimation}
-                  initial={{ ...counterAnimation.initial, scale: 0.8 }}
-                  whileInView={counterAnimation.animate}
-                  animate={undefined}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ amount: 0.3 }}
-                  transition={{ ...counterAnimation.animate.transition, delay: 0.15 + index * 0.08, duration: 0.35 }}
+                  transition={{ delay: 0.15 + index * 0.08, duration: 0.35, ease: easeOutQuint }}
                 >
                   {step.number}
                 </motion.div>
@@ -602,28 +609,28 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             viewport={{ amount: 0.4 }}
           >
             <motion.h2
-              initial={revealUp.initial}
-              whileInView={revealUp.whileInView}
-              viewport={revealUp.viewport}
-              transition={{ ...revealUp.whileInView.transition, delay: 0.1 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
             >
               Ready to stop making excuses?
             </motion.h2>
             <motion.p
-              initial={revealUp.initial}
-              whileInView={revealUp.whileInView}
-              viewport={revealUp.viewport}
-              transition={{ ...revealUp.whileInView.transition, delay: 0.15 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}
             >
               Join students who are finally getting things done. Free, simple, and it works.
             </motion.p>
             <motion.div
               whileHover={buttonHover}
               whileTap={buttonTap}
-              initial={revealUp.initial}
-              whileInView={revealUp.whileInView}
-              viewport={revealUp.viewport}
-              transition={{ ...revealUp.whileInView.transition, delay: 0.2 }}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }}
+              transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
             >
               <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
                 Start Locking In
@@ -637,11 +644,10 @@ export default function LandingPageClient({ isAuthenticated = false }) {
         
         <motion.footer
           className={styles.footer}
-          {...fadeIn}
-          whileInView={fadeIn.animate}
-          animate={undefined}
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
           viewport={{ amount: 0.1 }}
-          transition={{ ...fadeIn.animate.transition, duration: 0.5 }}
+          transition={{ duration: 0.5, ease: easeOutQuint }}
         >
           <div className={styles.footerContent}>
             <div className={styles.footerTop}>

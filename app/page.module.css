@@ -84,7 +84,7 @@
 /* Headline */
 .heroTitle {
   font-family: var(--font-display);
-  font-size: clamp(3.25rem, 7vw, 5rem);
+  font-size: clamp(3.25rem, 8vw, 7rem);
   font-weight: 500;
   line-height: 0.9;
   letter-spacing: -0.04em;
@@ -812,14 +812,15 @@
    ============================================= */
 
 .featuresDark {
-  background: var(--landing-ink);
-  color: var(--landing-bg);
+  background: #09090B;
+  color: #F4F2EB;
   padding: var(--space-24) var(--space-6);
   scroll-margin-top: 80px;
 }
 
 :global([data-theme="dark"]) .featuresDark {
   background: #1A1A18;
+  color: #F4F2EB;
 }
 
 .featuresInner {
@@ -900,7 +901,7 @@
   font-weight: 500;
   letter-spacing: -0.02em;
   margin-bottom: var(--space-3);
-  color: var(--landing-bg);
+  color: #F4F2EB;
 }
 
 .bentoCard p {
@@ -940,7 +941,7 @@
 .bentoRewardXp {
   font-size: var(--text-2xl);
   font-weight: 700;
-  color: var(--landing-bg);
+  color: #F4F2EB;
 }
 
 /* Avatar stack inside group card */

@@ -509,8 +509,83 @@ export default function LandingPageClient({ isAuthenticated = false }) {
         </section>
 
         {/* ===== FEATURES DARK SECTION — Task 5 ===== */}
+        <section id="features" className={styles.featuresDark}>
+          <div className={styles.featuresInner}>
+            <motion.div className={styles.featuresLeft}
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.3 }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+              <h2 className={styles.featuresHeading}>Why you&apos;ll actually do it this time.</h2>
+              <p className={styles.featuresDescription}>
+                Standard to-do lists rely on motivation. Motivation fades. LockIn relies on two
+                irrefutable human truths: we care what our friends think, and streaks are addictive.
+              </p>
+              <ul className={styles.featureChecklist}>
+                {['Google OAuth — 5-second signup', 'Real-time activity feed', 'XP, levels & achievements'].map((item) => (
+                  <li key={item} className={styles.featureCheckItem}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" fill="var(--accent-primary)" opacity="0.2"/>
+                      <path d="M9 12L11 14L15 10" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <div className={styles.featuresRight}>
+              {/* Wide card: Personal Pacts */}
+              <motion.div className={`${styles.bentoCard} ${styles.bentoWide}`}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Personal Pacts</h3>
+                <p>Make commitments that stick. Set deadlines, track daily check-ins, build accountability streaks. Choose from 20+ pact templates or create your own.</p>
+                <div className={styles.bentoReward}>
+                  <div className={styles.bentoRewardLabel}>Active Pact</div>
+                  <div className={styles.bentoRewardStatus}>&#10003; Completed on time</div>
+                  <div className={styles.bentoRewardXp}>+50 XP</div>
+                </div>
+              </motion.div>
+
+              {/* Half card: Group Accountability */}
+              <motion.div className={styles.bentoCard}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Group Accountability</h3>
+                <p>See who is pulling their weight and who is slacking. Kanban boards, task ownership, real-time activity. No more carrying the team alone.</p>
+                <div className={styles.bentoAvatars}>
+                  <div className={styles.bentoAvatar} style={{ background: '#3B82F6' }} />
+                  <div className={styles.bentoAvatar} style={{ background: '#10B981' }} />
+                  <div className={styles.bentoAvatarMore}>+4</div>
+                </div>
+              </motion.div>
+
+              {/* Half card: Focus Timer */}
+              <motion.div className={`${styles.bentoCard} ${styles.bentoTimer}`}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Focus Timer</h3>
+                <p>Pomodoro-style deep work sessions. Track your focus hours, compete with your past self, and earn XP for every session.</p>
+                <div className={styles.bentoTimerDisplay}>25:00</div>
+                <div className={styles.bentoTimerGlow} />
+              </motion.div>
+            </div>
+          </div>
+        </section>
 
         {/* ===== MARQUEE — Task 5 ===== */}
+        <div className={styles.marquee}>
+          <div className={styles.marqueeTrack}>
+            {[...Array(4)].map((_, i) => (
+              <span key={i} className={styles.marqueeSegment}>
+                <span className={styles.marqueeText}>STOP SAYING TOMORROW. LOCK IN TODAY.</span>
+                <span className={styles.marqueeDot}>&bull;</span>
+              </span>
+            ))}
+          </div>
+        </div>
 
         {/* ===== HOW IT WORKS — Task 6 ===== */}
 

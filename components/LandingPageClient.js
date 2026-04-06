@@ -65,7 +65,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
     <>
       <NavbarLanding />
 
-      <main className={styles.main}>
+      <main id="main-content" className={styles.main}>
         {/* ===== HERO SECTION ===== */}
         <section className={styles.hero}>
           <div className={styles.heroGrid}>
@@ -233,6 +233,8 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
           <motion.div
             className={styles.browserFrame}
+            aria-hidden="true"
+            role="presentation"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.2 }}
@@ -270,11 +272,11 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             {/* Mock dashboard layout */}
             <div className={styles.mockDashboard}>
               {/* Sidebar */}
-              <aside className={styles.mockSidebar}>
+              <div className={styles.mockSidebar}>
                 <div className={styles.mockSidebarLogo}>
                   <div className={styles.mockLogoIcon} />
                 </div>
-                <nav className={styles.mockNavItems}>
+                <div className={styles.mockNavItems}>
                   {[
                     {
                       label: 'Overview',
@@ -328,8 +330,8 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                       {item.svg}
                     </div>
                   ))}
-                </nav>
-              </aside>
+                </div>
+              </div>
 
               {/* Main content area */}
               <div className={styles.mockMain}>

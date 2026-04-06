@@ -34,8 +34,27 @@ export default function NavbarLanding() {
     setIsScrolled(latest > SCROLL_THRESHOLD);
   });
 
-  // Links visible when at top OR hovering the pill
+  // Links visible when at top OR hovering/tapping the pill
   const showLinks = !isScrolled || isHovered;
+
+  // Touch support: tap the pill to toggle links when scrolled
+  const handlePillClick = () => {
+    if (isScrolled) {
+      setIsHovered(prev => !prev);
+    }
+  };
+
+  // Close expanded pill when tapping outside
+  useEffect(() => {
+    if (!isHovered || !isScrolled) return;
+    const handleClickOutside = (e) => {
+      if (!e.target.closest(`.${styles.navInner}`)) {
+        setIsHovered(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isHovered, isScrolled]);
 
   // Skip morph animation on mobile or when user prefers reduced motion
   const [isMobile, setIsMobile] = useState(false);
@@ -76,6 +95,7 @@ export default function NavbarLanding() {
               }
             : undefined
         }
+        onClick={handlePillClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         transition={navPillSpring}

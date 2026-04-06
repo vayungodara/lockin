@@ -162,7 +162,7 @@ export default function NotificationBell() {
                 </div>
               ) : (
                 notifications.slice(0, 10).map((notification) => (
-                  <motion.div
+                  <motion.button
                     key={notification.id}
                     className={`${styles.notificationItem} ${!notification.is_read ? styles.unread : ''}`}
                     onClick={() => handleNotificationClick(notification)}
@@ -179,7 +179,7 @@ export default function NotificationBell() {
                     {!notification.is_read && (
                       <div className={styles.unreadDot} />
                     )}
-                  </motion.div>
+                  </motion.button>
                 ))
               )}
             </div>

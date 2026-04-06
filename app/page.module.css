@@ -777,7 +777,7 @@
 }
 
 :global([data-theme="dark"]) .ctaCard .btn {
-  background: white;
+  background: var(--text-primary);
   color: var(--bg-primary);
   border: none;
   box-shadow: 0 0 24px rgba(255, 255, 255, 0.15), var(--shadow-lg);

@@ -115,6 +115,7 @@ export default function FocusTimer() {
             className={styles.secondaryBtn}
             onClick={resetTimer}
             title="Reset"
+            aria-label="Reset timer"
             whileTap={buttonTap}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -126,6 +127,7 @@ export default function FocusTimer() {
           <motion.button
             className={`${styles.primaryBtn} ${isRunning ? styles.pauseBtn : styles.playBtn}`}
             onClick={toggleTimer}
+            aria-label={isRunning ? 'Pause timer' : 'Start timer'}
             whileTap={{ scale: 0.95 }}
             animate={isRunning ? pulseGlow.animate : {}}
           >
@@ -145,6 +147,7 @@ export default function FocusTimer() {
             className={styles.secondaryBtn}
             onClick={skipToNext}
             title="Skip"
+            aria-label="Skip to next session"
             whileTap={buttonTap}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -177,3 +177,36 @@
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .statsCard,
+:global([data-theme="dark"]) .historyCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .statBox {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .sessionItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .sessionItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .sessionIcon {
+  background: rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.12);
+}

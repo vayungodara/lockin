@@ -250,11 +250,11 @@
 }
 
 .level3 .dayNumber {
-  color: white;
+  color: var(--text-inverse);
 }
 
 .level3 .activityDot {
-  background: white;
+  background: var(--text-inverse);
 }
 
 .level4 {
@@ -262,11 +262,11 @@
 }
 
 .level4 .dayNumber {
-  color: white;
+  color: var(--text-inverse);
 }
 
 .level4 .activityDot {
-  background: white;
+  background: var(--text-inverse);
 }
 
 /* Detail Panel */
@@ -429,4 +429,52 @@
   .legend {
     justify-content: center;
   }
+}
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .container {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .navBtn {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .navBtn:hover:not(.navBtnDisabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .shareBtn {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .level0 {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .dayCell:hover:not(.future):not(.otherMonth) {
+  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .detailContent {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .detailClose:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .level3 .dayNumber,
+:global([data-theme="dark"]) .level4 .dayNumber {
+  color: #FFFFFF;
+}
+
+:global([data-theme="dark"]) .level3 .activityDot,
+:global([data-theme="dark"]) .level4 .activityDot {
+  background: #FFFFFF;
+}
+
+:global([data-theme="dark"]) .selected {
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary), 0 0 12px rgba(var(--accent-primary-rgb), 0.25);
 }

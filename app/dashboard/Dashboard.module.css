@@ -581,3 +581,39 @@
 :global([data-theme="dark"]) .signOutBtn:hover {
   background: rgba(var(--danger-rgb), 0.15);
 }
+
+:global([data-theme="dark"]) .statIcon {
+  background: rgba(var(--success-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statIcon.warning {
+  background: rgba(var(--warning-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statIcon.danger {
+  background: rgba(var(--danger-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statIcon.info {
+  background: rgba(var(--info-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statIcon.accent {
+  background: rgba(var(--accent-primary-rgb), 0.14);
+}
+
+:global([data-theme="dark"]) .activitySection {
+  border-top-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .pactCount {
+  background: rgba(var(--accent-primary-rgb), 0.14);
+}
+
+:global([data-theme="dark"]) .sidebarHeader {
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .sidebarFooter {
+  border-top-color: var(--border-default);
+}

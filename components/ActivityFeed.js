@@ -25,6 +25,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
   isLoadingMoreRef.current = isLoadingMore;
   const groupIdRef = useRef(groupId);
   groupIdRef.current = groupId;
+  const offsetRef = useRef(0);
 
   const loadActivities = useCallback(async () => {
     const requestGroupId = groupId;
@@ -40,8 +41,10 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       // Guard against stale responses from a previous groupId
       if (groupIdRef.current !== requestGroupId) return;
 
-      setActivities(result.data || []);
-      setHasMore((result.data?.length || 0) === pageSize);
+      const items = result.data || [];
+      setActivities(items);
+      offsetRef.current = items.length;
+      setHasMore(items.length === pageSize);
     } catch (err) {
       console.error('Error loading activities:', err);
     } finally {
@@ -121,14 +124,16 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
 
     setIsLoadingMore(true);
     try {
+      const currentOffset = offsetRef.current;
       let result;
       if (groupId) {
-        result = await getGroupActivity(supabase, groupId, pageSize, activities.length);
+        result = await getGroupActivity(supabase, groupId, pageSize, currentOffset);
       } else {
-        result = await getAllActivity(supabase, pageSize, activities.length);
+        result = await getAllActivity(supabase, pageSize, currentOffset);
       }
       const newActivities = result.data || [];
 
+      offsetRef.current = currentOffset + newActivities.length;
       setActivities(prev => [...prev, ...newActivities]);
       setHasMore(newActivities.length === pageSize);
     } catch (err) {
@@ -136,7 +141,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     } finally {
       setIsLoadingMore(false);
     }
-  }, [groupId, pageSize, supabase, activities.length]);
+  }, [groupId, pageSize, supabase]);
 
   // Keep ref in sync so the observer always calls the latest loadMore
   useEffect(() => {

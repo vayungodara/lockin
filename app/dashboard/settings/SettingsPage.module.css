@@ -238,7 +238,7 @@
 .toggleKnob {
   width: 18px;
   height: 18px;
-  background: white;
+  background: var(--bg-elevated);
   border-radius: 50%;
   position: absolute;
   top: 3px;
@@ -499,4 +499,20 @@
 
 :global([data-theme="dark"]) .accentRow {
   border-top-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .accountBadge {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .toggleKnob {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+:global([data-theme="dark"]) .accentSwatch:hover {
+  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .shortcutItem {
+  border-bottom-color: var(--border-default);
 }

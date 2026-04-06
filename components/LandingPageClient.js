@@ -19,6 +19,7 @@ import {
   smoothTransition,
   quickTransition,
   easeOutQuint,
+  prefersReducedMotion,
 } from '@/lib/animations';
 
 const features = [
@@ -107,6 +108,7 @@ const steps = [
 export default function LandingPageClient({ isAuthenticated = false }) {
   const router = useRouter();
   const toast = useToast();
+  const reducedMotion = prefersReducedMotion();
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
 
   const streakCount = 7 + Object.values(checkedPacts).filter(Boolean).length - 1;
@@ -159,11 +161,11 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             <motion.div
               className={`${styles.floatingCard} ${styles.card1}`}
               initial={{ opacity: 0, x: 30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -8, 0] }}
+              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -8, 0] }}
               transition={{
                 opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" }
+                ...(reducedMotion ? {} : { y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" } })
               }}
             >
               <div className={styles.cardIcon}>
@@ -178,11 +180,11 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             <motion.div
               className={`${styles.floatingCard} ${styles.card2}`}
               initial={{ opacity: 0, x: -30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -10, 0] }}
+              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -10, 0] }}
               transition={{
                 opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" }
+                ...(reducedMotion ? {} : { y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" } })
               }}
             >
               <div className={styles.cardIcon} style={{ background: 'var(--warning-light)', color: 'var(--warning)' }}>
@@ -197,11 +199,11 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             <motion.div
               className={`${styles.floatingCard} ${styles.card3}`}
               initial={{ opacity: 0, x: 30, y: -10 }}
-              animate={{ opacity: 1, x: 0, y: [0, -6, 0] }}
+              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -6, 0] }}
               transition={{
                 opacity: { delay: 1, duration: 0.5, ease: easeOutQuint },
                 x: { delay: 1, duration: 0.5, ease: easeOutQuint },
-                y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" }
+                ...(reducedMotion ? {} : { y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" } })
               }}
             >
               <div className={styles.cardIcon} style={{ background: 'var(--info-light)', color: 'var(--info)' }}>
@@ -225,8 +227,8 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             {/* Ambient pulse dot — unique small loop, kept inline */}
             <motion.span
               className={styles.heroTagDot}
-              animate={{ scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+              animate={reducedMotion ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
+              transition={reducedMotion ? {} : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
             />
             Built for students who mean business
           </motion.div>

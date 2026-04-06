@@ -130,7 +130,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2px;
+  gap: var(--space-1);
 }
 
 .statValue {
@@ -200,4 +200,12 @@
 
 :global([data-theme="dark"]) .milestoneBanner {
   background: rgba(var(--accent-primary-rgb), 0.14);
+}
+
+:global([data-theme="dark"]) .divider {
+  background: var(--border-default);
+}
+
+:global([data-theme="dark"]) .freezeBadge {
+  background: rgba(var(--info-rgb), 0.15);
 }

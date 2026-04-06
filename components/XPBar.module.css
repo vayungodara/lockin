@@ -62,3 +62,21 @@
   );
   animation: shimmerGlint 5s ease-in-out infinite;
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .levelBadge {
+  box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.45);
+}
+
+:global([data-theme="dark"]) .track {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .fill::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+}

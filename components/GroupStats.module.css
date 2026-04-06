@@ -251,3 +251,33 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .container {
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .statCard {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .statCard:hover {
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 4px 16px rgba(var(--accent-primary-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .leaderboardItem {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .leaderboardItem:hover {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+:global([data-theme="dark"]) .progressBar {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .progressFill {
+  filter: brightness(1.1);
+}

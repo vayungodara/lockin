@@ -360,3 +360,47 @@
     margin-left: 0;
   }
 }
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .item:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+:global([data-theme="dark"]) .reactionBubble {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .reactionBubble:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--border-strong);
+}
+
+:global([data-theme="dark"]) .reactionTriggerOpen {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-xl);
+}
+
+:global([data-theme="dark"]) .addReactionBtn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .iconPurple {
+  background: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .iconGreen {
+  background: rgba(var(--success-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .iconYellow {
+  background: rgba(var(--warning-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .iconBlue {
+  background: rgba(var(--info-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .iconRed {
+  background: rgba(var(--danger-rgb), 0.18);
+}

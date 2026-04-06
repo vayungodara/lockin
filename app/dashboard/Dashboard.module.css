@@ -291,7 +291,7 @@
 
 .statsGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 2fr 1fr 1fr;
   gap: var(--space-5);
   margin-bottom: var(--space-8);
 }
@@ -314,9 +314,23 @@
 }
 
 /* ── Stat cards — solid bg + colored left border ── */
+/* Completed gets hero treatment: wider, accent gradient top border */
 .statCardCompleted {
   border-left: 4px solid var(--success);
   background: var(--surface-1);
+  position: relative;
+  overflow: hidden;
+}
+
+.statCardCompleted::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--success), transparent);
+  opacity: 0.5;
 }
 
 .statCardPacts {
@@ -378,49 +392,6 @@
 .statLabel {
   font-size: var(--text-sm);
   color: var(--text-secondary);
-}
-
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-12) var(--space-6);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  text-align: center;
-  gap: var(--space-3);
-}
-
-.emptyIllustration {
-  color: var(--accent-primary);
-  margin-bottom: var(--space-2);
-}
-
-.emptyIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  background: var(--gradient-subtle);
-  color: var(--accent-primary);
-  border-radius: var(--radius-full);
-}
-
-.emptyState h3 {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  margin: 0;
-}
-
-.emptyState p {
-  color: var(--text-tertiary);
-  font-size: var(--text-sm);
-  margin: 0 0 var(--space-4);
-  max-width: 320px;
-  line-height: 1.5;
 }
 
 .loadingState {
@@ -506,6 +477,10 @@
   .statsGrid {
     grid-template-columns: repeat(3, 1fr);
   }
+
+  .statCardCompleted {
+    grid-column: auto;
+  }
 }
 
 @media (max-width: 1024px) {
@@ -527,6 +502,10 @@
   .statsGrid {
     grid-template-columns: repeat(2, 1fr);
     gap: var(--space-3);
+  }
+
+  .statCardCompleted {
+    grid-column: 1 / -1;
   }
 
   .statCard {
@@ -552,4 +531,53 @@
   .statsGrid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .statCard {
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .statCard:hover {
+  box-shadow: var(--shadow-lg);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .statCardCompleted {
+  border-left-color: var(--success);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--success-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statCardPacts {
+  border-left-color: var(--warning);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--warning-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .statCardMissed {
+  border-left-color: var(--danger);
+  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--danger-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .authCard {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-2xl);
+}
+
+:global([data-theme="dark"]) .googleButton {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .googleButton:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:global([data-theme="dark"]) .navItem:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:global([data-theme="dark"]) .signOutBtn:hover {
+  background: rgba(var(--danger-rgb), 0.15);
 }

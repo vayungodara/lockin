@@ -179,13 +179,33 @@ For each competitor:
 
 ---
 
-## STEP 3: WRITE ALL FINDINGS TO NOTION
+## STEP 3: WRITE ALL FINDINGS TO NOTION (WITH DEDUPLICATION)
 
-Write all findings from Steps 1 and 2 using:
-```
-mcp__claude_ai_Notion__notion-create-pages with:
-  parent: { data_source_id: "a0d65c3f-084a-4454-b4a0-2800a12068b7" }
-```
+**CRITICAL: Search before writing EVERY finding.** The #1 maintenance problem is duplicate findings — the same visual issue gets reported every audit run with slightly different wording. This wastes developer time during daily review.
+
+### Before creating each finding:
+
+1. **Search Notion** for existing findings about the same issue:
+   ```
+   mcp__claude_ai_Notion__notion-search with:
+     query: "<key phrase from your finding — e.g. 'dark mode card contrast' or 'landing page mockup empty'>"
+     data_source_url: "collection://a0d65c3f-084a-4454-b4a0-2800a12068b7"
+   ```
+
+2. **Check results:**
+   - **Match found, Status = "new" or "carried-over":** UPDATE the existing row with fresh details/date. Do NOT create a new row.
+   - **Match found, Status = "fixed":** Verify the fix is actually broken on the live site before creating a new row. If it looks fixed, skip.
+   - **Match found, Status = "dismissed":** Skip entirely.
+   - **No match:** Create a new row.
+
+3. **What counts as a "match":** Same visual issue, even if wording differs. Examples:
+   - "Dashboard cards blend into background" and "card boundaries invisible in dark mode" → SAME issue
+   - "Landing page empty mockup" and "hero frame has no screenshot" → SAME issue
+   - Any dark-mode-missing finding across runs with different file counts → SAME issue
+
+### Writing NEW findings (only after confirming no match):
+
+Use `mcp__claude_ai_Notion__notion-create-pages` with parent `data_source_id: "a0d65c3f-084a-4454-b4a0-2800a12068b7"`
 
 **Visual audit findings** (Source: "visual-audit"):
 - Visual bugs, layout issues, animation problems, dark mode inconsistencies

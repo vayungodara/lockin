@@ -15,6 +15,7 @@ import DailySummaryCard from '@/components/DailySummaryCard';
 import StreakHero from '@/components/StreakHero';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import XPBar from '@/components/XPBar';
+import EmptyState from '@/components/EmptyState';
 import { SkeletonCard } from '@/components/Skeleton';
 
 function useCountUp(target, duration = 800) {
@@ -321,68 +322,57 @@ export default function DashboardClient({ user }) {
             <SkeletonCard height="140px" />
           </motion.div>
         ) : error ? (
-          <motion.div
+          <EmptyState
             key="error"
-            className={styles.emptyState}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <div className={styles.emptyIcon} style={{ color: 'var(--danger)' }}>
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            floating={false}
+            icon={
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
                 <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-            </div>
-            <h3>Something went wrong</h3>
-            <p>{error}</p>
-            <motion.button 
-              className="btn btn-primary" 
-              onClick={fetchPacts}
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-            >
-              Try Again
-            </motion.button>
-          </motion.div>
+            }
+            title="Something went wrong"
+            description={error}
+            action={
+              <motion.button
+                className="btn btn-primary"
+                onClick={fetchPacts}
+                whileHover={buttonHover}
+                whileTap={buttonTap}
+              >
+                Try Again
+              </motion.button>
+            }
+          />
         ) : pacts.length === 0 ? (
-          <motion.div
+          <EmptyState
             key="empty"
-            className={styles.emptyState}
-            {...fadeInUp}
-          >
-            <motion.div
-              className={styles.emptyIllustration}
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
-            >
+            icon={
               <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                {/* Rocket body */}
                 <path d="M40 12C40 12 28 28 28 46C28 54 33 60 40 60C47 60 52 54 52 46C52 28 40 12 40 12Z" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                {/* Window */}
                 <circle cx="40" cy="36" r="5" stroke="var(--accent-primary)" strokeWidth="2" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                {/* Left fin */}
                 <path d="M28 50C28 50 20 52 18 58C18 58 24 58 28 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                {/* Right fin */}
                 <path d="M52 50C52 50 60 52 62 58C62 58 56 58 52 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                {/* Flame */}
                 <path d="M36 60C36 60 38 68 40 72C42 68 44 60 44 60" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
                 <path d="M38 60C38 60 39 65 40 67C41 65 42 60 42 60" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
               </svg>
-            </motion.div>
-            <h3>Nothing here yet. Go make something happen.</h3>
-            <p>Create your first pact and start holding yourself accountable.</p>
-            <motion.button
-              className="btn btn-primary"
-              onClick={requestCreatePact}
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-            >
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Create Your First Pact
-            </motion.button>
-          </motion.div>
+            }
+            title="Nothing here yet. Go make something happen."
+            description="Create your first pact and start holding yourself accountable."
+            action={
+              <motion.button
+                className="btn btn-primary"
+                onClick={requestCreatePact}
+                whileHover={buttonHover}
+                whileTap={buttonTap}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Create Your First Pact
+              </motion.button>
+            }
+          />
         ) : (
           <motion.div
             key="pacts"

@@ -168,8 +168,45 @@
   .card {
     padding: var(--space-6);
   }
-  
+
   .streakNumber {
     font-size: 4rem;
   }
+}
+
+/* ── Dark Mode Overrides ── */
+:global([data-theme="dark"]) .container {
+  background: var(--bg-secondary);
+}
+
+:global([data-theme="dark"]) .card {
+  box-shadow: var(--shadow-2xl), 0 0 40px rgba(var(--accent-primary-rgb), 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .streakNumber {
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.1);
+}
+
+:global([data-theme="dark"]) .shareBtn {
+  box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--accent-primary-rgb), 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+:global([data-theme="dark"]) .shareBtn:hover {
+  box-shadow: var(--shadow-xl), 0 0 28px rgba(var(--accent-primary-rgb), 0.4);
+}
+
+:global([data-theme="dark"]) .backBtn {
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-xs);
+}
+
+:global([data-theme="dark"]) .backBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+:global([data-theme="dark"]) .statDivider {
+  background: rgba(255, 255, 255, 0.2);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
@@ -38,7 +38,10 @@ export default function NavbarLanding() {
   const showLinks = !isScrolled || isHovered;
 
   // Skip morph animation on mobile or when user prefers reduced motion
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    setIsMobile(window.innerWidth < 768);
+  }, []);
   const shouldMorph = !prefersReducedMotion() && !isMobile;
 
   const handleGetStarted = async () => {
@@ -75,7 +78,6 @@ export default function NavbarLanding() {
         }
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        layout={shouldMorph}
         transition={navPillSpring}
       >
         <Link href="/" className={styles.logo}>
@@ -99,22 +101,22 @@ export default function NavbarLanding() {
           </div>
         </Link>
 
-        {showLinks && (
-          <motion.div
-            className={styles.navLinks}
-            initial={{ opacity: 0, width: 0 }}
-            animate={{ opacity: 1, width: 'auto' }}
-            exit={{ opacity: 0, width: 0 }}
-            transition={{ duration: 0.2, ease: 'easeInOut' }}
-          >
-            <a href="#features" className={styles.navLink}>
-              Features
-            </a>
-            <a href="#how-it-works" className={styles.navLink}>
-              How it Works
-            </a>
-          </motion.div>
-        )}
+        <motion.div
+          className={styles.navLinks}
+          animate={{
+            opacity: showLinks ? 1 : 0,
+            width: showLinks ? 'auto' : 0,
+          }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          style={{ pointerEvents: showLinks ? 'auto' : 'none' }}
+        >
+          <a href="#features" className={styles.navLink}>
+            Features
+          </a>
+          <a href="#how-it-works" className={styles.navLink}>
+            How it Works
+          </a>
+        </motion.div>
 
         <div className={styles.navActions}>
           <ThemeToggle />

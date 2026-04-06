@@ -279,34 +279,53 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                     {
                       label: 'Overview',
                       active: true,
-                      icon: 'M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ),
                     },
-                    { label: 'Pacts', icon: 'M12 6V12L16 14' },
+                    {
+                      label: 'Pacts',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      ),
+                    },
                     {
                       label: 'Groups',
-                      icon: 'M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                      ),
                     },
-                    { label: 'Timer', icon: 'M12 6V12L16 16' },
-                    { label: 'Stats', icon: 'M22 12H18L15 21L9 3L6 12H2' },
+                    {
+                      label: 'Timer',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M12 6V12L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Stats',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ),
+                    },
                   ].map((item) => (
                     <div
                       key={item.label}
                       className={`${styles.mockNavItem} ${item.active ? styles.mockNavActive : ''}`}
                     >
-                      <svg
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                      >
-                        <path
-                          d={item.icon}
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
+                      {item.svg}
                     </div>
                   ))}
                 </nav>

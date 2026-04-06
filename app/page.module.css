@@ -226,8 +226,8 @@
 /* Completed card — top right, slight left rotation */
 .cardCompleted {
   top: 16px;
-  right: 24px;
-  width: 288px;
+  right: 40px;
+  width: 272px;
   transform: rotate(-2deg);
 }
 

@@ -218,7 +218,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             className={styles.sectionHeader}
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.5 }}
+            viewport={{ amount: 0.15, once: true }}
             transition={{ duration: 0.5, ease: easeOutQuint }}
           >
             <h2>
@@ -237,7 +237,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             role="presentation"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.2 }}
+            viewport={{ amount: 0.1, once: true }}
             transition={{ duration: 0.6, ease: easeOutQuint }}
           >
             {/* Browser chrome bar */}
@@ -386,7 +386,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                       className={styles.mockPactCard}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ amount: 0.3 }}
+                      viewport={{ amount: 0.1, once: true }}
                       transition={{
                         ...smoothTransition,
                         delay: 0.3 + i * 0.1,
@@ -469,7 +469,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                   className={styles.mockCalendar}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ amount: 0.3 }}
+                  viewport={{ amount: 0.1, once: true }}
                   transition={{
                     duration: 0.5,
                     delay: 0.6,
@@ -534,7 +534,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           <div className={styles.featuresInner}>
             <motion.div className={styles.featuresLeft}
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+              viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
               <h2 className={styles.featuresHeading}>Why you&apos;ll actually do it this time.</h2>
               <p className={styles.featuresDescription}>
                 Standard to-do lists rely on motivation. Motivation fades. LockIn relies on two
@@ -557,7 +557,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Wide card: Personal Pacts */}
               <motion.div className={`${styles.bentoCard} ${styles.bentoWide}`}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, ease: easeOutQuint }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, ease: easeOutQuint }}
                 whileHover={cardHover}>
                 <h3>Personal Pacts</h3>
                 <p>Make commitments that stick. Set deadlines, track daily check-ins, build accountability streaks. Choose from 20+ pact templates or create your own.</p>
@@ -571,7 +571,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Half card: Group Accountability */}
               <motion.div className={styles.bentoCard}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
                 whileHover={cardHover}>
                 <h3>Group Accountability</h3>
                 <p>See who is pulling their weight and who is slacking. Kanban boards, task ownership, real-time activity. No more carrying the team alone.</p>
@@ -585,7 +585,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Half card: Focus Timer */}
               <motion.div className={`${styles.bentoCard} ${styles.bentoTimer}`}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
                 whileHover={cardHover}>
                 <h3>Focus Timer</h3>
                 <p>Pomodoro-style deep work sessions. Track your focus hours, compete with your past self, and earn XP for every session.</p>
@@ -613,7 +613,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           <div className={styles.stepsInner}>
             <motion.div className={styles.stepsLeft}
               initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+              viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
               <h2 className={styles.stepsHeading}>Get started in 3 steps.</h2>
               <p className={styles.stepsDescription}>
                 No complicated setup. No learning curve. Just accountability that actually works.
@@ -629,7 +629,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Step 1: Sign in with Google */}
               <motion.div className={styles.timelineStep}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, ease: easeOutQuint }}>
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, ease: easeOutQuint }}>
                 <div className={styles.stepNumber}>01</div>
                 <div className={styles.stepDot} />
                 <h3 className={styles.stepTitle}>Sign in with Google</h3>
@@ -658,7 +658,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Step 2: Create your first pact */}
               <motion.div className={styles.timelineStep}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
                 <div className={styles.stepNumber}>02</div>
                 <div className={styles.stepDot} />
                 <h3 className={styles.stepTitle}>Create your first pact</h3>
@@ -670,7 +670,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               {/* Step 3: Lock in and deliver */}
               <motion.div className={`${styles.timelineStep} ${styles.timelineStepLast}`}
                 initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}>
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}>
                 <div className={styles.stepNumber}>03</div>
                 <div className={`${styles.stepDot} ${styles.stepDotFilled}`}>
                   <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
@@ -703,20 +703,20 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
           <motion.h2 className={styles.ctaHeadline}
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.3 }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
             Tomorrow actually comes.
           </motion.h2>
 
           <motion.p className={styles.ctaDescription}
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
             Join students who are finally getting things done. Free, simple, and it works.
           </motion.p>
 
           <motion.button onClick={handleCta} className={styles.ctaButtonLarge}
             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.3 }} transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}>
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}>
             Start Locking In
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
               <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>

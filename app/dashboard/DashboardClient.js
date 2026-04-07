@@ -1,50 +1,20 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
-import { staggerContainer, staggerItem, fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
 import Link from 'next/link';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
-import CompactActivityCard from '@/components/CompactActivityCard';
-import DailySummaryCard from '@/components/DailySummaryCard';
-import StreakHero from '@/components/StreakHero';
+import TodayBar from '@/components/TodayBar';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
 import XPBar from '@/components/XPBar';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard } from '@/components/Skeleton';
-
-function useCountUp(target, duration = 800) {
-  const [count, setCount] = useState(0);
-  const ref = useRef(null);
-
-  useEffect(() => {
-    // For zero/null/undefined targets, the animation runs one frame and
-    // sets count to Math.round(0) = 0, so no special case is needed.
-    const safeTarget = target || 0;
-    const startTime = performance.now();
-
-    function animate(currentTime) {
-      const elapsed = currentTime - startTime;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-      setCount(Math.round(eased * safeTarget));
-
-      if (progress < 1) {
-        ref.current = requestAnimationFrame(animate);
-      }
-    }
-
-    ref.current = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(ref.current);
-  }, [target, duration]);
-
-  return count;
-}
 
 // Helper to request the layout-level CreatePactModal to open
 function requestCreatePact() {
@@ -139,7 +109,7 @@ export default function DashboardClient({ user }) {
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
-    // Refresh DailySummaryCard and XPBar when a pact status changes
+    // Refresh TodayBar and XPBar when a pact status changes
     if (updatedPact.status === 'completed' || updatedPact.status === 'missed') {
       setRefreshKey(k => k + 1);
     }
@@ -166,12 +136,6 @@ export default function DashboardClient({ user }) {
   // Calculate stats
   const activePacts = pacts.filter(p => p.status === 'active');
   const completedPacts = pacts.filter(p => p.status === 'completed');
-  const missedPacts = pacts.filter(p => p.status === 'missed');
-
-  // Animated count-up values
-  const animatedCompleted = useCountUp(completedPacts.length);
-  const animatedActive = useCountUp(activePacts.length);
-  const animatedMissed = useCountUp(missedPacts.length);
 
   // Dashboard shows active pacts first; if none, show a few recent completed ones
   const dashboardPacts = activePacts.length > 0
@@ -236,11 +200,12 @@ export default function DashboardClient({ user }) {
         transition={smoothTransition}
       >
           <div>
-            <h1 className={styles.greeting}>
-              Welcome back, {firstName}!
-            </h1>
-            <p className={styles.subGreeting}>Ready to lock in today?</p>
-            <XPBar userId={user?.id} refreshKey={refreshKey} />
+            <h1 className={styles.pageTitle}>Dashboard</h1>
+            <p className={styles.pageSubtitle}>
+              {activePacts.length > 0 ? `${activePacts.length} pact${activePacts.length !== 1 ? 's' : ''} due` : 'No pacts due'}
+              {' \u00b7 '}
+              {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
+            </p>
           </div>
           <motion.button
             className="btn btn-primary"
@@ -254,184 +219,132 @@ export default function DashboardClient({ user }) {
             New Pact
           </motion.button>
         </motion.header>
-        
+
+        <XPBar userId={user?.id} refreshKey={refreshKey} />
+
+        <TodayBar
+          userId={user?.id}
+          refreshKey={refreshKey}
+          currentStreak={streakData.currentStreak}
+          longestStreak={streakData.longestStreak}
+        />
+
         <OnboardingChecklist userId={user?.id} onCreatePact={requestCreatePact} />
 
-        <DailySummaryCard userId={user?.id} refreshKey={refreshKey} />
-
-        <StreakHero currentStreak={streakData.currentStreak} longestStreak={streakData.longestStreak} />
-
-        {/* Stats Overview */}
-        <motion.div
-          className={styles.statsGrid}
-          variants={staggerContainer}
-          initial="initial"
-          animate="animate"
-        >
-          <motion.div className={`${styles.statCard} ${styles.statCardCompleted}`} variants={staggerItem}>
-            <div className={styles.statIcon}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22 11.08V12C21.9988 14.1564 21.3005 16.2547 20.0093 17.9818C18.7182 19.709 16.9033 20.9725 14.8354 21.5839C12.7674 22.1953 10.5573 22.1219 8.53447 21.3746C6.51168 20.6273 4.78465 19.2461 3.61096 17.4371C2.43727 15.628 1.87979 13.4881 2.02168 11.3363C2.16356 9.18455 2.99721 7.13631 4.39828 5.49706C5.79935 3.85781 7.69279 2.71537 9.79619 2.24013C11.8996 1.7649 14.1003 1.98232 16.07 2.85999" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M22 4L12 14.01L9 11.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statValue}>{animatedCompleted}</span>
-              <span className={styles.statLabel}>Completed</span>
-            </div>
-          </motion.div>
-
-          <motion.div className={`${styles.statCard} ${styles.statCardPacts}`} variants={staggerItem}>
-            <div className={`${styles.statIcon} ${styles.warning}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statValue}>{animatedActive}</span>
-              <span className={styles.statLabel}>Active Pacts</span>
-            </div>
-          </motion.div>
-
-          <motion.div className={`${styles.statCard} ${styles.statCardMissed}`} variants={staggerItem}>
-            <div className={`${styles.statIcon} ${styles.danger}`}>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </div>
-            <div className={styles.statContent}>
-              <span className={styles.statValue}>{animatedMissed}</span>
-              <span className={styles.statLabel}>Missed</span>
-            </div>
-          </motion.div>
-        </motion.div>
-        
-        {/* Pacts List or Empty State */}
-        <AnimatePresence mode="wait">
-        {isLoading ? (
-          <motion.div
-            key="skeletons"
-            className={styles.pactsGrid}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-          >
-            <SkeletonCard height="140px" />
-            <SkeletonCard height="140px" />
-            <SkeletonCard height="140px" />
-            <SkeletonCard height="140px" />
-          </motion.div>
-        ) : error ? (
-          <EmptyState
-            key="error"
-            floating={false}
-            icon={
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-            }
-            title="Something went wrong"
-            description={error}
-            action={
-              <motion.button
-                className="btn btn-primary"
-                onClick={fetchPacts}
-                whileHover={buttonHover}
-                whileTap={buttonTap}
-              >
-                Try Again
-              </motion.button>
-            }
-          />
-        ) : pacts.length === 0 ? (
-          <EmptyState
-            key="empty"
-            icon={
-              <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M40 12C40 12 28 28 28 46C28 54 33 60 40 60C47 60 52 54 52 46C52 28 40 12 40 12Z" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                <circle cx="40" cy="36" r="5" stroke="var(--accent-primary)" strokeWidth="2" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                <path d="M28 50C28 50 20 52 18 58C18 58 24 58 28 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                <path d="M52 50C52 50 60 52 62 58C62 58 56 58 52 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                <path d="M36 60C36 60 38 68 40 72C42 68 44 60 44 60" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-                <path d="M38 60C38 60 39 65 40 67C41 65 42 60 42 60" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
-              </svg>
-            }
-            title="Nothing here yet. Go make something happen."
-            description="Create your first pact and start holding yourself accountable."
-            action={
-              <motion.button
-                className="btn btn-primary"
-                onClick={requestCreatePact}
-                whileHover={buttonHover}
-                whileTap={buttonTap}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Create Your First Pact
-              </motion.button>
-            }
-          />
-        ) : (
-          <motion.div
-            key="pacts"
-            className={styles.pactsSection}
-            variants={fadeInUp}
-            initial="initial"
-            animate="animate"
-          >
-            <div className={styles.sectionHeader}>
-              <h2>{activePacts.length > 0 ? 'Active Pacts' : 'Recent Pacts'}</h2>
-              <a href="/dashboard/pacts" className={styles.viewAllLink}>View all</a>
-            </div>
-            <LayoutGroup>
-              <motion.div className={styles.pactsGrid}>
-                <AnimatePresence mode="popLayout">
-                  {dashboardPacts.map((pact) => (
-                    <motion.div
-                      key={pact.id}
-                      layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9 }}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+        {/* Two-column grid: Pacts + Activity */}
+        <div className={styles.dashboardGrid}>
+          {/* Left column: Pacts */}
+          <div className={styles.pactsColumn}>
+            <AnimatePresence mode="wait">
+              {isLoading ? (
+                <motion.div
+                  key="skeletons"
+                  className={styles.pactsGrid}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
+                >
+                  <SkeletonCard height="140px" />
+                  <SkeletonCard height="140px" />
+                  <SkeletonCard height="140px" />
+                </motion.div>
+              ) : error ? (
+                <EmptyState
+                  key="error"
+                  floating={false}
+                  icon={
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                      <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                    </svg>
+                  }
+                  title="Something went wrong"
+                  description={error}
+                  action={
+                    <motion.button
+                      className="btn btn-primary"
+                      onClick={fetchPacts}
+                      whileHover={buttonHover}
+                      whileTap={buttonTap}
                     >
-                      <PactCard
-                        pact={pact}
-                        onUpdate={handlePactUpdate}
-                      />
+                      Try Again
+                    </motion.button>
+                  }
+                />
+              ) : pacts.length === 0 ? (
+                <EmptyState
+                  key="empty"
+                  icon={
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M40 12C40 12 28 28 28 46C28 54 33 60 40 60C47 60 52 54 52 46C52 28 40 12 40 12Z" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                      <circle cx="40" cy="36" r="5" stroke="var(--accent-primary)" strokeWidth="2" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                      <path d="M28 50C28 50 20 52 18 58C18 58 24 58 28 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                      <path d="M52 50C52 50 60 52 62 58C62 58 56 58 52 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
+                      <path d="M36 60C36 60 38 68 40 72C42 68 44 60 44 60" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
+                      <path d="M38 60C38 60 39 65 40 67C41 65 42 60 42 60" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
+                    </svg>
+                  }
+                  title="Nothing here yet. Go make something happen."
+                  description="Create your first pact and start holding yourself accountable."
+                  action={
+                    <motion.button
+                      className="btn btn-primary"
+                      onClick={requestCreatePact}
+                      whileHover={buttonHover}
+                      whileTap={buttonTap}
+                    >
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      Create Your First Pact
+                    </motion.button>
+                  }
+                />
+              ) : (
+                <motion.div
+                  key="pacts"
+                  className={styles.pactsSection}
+                  variants={fadeInUp}
+                  initial="initial"
+                  animate="animate"
+                >
+                  <div className={styles.sectionHeader}>
+                    <h2>{activePacts.length > 0 ? "Today\u2019s Pacts" : 'Recent Pacts'}</h2>
+                    <Link href="/dashboard/pacts" className={styles.viewAllLink}>View all</Link>
+                  </div>
+                  <LayoutGroup>
+                    <motion.div className={styles.pactsGrid}>
+                      <AnimatePresence mode="popLayout">
+                        {dashboardPacts.map((pact) => (
+                          <motion.div
+                            key={pact.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.9 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                          >
+                            <PactCard
+                              pact={pact}
+                              onUpdate={handlePactUpdate}
+                            />
+                          </motion.div>
+                        ))}
+                      </AnimatePresence>
                     </motion.div>
-                  ))}
-                </AnimatePresence>
-              </motion.div>
-            </LayoutGroup>
-          </motion.div>
-        )}
-        </AnimatePresence>
+                  </LayoutGroup>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
-        {!isLoading && pacts.length > 0 && (
-          <motion.div 
-            className={styles.activitySection}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...smoothTransition, delay: 0.3 }}
-          >
-            <CompactActivityCard userId={user?.id} />
-          </motion.div>
-        )}
-
-        {!isLoading && pacts.length > 0 && (
-          <motion.div 
-            className={styles.activitySection}
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ ...smoothTransition, delay: 0.4 }}
-          >
-            <ActivityFeed pageSize={10} />
-          </motion.div>
-        )}
-      
+          {/* Right column: Activity */}
+          <div className={styles.activityColumn}>
+            <div className={styles.sectionHeader}>
+              <h2>Activity</h2>
+            </div>
+            <ActivityFeed pageSize={5} />
+          </div>
+        </div>
     </>
   );
 }

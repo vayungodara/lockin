@@ -344,7 +344,7 @@ export default function DashboardClient({ user }) {
             <div className={styles.sectionHeader}>
               <h2>Activity</h2>
             </div>
-            <ActivityFeed pageSize={5} hideHeader />
+            <ActivityFeed pageSize={3} hideHeader />
           </div>
         </div>
     </div>

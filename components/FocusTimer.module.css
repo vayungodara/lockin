@@ -7,8 +7,8 @@
 
 .timerRing {
   position: relative;
-  width: 200px;
-  height: 200px;
+  width: 280px;
+  height: 280px;
 }
 
 .timerRing::after {
@@ -55,7 +55,7 @@
 }
 
 .time {
-  font-size: var(--text-5xl);
+  font-size: var(--text-6xl);
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   color: var(--text-primary);

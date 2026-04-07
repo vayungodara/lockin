@@ -54,52 +54,6 @@
   font-size: var(--text-sm);
 }
 
-/* Stats Bar */
-.statsBar {
-  display: flex;
-  align-items: center;
-  gap: var(--space-6);
-  padding: var(--space-4) var(--space-6);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  margin-bottom: var(--space-6);
-}
-
-.statItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.statValue {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.statValue.success {
-  color: var(--success);
-}
-
-.statValue.danger {
-  color: var(--danger);
-}
-
-.statLabel {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.statDivider {
-  width: 1px;
-  height: 32px;
-  background: var(--border-subtle);
-}
-
 /* Filter Tabs */
 .filterTabs {
   display: flex;
@@ -146,11 +100,11 @@
   z-index: 1;
 }
 
-/* Pacts Grid */
+/* Pacts List */
 .pactsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
 }
 
 /* Loading State */
@@ -194,36 +148,13 @@
     gap: var(--space-4);
   }
 
-  .statsBar {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .statDivider {
-    display: none;
-  }
-
-  .statItem {
-    width: 45%;
-    padding: var(--space-2) 0;
-  }
-
   .filterTabs {
     width: 100%;
     overflow-x: auto;
   }
-
-  .pactsGrid {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* ── Dark Mode Overrides ── */
-:global([data-theme="dark"]) .statsBar {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
-}
-
 :global([data-theme="dark"]) .filterTabs {
   border: 1px solid var(--border-subtle);
 }

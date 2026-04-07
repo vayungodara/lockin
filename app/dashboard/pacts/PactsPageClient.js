@@ -83,10 +83,10 @@ export default function PactsPageClient({ user }) {
     return true;
   });
 
-  // Stats
-  const activePacts = pacts.filter(p => p.status === 'active');
-  const completedPacts = pacts.filter(p => p.status === 'completed');
-  const missedPacts = pacts.filter(p => p.status === 'missed');
+  // Counts for filter tabs
+  const activeCount = pacts.filter(p => p.status === 'active').length;
+  const completedCount = pacts.filter(p => p.status === 'completed').length;
+  const missedCount = pacts.filter(p => p.status === 'missed').length;
 
   return (
     <div className={styles.container}>
@@ -103,38 +103,13 @@ export default function PactsPageClient({ user }) {
         </button>
       </div>
 
-      {/* Stats Bar */}
-      <div className={styles.statsBar}>
-        <div className={styles.statItem}>
-          <span className={styles.statValue}>{activePacts.length}</span>
-          <span className={styles.statLabel}>Active</span>
-        </div>
-        <div className={styles.statDivider}></div>
-        <div className={styles.statItem}>
-          <span className={`${styles.statValue} ${styles.success}`}>{completedPacts.length}</span>
-          <span className={styles.statLabel}>Completed</span>
-        </div>
-        <div className={styles.statDivider}></div>
-        <div className={styles.statItem}>
-          <span className={`${styles.statValue} ${styles.danger}`}>{missedPacts.length}</span>
-          <span className={styles.statLabel}>Missed</span>
-        </div>
-        <div className={styles.statDivider}></div>
-        <div className={styles.statItem}>
-          <span className={styles.statValue}>
-            {pacts.length > 0 ? Math.round((completedPacts.length / pacts.length) * 100) : 0}%
-          </span>
-          <span className={styles.statLabel}>Success Rate</span>
-        </div>
-      </div>
-
       {/* Filter Tabs */}
       <div className={styles.filterTabs}>
         {[
           { key: 'all', label: 'All', count: pacts.length },
-          { key: 'active', label: 'Active', count: activePacts.length },
-          { key: 'completed', label: 'Completed', count: completedPacts.length },
-          { key: 'missed', label: 'Missed', count: missedPacts.length },
+          { key: 'active', label: 'Active', count: activeCount },
+          { key: 'completed', label: 'Completed', count: completedCount },
+          { key: 'missed', label: 'Missed', count: missedCount },
         ].map(tab => (
           <button
             key={tab.key}

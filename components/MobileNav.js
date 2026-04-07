@@ -1,8 +1,11 @@
 'use client';
 
+import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { motion } from 'framer-motion';
+import { createClient } from '@/lib/supabase/client';
+import { getLevelFromXP } from '@/lib/gamification';
 import { useFocusSafe } from '@/lib/FocusContext';
 import styles from './MobileNav.module.css';
 
@@ -72,9 +75,25 @@ const navItems = [
   },
 ];
 
-export default function MobileNav() {
+export default function MobileNav({ userId }) {
   const pathname = usePathname();
   const focusContext = useFocusSafe();
+  const [level, setLevel] = useState(null);
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    async function fetchLevel() {
+      if (!userId) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('total_xp, level')
+        .eq('id', userId)
+        .single();
+      if (error || !data) return;
+      setLevel(data.level || getLevelFromXP(data.total_xp || 0));
+    }
+    fetchLevel();
+  }, [userId, supabase]);
 
   const isActive = (href) => {
     if (href === '/dashboard') {
@@ -108,6 +127,11 @@ export default function MobileNav() {
         </div>
       )}
       <nav className={styles.mobileNav}>
+      {level !== null && (
+        <span className={styles.levelPill} aria-label={`Level ${level}`}>
+          Lv. {level}
+        </span>
+      )}
       {navItems.map((item) => (
         <Link
           key={item.href}

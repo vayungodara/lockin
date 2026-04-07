@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useSyncExternalStore, useCallback } from 'react';
+import { useState, useEffect, useRef, useMemo, useSyncExternalStore, useCallback } from 'react';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
@@ -14,6 +14,8 @@ import {
   snappyTransition,
   smoothTransition,
 } from '@/lib/animations';
+import { createClient } from '@/lib/supabase/client';
+import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
 import { useTheme } from './ThemeProvider';
 import { useFocusSafe } from '@/lib/FocusContext';
 import NotificationBell from './NotificationBell';
@@ -104,6 +106,29 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
   const lockSrc = `/logos/${accent || 'indigo'}-lock.png`;
   const textSrc = `/logos/${accent || 'indigo'}-text.png`;
   const focusContext = useFocusSafe();
+
+  // XP state
+  const [xpData, setXpData] = useState({ level: 1, progress: 0, currentXP: 0 });
+  const supabase = useMemo(() => createClient(), []);
+
+  useEffect(() => {
+    async function fetchXP() {
+      if (!user?.id) return;
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('total_xp, level')
+        .eq('id', user.id)
+        .single();
+      if (error || !data) return;
+      const totalXP = data.total_xp || 0;
+      setXpData({
+        level: data.level || getLevelFromXP(totalXP),
+        progress: getProgressToNextLevel(totalXP),
+        currentXP: totalXP % 100,
+      });
+    }
+    fetchXP();
+  }, [user?.id, supabase]);
 
   const isCollapsed = useSyncExternalStore(
     subscribeToSidebarStorage,
@@ -342,7 +367,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
           layout
           transition={snappyTransition}
         >
-          <motion.div layout transition={snappyTransition}>
+          <motion.div layout transition={snappyTransition} className={styles.avatarWrapper}>
             {user?.user_metadata?.avatar_url ? (
               <Image
                 src={user.user_metadata.avatar_url}
@@ -355,6 +380,37 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
               <div className={styles.avatarPlaceholder}>
                 {user?.email?.[0]?.toUpperCase() || 'U'}
               </div>
+            )}
+            {/* XP progress ring — visible when collapsed */}
+            {!isExpanded && (
+              <svg
+                className={styles.xpRing}
+                width="44"
+                height="44"
+                viewBox="0 0 44 44"
+                aria-label={`Level ${xpData.level}, ${xpData.currentXP} of 100 XP`}
+              >
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="19"
+                  fill="none"
+                  stroke="var(--border-subtle)"
+                  strokeWidth="2.5"
+                />
+                <circle
+                  cx="22"
+                  cy="22"
+                  r="19"
+                  fill="none"
+                  stroke="var(--accent-primary)"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 19}
+                  strokeDashoffset={2 * Math.PI * 19 * (1 - xpData.progress / 100)}
+                  style={{ transform: 'rotate(-90deg)', transformOrigin: 'center', transition: 'stroke-dashoffset 0.6s ease' }}
+                />
+              </svg>
             )}
           </motion.div>
 
@@ -371,7 +427,20 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             <span className={styles.userName}>
               {user?.user_metadata?.full_name || 'User'}
             </span>
-            <span className={styles.userEmail}>{user?.email}</span>
+            <div className={styles.xpExpanded}>
+              <div className={styles.xpExpandedHeader}>
+                <span className={styles.levelBadge}>Lv. {xpData.level}</span>
+                <span className={styles.xpText}>{xpData.currentXP} / 100 XP</span>
+              </div>
+              <div className={styles.xpTrack}>
+                <motion.div
+                  className={styles.xpFill}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${xpData.progress}%` }}
+                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                />
+              </div>
+            </div>
           </motion.div>
         </motion.div>
 

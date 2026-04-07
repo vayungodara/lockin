@@ -98,7 +98,7 @@ export default function DashboardLayout({ user, children }) {
         <KeyboardShortcutsProvider>
           <div id="dashboard-layout" className={styles.layout}>
             <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
-            <MobileNav />
+            <MobileNav userId={user?.id} />
             <CommandPalette onCreatePact={() => setShowCreatePact(true)} />
             <CreatePactModal
               isOpen={showCreatePact}

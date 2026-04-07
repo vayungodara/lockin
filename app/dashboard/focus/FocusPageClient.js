@@ -40,7 +40,7 @@ export default function FocusPageClient({ user }) {
       const [recentResult, allResult] = await Promise.all([
         supabase
           .from('focus_sessions')
-          .select('*')
+          .select('id, started_at, duration_minutes')
           .eq('user_id', user.id)
           .order('started_at', { ascending: false })
           .limit(10),

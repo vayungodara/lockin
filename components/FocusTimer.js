@@ -19,6 +19,7 @@ export default function FocusTimer() {
     toggleTimer,
     resetTimer,
     skipToNext,
+    sessionsCompleted,
   } = useFocus();
 
   const { accent } = useTheme();

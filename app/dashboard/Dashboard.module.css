@@ -270,11 +270,17 @@
   min-height: 100dvh;
 }
 
+.pageContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
 .header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: var(--space-8);
+  margin-bottom: 0;
 }
 
 .pageTitle {
@@ -292,12 +298,20 @@
   margin-top: var(--space-1);
 }
 
+.streakHighlight {
+  color: #EA580C;
+  font-weight: 600;
+}
+
+:global([data-theme="dark"]) .streakHighlight {
+  color: #FB923C;
+}
+
 .dashboardGrid {
   display: grid;
   grid-template-columns: 3fr 2fr;
   gap: var(--space-8);
   align-items: start;
-  margin-top: var(--space-6);
 }
 
 .pactsColumn {
@@ -342,7 +356,7 @@
 }
 
 .pactsSection {
-  margin-top: var(--space-4);
+  margin-top: 0;
 }
 
 .sectionHeader {

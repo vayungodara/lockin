@@ -366,7 +366,8 @@
 }
 
 .card.completed {
-  opacity: 0.75;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
 }
 
 .card.completed:hover {

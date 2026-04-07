@@ -1,6 +1,7 @@
 /* ── TodayBar: unified streak + daily summary status bar ── */
 
 .bar {
+  --streak-color-rgb: 255, 184, 0;
   position: relative;
   width: 100%;
   background: var(--surface-1);
@@ -29,9 +30,16 @@
   pointer-events: none;
 }
 
+/* ── Base tier: subtle warm tint when streak > 0 ── */
+.base {
+  background: #FFFCF5;
+  border-color: rgba(var(--streak-color-rgb), 0.12);
+}
+
 /* ── Tier-based tinting (streak zone gets warm amber) ── */
 .warm {
-  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.04) 0%, var(--surface-1) 40%);
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.06) 0%, #FFFCF5 40%);
+  border-color: rgba(var(--streak-color-rgb), 0.15);
 }
 
 .fire {
@@ -454,6 +462,11 @@
 
 :global([data-theme="dark"]) .bar:hover {
   box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--accent-primary-rgb), 0.06);
+}
+
+:global([data-theme="dark"]) .base {
+  background: rgba(var(--streak-color-rgb), 0.05);
+  border-color: rgba(var(--streak-color-rgb), 0.12);
 }
 
 :global([data-theme="dark"]) .warm {

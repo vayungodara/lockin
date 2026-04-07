@@ -192,7 +192,7 @@ export default function DashboardClient({ user }) {
 
   // User is signed in - show dashboard
   return (
-    <>
+    <div className={styles.pageContent}>
       <motion.header
         className={styles.header}
         initial={{ opacity: 0, y: -12 }}
@@ -204,7 +204,9 @@ export default function DashboardClient({ user }) {
             <p className={styles.pageSubtitle}>
               {activePacts.length > 0 ? `${activePacts.length} pact${activePacts.length !== 1 ? 's' : ''} due` : 'No pacts due'}
               {' \u00b7 '}
-              {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
+              <span className={styles.streakHighlight}>
+                🔥 {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
+              </span>
             </p>
           </div>
           <motion.button
@@ -342,9 +344,9 @@ export default function DashboardClient({ user }) {
             <div className={styles.sectionHeader}>
               <h2>Activity</h2>
             </div>
-            <ActivityFeed pageSize={5} />
+            <ActivityFeed pageSize={5} hideHeader />
           </div>
         </div>
-    </>
+    </div>
   );
 }

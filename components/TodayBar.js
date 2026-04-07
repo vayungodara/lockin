@@ -237,20 +237,10 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           <div className={styles.iconWrapper}>
             {isMilestoneDay ? (
               <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
-                <span className={styles.streakIcon} role="img" aria-label="streak icon">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 23C16.5 23 20 19.5 20 15.5C20 11.5 17 8 15 6C14.5 8 13 9.5 12 10C11.5 7 10 4 8 2C7 5 5 8.5 5 12C5 16 7.5 23 12 23Z" fill="#FF6B35" stroke="#E8530E" strokeWidth="1"/>
-                    <path d="M12 23C14.5 23 16.5 20.5 16.5 17.5C16.5 14.5 14 12 13 11C12.5 13 12 14 11 14.5C10.5 12 10 10 9 8.5C8.5 11 7.5 13 7.5 15.5C7.5 19 9.5 23 12 23Z" fill="#FFB800" stroke="#FF9500" strokeWidth="0.5"/>
-                  </svg>
-                </span>
+                <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
               </motion.span>
             ) : (
-              <span className={styles.streakIcon} role="img" aria-label="streak icon">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 23C16.5 23 20 19.5 20 15.5C20 11.5 17 8 15 6C14.5 8 13 9.5 12 10C11.5 7 10 4 8 2C7 5 5 8.5 5 12C5 16 7.5 23 12 23Z" fill="#FF6B35" stroke="#E8530E" strokeWidth="1"/>
-                  <path d="M12 23C14.5 23 16.5 20.5 16.5 17.5C16.5 14.5 14 12 13 11C12.5 13 12 14 11 14.5C10.5 12 10 10 9 8.5C8.5 11 7.5 13 7.5 15.5C7.5 19 9.5 23 12 23Z" fill="#FFB800" stroke="#FF9500" strokeWidth="0.5"/>
-                </svg>
-              </span>
+              <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
             )}
             <span className={styles.confettiDotBlue} aria-hidden="true" />
             <span className={styles.confettiDotGreen} aria-hidden="true" />

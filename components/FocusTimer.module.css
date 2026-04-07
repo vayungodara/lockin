@@ -1,62 +1,8 @@
-.container {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.header {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-4) var(--space-5);
-  border-bottom: 1px solid var(--border-subtle);
-  background: var(--surface-1);
-}
-
-.header svg {
-  color: var(--accent-primary);
-}
-
-.header h3 {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin: 0;
-}
-
 .timerSection {
-  padding: var(--space-8);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-6);
-}
-
-.modeIndicator {
-  display: flex;
-  justify-content: center;
-}
-
-.modeTag {
-  padding: var(--space-2) var(--space-5);
-  border-radius: var(--radius-full);
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.workMode {
-  background: var(--gradient-subtle);
-  color: var(--accent-primary);
-}
-
-.breakMode {
-  background: var(--success-light);
-  color: var(--success);
 }
 
 .timerRing {
@@ -184,44 +130,6 @@
   color: var(--text-primary);
   border-color: var(--border-default);
   transform: scale(1.05);
-}
-
-.stats {
-  display: flex;
-  align-items: center;
-  gap: var(--space-8);
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--border-subtle);
-  width: 100%;
-  justify-content: center;
-}
-
-.statItem {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
-}
-
-.statValue {
-  font-size: var(--text-2xl);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--accent-primary);
-}
-
-.statLabel {
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  font-weight: var(--font-medium);
-}
-
-.statDivider {
-  width: 1px;
-  height: 40px;
-  background: var(--border-subtle);
 }
 
 /* Dark mode overrides for timer ring visibility */

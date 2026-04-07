@@ -7,14 +7,29 @@ import { useFocus } from '@/lib/FocusContext';
 import styles from './FocusPage.module.css';
 import FocusTimer from '@/components/FocusTimer';
 
+function timeAgo(dateStr) {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffMs = now - date;
+  const diffMins = Math.floor(diffMs / 60000);
+  if (diffMins < 1) return 'just now';
+  if (diffMins < 60) return `${diffMins}m ago`;
+  const diffHours = Math.floor(diffMins / 60);
+  if (diffHours < 24) return `${diffHours}h ago`;
+  const diffDays = Math.floor(diffHours / 24);
+  return `${diffDays}d ago`;
+}
+
 export default function FocusPageClient({ user }) {
   const [sessions, setSessions] = useState([]);
-  const [stats, setStats] = useState({ today: 0, week: 0, total: 0 });
+  const [todayMinutes, setTodayMinutes] = useState(0);
+  const [todaySessions, setTodaySessions] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [broadcast, setBroadcast] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcuts();
-  const { toggleTimer } = useFocus();
+  const { toggleTimer, mode, isRunning } = useFocus();
 
   // Register keyboard shortcut for timer toggle
   useEffect(() => {
@@ -32,43 +47,33 @@ export default function FocusPageClient({ user }) {
     try {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
 
-      // Fetch recent sessions (for display list) and all sessions (for stats) in parallel
-      const [recentResult, allResult] = await Promise.all([
-        supabase
-          .from('focus_sessions')
-          .select('*')
-          .eq('user_id', user.id)
-          .order('started_at', { ascending: false })
-          .limit(10),
+      const [recentResult, todayResult] = await Promise.all([
         supabase
           .from('focus_sessions')
           .select('id, started_at, duration_minutes')
           .eq('user_id', user.id)
           .order('started_at', { ascending: false })
-          .limit(5000),
+          .limit(1),
+        supabase
+          .from('focus_sessions')
+          .select('id, started_at, duration_minutes')
+          .eq('user_id', user.id)
+          .gte('started_at', today.toISOString())
+          .order('started_at', { ascending: false }),
       ]);
 
       if (recentResult.error) throw recentResult.error;
-      if (allResult.error) throw allResult.error;
+      if (todayResult.error) throw todayResult.error;
 
       setSessions(recentResult.data || []);
 
-      const allSessions = allResult.data || [];
-      const todaySessions = allSessions.filter(s => new Date(s.started_at) >= today);
-      const weekSessions = allSessions.filter(s => new Date(s.started_at) >= weekAgo);
-
-      setStats({
-        today: todaySessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0),
-        week: weekSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0),
-        total: allSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0)
-      });
+      const todayData = todayResult.data || [];
+      setTodaySessions(todayData.length);
+      setTodayMinutes(todayData.reduce((acc, s) => acc + (s.duration_minutes || 0), 0));
     } catch (err) {
       console.error('Error fetching sessions:', err);
-      setError('Failed to load focus sessions. Please try again.');
+      setError('Failed to load focus sessions.');
     } finally {
       setIsLoading(false);
     }
@@ -78,79 +83,80 @@ export default function FocusPageClient({ user }) {
     fetchSessions();
   }, [fetchSessions]);
 
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-  };
+  // Determine the last completed session
+  const lastSession = sessions[0] || null;
+
+  // Mode selector labels mapped to context mode values
+  const modes = [
+    { label: 'Focus', value: 'work' },
+    { label: 'Short Break', value: 'break' },
+    { label: 'Long Break', value: 'longBreak' },
+  ];
+
+  // Current active tab: map context mode to selector
+  const activeMode = mode === 'work' ? 'work' : 'break';
 
   return (
     <div className={styles.container}>
       <header className={styles.header}>
-        <div>
-          <h1>Focus Timer</h1>
-          <p className={styles.subtitle}>Pomodoro-style deep work sessions</p>
+        <h1>Focus</h1>
+
+        <div className={styles.broadcastPill}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
+          </svg>
+          <span className={styles.broadcastLabel}>Broadcast to group</span>
+          <div className={styles.toggleSwitch}>
+            <input
+              type="checkbox"
+              id="broadcastToggle"
+              className={styles.toggleInput}
+              checked={broadcast}
+              onChange={(e) => setBroadcast(e.target.checked)}
+            />
+            <label htmlFor="broadcastToggle" className={styles.toggleTrack} />
+          </div>
         </div>
       </header>
 
-      <div className={styles.content}>
-        <div className={styles.timerColumn}>
-          <FocusTimer />
+      <section className={styles.focusLayout}>
+        {/* Mode selector pills */}
+        <div className={styles.modeSelector}>
+          {modes.map((m) => (
+            <button
+              key={m.value}
+              className={`${styles.modeButton} ${activeMode === m.value ? styles.modeButtonActive : ''}`}
+              disabled={isRunning}
+              aria-pressed={activeMode === m.value}
+            >
+              {m.label}
+            </button>
+          ))}
         </div>
 
-        <div className={styles.statsColumn}>
-          {error && (
-            <div className={styles.statsCard}>
-              <p>{error}</p>
-              <button className="btn btn-primary" onClick={fetchSessions} style={{ marginTop: '0.5rem' }}>Try Again</button>
-            </div>
-          )}
-          <div className={styles.statsCard}>
-            <h3>Your Focus Stats</h3>
-            <div className={styles.statsGrid}>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{stats.today}m</span>
-                <span className={styles.statLabel}>Today</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{stats.week}m</span>
-                <span className={styles.statLabel}>This Week</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{Math.floor(stats.total / 60)}h</span>
-                <span className={styles.statLabel}>All Time</span>
-              </div>
-            </div>
-          </div>
+        {/* Timer hero */}
+        <FocusTimer />
 
-          <div className={styles.historyCard}>
-            <h3>Recent Sessions</h3>
-            {isLoading ? (
-              <div className={styles.loading}>Loading...</div>
-            ) : sessions.length === 0 ? (
-              <div className={styles.empty}>
-                <p>No sessions yet. Start your first focus session!</p>
-              </div>
-            ) : (
-              <div className={styles.sessionList}>
-                {sessions.map((session) => (
-                  <div key={session.id} className={styles.sessionItem}>
-                    <div className={styles.sessionIcon}>
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                        <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                      </svg>
-                    </div>
-                    <div className={styles.sessionInfo}>
-                      <span className={styles.sessionDuration}>{session.duration_minutes} {session.duration_minutes === 1 ? 'minute' : 'minutes'}</span>
-                      <span className={styles.sessionDate}>{formatDate(session.started_at)}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+        {/* Inline stats */}
+        {error ? (
+          <div className={styles.errorBox}>
+            <p>{error}</p>
+            <button className="btn btn-primary" onClick={fetchSessions}>Try Again</button>
+          </div>
+        ) : (
+          <div>
+            <p className={styles.inlineStats}>
+              Today: {todayMinutes}m focused · {todaySessions} {todaySessions === 1 ? 'session' : 'sessions'}
+            </p>
+            {lastSession && !isLoading && (
+              <p className={styles.lastSession}>
+                Last: {lastSession.duration_minutes}min · {timeAgo(lastSession.started_at)}
+              </p>
             )}
           </div>
-        </div>
-      </div>
+        )}
+      </section>
     </div>
   );
 }

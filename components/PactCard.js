@@ -34,12 +34,32 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     return null;
   }
 
-  const isOverdue = new Date(pact.deadline) < new Date() && pact.status === 'active';
+  const now = new Date();
   const deadlineDate = new Date(pact.deadline);
+  const isOverdue = deadlineDate < now && pact.status === 'active';
+  const isDueToday = !isOverdue && pact.status === 'active' &&
+    deadlineDate.toDateString() === now.toDateString();
+  const isCompleted = pact.status === 'completed';
 
-  // Deadline urgency coloring
-  const hoursRemaining = pact.deadline ? (new Date(pact.deadline) - new Date()) / (1000 * 60 * 60) : null;
-  const urgencyClass = hoursRemaining !== null
+  // Determine urgency tier for card-level CSS class
+  const urgencyTierClass = isOverdue ? styles.pactCardOverdue
+    : isDueToday ? styles.pactCardDueToday
+    : isCompleted ? styles.pactCardCompleted
+    : styles.pactCardDefault;
+
+  // Hours overdue for badge text
+  const hoursOverdue = isOverdue
+    ? Math.floor((now - deadlineDate) / (1000 * 60 * 60))
+    : 0;
+
+  // Hours remaining for "Due in X hours" text
+  const hoursUntilDue = isDueToday
+    ? Math.max(0, Math.floor((deadlineDate - now) / (1000 * 60 * 60)))
+    : 0;
+
+  // Deadline urgency coloring (for deadline text)
+  const hoursRemaining = pact.deadline ? (deadlineDate - now) / (1000 * 60 * 60) : null;
+  const deadlineUrgencyClass = hoursRemaining !== null
     ? hoursRemaining < 6 ? styles.urgencyCritical
     : hoursRemaining < 12 ? styles.urgencyHigh
     : hoursRemaining < 24 ? styles.urgencyMedium
@@ -232,31 +252,65 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
   return (
     <motion.div
       ref={cardRef}
-      className={`${styles.card} ${getStatusClass()}`}
+      className={`${styles.card} ${getStatusClass()} ${urgencyTierClass}`}
       whileHover={pact.status === 'active' ? cardHover : undefined}
       animate={showBounce ? celebrationGlow.animate : undefined}
       style={{ position: 'relative' }}
     >
       {ConfettiComponent}
+
+      {/* Overdue pulsing indicator dot */}
+      {isOverdue && <span className={styles.pulseDot} aria-hidden="true" />}
+
+      {/* Due today amber indicator dot */}
+      {isDueToday && <span className={styles.amberDot} aria-hidden="true" />}
+
       <div className={styles.content}>
         <div className={styles.header}>
           <h3 className={styles.title}>{pact.title}</h3>
-          <span className={`${styles.badge} ${getStatusClass()}`}>
-            {pact.status === 'completed' ? 'Done' : pact.status === 'missed' ? 'Missed' : isOverdue ? 'Overdue' : 'Active'}
-          </span>
+          <div className={styles.badgeGroup}>
+            {/* Overdue hours badge */}
+            {isOverdue && (
+              <span className={styles.overdueBadge}>
+                {hoursOverdue === 0 ? 'Just overdue' : `${hoursOverdue}h overdue`}
+              </span>
+            )}
+
+            {/* Completed XP reward badge */}
+            {isCompleted && (
+              <span className={styles.xpBadge}>
+                +{pact.xp_reward || 10} XP
+              </span>
+            )}
+
+            <span className={`${styles.badge} ${getStatusClass()}`}>
+              {pact.status === 'completed' ? 'Done' : pact.status === 'missed' ? 'Missed' : isOverdue ? 'Overdue' : 'Active'}
+            </span>
+          </div>
         </div>
-        
+
         {pact.description && (
           <p className={styles.description}>{pact.description}</p>
         )}
-        
+
         <div className={styles.footer}>
-          <div className={`${styles.deadline} ${pact.status === 'active' ? urgencyClass : ''}`}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-            {formatDeadline()}
+          <div className={`${styles.deadline} ${pact.status === 'active' ? deadlineUrgencyClass : ''}`}>
+            {/* Overdue: no clock icon, use warning icon */}
+            {isOverdue ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 9V13M12 17H12.01M5.07 19H18.93C20.52 19 21.5 17.28 20.7 15.89L13.77 3.97C12.97 2.58 11.03 2.58 10.23 3.97L3.3 15.89C2.5 17.28 3.48 19 5.07 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : isCompleted ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+            )}
+            {isDueToday && hoursUntilDue > 0 ? `Due in ${hoursUntilDue} hour${hoursUntilDue === 1 ? '' : 's'}` : formatDeadline()}
           </div>
           
           {pact.status === 'active' ? (

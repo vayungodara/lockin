@@ -205,7 +205,11 @@ export default function DashboardClient({ user }) {
               {activePacts.length > 0 ? `${activePacts.length} pact${activePacts.length !== 1 ? 's' : ''} due` : 'No pacts due'}
               {' \u00b7 '}
               <span className={styles.streakHighlight}>
-                🔥 {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ verticalAlign: 'text-bottom', marginRight: 2 }}>
+                  <path d="M12 23C16.5 23 20 19.5 20 15.5C20 11.5 17 8 15 6C14.5 8 13 9.5 12 10C11.5 7 10 4 8 2C7 5 5 8.5 5 12C5 16 7.5 23 12 23Z" fill="#FF6B35" stroke="#E8530E" strokeWidth="1"/>
+                  <path d="M12 23C14.5 23 16.5 20.5 16.5 17.5C16.5 14.5 14 12 13 11C12.5 13 12 14 11 14.5C10.5 12 10 10 9 8.5C8.5 11 7.5 13 7.5 15.5C7.5 19 9.5 23 12 23Z" fill="#FFB800" stroke="#FF9500" strokeWidth="0.5"/>
+                </svg>
+                {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
               </span>
             </p>
           </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
+import { usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { FocusProvider } from '@/lib/FocusContext';
 import { KeyboardShortcutsProvider } from '@/lib/KeyboardShortcutsContext';
@@ -13,6 +14,8 @@ import CreatePactModal from '@/components/CreatePactModal';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
+  const pathname = usePathname();
+  const isDashboard = pathname === '/dashboard';
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showCreatePact, setShowCreatePact] = useState(false);
   const supabase = useMemo(() => createClient(), []);
@@ -97,7 +100,7 @@ export default function DashboardLayout({ user, children }) {
       <NotificationProvider>
         <KeyboardShortcutsProvider>
           <div id="dashboard-layout" className={styles.layout}>
-            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
+            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} hideXP={isDashboard} />
             <MobileNav userId={user?.id} />
             <CommandPalette onCreatePact={() => setShowCreatePact(true)} />
             <CreatePactModal

@@ -100,7 +100,7 @@ const navItems = [
   },
 ];
 
-export default function Sidebar({ user, onSignOut, onExpandChange }) {
+export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
   const pathname = usePathname();
   const { theme, setTheme, resolvedTheme, mounted, accent } = useTheme();
   const lockSrc = `/logos/${accent || 'indigo'}-lock.png`;
@@ -427,20 +427,22 @@ export default function Sidebar({ user, onSignOut, onExpandChange }) {
             <span className={styles.userName}>
               {user?.user_metadata?.full_name || 'User'}
             </span>
-            <div className={styles.xpExpanded}>
-              <div className={styles.xpExpandedHeader}>
-                <span className={styles.levelBadge}>Lv. {xpData.level}</span>
-                <span className={styles.xpText}>{xpData.currentXP} / 100 XP</span>
+            {!hideXP && (
+              <div className={styles.xpExpanded}>
+                <div className={styles.xpExpandedHeader}>
+                  <span className={styles.levelBadge}>Lv. {xpData.level}</span>
+                  <span className={styles.xpText}>{xpData.currentXP} / 100 XP</span>
+                </div>
+                <div className={styles.xpTrack}>
+                  <motion.div
+                    className={styles.xpFill}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${xpData.progress}%` }}
+                    transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                  />
+                </div>
               </div>
-              <div className={styles.xpTrack}>
-                <motion.div
-                  className={styles.xpFill}
-                  initial={{ width: 0 }}
-                  animate={{ width: `${xpData.progress}%` }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                />
-              </div>
-            </div>
+            )}
           </motion.div>
         </motion.div>
 

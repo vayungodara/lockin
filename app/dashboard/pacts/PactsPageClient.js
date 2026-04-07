@@ -8,8 +8,6 @@ import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonRow } from '@/components/Skeleton';
-import { fadeInUp } from '@/lib/animations';
-
 export default function PactsPageClient({ user }) {
   const [pacts, setPacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);

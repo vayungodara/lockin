@@ -5,11 +5,9 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import styles from './GroupsPage.module.css';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import EmptyState from '@/components/EmptyState';
-import { fadeInUp } from '@/lib/animations';
 // Warm muted palette for group letter-initial avatars
 const WARM_GROUP_COLORS = [
   { bg: 'rgba(196, 131, 106, 0.14)', text: '#C4836A' }, // Terracotta

@@ -278,10 +278,11 @@
 }
 
 .greeting {
+  font-family: var(--font-display);
   font-size: var(--text-3xl);
   font-weight: var(--font-semibold);
   margin-bottom: var(--space-2);
-  letter-spacing: var(--tracking-tight);
+  letter-spacing: -0.04em;
 }
 
 .subGreeting {

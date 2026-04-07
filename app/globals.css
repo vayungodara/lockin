@@ -9,9 +9,9 @@
   /* === LIGHT MODE — "Luminous" === */
 
   /* Background colors — warm off-whites with violet undertone */
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F5F5;
-  --bg-tertiary: #EEEDF6;
+  --bg-primary: #FAF9F7;
+  --bg-secondary: #F5F4F0;
+  --bg-tertiary: #EDECE6;
   --bg-elevated: #FFFFFF;
   --bg-hover: #ECEAFF;
 
@@ -92,6 +92,7 @@
   
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Instrument Sans', var(--font-sans);
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
   
   /* Font sizes - Refined scale */
@@ -181,9 +182,9 @@
 /* === DARK MODE — "Deep Space" === */
 [data-theme="dark"] {
   /* Background colors — warm neutral darks */
-  --bg-primary: #0C0C0E;
-  --bg-secondary: #111113;
-  --bg-tertiary: #18181B;
+  --bg-primary: #121210;
+  --bg-secondary: #171714;
+  --bg-tertiary: #1C1C19;
   --bg-elevated: #1C1C1F;
   --bg-hover: #252528;
 
@@ -292,29 +293,6 @@ body {
   }
 }
 
-/* Subtle background pattern for visual interest */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--accent-primary-rgb), 0.04), transparent),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(var(--accent-tertiary-rgb), 0.03), transparent),
-    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.02), transparent);
-  z-index: -1;
-  pointer-events: none;
-}
-
-[data-theme="dark"] body::before {
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--accent-primary-rgb), 0.08), transparent),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(var(--accent-tertiary-rgb), 0.05), transparent),
-    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.03), transparent);
-}
-
 /* Enable smooth transitions only after initial theme is applied.
    Without this gate, body transitions animate the light→dark switch on
    page load, causing a visible flash. The inline themeScript sets
@@ -322,10 +300,6 @@ body::before {
    hydration so subsequent user-initiated theme toggles still animate. */
 html[data-theme-ready] body {
   transition: background-color var(--transition-slow), color var(--transition-slow);
-}
-
-html[data-theme-ready] body::before {
-  transition: opacity var(--transition-slow);
 }
 
 html[data-theme-ready] *::-webkit-scrollbar-thumb {

@@ -10,20 +10,21 @@ import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import EmptyState from '@/components/EmptyState';
 import { fadeInUp } from '@/lib/animations';
-import { ACCENT_PALETTES, hexToRgb } from '@/lib/accentColors';
+// Warm muted palette for group letter-initial avatars
+const WARM_GROUP_COLORS = [
+  { bg: 'rgba(196, 131, 106, 0.14)', text: '#C4836A' }, // Terracotta
+  { bg: 'rgba(122, 154, 126, 0.14)', text: '#7A9A7E' }, // Sage
+  { bg: 'rgba(201, 165, 77, 0.14)',  text: '#C9A54D' }, // Amber
+  { bg: 'rgba(139, 134, 128, 0.14)', text: '#8B8680' }, // Warm gray
+  { bg: 'rgba(107, 143, 173, 0.14)', text: '#6B8FAD' }, // Dusty blue
+];
 
-// Cycle through accent palettes for group icon colors
 function getGroupColor(name) {
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
     hash = name.charCodeAt(i) + ((hash << 5) - hash);
   }
-  const palette = ACCENT_PALETTES[Math.abs(hash) % ACCENT_PALETTES.length];
-  const rgb = hexToRgb(palette.primary);
-  return {
-    bg: `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.12)`,
-    text: palette.primary,
-  };
+  return WARM_GROUP_COLORS[Math.abs(hash) % WARM_GROUP_COLORS.length];
 }
 
 function GroupCard({ group, isHero = false }) {

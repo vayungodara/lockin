@@ -1,9 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
-import { fadeInUp } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import EmptyState from '@/components/EmptyState';
@@ -234,32 +232,15 @@ export default function StatsPageClient({ user }) {
           />
         )}
 
-        {/* Streak Summary */}
-        <div className={styles.streakCard}>
-          <div className={styles.streakItem}>
-            <span className={styles.streakIcon}>🔥</span>
-            <div className={styles.streakInfo}>
-              <span className={styles.streakValue}>{streakData.currentStreak}</span>
-              <span className={styles.streakLabel}>Current Streak</span>
-            </div>
-          </div>
-          <div className={styles.streakDivider} />
-          <div className={styles.streakItem}>
-            <span className={styles.streakIcon}>🏆</span>
-            <div className={styles.streakInfo}>
-              <span className={styles.streakValue}>{streakData.longestStreak}</span>
-              <span className={styles.streakLabel}>Best Streak</span>
-            </div>
-          </div>
-          <div className={styles.streakDivider} />
-          <div className={styles.streakItem}>
-            <span className={styles.streakIcon}>✓</span>
-            <div className={styles.streakInfo}>
-              <span className={styles.streakValue}>{streakData.totalCompleted}</span>
-              <span className={styles.streakLabel}>Total Completed</span>
-            </div>
-          </div>
-        </div>
+        {/* Streak Summary — compact inline */}
+        <p className={styles.streakInline}>
+          <span className={styles.streakEmoji}>🔥</span>{' '}
+          {streakData.currentStreak} day streak{' '}
+          <span className={styles.streakSep}>&middot;</span>{' '}
+          Best: {streakData.longestStreak} day{' '}
+          <span className={styles.streakSep}>&middot;</span>{' '}
+          {streakData.totalCompleted} completed
+        </p>
 
         {/* Activity Calendar */}
         <MonthlyCalendar userId={user.id} />
@@ -274,21 +255,8 @@ export default function StatsPageClient({ user }) {
                 <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Pact Analytics
+              <span className={styles.headingStat}>&middot; {pactStats.completionRate}% rate</span>
             </h3>
-            <div className={styles.statsGrid}>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{pactStats.completionRate}%</span>
-                <span className={styles.statLabel}>Completion Rate</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{pactStats.thisWeek}</span>
-                <span className={styles.statLabel}>This Week</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{pactStats.thisMonth}</span>
-                <span className={styles.statLabel}>This Month</span>
-              </div>
-            </div>
             <div className={styles.breakdown}>
               <div className={styles.breakdownItem}>
                 <span className={styles.breakdownDot} style={{ background: 'var(--success)' }} />
@@ -316,21 +284,8 @@ export default function StatsPageClient({ user }) {
                 <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
               Focus Analytics
+              <span className={styles.headingStat}>&middot; {formatDuration(focusStats.totalMinutes)} total</span>
             </h3>
-            <div className={styles.statsGrid}>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{formatDuration(focusStats.totalMinutes)}</span>
-                <span className={styles.statLabel}>Total Time</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{focusStats.sessionsCount}</span>
-                <span className={styles.statLabel}>Sessions</span>
-              </div>
-              <div className={styles.statBox}>
-                <span className={styles.statValue}>{focusStats.avgDuration}m</span>
-                <span className={styles.statLabel}>Avg Duration</span>
-              </div>
-            </div>
             <div className={styles.breakdown}>
               <div className={styles.breakdownItem}>
                 <span className={styles.breakdownDot} style={{ background: 'var(--accent-primary)' }} />

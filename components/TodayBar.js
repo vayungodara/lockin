@@ -174,7 +174,7 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
 
   // Derive streak value: prefer fetched summary, fall back to prop
   const streak = summary?.streak ?? currentStreak ?? 0;
-  const { icon, tier } = getStreakTier(streak);
+  const { tier } = getStreakTier(streak);
   const microCopy = getMicroCopy(streak);
   const isMilestoneDay = STREAK_MILESTONES.includes(streak);
   const milestoneMessage = getMilestoneMessage(streak);

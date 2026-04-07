@@ -1,0 +1,532 @@
+/* ── TodayBar: unified streak + daily summary status bar ── */
+
+.bar {
+  position: relative;
+  width: 100%;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  overflow: hidden;
+  transition: all var(--transition-base);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 96px;
+}
+
+.bar:hover {
+  border-color: rgba(var(--accent-primary-rgb), 0.18);
+  box-shadow: 0 2px 16px rgba(var(--accent-primary-rgb), 0.06);
+}
+
+/* ── Background decoration ── */
+.bgDecoration {
+  position: absolute;
+  top: -60%;
+  right: -5%;
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(var(--streak-color-rgb), 0.05) 0%, transparent 70%);
+  border-radius: var(--radius-full);
+  pointer-events: none;
+}
+
+/* ── Tier-based tinting (streak zone gets warm amber) ── */
+.warm {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.04) 0%, var(--surface-1) 40%);
+}
+
+.fire {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.06) 0%, var(--surface-1) 40%);
+}
+
+.electric {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.06) 0%, var(--surface-1) 40%);
+  border-color: rgba(var(--streak-color-rgb), 0.15);
+}
+
+.diamond {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.07) 0%, rgba(var(--accent-primary-rgb), 0.03) 40%, var(--surface-1) 70%);
+  border-color: rgba(var(--streak-color-rgb), 0.18);
+}
+
+.legendary {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.09) 0%, rgba(var(--accent-primary-rgb), 0.05) 40%, var(--surface-1) 70%);
+  border-color: rgba(var(--streak-color-rgb), 0.24);
+  box-shadow: 0 0 28px rgba(var(--streak-color-rgb), 0.06);
+}
+
+/* ── Primary row: 3 zones ── */
+.primaryRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  gap: var(--space-5);
+  z-index: 1;
+}
+
+/* ── Zone divider ── */
+.zoneDivider {
+  width: 1px;
+  align-self: stretch;
+  min-height: 36px;
+  background: var(--border-default);
+  flex-shrink: 0;
+}
+
+/* ── Zone 1: Streak ── */
+.streakZone {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex: 1.2;
+  min-width: 0;
+}
+
+.iconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  background: rgba(var(--streak-color-rgb), 0.1);
+  border-radius: var(--radius-lg);
+}
+
+.fire .iconWrapper,
+.electric .iconWrapper,
+.diamond .iconWrapper,
+.legendary .iconWrapper {
+  background: rgba(var(--streak-color-rgb), 0.14);
+  animation: iconPulse 3s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(var(--streak-color-rgb), 0);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(var(--streak-color-rgb), 0.12);
+    transform: scale(1.03);
+  }
+}
+
+.streakIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.streakText {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.streakHeadline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.streakCount {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 800;
+  color: var(--text-primary);
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.streakLabel {
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.bestBadge {
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--text-tertiary);
+  background: rgba(var(--accent-primary-rgb), 0.06);
+  padding: 1px var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.microCopy {
+  font-size: var(--text-xs);
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Zone 2: Pacts due ── */
+.pactsZone {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0.9;
+  min-width: 0;
+}
+
+.zoneRow {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.zoneDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.zoneDot.active {
+  background: var(--accent-primary);
+}
+
+.zoneDot.done {
+  background: var(--success);
+}
+
+.zoneDot.warning {
+  background: var(--warning);
+}
+
+.zoneDot.danger {
+  background: var(--danger);
+}
+
+.zoneValue {
+  font-size: var(--text-sm);
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.zoneNumber {
+  font-family: var(--font-display);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+}
+
+/* ── Zone 3: Focus time ── */
+.focusZone {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex: 0.7;
+  min-width: 0;
+}
+
+.focusContent {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.focusIcon {
+  font-size: 1.1rem;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.focusText {
+  display: flex;
+  flex-direction: column;
+}
+
+.focusValue {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--text-primary);
+  line-height: 1.1;
+}
+
+.focusLabel {
+  font-size: 11px;
+  color: var(--text-secondary);
+  font-weight: var(--font-medium);
+}
+
+/* ── Freeze badge (small pill) ── */
+.freezeBadge {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px var(--space-2);
+  background: var(--info-bg);
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: var(--font-semibold);
+  color: var(--info);
+  flex-shrink: 0;
+}
+
+.freezeBadgeIcon {
+  font-size: 11px;
+}
+
+/* ── Secondary row (expandable) ── */
+.secondaryRow {
+  overflow: hidden;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ── Risk banner ── */
+.riskBanner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  background: var(--warning-bg);
+  font-size: var(--text-sm);
+  color: var(--warning);
+  font-weight: var(--font-medium);
+}
+
+.riskText {
+  min-width: 0;
+}
+
+.freezeBtn {
+  padding: 4px 12px;
+  background: var(--info-bg);
+  color: var(--info);
+  border: 1px solid var(--info);
+  border-radius: var(--radius-md);
+  font-size: 12px;
+  font-weight: var(--font-semibold);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.freezeBtn:hover:not(:disabled) {
+  background: var(--info);
+  color: white;
+}
+
+.freezeBtnDisabled,
+.freezeBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+/* ── Milestone banner ── */
+.milestoneBanner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  background: rgba(var(--accent-primary-rgb), 0.06);
+}
+
+.milestoneEmoji {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.milestoneText {
+  font-size: var(--text-sm);
+  font-weight: var(--font-semibold);
+  color: var(--accent-primary);
+}
+
+/* ── Skeleton placeholder ── */
+.skeleton {
+  width: 100%;
+  height: 80px;
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-2xl);
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+/* ── Responsive: stack vertically on mobile ── */
+@media (max-width: 768px) {
+  .primaryRow {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .zoneDivider {
+    width: 100%;
+    height: 1px;
+    min-height: 0;
+    align-self: auto;
+  }
+
+  .streakZone {
+    flex: none;
+  }
+
+  .pactsZone {
+    flex: none;
+    padding-left: var(--space-1);
+  }
+
+  .focusZone {
+    flex: none;
+    padding-left: var(--space-1);
+  }
+
+  .riskBanner {
+    flex-direction: column;
+    text-align: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .milestoneBanner {
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .streakCount {
+    font-size: var(--text-2xl);
+  }
+
+  .iconWrapper {
+    width: 42px;
+    height: 42px;
+  }
+
+  .streakIcon {
+    font-size: 1.3rem;
+  }
+
+  .skeleton {
+    height: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .primaryRow {
+    padding: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .streakHeadline {
+    gap: var(--space-1);
+  }
+
+  .iconWrapper {
+    width: 38px;
+    height: 38px;
+  }
+
+  .streakIcon {
+    font-size: 1.15rem;
+  }
+
+  .streakCount {
+    font-size: var(--text-xl);
+  }
+}
+
+/* ── Dark mode overrides ── */
+:global([data-theme="dark"]) .bar {
+  background: rgba(20, 20, 23, 0.7);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .bar:hover {
+  box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--accent-primary-rgb), 0.06);
+}
+
+:global([data-theme="dark"]) .warm {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.08) 0%, rgba(20, 20, 23, 0.7) 40%);
+}
+
+:global([data-theme="dark"]) .fire {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.12) 0%, rgba(20, 20, 23, 0.7) 40%);
+}
+
+:global([data-theme="dark"]) .electric {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.14) 0%, rgba(20, 20, 23, 0.7) 40%);
+  border-color: rgba(var(--streak-color-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .diamond {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.16) 0%, rgba(var(--accent-primary-rgb), 0.08) 40%, rgba(20, 20, 23, 0.7) 70%);
+  border-color: rgba(var(--streak-color-rgb), 0.35);
+  box-shadow: 0 0 32px rgba(var(--streak-color-rgb), 0.1);
+}
+
+:global([data-theme="dark"]) .legendary {
+  background: linear-gradient(90deg, rgba(var(--streak-color-rgb), 0.2) 0%, rgba(var(--accent-primary-rgb), 0.12) 40%, rgba(20, 20, 23, 0.7) 70%);
+  border-color: rgba(var(--streak-color-rgb), 0.42);
+  box-shadow: 0 0 44px rgba(var(--streak-color-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .iconWrapper {
+  background: rgba(var(--streak-color-rgb), 0.16);
+}
+
+:global([data-theme="dark"]) .fire .iconWrapper,
+:global([data-theme="dark"]) .electric .iconWrapper,
+:global([data-theme="dark"]) .diamond .iconWrapper,
+:global([data-theme="dark"]) .legendary .iconWrapper {
+  background: rgba(var(--streak-color-rgb), 0.24);
+  box-shadow: 0 0 16px rgba(var(--streak-color-rgb), 0.12);
+}
+
+:global([data-theme="dark"]) .bestBadge {
+  background: rgba(var(--accent-primary-rgb), 0.1);
+}
+
+:global([data-theme="dark"]) .riskBanner {
+  background: rgba(var(--warning-rgb), 0.12);
+}
+
+:global([data-theme="dark"]) .freezeBtn {
+  background: rgba(var(--info-rgb), 0.15);
+  border-color: rgba(var(--info-rgb), 0.4);
+}
+
+:global([data-theme="dark"]) .freezeBtn:hover:not(:disabled) {
+  box-shadow: 0 0 14px rgba(var(--info-rgb), 0.3);
+}
+
+:global([data-theme="dark"]) .milestoneBanner {
+  background: rgba(var(--accent-primary-rgb), 0.12);
+}
+
+:global([data-theme="dark"]) .freezeBadge {
+  background: rgba(var(--info-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .zoneDivider {
+  background: var(--border-default);
+}
+
+:global([data-theme="dark"]) .bgDecoration {
+  background: radial-gradient(circle, rgba(var(--streak-color-rgb), 0.08) 0%, transparent 70%);
+}
+
+:global([data-theme="dark"]) .skeleton {
+  background: rgba(20, 20, 23, 0.7);
+  border-color: var(--border-default);
+}

@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google";
+import { Inter, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
@@ -10,6 +10,14 @@ const inter = Inter({
   display: "swap",
   variable: "--font-inter",
 });
+
+const instrumentSans = Instrument_Sans({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700"],
+});
+
 
 export const viewport = {
   width: 'device-width',
@@ -98,7 +106,7 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={inter.className}>
+      <body className={`${inter.className} ${instrumentSans.variable}`}>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
         <ThemeProvider>
           <ToastProvider>

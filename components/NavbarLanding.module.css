@@ -83,6 +83,7 @@
 
 .navLinksHidden {
   opacity: 0;
+  visibility: hidden;
   width: 0 !important;
   gap: 0;
   pointer-events: none;
@@ -100,6 +101,11 @@
 
 .navLink:hover {
   color: var(--landing-ink);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--landing-ink);
+  outline-offset: 2px;
 }
 
 /* ---- Actions ---- */

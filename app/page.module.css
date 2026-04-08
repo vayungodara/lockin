@@ -93,7 +93,7 @@
 }
 
 .heroFaded {
-  opacity: 0.3;
+  opacity: 0.45;
   font-style: italic;
 }
 
@@ -133,6 +133,13 @@
 
 .ctaPrimary:hover {
   opacity: 0.9;
+}
+
+.ctaPrimary:focus-visible,
+.ctaOutline:focus-visible,
+.ctaButtonLarge:focus-visible {
+  outline: 2px solid var(--landing-ink);
+  outline-offset: 2px;
 }
 
 .ctaOutline {
@@ -1453,7 +1460,7 @@
 .ctaSubtext {
   margin-top: 24px;
   font-size: 0.875rem;
-  color: rgba(165, 180, 252, 0.6);
+  color: rgba(199, 210, 254, 0.85);
 }
 
 /* --- Footer links --- */
@@ -1484,7 +1491,7 @@
 }
 
 .footerNav a {
-  color: rgba(165, 180, 252, 0.6);
+  color: rgba(199, 210, 254, 0.75);
   font-size: 0.875rem;
   text-decoration: none;
   transition: color 0.2s ease;
@@ -1494,9 +1501,14 @@
   color: white;
 }
 
+.footerNav a:focus-visible {
+  outline: 2px solid rgba(199, 210, 254, 0.75);
+  outline-offset: 2px;
+}
+
 .footerCredit {
   font-size: 0.875rem;
-  color: rgba(129, 140, 248, 0.5);
+  color: rgba(199, 210, 254, 0.75);
 }
 
 /* =============================================

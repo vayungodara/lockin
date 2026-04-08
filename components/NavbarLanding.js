@@ -22,7 +22,8 @@ export default function NavbarLanding() {
   const { scrollY } = useScroll();
 
   useMotionValueEvent(scrollY, 'change', (latest) => {
-    setIsScrolled(latest > SCROLL_THRESHOLD);
+    const scrolled = latest > SCROLL_THRESHOLD;
+    setIsScrolled(prev => prev === scrolled ? prev : scrolled);
     if (latest <= SCROLL_THRESHOLD) setIsExpanded(false);
   });
 
@@ -50,7 +51,7 @@ export default function NavbarLanding() {
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback` },
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(window.location.pathname)}` },
     });
     if (error) toast.error('Sign in failed. Please try again.');
   };
@@ -59,9 +60,19 @@ export default function NavbarLanding() {
     <nav className={styles.navbar}>
       <div
         className={`${styles.navInner} ${isPill ? styles.navPill : ''} ${reducedMotion ? '' : styles.navAnimated}`}
+        role={isPill ? 'button' : undefined}
+        tabIndex={isPill ? 0 : undefined}
+        aria-expanded={isPill ? isExpanded : undefined}
+        aria-label={isPill ? 'Toggle navigation menu' : undefined}
         onClick={(e) => {
           // Only toggle on click in the pill "dead zone" (not on buttons/links)
           if (isScrolled && !e.target.closest('a') && !e.target.closest('button')) {
+            setIsExpanded((p) => !p);
+          }
+        }}
+        onKeyDown={(e) => {
+          if (isPill && (e.key === 'Enter' || e.key === ' ')) {
+            e.preventDefault();
             setIsExpanded((p) => !p);
           }
         }}
@@ -88,8 +99,8 @@ export default function NavbarLanding() {
         </Link>
 
         <div className={`${styles.navLinks} ${!showLinks ? styles.navLinksHidden : ''}`}>
-          <a href="#features" className={styles.navLink}>Features</a>
-          <a href="#how-it-works" className={styles.navLink}>How it Works</a>
+          <a href="#features" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>Features</a>
+          <a href="#how-it-works" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>How it Works</a>
         </div>
 
         <div className={styles.navActions}>

@@ -37,20 +37,22 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
   const reducedMotion = prefersReducedMotion();
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
 
-  const streakCount = 7 + Object.values(checkedPacts).filter(Boolean).length - 1;
+  const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
+  const streakCount = 7 + checkedCount - 1;
   const allComplete = Object.values(checkedPacts).every(Boolean);
 
   const calendarLevels = [3,1,2,0,3,2,1,3,2,3,1,0,2,3,2,1,3,0,2,3,1,2,3,2,0,1,3,2];
-  const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
   const extraChecks = checkedCount - 1;
-  let emptyFilled = 0;
-  const activeLevels = calendarLevels.map((level) => {
-    if (level === 0 && emptyFilled < extraChecks) {
-      emptyFilled++;
-      return 3;
-    }
-    return level;
-  });
+  const activeLevels = (() => {
+    let filled = 0;
+    return calendarLevels.map((level) => {
+      if (level === 0 && filled < extraChecks) {
+        filled++;
+        return 3;
+      }
+      return level;
+    });
+  })();
 
   const handleCta = async () => {
     if (isAuthenticated) {
@@ -130,7 +132,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
                   whileTap={buttonTap}
                 >
                   Start Locking In
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </motion.button>
@@ -152,7 +154,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
                       key={id}
                       className={styles.avatar}
                       style={{
-                        backgroundColor: ACCENT_PALETTES.find(p => p.id === id).primary,
+                        backgroundColor: ACCENT_PALETTES.find(p => p.id === id)?.primary || '#5B5EF5',
                         zIndex: 3 - i,
                       }}
                     />
@@ -527,7 +529,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
                   whileTap={buttonTap}
                 >
                   Start Locking In
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
                     <path
                       d="M5 12H19M19 12L12 5M19 12L12 19"
                       stroke="currentColor"
@@ -610,10 +612,10 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
         </section>
 
         {/* ===== MARQUEE — Task 5 ===== */}
-        <div className={styles.marquee}>
+        <div className={styles.marquee} role="marquee">
           <div className={styles.marqueeTrack}>
             {[...Array(4)].map((_, i) => (
-              <span key={i} className={styles.marqueeSegment}>
+              <span key={i} className={styles.marqueeSegment} aria-hidden={i > 0 ? 'true' : undefined}>
                 <span className={styles.marqueeText}>STOP SAYING TOMORROW. LOCK IN TODAY.</span>
                 <span className={styles.marqueeDot}>&bull;</span>
               </span>
@@ -706,8 +708,8 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
         <div className={styles.ctaGlow} />
         <div className={styles.ctaContent}>
           <motion.div className={styles.ctaLockIcon}
-            animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+            animate={reducedMotion ? {} : { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+            transition={reducedMotion ? {} : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
               <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/>
               <path d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
@@ -731,7 +733,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
             initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}>
             Start Locking In
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
               <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </motion.button>
@@ -741,7 +743,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
 
         <div className={styles.footerLinks}>
           <span className={styles.footerBrand}>LockIn.</span>
-          <nav className={styles.footerNav}>
+          <nav className={styles.footerNav} aria-label="Footer navigation">
             <a href="#features">Features</a>
             <a href="#how-it-works">How It Works</a>
             <a href="https://github.com/vayungodara/lockin" target="_blank" rel="noopener noreferrer">GitHub</a>

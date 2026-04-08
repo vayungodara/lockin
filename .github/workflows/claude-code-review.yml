@@ -32,9 +32,25 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
-          plugins: 'code-review@claude-code-plugins'
-          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
-          claude_args: >-
-            --model claude-opus-4-6
-            --append-system-prompt "REVIEW POLICY: Be exhaustive. Find every real bug, logic error, security vulnerability, race condition, and edge case. False negatives are far worse than false positives. Multi-pass process: (1) Read full diff and understand the change. (2) Trace every changed code path through the codebase — follow imports, check callers, verify data flow end-to-end. (3) Check systematically: logic errors, off-by-one, null/undefined, wrong comparisons, XSS, injection, auth bypasses, exposed secrets, missing RLS checks, race conditions, stale closures, async bugs, missing await, empty arrays, missing data, network failures, concurrent users, Supabase client vs server, React missing deps in useEffect, stale state, memory leaks, CSS z-index conflicts, overflow, dark mode breakage, mobile bugs. (4) Verify fixes actually work and don't introduce new issues. (5) Check what is NOT in the diff — missing migrations, missing test updates, stale imports. Tag severity: Bug (will break production), Issue (incorrect behavior or security concern), Nit (minor, not blocking). Read REVIEW.md and CLAUDE.md for project conventions."
+          classify_inline_comments: 'true'
+          include_fix_links: 'true'
+          prompt: |
+            Review this pull request exhaustively. Your job is to find every real bug, logic error, security vulnerability, race condition, and edge case that could break in production.
+
+            ## Process
+            1. Read the full diff and understand what changed and why.
+            2. Trace every changed code path through the codebase — follow imports, check callers, verify data flow end-to-end.
+            3. Check each category systematically:
+               - Logic errors, off-by-one, null/undefined access, wrong comparisons
+               - Security: XSS, injection, auth bypasses, exposed secrets, missing RLS checks
+               - Race conditions, stale closures, async bugs, missing await
+               - Edge cases: empty arrays, missing data, network failures, concurrent users
+               - Supabase: client vs server usage, RLS implications, missing error handling
+               - React: missing deps in useEffect, stale state in callbacks, memory leaks
+               - CSS: z-index conflicts, overflow issues, dark mode breakage, mobile layout bugs
+            4. Verify fixes actually work and don't introduce new issues.
+            5. Check what's NOT in the diff — missing migrations, missing test updates, stale imports.
+
+            Post each finding as an inline review comment on the exact line where the issue is.
+            Read REVIEW.md and CLAUDE.md for project-specific conventions.
+          claude_args: '--model claude-opus-4-6'

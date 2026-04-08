@@ -5,13 +5,6 @@ import { useRouter } from 'next/navigation';
 import { DM_Sans } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-body',
-  weight: ['400', '500', '600'],
-});
 import NavbarLanding from '@/components/NavbarLanding';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
@@ -30,6 +23,13 @@ import {
   staggerContainer,
   staggerItem,
 } from '@/lib/animations';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+  weight: ['400', '500', '600'],
+});
 
 export default function LandingPageClient({ isAuthenticated = false, returnTo }) {
   const router = useRouter();
@@ -502,7 +502,6 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
                         className={`${styles.mockCalendarCell} ${styles[`mockLevel${level}`]}`}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
-                        layout
                       />
                     ))}
                   </div>

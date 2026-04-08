@@ -6,6 +6,7 @@ import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
+import { Fire } from '@phosphor-icons/react';
 import styles from './StatsPage.module.css';
 
 export default function StatsPageClient({ user }) {
@@ -234,7 +235,7 @@ export default function StatsPageClient({ user }) {
 
         {/* Streak Summary — compact inline */}
         <p className={styles.streakInline}>
-          <span className={styles.streakEmoji}>🔥</span>{' '}
+          <Fire size={18} weight="fill" color="#EA580C" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
           {streakData.currentStreak} day streak{' '}
           <span className={styles.streakSep}>&middot;</span>{' '}
           Best: {streakData.longestStreak} day{' '}

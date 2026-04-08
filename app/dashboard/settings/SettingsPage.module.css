@@ -324,7 +324,7 @@
 }
 
 .accentSwatchActive {
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 3px var(--accent-primary);
 }
 
 /* Shortcuts */

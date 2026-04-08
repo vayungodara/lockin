@@ -38,6 +38,12 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .heroTagDot {
+    animation: none;
+  }
+}
+
 .heroTitle {
   font-size: clamp(3.25rem, 7vw, 5rem);
   font-weight: 800;

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import { useToast } from '@/components/Toast';
@@ -12,7 +13,7 @@ import styles from './NavbarLanding.module.css';
 
 const SCROLL_THRESHOLD = 80;
 
-export default function NavbarLanding() {
+export default function NavbarLanding({ isAuthenticated = false }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
@@ -47,7 +48,13 @@ export default function NavbarLanding() {
   const showLinks = !isScrolled || isExpanded;
   const isPill = isScrolled && !isExpanded && !isMobile;
 
+  const router = useRouter();
+
   const handleGetStarted = async () => {
+    if (isAuthenticated) {
+      router.push('/dashboard');
+      return;
+    }
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

@@ -14,14 +14,10 @@ import {
   buttonHover,
   buttonTap,
   cardHover,
-  revealUp,
-  ambientFloat,
   easeOutQuint,
   prefersReducedMotion,
   smoothTransition,
   quickTransition,
-  staggerContainer,
-  staggerItem,
 } from '@/lib/animations';
 
 const dmSans = DM_Sans({
@@ -77,7 +73,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
 
   return (
     <div className={dmSans.variable}>
-      <NavbarLanding />
+      <NavbarLanding isAuthenticated={isAuthenticated} />
 
       <main id="main-content" className={styles.main}>
         {/* ===== HERO SECTION ===== */}
@@ -611,7 +607,7 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
         </section>
 
         {/* ===== MARQUEE — Task 5 ===== */}
-        <div className={styles.marquee} role="marquee">
+        <div className={styles.marquee} aria-hidden="true">
           <div className={styles.marqueeTrack}>
             {[...Array(4)].map((_, i) => (
               <span key={i} className={styles.marqueeSegment} aria-hidden={i > 0 ? 'true' : undefined}>

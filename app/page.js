@@ -15,8 +15,13 @@ export default async function HomePage({ searchParams }) {
   const params = await searchParams
 
   if (user && params?.preview !== 'true') {
-    redirect('/dashboard')
+    let destination = '/dashboard';
+    const returnTo = params?.returnTo;
+    if (typeof returnTo === 'string' && returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+      destination = returnTo;
+    }
+    redirect(destination)
   }
 
-  return <LandingPageClient isAuthenticated={!!user} />
+  return <LandingPageClient isAuthenticated={!!user} returnTo={params?.returnTo} />
 }

@@ -34,33 +34,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          prompt: |
-            You are reviewing PR #${{ github.event.pull_request.number }} in ${{ github.repository }}.
-
-            ## Review mandate
-            Be exhaustive. Your job is to find every real bug, logic error, security vulnerability, race condition, and edge case that could break in production. Do NOT hold back findings to be polite. False negatives (missed bugs) are far worse than false positives.
-
-            ## Multi-pass review process
-            1. **Read the full diff** and understand what changed and why.
-            2. **Trace every changed code path** through the codebase — follow imports, check callers, verify data flow end-to-end.
-            3. **Check each category systematically:**
-               - Logic errors, off-by-one, null/undefined access, wrong comparisons
-               - Security: XSS, injection, auth bypasses, exposed secrets, missing RLS checks
-               - Race conditions, stale closures, async bugs, missing await
-               - Edge cases: empty arrays, missing data, network failures, concurrent users
-               - Supabase: client vs server usage, RLS implications, missing error handling
-               - React: missing deps in useEffect, stale state in callbacks, memory leaks
-               - CSS: z-index conflicts, overflow issues, dark mode breakage, mobile layout bugs
-            4. **Verify fixes** — if the PR claims to fix something, confirm the fix actually works and doesn't introduce new issues.
-            5. **Check what's NOT in the diff** — are there files that SHOULD have been changed but weren't? Missing migrations, missing test updates, stale imports?
-
-            ## Output format
-            Post each finding as an inline review comment on the exact line. Tag severity:
-            - 🔴 **Bug**: Will break in production. Must fix before merge.
-            - 🟡 **Issue**: Won't crash but causes incorrect behavior or is a security concern.
-            - 🟣 **Nit**: Minor improvement, not blocking.
-
-            If you find zero issues, say so explicitly — but only after genuinely checking everything above.
-
-            Read REVIEW.md and CLAUDE.md for project-specific conventions.
-          claude_args: '--model claude-opus-4-6'
+          prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
+          claude_args: >-
+            --model claude-opus-4-6
+            --append-system-prompt "REVIEW POLICY: Be exhaustive. Find every real bug, logic error, security vulnerability, race condition, and edge case. False negatives are far worse than false positives. Multi-pass process: (1) Read full diff and understand the change. (2) Trace every changed code path through the codebase — follow imports, check callers, verify data flow end-to-end. (3) Check systematically: logic errors, off-by-one, null/undefined, wrong comparisons, XSS, injection, auth bypasses, exposed secrets, missing RLS checks, race conditions, stale closures, async bugs, missing await, empty arrays, missing data, network failures, concurrent users, Supabase client vs server, React missing deps in useEffect, stale state, memory leaks, CSS z-index conflicts, overflow, dark mode breakage, mobile bugs. (4) Verify fixes actually work and don't introduce new issues. (5) Check what is NOT in the diff — missing migrations, missing test updates, stale imports. Tag severity: Bug (will break production), Issue (incorrect behavior or security concern), Nit (minor, not blocking). Read REVIEW.md and CLAUDE.md for project conventions."

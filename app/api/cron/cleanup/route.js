@@ -33,20 +33,25 @@ export async function GET(request) {
     results.errors.push(`Overdue pacts: ${err.message}`);
   }
 
-  // 2. Auto-close orphaned focus sessions (started > duration + 30min ago, no ended_at)
+  // 2. Auto-close orphaned focus sessions (exceeded duration + 30min grace, no ended_at)
   try {
-    const { data: orphaned, error: fetchError } = await supabase
+    const { data: openSessions, error: fetchError } = await supabase
       .from('focus_sessions')
       .select('id, started_at, duration_minutes')
-      .is('ended_at', null)
-      .lt('started_at', new Date(Date.now() - 60 * 60 * 1000).toISOString()); // started > 1hr ago
+      .is('ended_at', null);
 
     if (fetchError) throw fetchError;
 
-    if (orphaned && orphaned.length > 0) {
+    // Only close sessions that exceeded their configured duration + 30min grace
+    const now = new Date();
+    const orphaned = (openSessions || []).filter(session => {
+      const graceMs = ((session.duration_minutes || 25) + 30) * 60 * 1000;
+      return now.getTime() - new Date(session.started_at).getTime() > graceMs;
+    });
+
+    if (orphaned.length > 0) {
       // Batch upsert: compute ended_at for each session, capped at expected end time.
       // Abandoned sessions should not inflate duration beyond what was configured.
-      const now = new Date();
       const updates = orphaned.map(session => {
         const expectedEnd = new Date(
           new Date(session.started_at).getTime() + session.duration_minutes * 60 * 1000

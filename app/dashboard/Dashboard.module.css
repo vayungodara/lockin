@@ -401,6 +401,27 @@
 }
 
 
+.activityFooter {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-4) 0;
+  border-top: 1px solid var(--border-subtle);
+  margin-top: var(--space-2);
+}
+
+.activityFooterLink {
+  font-family: var(--font-display);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--accent-primary);
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.activityFooterLink:hover {
+  opacity: 0.8;
+}
+
 @media (max-width: 1024px) {
   .dashboardGrid {
     grid-template-columns: 1fr;

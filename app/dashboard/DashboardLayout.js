@@ -114,7 +114,7 @@ export default function DashboardLayout({ user, children }) {
               style={{ marginLeft: sidebarExpanded ? 260 : 80 }}
             >
               <ErrorBoundary message="Something went wrong loading this page.">
-                <div>{children}</div>
+                <div className={styles.contentWrapper}>{children}</div>
               </ErrorBoundary>
             </main>
           </div>

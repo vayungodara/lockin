@@ -25,6 +25,13 @@
   -ms-overflow-style: none;
 }
 
+.contentWrapper {
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+
 .main::-webkit-scrollbar {
   display: none;
 }

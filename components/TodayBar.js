@@ -229,101 +229,106 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
       {/* Background decoration */}
       <div className={styles.bgDecoration} aria-hidden="true" />
 
-      {/* ── Primary row: 3 zones ── */}
-      <div className={styles.primaryRow}>
+      {/* ── Inner white card ── */}
+      <div className={styles.barInner}>
+        {/* ── Primary row: 3 zones ── */}
+        <div className={styles.primaryRow}>
 
-        {/* Zone 1: Streak */}
-        <div className={styles.streakZone}>
-          <div className={styles.iconWrapper}>
-            {isMilestoneDay ? (
-              <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
+          {/* Zone 1: Streak */}
+          <div className={styles.streakZone}>
+            <div className={styles.iconWrapper}>
+              {isMilestoneDay ? (
+                <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
+                  <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
+                </motion.span>
+              ) : (
                 <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
-              </motion.span>
-            ) : (
-              <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
-            )}
-            <span className={styles.confettiDotBlue} aria-hidden="true" />
-            <span className={styles.confettiDotGreen} aria-hidden="true" />
-          </div>
-          <div className={styles.streakText}>
-            <div className={styles.streakHeadline}>
-              <span className={styles.streakCount}>{streak}</span>
-              <span className={styles.streakLabel}>day streak!</span>
-              {longestStreak > 0 && longestStreak > streak && (
-                <span className={styles.bestBadge} title={`Best: ${longestStreak} days`}>
-                  Best: {longestStreak}
-                </span>
               )}
+              <span className={styles.confettiDotBlue} aria-hidden="true" />
+              <span className={styles.confettiDotGreen} aria-hidden="true" />
             </div>
-            <p className={styles.microCopy}>{microCopy}</p>
-          </div>
-        </div>
-
-        {/* Zone divider */}
-        <div className={styles.zoneDivider} aria-hidden="true" />
-
-        {/* Zone 2: Pacts due */}
-        <div className={styles.pactsZone}>
-          {summary.overdue > 0 ? (
-            <>
-              <div className={styles.zoneRow}>
-                <span className={`${styles.zoneDot} ${styles.danger}`} />
-                <span className={styles.zoneValue}>
-                  <span className={styles.zoneNumber}>{summary.overdue}</span> overdue
-                </span>
+            <div className={styles.streakText}>
+              <div className={styles.streakHeadline}>
+                <span className={styles.streakCount}>{streak}</span>
+                <span className={styles.streakLabel}>day streak!</span>
+                {longestStreak > 0 && longestStreak > streak && (
+                  <span className={styles.bestBadge} title={`Best: ${longestStreak} days`}>
+                    Best: {longestStreak}
+                  </span>
+                )}
               </div>
-              {summary.dueToday > 0 && (
+              <p className={styles.microCopy}>{microCopy}</p>
+            </div>
+          </div>
+
+          {/* Zone divider */}
+          <div className={styles.zoneDivider} aria-hidden="true" />
+
+          {/* Zone 2: Pacts due */}
+          <div className={styles.pactsZone}>
+            {summary.overdue > 0 ? (
+              <>
                 <div className={styles.zoneRow}>
-                  <span className={`${styles.zoneDot} ${styles.warning}`} />
+                  <span className={`${styles.zoneDot} ${styles.danger}`} />
                   <span className={styles.zoneValue}>
-                    <span className={styles.zoneNumber}>{summary.dueToday}</span> due today
+                    <span className={styles.zoneNumber}>{summary.overdue}</span> overdue
                   </span>
                 </div>
-              )}
-            </>
-          ) : summary.dueToday > 0 ? (
-            <div className={styles.zoneRow}>
-              <span className={`${styles.zoneDot} ${styles.active}`} />
-              <span className={styles.zoneValue}>
-                <span className={styles.zoneNumber}>{summary.dueToday}</span> pact{summary.dueToday !== 1 ? 's' : ''} due today
-              </span>
-            </div>
-          ) : (
-            <div className={styles.zoneRow}>
-              <span className={`${styles.zoneDot} ${styles.done}`} />
-              <span className={styles.zoneValue}>
-                {summary.completedToday > 0 ? 'All done for today' : 'No pacts due'}
-              </span>
-            </div>
-          )}
-          {summary.completedToday > 0 && totalDue > 0 && (
-            <div className={styles.zoneRow}>
-              <span className={`${styles.zoneDot} ${styles.done}`} />
-              <span className={styles.zoneValue}>
-                <span className={styles.zoneNumber}>{summary.completedToday}</span> completed
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Zone divider */}
-        <div className={styles.zoneDivider} aria-hidden="true" />
-
-        {/* Zone 3: Focus time + freeze badge */}
-        <div className={styles.focusZone}>
-          <div className={styles.focusContent}>
-            <span className={styles.focusIcon} role="img" aria-label="focus time">{'\u23F1'}</span>
-            <div className={styles.focusText}>
-              <span className={styles.focusValue}>{summary.focusMinutes}m</span>
-              <span className={styles.focusLabel}>focused</span>
-            </div>
+                {summary.dueToday > 0 && (
+                  <div className={styles.zoneRow}>
+                    <span className={`${styles.zoneDot} ${styles.warning}`} />
+                    <span className={styles.zoneValue}>
+                      <span className={styles.zoneNumber}>{summary.dueToday}</span> due today
+                    </span>
+                  </div>
+                )}
+              </>
+            ) : summary.dueToday > 0 ? (
+              <div className={styles.zoneRow}>
+                <span className={`${styles.zoneDot} ${styles.active}`} />
+                <span className={styles.zoneValue}>
+                  <span className={styles.zoneNumber}>{summary.dueToday}</span> pact{summary.dueToday !== 1 ? 's' : ''} due today
+                </span>
+              </div>
+            ) : (
+              <div className={styles.zoneRow}>
+                <span className={`${styles.zoneDot} ${styles.done}`} />
+                <span className={styles.zoneValue}>
+                  {summary.completedToday > 0 ? 'All done for today' : 'No pacts due'}
+                </span>
+              </div>
+            )}
+            {summary.completedToday > 0 && totalDue > 0 && (
+              <div className={styles.zoneRow}>
+                <span className={`${styles.zoneDot} ${styles.done}`} />
+                <span className={styles.zoneValue}>
+                  <span className={styles.zoneNumber}>{summary.completedToday}</span> completed
+                </span>
+              </div>
+            )}
           </div>
-          {freezesRemaining > 0 && (
-            <div className={styles.freezeBadge} title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}>
-              <span className={styles.freezeBadgeIcon}>{'\u2744\uFE0F'}</span>
-              <span>{freezesRemaining}</span>
+
+          {/* Zone divider */}
+          <div className={styles.zoneDivider} aria-hidden="true" />
+
+          {/* Zone 3: Focus time + freeze badge */}
+          <div className={styles.focusZone}>
+            <div className={styles.focusContent}>
+              <span className={styles.focusIconCircle} aria-hidden="true">
+                <span className={styles.focusIcon} role="img" aria-label="focus time">{'\u23F1'}</span>
+              </span>
+              <div className={styles.focusText}>
+                <span className={styles.focusValue}>{summary.focusMinutes}m</span>
+                <span className={styles.focusLabel}>focused</span>
+              </div>
             </div>
-          )}
+            {freezesRemaining > 0 && (
+              <div className={styles.freezeBadge} title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}>
+                <span className={styles.freezeBadgeIcon}>{'\u2744\uFE0F'}</span>
+                <span>{freezesRemaining}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

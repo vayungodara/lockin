@@ -222,8 +222,6 @@
   box-shadow: 0 20px 50px -12px rgba(0, 0, 0, 0.12);
   border: 1px solid var(--landing-border);
   padding: var(--space-4);
-  will-change: transform, opacity;
-  backface-visibility: hidden;
 }
 
 :global([data-theme="dark"]) .floatingCard {
@@ -897,8 +895,6 @@
   padding: var(--space-8);
   position: relative;
   overflow: hidden;
-  will-change: transform;
-  backface-visibility: hidden;
   transition: background 0.3s ease;
 }
 

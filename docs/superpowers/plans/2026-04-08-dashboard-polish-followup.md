@@ -37,6 +37,24 @@ Data exists in `activity_reactions` table but isn't rendered inline on dashboard
 
 All modals should match the design language: glass backdrop blur, warm surface tokens, Instrument Sans headings. **Keep emojis** in template/category pickers — they're content, not UI chrome.
 
+### OnboardingChecklist (Redesign — needs brainstorming)
+The onboarding is the **first thing new users see** after signing in. It deserves more than token warmup — it needs design thought.
+- [ ] **Brainstorm first** — use `superpowers:brainstorming` to decide:
+  - Should the checklist use the same warm card styling as TodayBar?
+  - Does it need a progress indicator (like a mini XP bar showing setup completion)?
+  - Should steps use Instrument Sans headings with varied visual weight?
+  - How should it dismiss/collapse after completion? (fade, slide, confetti?)
+  - Does it conflict visually with TodayBar + XP bar stacked above it?
+  - Should there be a "skip for now" option that's more prominent?
+- [ ] Apply Instrument Sans to heading ("Get Started" or whatever the title is)
+- [ ] Warm surface tokens on the checklist card
+- [ ] Replace inline SVG icons with Phosphor (checkmarks, arrows, etc.)
+- [ ] Add completion celebration (confetti? XP reward? level-up moment?)
+- [ ] Verify it looks right between XP bar and TodayBar in the dashboard layout
+- [ ] Test with 0 steps complete, partial, and all complete states
+- [ ] Dark mode
+- [ ] Mobile responsive
+
 ### CreatePactModal
 - [ ] Apply Instrument Sans (`var(--font-display)`) to "New Pact" heading
 - [ ] Verify glass backdrop blur (currently 12px overlay + 20px card — this is fine)

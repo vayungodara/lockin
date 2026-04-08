@@ -87,17 +87,17 @@ Take conversation screenshots at each page for YOUR visual analysis. Write detai
 
 - Navigate to `/dashboard`
 - Take a conversation screenshot, inspect thoroughly
-- Check: welcome message, XP bar, challenge cards, streak display, "New Pact" button
-- Note: spacing consistency, card alignment, typography hierarchy, color usage
+- Check: "Dashboard" heading (Instrument Sans) with contextual subtitle, Scholar Rank Progress XP bar (Lv badge + gradient progress bar), TodayBar (3-zone: streak + pacts due + focus time, double-nested cream/amber card), asymmetric 2-column layout (pacts left 3fr, activity right 2fr), "New Pact" button, Phosphor icons in sidebar
+- Note: spacing consistency, urgency hierarchy on pact cards (overdue=red, due today=amber, completed=muted+XP badge), warm surfaces (#FAF9F7), no 3-stat-card grids anywhere
 
 ### 1c. Every Other Page
 
 Navigate through each sidebar item:
-- **My Pacts** `/dashboard/pacts` — pact cards, status indicators, deadline display
-- **Groups** `/dashboard/groups` — group list, member avatars, activity feed
-- **Focus Timer** `/dashboard/focus` — timer UI, controls, session history
-- **Stats** `/dashboard/stats` — charts, data visualization, stat cards
-- **Settings** `/dashboard/settings` — form layout, toggle states, theme switching
+- **My Pacts** `/dashboard/pacts` — single-column pact list, filter tabs with counts, PactCard urgency hierarchy (overdue/today/completed), no stats bar
+- **Groups** `/dashboard/groups` — group cards with warm avatar backgrounds (terracotta/sage/amber tones), progress bars
+- **Focus Timer** `/dashboard/focus` — full-bleed centered timer ring (280px), mode pills (Focus/Short Break/Long Break), inline stats line, broadcast toggle chip, no stat grids
+- **Stats** `/dashboard/stats` — compact inline streak ("🔥 N day streak · Best: N"), Activity Calendar, analytics with inline heading stats (no 3-stat grids), breakdown lists with colored dots
+- **Settings** `/dashboard/settings` — form layout, toggle states, theme switching, accent color circles with outline ring
 
 For EACH page note:
 - Does the layout feel balanced or lopsided?

@@ -139,7 +139,7 @@ export default function DashboardClient({ user }) {
 
   // Dashboard shows active pacts first; if none, show a few recent completed ones
   const dashboardPacts = activePacts.length > 0
-    ? activePacts
+    ? activePacts.slice(0, 3)
     : completedPacts.slice(0, 3);
 
   // If no user, show sign-in page

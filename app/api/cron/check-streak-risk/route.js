@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { NOTIFICATION_TYPES } from '@/lib/notifications';
 import { verifyCronSecret } from '@/lib/cronAuth';
+import { formatDateInTimezone } from '@/lib/streaks';
 
 function getSupabaseClient() {
   return createClient(
@@ -17,38 +18,44 @@ export async function GET(request) {
   const supabase = getSupabaseClient();
 
   try {
-    const today = new Date().toISOString().split('T')[0];
-    const twoDaysAgo = new Date(Date.now() - 2 * 86400000).toISOString().split('T')[0];
+    const now = new Date();
 
-    // Find users with active streaks who haven't been active today
-    // but whose streak is NOT yet broken (active yesterday or day before)
+    // Fetch all profiles with active streaks — timezone filtering done in JS
     const { data: profiles, error } = await supabase
       .from('profiles')
-      .select('id, current_streak, last_activity_date')
+      .select('id, current_streak, last_activity_date, timezone')
       .gt('current_streak', 0)
-      .gte('last_activity_date', twoDaysAgo)
-      .lt('last_activity_date', today);
+      .not('last_activity_date', 'is', null);
 
     if (error) throw error;
 
-    if (!profiles || profiles.length === 0) {
+    // Filter to at-risk profiles using each user's timezone
+    const atRiskProfiles = (profiles || []).filter(p => {
+      const tz = p.timezone || 'UTC';
+      const localToday = formatDateInTimezone(now, tz);
+      const localTwoDaysAgo = formatDateInTimezone(new Date(now.getTime() - 2 * 86400000), tz);
+      return p.last_activity_date >= localTwoDaysAgo && p.last_activity_date < localToday;
+    });
+
+    if (atRiskProfiles.length === 0) {
       return Response.json({ message: 'Sent 0 risk alerts' });
     }
 
-    const profileIds = profiles.map(p => p.id);
+    const profileIds = atRiskProfiles.map(p => p.id);
 
-    // Batch fetch: find all users who already got a streak-at-risk notification today
+    // Dedup: skip users already notified in the last 24 hours
+    const oneDayAgo = new Date(now.getTime() - 86400000).toISOString();
     const { data: existingNotifs } = await supabase
       .from('notifications')
       .select('user_id')
       .in('user_id', profileIds)
       .eq('type', NOTIFICATION_TYPES.STREAK_AT_RISK)
-      .gte('created_at', `${today}T00:00:00Z`);
+      .gte('created_at', oneDayAgo);
 
     const alreadyNotified = new Set((existingNotifs || []).map(n => n.user_id));
 
     // Filter to only users who haven't been notified yet
-    const profilesToNotify = profiles.filter(p => !alreadyNotified.has(p.id));
+    const profilesToNotify = atRiskProfiles.filter(p => !alreadyNotified.has(p.id));
 
     if (profilesToNotify.length === 0) {
       return Response.json({ message: 'Sent 0 risk alerts' });

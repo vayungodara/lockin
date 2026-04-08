@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Worktree copies have their own .next dirs that confuse the linter
+    ".claude/worktrees/**",
   ]),
 ]);
 

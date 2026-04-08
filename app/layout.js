@@ -1,4 +1,4 @@
-import { Inter, Instrument_Sans, DM_Sans } from "next/font/google";
+import { Inter, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
@@ -18,12 +18,6 @@ const instrumentSans = Instrument_Sans({
   weight: ["400", "500", "600", "700"],
 });
 
-const dmSans = DM_Sans({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-body",
-  weight: ["400", "500", "600"],
-});
 
 export const viewport = {
   width: 'device-width',
@@ -112,7 +106,7 @@ export default function RootLayout({ children }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.className} ${instrumentSans.variable} ${dmSans.variable}`}>
+      <body className={`${inter.className} ${instrumentSans.variable}`}>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
         <ThemeProvider>
           <ToastProvider>

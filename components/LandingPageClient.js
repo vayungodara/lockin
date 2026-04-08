@@ -2,8 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { DM_Sans } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+  weight: ['400', '500', '600'],
+});
 import NavbarLanding from '@/components/NavbarLanding';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
@@ -62,7 +70,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
   };
 
   return (
-    <>
+    <div className={dmSans.variable}>
       <NavbarLanding />
 
       <main id="main-content" className={styles.main}>
@@ -736,6 +744,6 @@ export default function LandingPageClient({ isAuthenticated = false }) {
           <span className={styles.footerCredit}>Built by Vayun Godara</span>
         </div>
       </footer>
-    </>
+    </div>
   );
 }

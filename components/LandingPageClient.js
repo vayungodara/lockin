@@ -105,7 +105,7 @@ const steps = [
   },
 ];
 
-export default function LandingPageClient({ isAuthenticated = false }) {
+export default function LandingPageClient({ isAuthenticated = false, returnTo }) {
   const router = useRouter();
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
@@ -132,10 +132,14 @@ export default function LandingPageClient({ isAuthenticated = false }) {
       return;
     }
     const supabase = createClient();
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+      callbackUrl.searchParams.set('next', returnTo);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
     if (error) {

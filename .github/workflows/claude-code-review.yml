@@ -53,5 +53,4 @@ jobs:
 
             Post each finding as an inline review comment on the exact line where the issue is.
             Read REVIEW.md and CLAUDE.md for project-specific conventions.
-          show_full_output: 'true'
-          claude_args: '--model claude-opus-4-6'
+          claude_args: '--model claude-opus-4-6 --allowedTools "Bash(gh:*)"'

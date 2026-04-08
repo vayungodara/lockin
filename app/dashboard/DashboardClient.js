@@ -138,10 +138,17 @@ export default function DashboardClient({ user }) {
   const activePacts = pacts.filter(p => p.status === 'active');
   const completedPacts = pacts.filter(p => p.status === 'completed');
 
-  // Dashboard shows active pacts first; if none, show a few recent completed ones
-  const dashboardPacts = activePacts.length > 0
-    ? activePacts.slice(0, 3)
-    : completedPacts.slice(0, 3);
+  // Filter pacts due today or overdue for the subtitle count
+  const now = new Date();
+  const todayEnd = new Date(); todayEnd.setHours(23, 59, 59, 999);
+  const pactsDueToday = activePacts.filter(p => new Date(p.deadline) <= todayEnd);
+
+  // Dashboard shows pacts due today/overdue first; if none, show recent completed
+  const dashboardPacts = pactsDueToday.length > 0
+    ? pactsDueToday.slice(0, 3)
+    : activePacts.length > 0
+      ? activePacts.slice(0, 3)
+      : completedPacts.slice(0, 3);
 
   // If no user, show sign-in page
   const fullName = typeof user?.user_metadata?.full_name === 'string'
@@ -203,7 +210,7 @@ export default function DashboardClient({ user }) {
           <div>
             <h1 className={styles.pageTitle}>Dashboard</h1>
             <p className={styles.pageSubtitle}>
-              {activePacts.length > 0 ? `${activePacts.length} pact${activePacts.length !== 1 ? 's' : ''} due` : 'No pacts due'}
+              {pactsDueToday.length > 0 ? `${pactsDueToday.length} pact${pactsDueToday.length !== 1 ? 's' : ''} due today` : 'No pacts due'}
               {' \u00b7 '}
               <span className={styles.streakHighlight}>
                 <Fire size={16} weight="fill" color="#EA580C" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}

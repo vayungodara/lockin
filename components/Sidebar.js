@@ -72,6 +72,15 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
       });
     }
     fetchXP();
+
+    // Refresh XP when pact status changes (completion triggers XP gain)
+    const handlePactUpdate = () => fetchXP();
+    window.addEventListener('pact-created', handlePactUpdate);
+    window.addEventListener('xp-updated', handlePactUpdate);
+    return () => {
+      window.removeEventListener('pact-created', handlePactUpdate);
+      window.removeEventListener('xp-updated', handlePactUpdate);
+    };
   }, [user?.id, supabase]);
 
   const isCollapsed = useSyncExternalStore(

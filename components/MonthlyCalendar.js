@@ -22,7 +22,7 @@ export default function MonthlyCalendar({ userId }) {
 
   const fetchData = useCallback(async () => {
     try {
-      const heatmap = await getActivityHeatmap(supabase, userId, 365);
+      const heatmap = await getActivityHeatmap(supabase, userId, 365, Intl.DateTimeFormat().resolvedOptions().timeZone);
       setHeatmapData(heatmap.data || []);
     } catch (err) {
       console.error('Error fetching calendar data:', err);

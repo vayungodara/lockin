@@ -67,10 +67,8 @@ export default function NavbarLanding({ isAuthenticated = false }) {
     <nav className={styles.navbar}>
       <div
         className={`${styles.navInner} ${isPill ? styles.navPill : ''} ${reducedMotion ? '' : styles.navAnimated}`}
-        role={isPill ? 'button' : undefined}
-        tabIndex={isPill ? 0 : undefined}
         aria-expanded={isPill ? isExpanded : undefined}
-        aria-label={isPill ? 'Toggle navigation menu' : undefined}
+        aria-label={isPill ? 'Navigation menu' : undefined}
         onClick={(e) => {
           // Only toggle on click in the pill "dead zone" (not on buttons/links)
           if (isScrolled && !e.target.closest('a') && !e.target.closest('button')) {

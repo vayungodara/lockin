@@ -56,6 +56,13 @@ The spec called for different empty state layouts per page (not uniform centered
 - [ ] Overdue card "Resolve" action button styling
 - [ ] Due-today card accent color on title hover
 
+## Focus Timer — Mode Pills
+The Short Break / Long Break pills on the focus page are currently inert (visual only). They need to be wired to FocusContext's mode-change logic.
+- [ ] Wire Short Break pill to switch timer to short break duration
+- [ ] Wire Long Break pill to switch timer to long break duration
+- [ ] Ensure active pill state updates when mode changes automatically (after work session completes)
+- [ ] This is a behavioral change, not just visual — needs FocusContext integration
+
 ## Animation Review
 - [ ] Verify all card hover effects are varied (not uniform translateY(-2px))
 - [ ] TodayBar count-change animations on pact completion

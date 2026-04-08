@@ -85,6 +85,16 @@ It returns: page-by-page scores (layout, typography, color, components, motion, 
 Tools: Read, Glob, Grep, Bash (read-only — cannot edit files).
 This agent audits CSS/JS source code. It cannot view images — the visual audit's text descriptions in Notion provide rendered-page context.
 
+**IMPORTANT context for the frontend auditor (post-redesign):**
+- Dashboard uses TodayBar (components/TodayBar.js) — NOT StreakHero or DailySummaryCard. Don't flag these as missing.
+- Dashboard layout is asymmetric 2-column (3fr pacts / 2fr activity), max-width 1200px. This is intentional.
+- PactCard has urgency hierarchy — overdue/today/completed cards look DIFFERENT on purpose.
+- Icons use @phosphor-icons/react — inline SVGs in Sidebar, MobileNav, XPBar, ActivityFeed were replaced. Don't flag Phosphor imports.
+- Headings use var(--font-display) (Instrument Sans). Body stays Inter. DM Sans is landing-page only.
+- Background tokens are warm: --bg-primary: #FAF9F7 (light), #121210 (dark). NOT cold #FAFAFA.
+- The 3-stat-card grid pattern (Completed/Active/Missed with colored icons) was intentionally killed on all pages.
+- Focus Timer is full-bleed centered with mode pills and inline stats — no stat grids or recent sessions list.
+
 ### DB Health (run directly from main session, NOT as subagent)
 Subagents cannot access Supabase MCP tools. Run DB health queries directly using `mcp__a0b728f8-f074-4beb-9ff3-ba3d16543f1e__execute_sql` with project_id `muhklpbzdecfscrrwhdr`. Launch these queries while the two subagents are in flight. SELECT only — NEVER mutate.
 
@@ -217,6 +227,13 @@ If checks fail, note "Vercel health check failed" in the triage report and conti
 - Animation presets from `@/lib/animations`, never inline Framer Motion variants
 - Use CSS variables from `globals.css`, never hardcode hex values
 - `overflow-x: clip` not `overflow-x: hidden` on html/body
+- Icons: use `@phosphor-icons/react` (e.g. `<Fire size={16} weight="fill" />`), not inline SVGs or emojis
+- Headings: use `font-family: var(--font-display)` (Instrument Sans), not hardcoded font-family
+- Backgrounds: warm tones (#FAF9F7 light, #121210 dark) — never cold white (#FAFAFA) or pure black (#000)
+- No 3-stat-card grids (colored circle icon + number + uppercase label pattern)
+- PactCard uses urgency hierarchy: overdue (red border, elevated), due today (amber), completed (muted + XP badge)
+- TodayBar replaces old StreakHero + DailySummaryCard — don't flag these as missing
+- Dashboard uses asymmetric 2-column layout (pacts 3fr, activity 2fr) with 1200px max-width
 
 ---
 

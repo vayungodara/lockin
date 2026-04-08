@@ -105,7 +105,7 @@ const steps = [
   },
 ];
 
-export default function LandingPageClient({ isAuthenticated = false }) {
+export default function LandingPageClient({ isAuthenticated = false, returnTo }) {
   const router = useRouter();
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
@@ -132,10 +132,14 @@ export default function LandingPageClient({ isAuthenticated = false }) {
       return;
     }
     const supabase = createClient();
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+      callbackUrl.searchParams.set('next', returnTo);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
     if (error) {
@@ -398,6 +402,8 @@ export default function LandingPageClient({ isAuthenticated = false }) {
 
           <motion.div
             className={styles.browserFrame}
+            aria-hidden="true"
+            role="presentation"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ amount: 0.2 }}
@@ -479,6 +485,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                         <motion.button
                           className={`${styles.mockCheckbox} ${styles.mockCheckboxClickable} ${!checkedPacts[i] ? styles.mockUnchecked : ''}`}
                           onClick={() => setCheckedPacts(prev => ({ ...prev, [i]: !prev[i] }))}
+                          tabIndex={-1}
                           whileTap={{ scale: 0.85 }}
                           animate={checkedPacts[i] ? { scale: [1, 1.2, 1] } : { scale: 1 }}
                           transition={{ duration: 0.25 }}

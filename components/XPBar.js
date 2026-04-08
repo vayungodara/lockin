@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
+import { Star } from '@phosphor-icons/react';
 import { xpFillFlash } from '@/lib/animations';
 import styles from './XPBar.module.css';
 
@@ -57,7 +58,7 @@ export default function XPBar({ userId, refreshKey }) {
   return (
     <div className={styles.container}>
       <div className={styles.levelBadge}>
-        <span className={styles.starIcon} role="img" aria-label="star">⭐</span>
+        <Star size={16} weight="fill" color="#FFB800" />
         <span>Lv. {level}</span>
       </div>
 

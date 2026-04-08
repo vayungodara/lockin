@@ -7,6 +7,7 @@ import { fadeInUp, streakCelebration } from '@/lib/animations';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
+import { Timer, Snowflake } from '@phosphor-icons/react';
 import { useToast } from '@/components/Toast';
 import styles from './TodayBar.module.css';
 
@@ -315,7 +316,7 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           <div className={styles.focusZone}>
             <div className={styles.focusContent}>
               <span className={styles.focusIconCircle} aria-hidden="true">
-                <span className={styles.focusIcon} role="img" aria-label="focus time">{'\u23F1'}</span>
+                <Timer size={18} weight="fill" color="currentColor" />
               </span>
               <div className={styles.focusText}>
                 <span className={styles.focusValue}>{summary.focusMinutes}m</span>
@@ -324,7 +325,7 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             </div>
             {freezesRemaining > 0 && (
               <div className={styles.freezeBadge} title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}>
-                <span className={styles.freezeBadgeIcon}>{'\u2744\uFE0F'}</span>
+                <span className={styles.freezeBadgeIcon}><Snowflake size={14} weight="fill" /></span>
                 <span>{freezesRemaining}</span>
               </div>
             )}

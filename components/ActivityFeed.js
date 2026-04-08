@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { staggerContainer } from '@/lib/animations';
 import { createClient } from '@/lib/supabase/client';
 import { getGroupActivity, getAllActivity, HIDDEN_FEED_ACTIONS, TEST_DATA_PATTERNS } from '@/lib/activity';
+import { Clock } from '@phosphor-icons/react';
 import ActivityItem from './ActivityItem';
 import styles from './ActivityFeed.module.css';
 
@@ -194,10 +195,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       <div className={styles.container}>
         {!hideHeader && (
           <div className={styles.header}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
+            <Clock size={18} weight="regular" />
             <h3>Activity</h3>
           </div>
         )}
@@ -214,10 +212,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     <div className={styles.container}>
       {!hideHeader && (
         <div className={styles.header}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-            <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
+          <Clock size={18} weight="regular" />
           <h3>Activity</h3>
         </div>
       )}
@@ -225,10 +220,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       {activities.length === 0 ? (
         <div className={styles.empty}>
           <div className={styles.emptyIcon}>
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
+            <Clock size={32} weight="light" />
           </div>
           <p>No activity yet</p>
           <span>{groupId ? 'Activity will appear here as your team works' : 'Your activity will appear here as you work'}</span>

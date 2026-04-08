@@ -14,6 +14,7 @@ import {
   snappyTransition,
   smoothTransition,
 } from '@/lib/animations';
+import { House, CheckSquare, UsersThree, Timer, ChartLineUp, GearSix, Sun, Moon, Monitor, ArrowSquareOut, SignOut } from '@phosphor-icons/react';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
 import { useTheme } from './ThemeProvider';
@@ -35,69 +36,12 @@ function subscribeToSidebarStorage(callback) {
 }
 
 const navItems = [
-  {
-    href: '/dashboard',
-    label: 'Dashboard',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 9L12 2L21 9V20C21 20.5304 20.7893 21.0391 20.4142 21.4142C20.0391 21.7893 19.5304 22 19 22H5C4.46957 22 3.96086 21.7893 3.58579 21.4142C3.21071 21.0391 3 20.5304 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M9 22V12H15V22" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/pacts',
-    label: 'My Pacts',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/groups',
-    label: 'Groups',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-        <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89318 18.7122 8.75608 18.1676 9.45769C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/focus',
-    label: 'Focus Timer',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/stats',
-    label: 'Stats',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M18 20V10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M12 20V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        <path d="M6 20V14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-  },
-  {
-    href: '/dashboard/settings',
-    label: 'Settings',
-    icon: (
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="3" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 1V4M12 20V23M4.22 4.22L6.34 6.34M17.66 17.66L19.78 19.78M1 12H4M20 12H23M4.22 19.78L6.34 17.66M17.66 6.34L19.78 4.22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-  },
+  { href: '/dashboard', label: 'Dashboard', IconComponent: House },
+  { href: '/dashboard/pacts', label: 'My Pacts', IconComponent: CheckSquare },
+  { href: '/dashboard/groups', label: 'Groups', IconComponent: UsersThree },
+  { href: '/dashboard/focus', label: 'Focus Timer', IconComponent: Timer },
+  { href: '/dashboard/stats', label: 'Stats', IconComponent: ChartLineUp },
+  { href: '/dashboard/settings', label: 'Settings', IconComponent: GearSix },
 ];
 
 export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
@@ -189,27 +133,12 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
 
   const getThemeIcon = () => {
     if (!mounted || theme === 'system') {
-      return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
-          <path d="M8 21H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          <path d="M12 17V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        </svg>
-      );
+      return <Monitor size={18} weight="regular" />;
     }
     if (resolvedTheme === 'dark') {
-      return (
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      );
+      return <Moon size={18} weight="regular" />;
     }
-    return (
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 1V3M12 21V23M4.22 4.22L5.64 5.64M18.36 18.36L19.78 19.78M1 12H3M21 12H23M4.22 19.78L5.64 18.36M18.36 5.64L19.78 4.22" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    );
+    return <Sun size={18} weight="regular" />;
   };
 
   const getThemeLabel = () => {
@@ -264,6 +193,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
       <nav className={styles.nav}>
         {navItems.map((item) => {
           const active = isActive(item.href);
+          const IconComp = item.IconComponent;
           return (
             <Link
               key={item.href}
@@ -279,7 +209,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
                 />
               )}
               <span className={`${styles.navIcon} ${active ? styles.navIconActive : ''}`}>
-                {item.icon}
+                <IconComp size={20} weight={active ? 'fill' : 'regular'} />
               </span>
               {/* Always mounted -- fade + collapse width to prevent truncated text */}
               <motion.span
@@ -475,11 +405,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
               aria-label="View landing page"
               title="View Landing Page"
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18 13V19C18 19.5304 17.7893 20.0391 17.4142 20.4142C17.0391 20.7893 16.5304 21 16 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V8C3 7.46957 3.21071 6.96086 3.58579 6.58579C3.96086 6.21071 4.46957 6 5 6H11" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <polyline points="15 3 21 3 21 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
+              <ArrowSquareOut size={18} weight="regular" />
             </Link>
           </motion.div>
 
@@ -492,11 +418,7 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
             transition={snappyTransition}
             whileTap={sidebarTap}
           >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M16 17L21 12L16 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <SignOut size={18} weight="regular" />
           </motion.button>
         </motion.div>
       </motion.div>

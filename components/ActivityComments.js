@@ -6,6 +6,7 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { getComments, postComment, deleteComment } from '@/lib/comments';
 import { formatRelativeTime } from '@/lib/activity';
+import { ChatCircle } from '@phosphor-icons/react';
 import { useToast } from '@/components/Toast';
 import styles from './ActivityComments.module.css';
 
@@ -74,9 +75,7 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
         className={styles.toggleButton}
         onClick={toggleComments}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <ChatCircle size={14} weight="regular" />
         {commentCount > 0 ? commentCount : ''} {showComments ? 'Hide' : commentCount > 0 ? '' : 'Comment'}
       </button>
 

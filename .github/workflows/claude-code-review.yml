@@ -3,25 +3,21 @@ name: Claude Code Review
 on:
   pull_request:
     types: [opened, synchronize, ready_for_review, reopened]
-    # Optional: Only run on specific file changes
-    # paths:
-    #   - "src/**/*.ts"
-    #   - "src/**/*.tsx"
-    #   - "src/**/*.js"
-    #   - "src/**/*.jsx"
+
+# Cancel in-progress review if a new push arrives
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    if: ${{ !github.event.pull_request.draft }}
 
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
 
@@ -29,7 +25,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 1
+          fetch-depth: 0
 
       - name: Run Claude Code Review
         id: claude-review
@@ -39,6 +35,6 @@ jobs:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
           prompt: '/code-review:code-review ${{ github.repository }}/pull/${{ github.event.pull_request.number }}'
-          # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://code.claude.com/docs/en/cli-reference for available options
-
+          claude_args: >-
+            --model claude-opus-4-6
+            --append-system-prompt "REVIEW POLICY: Be exhaustive. Find every real bug, logic error, security vulnerability, race condition, and edge case. False negatives are far worse than false positives. Multi-pass process: (1) Read full diff and understand the change. (2) Trace every changed code path through the codebase — follow imports, check callers, verify data flow end-to-end. (3) Check systematically: logic errors, off-by-one, null/undefined, wrong comparisons, XSS, injection, auth bypasses, exposed secrets, missing RLS checks, race conditions, stale closures, async bugs, missing await, empty arrays, missing data, network failures, concurrent users, Supabase client vs server, React missing deps in useEffect, stale state, memory leaks, CSS z-index conflicts, overflow, dark mode breakage, mobile bugs. (4) Verify fixes actually work and don't introduce new issues. (5) Check what is NOT in the diff — missing migrations, missing test updates, stale imports. Tag severity: Bug (will break production), Issue (incorrect behavior or security concern), Nit (minor, not blocking). Read REVIEW.md and CLAUDE.md for project conventions."

@@ -467,12 +467,12 @@
 
 :global([data-theme="dark"]) .level3 .dayNumber,
 :global([data-theme="dark"]) .level4 .dayNumber {
-  color: #FFFFFF;
+  color: var(--text-inverse);
 }
 
 :global([data-theme="dark"]) .level3 .activityDot,
 :global([data-theme="dark"]) .level4 .activityDot {
-  background: #FFFFFF;
+  background: var(--text-inverse);
 }
 
 :global([data-theme="dark"]) .selected {

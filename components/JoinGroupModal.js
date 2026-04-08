@@ -86,7 +86,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
       // Check if already a member
       const { data: existingMember, error: existingError } = await supabase
         .from('group_members')
-        .select('*')
+        .select('group_id')
         .eq('group_id', group.id)
         .eq('user_id', user.id)
         .single();

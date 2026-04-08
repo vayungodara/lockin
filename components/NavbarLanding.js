@@ -15,7 +15,7 @@ const SCROLL_THRESHOLD = 80;
 export default function NavbarLanding() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
 
@@ -25,10 +25,6 @@ export default function NavbarLanding() {
     setIsScrolled(latest > SCROLL_THRESHOLD);
     if (latest <= SCROLL_THRESHOLD) setIsExpanded(false);
   });
-
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-  }, []);
 
   // Close expanded pill when clicking outside
   useEffect(() => {

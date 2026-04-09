@@ -89,7 +89,7 @@
 
 /* Headline */
 .heroTitle {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(3.25rem, 8vw, 7rem);
   font-weight: 500;
   line-height: 0.9;
@@ -416,7 +416,7 @@
 }
 
 .sectionHeader h2 {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4.5vw, 3.25rem);
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -590,7 +590,7 @@
 }
 
 .mockHeaderText h3 {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-base);
   color: var(--landing-ink);
@@ -852,7 +852,7 @@
 }
 
 .featuresHeading {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 600;
   letter-spacing: -0.03em;
@@ -909,7 +909,7 @@
 }
 
 .bentoCard h3 {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -1012,7 +1012,7 @@
 }
 
 .bentoTimerDisplay {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: 3.5rem;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -1072,7 +1072,7 @@
 }
 
 .marqueeText {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 4vw, 3rem);
   font-weight: 700;
   text-transform: uppercase;
@@ -1232,7 +1232,7 @@
 }
 
 .stepsHeading {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 2.75rem);
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -1274,7 +1274,7 @@
   position: absolute;
   left: -64px;
   top: 0;
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: 6rem;
   font-weight: 700;
   opacity: 0.04;
@@ -1310,7 +1310,7 @@
 }
 
 .stepTitle {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(1.5rem, 3vw, 2rem);
   font-weight: 500;
   letter-spacing: -0.02em;
@@ -1421,7 +1421,7 @@
 }
 
 .ctaHeadline {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: clamp(3rem, 6vw, 6rem);
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -1482,7 +1482,7 @@
 }
 
 .footerBrand {
-  font-family: var(--font-body), var(--font-sans);
+  font-family: var(--font-display);
   font-size: 1.5rem;
   font-weight: 700;
 }

@@ -586,8 +586,8 @@ export default function LandingPageClient({ isAuthenticated = false, returnTo })
                 <h3>Group Accountability</h3>
                 <p>See who is pulling their weight and who is slacking. Kanban boards, task ownership, real-time activity. No more carrying the team alone.</p>
                 <div className={styles.bentoAvatars}>
-                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'ocean')?.primary }} />
-                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'emerald')?.primary }} />
+                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'ocean')?.primary || '#3B82F6' }} />
+                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'emerald')?.primary || '#10B981' }} />
                   <div className={styles.bentoAvatarMore}>+4</div>
                 </div>
               </motion.div>

@@ -294,6 +294,8 @@ Design doc: `/docs/plans/2026-03-08-ios-app-design.md`
 
 ## Design Context
 
+> **For design work:** Use impeccable skills (`/critique`, `/polish`, `/arrange`, `/animate`, `/audit`, etc.). Full design brief is in `.impeccable.md`. Use `/impeccable teach` if `.impeccable.md` needs updating.
+
 **Users:** University students using social accountability to beat procrastination. The app should feel like their personal system — proud ownership through XP, streaks, and level badges.
 
 **Brand:** "Duolingo grew up for university." Motivating, Personal, Polished.

@@ -31,6 +31,7 @@ export default function NavbarLanding({ isAuthenticated = false }) {
   // Update isMobile on viewport resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -69,8 +70,6 @@ export default function NavbarLanding({ isAuthenticated = false }) {
         className={`${styles.navInner} ${isPill ? styles.navPill : ''} ${reducedMotion ? '' : styles.navAnimated}`}
         aria-expanded={isPill ? isExpanded : undefined}
         aria-label={isPill ? 'Navigation menu' : undefined}
-        role={isPill ? 'button' : undefined}
-        tabIndex={isPill ? 0 : undefined}
         onClick={(e) => {
           // Only toggle on click in the pill "dead zone" (not on buttons/links)
           if (isScrolled && !e.target.closest('a') && !e.target.closest('button')) {

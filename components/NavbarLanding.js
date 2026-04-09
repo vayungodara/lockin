@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { motion, useScroll, useMotionValueEvent } from 'framer-motion';
+import { useScroll, useMotionValueEvent } from 'framer-motion';
 import ThemeToggle from './ThemeToggle';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
@@ -16,7 +16,7 @@ const SCROLL_THRESHOLD = 80;
 export default function NavbarLanding({ isAuthenticated = false }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(false);
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
 
@@ -31,6 +31,7 @@ export default function NavbarLanding({ isAuthenticated = false }) {
   // Update isMobile on viewport resize
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);

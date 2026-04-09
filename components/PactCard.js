@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useMemo, useEffect } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
@@ -10,10 +10,13 @@ import { useToast } from '@/components/Toast';
 import { playCompletionSound, playMissSound } from '@/lib/sounds';
 import styles from './PactCard.module.css';
 
+const UNDO_DELAY_MS = 5000;
+
 export default function PactCard({ pact, onUpdate, onDelete }) {
-  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, setIsPending] = useState(false);
   const isCompletingRef = useRef(false);
   const justCompletedRef = useRef(false);
+  const pendingActionRef = useRef(null);
   const [showBounce, setShowBounce] = useState(false);
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
@@ -29,6 +32,103 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     }, 1000);
     return () => clearTimeout(timer);
   }, [showBounce]);
+
+  // Commit pending action on unmount so we never lose a completion/miss
+  useEffect(() => {
+    return () => {
+      if (pendingActionRef.current) {
+        clearTimeout(pendingActionRef.current.timer);
+        pendingActionRef.current.commit();
+        pendingActionRef.current = null;
+      }
+    };
+  }, []);
+
+  // --- Extracted commit functions (before the early return guard) ---
+
+  const commitComplete = useCallback(async () => {
+    try {
+      const { error } = await supabase
+        .from('pacts')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString()
+        })
+        .eq('id', pact?.id);
+
+      if (error) throw error;
+
+      // Best-effort side effects — failures do not revert completion
+      try {
+        await logActivity(supabase, 'pact_completed', null, { pact_description: pact?.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
+
+      const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
+        awardXP(supabase, pact?.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact?.id })
+      ).catch(err => console.error('XP award error:', err));
+
+      const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
+        calculateStreak(supabase, pact?.user_id)
+      ).then(({ currentStreak, longestStreak, totalCompleted }) => {
+        const streakUpdate = import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
+          updateStreakOnCompletion(supabase, pact?.user_id, currentStreak, longestStreak)
+        ).catch(err => console.error('Streak advanced update error:', err));
+
+        const achievementCheck = import('@/lib/gamification').then(({ checkPactAchievements }) =>
+          checkPactAchievements(supabase, pact?.user_id, totalCompleted, currentStreak)
+        ).catch(err => console.error('Achievement check error:', err));
+
+        return Promise.all([streakUpdate, achievementCheck]);
+      }).catch(err => console.error('Streak calculation error:', err));
+
+      const partnerPromise = import('@/lib/partnerships').then(({ notifyPartner }) =>
+        notifyPartner(supabase, pact?.user_id, 'completed', pact?.title)
+      ).catch(err => console.error('Partner notify error:', err));
+
+      await Promise.race([
+        Promise.all([xpPromise, streakPromise, partnerPromise]),
+        new Promise(resolve => setTimeout(resolve, 10000)),
+      ]);
+    } catch (err) {
+      console.error('Error committing pact completion:', err);
+      // Revert optimistic UI on DB error
+      if (onUpdate && pact) {
+        onUpdate({ ...pact, status: 'active', completed_at: null });
+      }
+      toast.error('Failed to complete pact. Please try again.');
+    }
+  }, [supabase, pact, onUpdate, toast]);
+
+  const commitMiss = useCallback(async () => {
+    try {
+      const { error } = await supabase
+        .from('pacts')
+        .update({ status: 'missed' })
+        .eq('id', pact?.id);
+
+      if (error) throw error;
+
+      // Best-effort side effects
+      try {
+        await logActivity(supabase, 'pact_missed', null, { pact_description: pact?.title });
+      } catch (err) {
+        console.error('Activity logging failed:', err);
+      }
+
+      import('@/lib/partnerships').then(({ notifyPartner }) =>
+        notifyPartner(supabase, pact?.user_id, 'missed', pact?.title)
+      ).catch(err => console.error('Partner notify error:', err));
+    } catch (err) {
+      console.error('Error committing pact miss:', err);
+      // Revert optimistic UI on DB error
+      if (onUpdate && pact) {
+        onUpdate({ ...pact, status: 'active' });
+      }
+      toast.error('Failed to update pact. Please try again.');
+    }
+  }, [supabase, pact, onUpdate, toast]);
 
   if (!pact) {
     return null;
@@ -103,143 +203,91 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     return `Due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   };
 
-  const handleComplete = async () => {
+  const handleComplete = () => {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
-    setIsLoading(true);
+    setIsPending(true);
 
-    // Safety timeout — if the entire operation hangs for 15s, unlock the UI
-    const safetyTimer = setTimeout(() => {
-      isCompletingRef.current = false;
-      setIsLoading(false);
-    }, 15000);
+    // Optimistic UI — confetti, sound, update parent immediately
+    triggerConfetti();
+    justCompletedRef.current = true;
+    setShowBounce(true);
+    playCompletionSound();
 
-    try {
-      // Step 1: Mark pact as completed in DB — this is the critical operation
-      const { error } = await supabase
-        .from('pacts')
-        .update({
-          status: 'completed',
-          completed_at: new Date().toISOString()
-        })
-        .eq('id', pact.id);
-
-      if (error) throw error;
-
-      // Pact is now saved. Everything below is best-effort — failures must not
-      // revert the completion or show an error toast to the user.
-
-      triggerConfetti();
-      justCompletedRef.current = true;
-      setShowBounce(true);
-
-      // Activity logging — independent, non-blocking
-      try {
-        await logActivity(supabase, 'pact_completed', null, { pact_description: pact.title });
-      } catch (err) {
-        console.error('Activity logging failed:', err);
-      }
-
-      // XP award — independent
-      const xpPromise = import('@/lib/gamification').then(({ awardXP, XP_REWARDS }) =>
-        awardXP(supabase, pact.user_id, 'pact_completed', XP_REWARDS.PACT_COMPLETED, { pactId: pact.id })
-      ).catch(err => console.error('XP award error:', err));
-
-      // Streak calculation, then streak-advanced + achievements — isolated from each other
-      const streakPromise = import('@/lib/streaks').then(({ calculateStreak }) =>
-        calculateStreak(supabase, pact.user_id)
-      ).then(({ currentStreak, longestStreak, totalCompleted }) => {
-        // Run streak update and achievement check independently so one failure
-        // does not prevent the other from completing
-        const streakUpdate = import('@/lib/streaks-advanced').then(({ updateStreakOnCompletion }) =>
-          updateStreakOnCompletion(supabase, pact.user_id, currentStreak, longestStreak)
-        ).catch(err => console.error('Streak advanced update error:', err));
-
-        const achievementCheck = import('@/lib/gamification').then(({ checkPactAchievements }) =>
-          checkPactAchievements(supabase, pact.user_id, totalCompleted, currentStreak)
-        ).catch(err => console.error('Achievement check error:', err));
-
-        return Promise.all([streakUpdate, achievementCheck]);
-      }).catch(err => console.error('Streak calculation error:', err));
-
-      // Partner notification — independent
-      const partnerPromise = import('@/lib/partnerships').then(({ notifyPartner }) =>
-        notifyPartner(supabase, pact.user_id, 'completed', pact.title)
-      ).catch(err => console.error('Partner notify error:', err));
-
-      // Wait for best-effort work, but cap at 10s so we don't hang the UI
-      await Promise.race([
-        Promise.all([xpPromise, streakPromise, partnerPromise]),
-        new Promise(resolve => setTimeout(resolve, 10000)),
-      ]);
-
-      playCompletionSound();
-
-      if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Pact completed! It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
-      }
-
-      if (onUpdate) {
-        onUpdate({ ...pact, status: 'completed', completed_at: new Date().toISOString() });
-      }
-    } catch (err) {
-      console.error('Error completing pact:', err);
-      toast.error('Failed to complete pact. Please try again.');
-    } finally {
-      clearTimeout(safetyTimer);
-      isCompletingRef.current = false;
-      setIsLoading(false);
+    if (onUpdate) {
+      onUpdate({ ...pact, status: 'completed', completed_at: new Date().toISOString() });
     }
+
+    // Schedule the real DB commit after UNDO_DELAY_MS
+    const timer = setTimeout(() => {
+      pendingActionRef.current = null;
+      commitComplete().finally(() => {
+        isCompletingRef.current = false;
+        setIsPending(false);
+      });
+    }, UNDO_DELAY_MS);
+
+    pendingActionRef.current = { timer, commit: commitComplete };
+
+    const recurrenceMsg = pact.is_recurring && pact.recurrence_type
+      ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
+      : '';
+
+    toast.success(`Pact completed!${recurrenceMsg}`, {
+      label: 'Undo',
+      onClick: () => {
+        clearTimeout(timer);
+        pendingActionRef.current = null;
+        isCompletingRef.current = false;
+        setIsPending(false);
+        setShowBounce(false);
+        justCompletedRef.current = false;
+        if (onUpdate) {
+          onUpdate({ ...pact, status: 'active', completed_at: null });
+        }
+      },
+    });
   };
 
-  const handleMiss = async () => {
+  const handleMiss = () => {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
-    setIsLoading(true);
+    setIsPending(true);
 
-    // Safety timeout — if the operation hangs for 15s, unlock the UI
-    const safetyTimer = setTimeout(() => {
-      isCompletingRef.current = false;
-      setIsLoading(false);
-    }, 15000);
+    // Optimistic UI — sound, update parent immediately
+    playMissSound();
 
-    try {
-      const { error } = await supabase
-        .from('pacts')
-        .update({ status: 'missed' })
-        .eq('id', pact.id);
-
-      if (error) throw error;
-
-      // Activity logging — best-effort, don't block on failure
-      try {
-        await logActivity(supabase, 'pact_missed', null, { pact_description: pact.title });
-      } catch (err) {
-        console.error('Activity logging failed:', err);
-      }
-
-      // Notify accountability partner (fire-and-forget)
-      import('@/lib/partnerships').then(({ notifyPartner }) =>
-        notifyPartner(supabase, pact.user_id, 'missed', pact.title)
-      ).catch(err => console.error('Partner notify error:', err));
-
-      playMissSound();
-
-      if (onUpdate) {
-        onUpdate({ ...pact, status: 'missed' });
-      }
-
-      if (pact.is_recurring && pact.recurrence_type) {
-        toast.success(`Marked as missed. It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`);
-      }
-    } catch (err) {
-      console.error('Error marking pact as missed:', err);
-      toast.error('Failed to update pact. Please try again.');
-    } finally {
-      clearTimeout(safetyTimer);
-      isCompletingRef.current = false;
-      setIsLoading(false);
+    if (onUpdate) {
+      onUpdate({ ...pact, status: 'missed' });
     }
+
+    // Schedule the real DB commit after UNDO_DELAY_MS
+    const timer = setTimeout(() => {
+      pendingActionRef.current = null;
+      commitMiss().finally(() => {
+        isCompletingRef.current = false;
+        setIsPending(false);
+      });
+    }, UNDO_DELAY_MS);
+
+    pendingActionRef.current = { timer, commit: commitMiss };
+
+    const recurrenceMsg = pact.is_recurring && pact.recurrence_type
+      ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
+      : '';
+
+    toast.warning(`Marked as missed.${recurrenceMsg}`, {
+      label: 'Undo',
+      onClick: () => {
+        clearTimeout(timer);
+        pendingActionRef.current = null;
+        isCompletingRef.current = false;
+        setIsPending(false);
+        if (onUpdate) {
+          onUpdate({ ...pact, status: 'active' });
+        }
+      },
+    });
   };
 
   const getStatusClass = () => {
@@ -317,7 +365,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
             <div className={styles.actions}>
               <motion.button
                 onClick={handleMiss}
-                disabled={isLoading}
+                disabled={isPending}
                 className={styles.missBtn}
                 aria-label="Mark pact as missed"
                 whileHover={buttonHover}
@@ -329,7 +377,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
               </motion.button>
               <motion.button
                 onClick={handleComplete}
-                disabled={isLoading}
+                disabled={isPending}
                 className={`${styles.completeBtn} ${showBounce ? styles.completedCheck : ''}`}
                 aria-label="Mark pact as complete"
                 whileHover={buttonHover}
@@ -345,7 +393,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
             <div className={styles.actions}>
               <motion.button
                 onClick={() => onDelete(pact.id)}
-                disabled={isLoading}
+                disabled={isPending}
                 className={styles.missBtn}
                 aria-label="Delete pact"
                 whileHover={buttonHover}

@@ -351,7 +351,7 @@ export default function DashboardClient({ user }) {
             </div>
             <ActivityFeed pageSize={3} hideHeader />
             <div className={styles.activityFooter}>
-              <span className={styles.activityFooterLink}>View Older Activity &rarr;</span>
+              <Link href="/dashboard/stats" className={styles.activityFooterLink}>View Older Activity &rarr;</Link>
             </div>
           </div>
         </div>

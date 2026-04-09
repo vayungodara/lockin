@@ -18,8 +18,9 @@
   padding: var(--space-8);
   min-height: 100vh;
   min-height: 100dvh;
-  transition: margin-left 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.05);
-  will-change: margin-left;
+  margin-left: 80px;
+  transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.05);
+  will-change: transform;
   scrollbar-gutter: stable;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -39,6 +40,7 @@
 @media (max-width: 768px) {
   .main {
     margin-left: 0 !important;
+    transform: none !important;
     padding: var(--space-4);
     padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
   }

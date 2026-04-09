@@ -111,7 +111,7 @@ export default function DashboardLayout({ user, children }) {
             <main
               id="main-content"
               className={styles.main}
-              style={{ marginLeft: sidebarExpanded ? 260 : 80 }}
+              style={{ transform: sidebarExpanded ? 'translateX(180px)' : 'translateX(0)' }}
             >
               <ErrorBoundary message="Something went wrong loading this page.">
                 <div className={styles.contentWrapper}>{children}</div>

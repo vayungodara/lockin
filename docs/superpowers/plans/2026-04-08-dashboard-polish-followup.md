@@ -14,15 +14,50 @@ Design context in CLAUDE.md. Mockup at .aidesigner/dashboard-mockup-v2.html.
 
 ---
 
+## Priority 0: Critical Bugs (from /critique)
+
+### Missing Urgency Tokens ✅ FIXED
+The `--urgency-amber`, `--urgency-amber-rgb`, `--urgency-amber-bg`, `--urgency-red`, `--urgency-red-rgb`, `--urgency-red-light` tokens were referenced 23+ times across PactCard, TodayBar, TaskCard, and DailySummaryCard but never defined in globals.css. **Fixed:** Tokens added to both `:root` and `[data-theme="dark"]` in globals.css.
+
+### Duplicate CreatePactModal ✅ FIXED
+`DashboardLayout.js` and `PactsPageClient.js` both mounted separate `CreatePactModal` instances. On /dashboard/pacts, two modals existed in the DOM. **Fixed:** Removed modal from PactsPageClient, now uses `open-create-pact` CustomEvent.
+
+### Focus Timer Mode Pills Non-Functional ✅ FIXED
+Focus/Short Break/Long Break pills had no onClick handler. **Fixed:** Added `switchMode` to FocusContext, wired pills in FocusPageClient. Also added long break support (15min, auto-triggers every 4th session).
+
+---
+
+## Critique Findings (Unresolved)
+
+- [ ] **No greeting/personalization** — `firstName` computed in DashboardClient.js:157 but never displayed. Header just says "Dashboard".
+- [ ] **"View Older Activity" routes to /dashboard/stats** — users expect more activity, not analytics.
+- [ ] **Glassmorphism performance audit** — 14 files use `backdrop-filter: blur()` (~26 instances). Consider removing blur from PactCard (inside scrollable list).
+- [ ] **Streak calculation inconsistency** — DashboardClient uses `calculateStreak()` with timezone; TodayBar reads `profile.current_streak` from DB. Three-way priority chain can show stale numbers.
+- [x] **Sidebar .logoText gradient** — dead gradient-clip CSS (PNG images used instead). ✅ FIXED
+- [x] **XP float + shimmer infinite animations** — both were `infinite` instead of one-shot. ✅ FIXED
+- [x] **Dead CSS** — 85 lines of unused sidebar styles in Dashboard.module.css. ✅ FIXED
+- [ ] **Bounce easing overshoot** — `--transition-bounce: cubic-bezier(0.34, 1.56, 0.64, 1)` overshoots. Used in 4 modal animations.
+- [ ] **TodayBar confetti dots always-on** — `.confettiDotBlue`/`.confettiDotGreen` appear at all streak levels, should be earned (7+ days).
+- [ ] **Social proof absent from main dashboard** — Activity feed shows only user's own actions. Principle 2 scored 2/5. Design brief below.
+- [ ] **GroupsPage side-tab + width transition** — `border-left: 3px solid var(--accent-primary)` (line 93) is an AI slop tell. `transition: width` (line 228) causes layout thrash. Replace border with bg tint, switch to transform.
+- [ ] **TodayBar hardcoded colors** — 7 instances of `#FFFCF5` and 11 instances of `rgba(255, 184, 0, ...)` instead of CSS variables. Extract to `--today-bar-bg` and use `var(--streak-color-rgb)` consistently.
+
+### Social Proof Surface — Design Brief (from /shape)
+
+**Component:** `SocialPulse` — compact social indicator at top of Activity Feed column.
+**Data:** Query `activity_log` joined with `group_members` for today's distinct active users (excluding self).
+**Layout:** Single row — avatar stack (up to 3, overlap -8px) + text. ~48px height. Subtle tint bg `rgba(var(--accent-primary-rgb), 0.04)`, no card/border.
+**Copy:** 3+ active: "{Name1}, {Name2} +{N} locked in today" · 1-2: "{Name1} locked in today" · 0: "Your groups are quiet today — be the first" · No groups: don't render.
+**States:** Active (avatar stack + count), empty (muted challenge text), no groups (hidden), loading (skeleton pulse), error (silent fail).
+**Interaction:** Passive only — no clicks, no hover. Count animates on change (AnimatePresence popLayout, same as streak count).
+**Deferred to v2:** Milestone celebrations in social feed, link to /dashboard/friends, Supabase realtime subscriptions.
+
+---
+
 ## Priority 1: Functional Fixes
 
-### Focus Timer — Wire Mode Pills
-The Short Break / Long Break pills are visual-only. This is a behavioral fix, not just polish.
-- [ ] Read `lib/FocusContext.js` to understand mode-change API
-- [ ] Wire Short Break pill to switch timer to short break duration
-- [ ] Wire Long Break pill to switch timer to long break duration
-- [ ] Ensure active pill state updates when mode changes automatically (after work session completes)
-- [ ] Test: start focus → complete → verify auto-switch to break → pill state updates
+### Focus Timer — Wire Mode Pills ✅ FIXED (Priority 0)
+Moved to Priority 0 and fixed: added `switchMode` to FocusContext, wired pills, added long break support (15min, auto-triggers every 4th session).
 
 ### Activity Feed — Inline Reaction Counts
 Data exists in `activity_reactions` table but isn't rendered inline on dashboard activity items.
@@ -165,3 +200,7 @@ The spec called for different empty state layouts per page. Currently all pages 
 | EmptyState needs brainstorming | Per-page variants are a design decision, not just CSS |
 | Friends/Global toggle deferred | Needs backend query filtering — not just frontend |
 | Category tags deferred | Needs DB schema change or template inference logic |
+| Urgency tokens fixed | Fixed missing --urgency-amber/red definitions in globals.css |
+| Duplicate modal removed | PactsPageClient now uses layout-level modal via CustomEvent |
+| Timer pills wired | Added switchMode to FocusContext, long break support added |
+| Social proof deferred | Needs /shape design session before implementation |

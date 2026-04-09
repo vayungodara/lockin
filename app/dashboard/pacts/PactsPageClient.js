@@ -4,14 +4,13 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import styles from './PactsPage.module.css';
-import CreatePactModal from '@/components/CreatePactModal';
 import PactCard from '@/components/PactCard';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonRow } from '@/components/Skeleton';
+
 export default function PactsPageClient({ user }) {
   const [pacts, setPacts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [filter, setFilter] = useState('all');
   const supabase = useMemo(() => createClient(), []);
 
@@ -50,9 +49,16 @@ export default function PactsPageClient({ user }) {
     fetchPacts();
   }, [fetchPacts]);
 
-  const handlePactCreated = (newPact) => {
-    setPacts(prev => [newPact, ...prev]);
-  };
+  // Listen for pact-created events from the layout-level CreatePactModal
+  useEffect(() => {
+    const handlePactCreated = (e) => {
+      if (e.detail) {
+        setPacts(prev => [e.detail, ...prev]);
+      }
+    };
+    window.addEventListener('pact-created', handlePactCreated);
+    return () => window.removeEventListener('pact-created', handlePactCreated);
+  }, []);
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
@@ -93,7 +99,7 @@ export default function PactsPageClient({ user }) {
           <h1>My Pacts</h1>
           <p className={styles.subtitle}>{pacts.length} total pacts</p>
         </div>
-        <button className="btn btn-primary" onClick={() => setIsModalOpen(true)}>
+        <button className="btn btn-primary" onClick={() => window.dispatchEvent(new CustomEvent('open-create-pact'))}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
@@ -159,7 +165,7 @@ export default function PactsPageClient({ user }) {
               : filter === 'missed' ? "Clean record so far. Let's keep it that way."
               : 'Time to commit to something new.'
           }
-          action={filter === 'all' ? { label: '+ Create Your First Pact', onClick: () => setIsModalOpen(true) } : null}
+          action={filter === 'all' ? { label: '+ Create Your First Pact', onClick: () => window.dispatchEvent(new CustomEvent('open-create-pact')) } : null}
         />
       ) : (
         <LayoutGroup>
@@ -186,12 +192,6 @@ export default function PactsPageClient({ user }) {
         </LayoutGroup>
       )}
 
-      {/* Create Pact Modal */}
-      <CreatePactModal 
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onPactCreated={handlePactCreated}
-      />
     </div>
   );
 }

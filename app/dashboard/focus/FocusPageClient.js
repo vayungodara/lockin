@@ -30,7 +30,7 @@ export default function FocusPageClient({ user }) {
   const [broadcast, setBroadcast] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const { registerCallbacks, unregisterCallbacks } = useKeyboardShortcuts();
-  const { toggleTimer, mode, isRunning } = useFocus();
+  const { toggleTimer, mode, isRunning, switchMode } = useFocus();
 
   // Register keyboard shortcut for timer toggle
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function FocusPageClient({ user }) {
   ];
 
   // Current active tab: map context mode to selector
-  const activeMode = mode === 'work' ? 'work' : 'break';
+  const activeMode = mode; // 'work', 'break', or 'longBreak'
 
   return (
     <div className={styles.container}>
@@ -126,6 +126,7 @@ export default function FocusPageClient({ user }) {
               key={m.value}
               className={`${styles.modeButton} ${activeMode === m.value ? styles.modeButtonActive : ''}`}
               disabled={isRunning}
+              onClick={() => switchMode(m.value)}
               aria-pressed={activeMode === m.value}
             >
               {m.label}

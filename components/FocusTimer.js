@@ -9,6 +9,8 @@ import { buttonTap, pulseGlow } from '@/lib/animations';
 import styles from './FocusTimer.module.css';
 import { useEffect, useRef, useMemo } from 'react';
 
+const defaultPalette = ACCENT_PALETTES.find(p => p.id === DEFAULT_PALETTE_ID);
+
 export default function FocusTimer() {
   const {
     timeLeft,
@@ -30,11 +32,10 @@ export default function FocusTimer() {
   // Derive accent colors for SVG gradient stops directly from palette data.
   // SVG <stop> elements don't reliably support CSS custom properties,
   // so we resolve hex values from the palette definition instead.
-  const defaultPalette = ACCENT_PALETTES.find(p => p.id === DEFAULT_PALETTE_ID);
   const gradientColors = useMemo(() => {
     const palette = ACCENT_PALETTES.find(p => p.id === accent) || defaultPalette;
     return [palette.primary, palette.secondary, palette.tertiary];
-  }, [accent, defaultPalette]);
+  }, [accent]);
 
   useEffect(() => {
     if (sessionsCompleted > prevSessionsRef.current) {

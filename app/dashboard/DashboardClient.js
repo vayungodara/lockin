@@ -383,7 +383,7 @@ export default function DashboardClient({ user }) {
           >
             <div className={styles.sectionHeader}>
               <h2>{activePacts.length > 0 ? 'Active Pacts' : 'Recent Pacts'}</h2>
-              <a href="/dashboard/pacts" className={styles.viewAllLink}>View all</a>
+              <Link href="/dashboard/pacts" className={styles.viewAllLink}>View all</Link>
             </div>
             <LayoutGroup>
               <motion.div className={styles.pactsGrid}>

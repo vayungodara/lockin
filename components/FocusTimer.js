@@ -76,7 +76,7 @@ export default function FocusTimer() {
             fill="none"
           />
           <circle
-            className={`${styles.progressBar} ${mode === 'work' ? styles.workProgress : styles.breakProgress}`}
+            className={`${styles.progressBar} ${mode === 'work' ? styles.workProgress : mode === 'longBreak' ? styles.longBreakProgress : styles.breakProgress}`}
             cx="60"
             cy="60"
             r="54"

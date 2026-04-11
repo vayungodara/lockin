@@ -46,6 +46,11 @@
   filter: drop-shadow(0 0 12px rgba(var(--success-rgb), 0.4));
 }
 
+.longBreakProgress {
+  stroke: var(--info);
+  filter: drop-shadow(0 0 12px rgba(var(--info-rgb), 0.4));
+}
+
 .timeDisplay {
   position: absolute;
   top: 50%;
@@ -132,6 +137,11 @@
   transform: scale(1.05);
 }
 
+@keyframes breathe {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.02); }
+}
+
 /* Dark mode overrides for timer ring visibility */
 :global([data-theme="dark"]) .progressBg {
   stroke: rgba(var(--accent-primary-rgb), 0.18);
@@ -143,6 +153,10 @@
 
 :global([data-theme="dark"]) .breakProgress {
   filter: drop-shadow(0 0 16px rgba(var(--success-rgb), 0.6));
+}
+
+:global([data-theme="dark"]) .longBreakProgress {
+  filter: drop-shadow(0 0 16px rgba(var(--info-rgb), 0.6));
 }
 
 :global([data-theme="dark"]) .timerRing::after {

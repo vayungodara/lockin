@@ -15,7 +15,7 @@ const instrumentSans = Instrument_Sans({
   subsets: ['latin'],
   display: 'swap',
   variable: '--font-display',
-  weight: ['500', '600', '700'],
+  weight: 'variable',
 });
 
 export const viewport = {

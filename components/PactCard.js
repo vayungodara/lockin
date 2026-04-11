@@ -10,13 +10,10 @@ import { useToast } from '@/components/Toast';
 import { playCompletionSound, playMissSound } from '@/lib/sounds';
 import styles from './PactCard.module.css';
 
-const UNDO_DELAY_MS = 5000;
-
 export default function PactCard({ pact, onUpdate, onDelete }) {
   const [isPending, setIsPending] = useState(false);
   const isCompletingRef = useRef(false);
   const justCompletedRef = useRef(false);
-  const pendingActionRef = useRef(null);
   const [showBounce, setShowBounce] = useState(false);
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
@@ -33,18 +30,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     return () => clearTimeout(timer);
   }, [showBounce]);
 
-  // Cancel pending action on unmount — don't commit, since the optimistic
-  // UI update can cause unmount (list re-sort) which would bypass the undo window
-  useEffect(() => {
-    return () => {
-      if (pendingActionRef.current) {
-        clearTimeout(pendingActionRef.current.timer);
-        pendingActionRef.current = null;
-      }
-    };
-  }, []);
-
-  // --- Extracted commit functions (before the early return guard) ---
+  // --- Commit functions: write to DB immediately ---
 
   const commitComplete = useCallback(async () => {
     try {
@@ -130,6 +116,72 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     }
   }, [supabase, pact, onUpdate, toast]);
 
+  // --- Revert functions: undo a committed action ---
+
+  const revertComplete = useCallback(async () => {
+    setIsPending(true);
+    try {
+      // 1. Revert pact status back to active
+      const { error } = await supabase
+        .from('pacts')
+        .update({ status: 'active', completed_at: null })
+        .eq('id', pact?.id);
+
+      if (error) throw error;
+
+      // 2. Claw back XP by awarding negative amount (award_xp is SECURITY DEFINER,
+      //    handles negative values — subtracts from total_xp and recalculates level)
+      try {
+        const { awardXP, XP_REWARDS } = await import('@/lib/gamification');
+        await awardXP(supabase, pact?.user_id, 'pact_completed_reverted', -XP_REWARDS.PACT_COMPLETED, { pactId: pact?.id });
+      } catch (err) {
+        console.error('XP clawback failed:', err);
+      }
+
+      // 3. Recalculate streak after reverting
+      try {
+        const { calculateStreak } = await import('@/lib/streaks');
+        await calculateStreak(supabase, pact?.user_id);
+      } catch (err) {
+        console.error('Streak recalculation failed:', err);
+      }
+
+      // 4. Revert optimistic UI
+      if (onUpdate) {
+        onUpdate({ ...pact, status: 'active', completed_at: null });
+      }
+    } catch (err) {
+      console.error('Error reverting pact completion:', err);
+      toast.error('Failed to undo. Please try again.');
+    } finally {
+      setIsPending(false);
+      isCompletingRef.current = false;
+    }
+  }, [supabase, pact, onUpdate, toast]);
+
+  const revertMiss = useCallback(async () => {
+    setIsPending(true);
+    try {
+      const { error } = await supabase
+        .from('pacts')
+        .update({ status: 'active' })
+        .eq('id', pact?.id);
+
+      if (error) throw error;
+
+      // Revert optimistic UI
+      if (onUpdate) {
+        onUpdate({ ...pact, status: 'active' });
+      }
+    } catch (err) {
+      console.error('Error reverting pact miss:', err);
+      toast.error('Failed to undo. Please try again.');
+    } finally {
+      setIsPending(false);
+      isCompletingRef.current = false;
+    }
+  }, [supabase, pact, onUpdate, toast]);
+
   if (!pact) {
     return null;
   }
@@ -208,7 +260,12 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     isCompletingRef.current = true;
     setIsPending(true);
 
-    // Optimistic UI — confetti, sound, update parent immediately
+    // 1. Commit to DB immediately — no timer, no unmount risk
+    commitComplete().finally(() => {
+      setIsPending(false);
+    });
+
+    // 2. Optimistic UI — confetti, sound, update parent
     triggerConfetti();
     justCompletedRef.current = true;
     setShowBounce(true);
@@ -218,17 +275,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       onUpdate({ ...pact, status: 'completed', completed_at: new Date().toISOString() });
     }
 
-    // Schedule the real DB commit after UNDO_DELAY_MS
-    const timer = setTimeout(() => {
-      pendingActionRef.current = null;
-      commitComplete().finally(() => {
-        isCompletingRef.current = false;
-        setIsPending(false);
-      });
-    }, UNDO_DELAY_MS);
-
-    pendingActionRef.current = { timer, commit: commitComplete };
-
+    // 3. Toast with Undo — reverts the committed DB write
     const recurrenceMsg = pact.is_recurring && pact.recurrence_type
       ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
       : '';
@@ -236,15 +283,9 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     toast.success(`Pact completed!${recurrenceMsg}`, {
       label: 'Undo',
       onClick: () => {
-        clearTimeout(timer);
-        pendingActionRef.current = null;
-        isCompletingRef.current = false;
-        setIsPending(false);
         setShowBounce(false);
         justCompletedRef.current = false;
-        if (onUpdate) {
-          onUpdate({ ...pact, status: 'active', completed_at: null });
-        }
+        revertComplete();
       },
     });
   };
@@ -254,24 +295,19 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     isCompletingRef.current = true;
     setIsPending(true);
 
-    // Optimistic UI — sound, update parent immediately
+    // 1. Commit to DB immediately — no timer, no unmount risk
+    commitMiss().finally(() => {
+      setIsPending(false);
+    });
+
+    // 2. Optimistic UI — sound, update parent
     playMissSound();
 
     if (onUpdate) {
       onUpdate({ ...pact, status: 'missed' });
     }
 
-    // Schedule the real DB commit after UNDO_DELAY_MS
-    const timer = setTimeout(() => {
-      pendingActionRef.current = null;
-      commitMiss().finally(() => {
-        isCompletingRef.current = false;
-        setIsPending(false);
-      });
-    }, UNDO_DELAY_MS);
-
-    pendingActionRef.current = { timer, commit: commitMiss };
-
+    // 3. Toast with Undo — reverts the committed DB write
     const recurrenceMsg = pact.is_recurring && pact.recurrence_type
       ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
       : '';
@@ -279,13 +315,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     toast.warning(`Marked as missed.${recurrenceMsg}`, {
       label: 'Undo',
       onClick: () => {
-        clearTimeout(timer);
-        pendingActionRef.current = null;
-        isCompletingRef.current = false;
-        setIsPending(false);
-        if (onUpdate) {
-          onUpdate({ ...pact, status: 'active' });
-        }
+        revertMiss();
       },
     });
   };

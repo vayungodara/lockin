@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { createMockSupabase } from '../../setup/supabase-mock';
-import { checkStreakAtRisk, getStreakFreezeStatus, useStreakFreeze } from '@/lib/streaks-advanced';
+import { checkStreakAtRisk, getStreakFreezeStatus, applyStreakFreeze } from '@/lib/streaks-advanced';
 import { formatUTCDate } from '@/lib/streaks';
 
 describe('checkStreakAtRisk', () => {
@@ -173,12 +173,12 @@ describe('getStreakFreezeStatus', () => {
   });
 });
 
-describe('useStreakFreeze', () => {
+describe('applyStreakFreeze', () => {
   it('returns error when not authenticated', async () => {
     const { supabase } = createMockSupabase();
     supabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(false);
     expect(result.error).toBe('Not authenticated');
   });
@@ -187,7 +187,7 @@ describe('useStreakFreeze', () => {
     const { supabase, builder } = createMockSupabase();
     builder.mockReturnValue({ data: null, error: null });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(false);
     expect(result.error).toBe('Profile not found');
   });
@@ -203,7 +203,7 @@ describe('useStreakFreeze', () => {
       error: null,
     });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(false);
     expect(result.error).toContain('No freezes remaining');
   });
@@ -219,7 +219,7 @@ describe('useStreakFreeze', () => {
       error: null,
     });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(false);
     expect(result.error).toContain('Cooldown');
   });
@@ -235,7 +235,7 @@ describe('useStreakFreeze', () => {
       error: null,
     });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(false);
     expect(result.error).toBe('No active streak to freeze');
   });
@@ -251,7 +251,7 @@ describe('useStreakFreeze', () => {
       error: null,
     });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(true);
     expect(result.freezesRemaining).toBe(1);
   });
@@ -270,7 +270,7 @@ describe('useStreakFreeze', () => {
       error: null,
     });
 
-    const result = await useStreakFreeze(supabase);
+    const result = await applyStreakFreeze(supabase);
     expect(result.success).toBe(true);
     expect(result.freezesRemaining).toBe(2);
   });

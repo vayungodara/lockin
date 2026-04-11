@@ -2,12 +2,10 @@
 
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { FocusProvider } from '@/lib/FocusContext';
 import { KeyboardShortcutsProvider } from '@/lib/KeyboardShortcutsContext';
 import { NotificationProvider } from '@/lib/NotificationContext';
-import { pageTransition } from '@/lib/animations';
 import Sidebar from '@/components/Sidebar';
 import MobileNav from '@/components/MobileNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -16,9 +14,10 @@ import CreatePactModal from '@/components/CreatePactModal';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
+  const pathname = usePathname();
+  const isDashboard = pathname === '/dashboard';
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showCreatePact, setShowCreatePact] = useState(false);
-  const pathname = usePathname();
   const supabase = useMemo(() => createClient(), []);
 
   // Detect and persist the user's IANA timezone so streak calculations
@@ -101,8 +100,8 @@ export default function DashboardLayout({ user, children }) {
       <NotificationProvider>
         <KeyboardShortcutsProvider>
           <div id="dashboard-layout" className={styles.layout}>
-            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} />
-            <MobileNav />
+            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} hideXP={isDashboard} />
+            <MobileNav userId={user?.id} />
             <CommandPalette onCreatePact={() => setShowCreatePact(true)} />
             <CreatePactModal
               isOpen={showCreatePact}
@@ -112,16 +111,10 @@ export default function DashboardLayout({ user, children }) {
             <main
               id="main-content"
               className={styles.main}
-              style={{ marginLeft: sidebarExpanded ? 260 : 80 }}
+              style={{ transform: sidebarExpanded ? 'translateX(180px)' : 'translateX(0)' }}
             >
               <ErrorBoundary message="Something went wrong loading this page.">
-                <motion.div
-                  key={pathname}
-                  initial={pageTransition.initial}
-                  animate={pageTransition.animate}
-                >
-                  {children}
-                </motion.div>
+                <div className={styles.contentWrapper}>{children}</div>
               </ErrorBoundary>
             </main>
           </div>

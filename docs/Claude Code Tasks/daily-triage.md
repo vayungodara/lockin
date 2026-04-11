@@ -232,8 +232,13 @@ If checks fail, note "Vercel health check failed" in the triage report and conti
 - Backgrounds: warm tones (#FAF9F7 light, #121210 dark) — never cold white (#FAFAFA) or pure black (#000)
 - No 3-stat-card grids (colored circle icon + number + uppercase label pattern)
 - PactCard uses urgency hierarchy: overdue (red border, elevated), due today (amber), completed (muted + XP badge)
+- PactCard uses commit-then-revert undo pattern — complete/miss writes to DB immediately, undo reverts within 5s toast window. Don't flag the immediate DB write as a bug.
+- Urgency colors use dedicated `--urgency-amber` / `--urgency-red` tokens (fixed, independent of accent palette). Don't flag these as "should use --warning".
 - TodayBar replaces old StreakHero + DailySummaryCard — don't flag these as missing
 - Dashboard uses asymmetric 2-column layout (pacts 3fr, activity 2fr) with 1200px max-width
+- Sidebar animation uses `transform: translateX()` (GPU composited), not margin-left. Don't flag the static `margin-left: 80px` as a perf issue — only the transform is animated.
+- Focus Timer has 3 modes: work, break, longBreak. Long break has a distinct blue progress ring. Mode pills are wired to `switchMode` in FocusContext.
+- Supabase: `profiles` table has a `protect_gamification_cols` trigger that locks XP/level/streak columns from direct client UPDATE. `award_xp` RPC has XP cap (50) and event type allowlist.
 
 ---
 

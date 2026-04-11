@@ -104,6 +104,52 @@
   line-height: 1.4;
 }
 
+.actionBtn {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: var(--space-1) var(--space-3);
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(var(--accent-primary-rgb), 0.12);
+  color: var(--accent-primary);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.1s ease;
+  white-space: nowrap;
+}
+
+.actionBtn:hover {
+  background: rgba(var(--accent-primary-rgb), 0.2);
+  transform: scale(1.04);
+}
+
+.actionBtn:active {
+  transform: scale(0.96);
+}
+
+.success .actionBtn {
+  background: rgba(var(--success-rgb), 0.12);
+  color: var(--success);
+}
+
+.success .actionBtn:hover {
+  background: rgba(var(--success-rgb), 0.22);
+}
+
+.warning .actionBtn {
+  background: rgba(var(--warning-rgb), 0.12);
+  color: var(--warning);
+}
+
+.warning .actionBtn:hover {
+  background: rgba(var(--warning-rgb), 0.22);
+}
+
+.hasAction::after {
+  --toast-duration: 5s;
+}
+
 .close {
   flex-shrink: 0;
   display: flex;
@@ -164,4 +210,28 @@
 
 :global([data-theme="dark"]) .close:hover {
   background: rgba(255, 255, 255, 0.08);
+}
+
+:global([data-theme="dark"]) .actionBtn {
+  background: rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .actionBtn:hover {
+  background: rgba(var(--accent-primary-rgb), 0.28);
+}
+
+:global([data-theme="dark"]) .success .actionBtn {
+  background: rgba(var(--success-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .success .actionBtn:hover {
+  background: rgba(var(--success-rgb), 0.28);
+}
+
+:global([data-theme="dark"]) .warning .actionBtn {
+  background: rgba(var(--warning-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .warning .actionBtn:hover {
+  background: rgba(var(--warning-rgb), 0.28);
 }

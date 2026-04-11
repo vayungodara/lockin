@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import styles from './Toast.module.css';
 
@@ -16,28 +16,42 @@ export function useToast() {
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
-
-  const addToast = useCallback((message, type = 'info', duration = 4000) => {
-    const id = Date.now() + Math.random();
-    setToasts(prev => [...prev, { id, message, type }]);
-    
-    if (duration > 0) {
-      setTimeout(() => {
-        setToasts(prev => prev.filter(t => t.id !== id));
-      }, duration);
-    }
-    
-    return id;
-  }, []);
+  const timersRef = useRef({});
 
   const removeToast = useCallback((id) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+    if (timersRef.current[id]) {
+      clearTimeout(timersRef.current[id]);
+      delete timersRef.current[id];
+    }
   }, []);
 
-  const success = useCallback((message) => addToast(message, 'success'), [addToast]);
-  const error = useCallback((message) => addToast(message, 'error', 6000), [addToast]);
-  const warning = useCallback((message) => addToast(message, 'warning'), [addToast]);
-  const info = useCallback((message) => addToast(message, 'info'), [addToast]);
+  const addToast = useCallback((message, type = 'info', duration = 4000, action = null) => {
+    const id = Date.now() + Math.random();
+    const effectiveDuration = action ? 5000 : duration;
+    setToasts(prev => [...prev, { id, message, type, action }]);
+
+    if (effectiveDuration > 0) {
+      timersRef.current[id] = setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+        delete timersRef.current[id];
+      }, effectiveDuration);
+    }
+
+    return id;
+  }, []);
+
+  const handleActionClick = useCallback((toast) => {
+    if (toast.action?.onClick) {
+      toast.action.onClick();
+    }
+    removeToast(toast.id);
+  }, [removeToast]);
+
+  const success = useCallback((message, action = null) => addToast(message, 'success', 4000, action), [addToast]);
+  const error = useCallback((message, action = null) => addToast(message, 'error', 6000, action), [addToast]);
+  const warning = useCallback((message, action = null) => addToast(message, 'warning', 4000, action), [addToast]);
+  const info = useCallback((message, action = null) => addToast(message, 'info', 4000, action), [addToast]);
 
   return (
     <ToastContext.Provider value={{ addToast, removeToast, success, error, warning, info }}>
@@ -47,7 +61,7 @@ export function ToastProvider({ children }) {
           {toasts.map(toast => (
             <motion.div
               key={toast.id}
-              className={`${styles.toast} ${styles[toast.type]}`}
+              className={`${styles.toast} ${styles[toast.type]} ${toast.action ? styles.hasAction : ''}`}
               initial={{ opacity: 0, y: 50, scale: 0.9 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, x: 100, scale: 0.9 }}
@@ -78,7 +92,15 @@ export function ToastProvider({ children }) {
                 )}
               </div>
               <span className={styles.message}>{toast.message}</span>
-              <button 
+              {toast.action && (
+                <button
+                  className={styles.actionBtn}
+                  onClick={() => handleActionClick(toast)}
+                >
+                  {toast.action.label}
+                </button>
+              )}
+              <button
                 className={styles.close}
                 onClick={() => removeToast(toast.id)}
                 aria-label="Dismiss notification"

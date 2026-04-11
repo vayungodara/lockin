@@ -37,6 +37,10 @@ export default function MobileNav({ userId }) {
       setLevel(data.level || getLevelFromXP(data.total_xp || 0));
     }
     fetchLevel();
+
+    const handleXPUpdate = () => fetchLevel();
+    window.addEventListener('xp-updated', handleXPUpdate);
+    return () => window.removeEventListener('xp-updated', handleXPUpdate);
   }, [userId, supabase]);
 
   const isActive = (href) => {

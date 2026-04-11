@@ -77,8 +77,12 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
         Promise.all([xpPromise, streakPromise, partnerPromise]),
         new Promise(resolve => setTimeout(resolve, 10000)),
       ]);
+
+      // Signal Sidebar + MobileNav to refresh XP display
+      window.dispatchEvent(new CustomEvent('xp-updated'));
     } catch (err) {
       console.error('Error committing pact completion:', err);
+      isCompletingRef.current = false;
       // Revert optimistic UI on DB error
       if (onUpdate && pact) {
         onUpdate({ ...pact, status: 'active', completed_at: null });
@@ -108,6 +112,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       ).catch(err => console.error('Partner notify error:', err));
     } catch (err) {
       console.error('Error committing pact miss:', err);
+      isCompletingRef.current = false;
       // Revert optimistic UI on DB error
       if (onUpdate && pact) {
         onUpdate({ ...pact, status: 'active' });
@@ -146,10 +151,11 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
         console.error('Streak recalculation failed:', err);
       }
 
-      // 4. Revert optimistic UI
+      // 4. Revert optimistic UI + signal XP refresh
       if (onUpdate) {
         onUpdate({ ...pact, status: 'active', completed_at: null });
       }
+      window.dispatchEvent(new CustomEvent('xp-updated'));
     } catch (err) {
       console.error('Error reverting pact completion:', err);
       toast.error('Failed to undo. Please try again.');

@@ -110,10 +110,8 @@ export default function DashboardClient({ user }) {
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
-    // Refresh TodayBar and XPBar when a pact status changes
-    if (updatedPact.status === 'completed' || updatedPact.status === 'missed') {
-      setRefreshKey(k => k + 1);
-    }
+    // Refresh TodayBar and XPBar on any status change (including undo back to active)
+    setRefreshKey(k => k + 1);
   };
 
 

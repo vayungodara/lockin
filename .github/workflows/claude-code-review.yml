@@ -48,8 +48,19 @@ jobs:
                - Supabase: client vs server usage, RLS implications, missing error handling
                - React: missing deps in useEffect, stale state in callbacks, memory leaks
                - CSS: z-index conflicts, overflow issues, dark mode breakage, mobile layout bugs
-            4. Verify fixes actually work and don't introduce new issues.
-            5. Check what's NOT in the diff — missing migrations, missing test updates, stale imports.
+            4. Frontend & CSS:
+               - Hardcoded hex colors instead of CSS variables (breaks dark mode — recurring bug)
+               - Raw z-index values instead of tokens (--z-base through --z-tooltip)
+               - Wrong overflow property (must be clip, not hidden)
+               - background: var(--bg-primary) on page containers (should inherit --bg-secondary)
+               - Inline Framer Motion configs instead of @/lib/animations presets
+               - margin-left for layout animations instead of transform (causes jank)
+               - Responsive breakpoint mismatches (Sidebar uses 767px, DashboardLayout uses 768px)
+               - Modal blur breaking position:fixed children
+               - Missing createPortal SSR guard (typeof document !== 'undefined')
+               - Missing useModalScrollLock in new modals
+            5. Verify fixes actually work and don't introduce new issues.
+            6. Check what's NOT in the diff — missing migrations, missing test updates, stale imports, broken CustomEvent listeners.
 
             Post each finding as an inline review comment on the exact line where the issue is.
             Read REVIEW.md and CLAUDE.md for project-specific conventions.

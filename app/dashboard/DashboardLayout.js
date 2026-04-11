@@ -35,7 +35,7 @@ export default function DashboardLayout({ user, children }) {
           .from('profiles')
           .update({ timezone: detected })
           .eq('id', user.id)
-          .then(() => {}); // fire-and-forget
+          .then(({ error }) => { if (error) console.warn('Timezone sync failed:', error.message); });
       }
     } catch {
       // Intl API unavailable — timezone stays as DB default ('UTC')

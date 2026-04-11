@@ -95,7 +95,7 @@ Take conversation screenshots at each page for YOUR visual analysis. Write detai
 Navigate through each sidebar item:
 - **My Pacts** `/dashboard/pacts` — single-column pact list, filter tabs with counts, PactCard urgency hierarchy (overdue/today/completed), no stats bar
 - **Groups** `/dashboard/groups` — group cards with warm avatar backgrounds (terracotta/sage/amber tones), progress bars
-- **Focus Timer** `/dashboard/focus` — full-bleed centered timer ring (280px), mode pills (Focus/Short Break/Long Break), inline stats line, broadcast toggle chip, no stat grids
+- **Focus Timer** `/dashboard/focus` — full-bleed centered timer ring (280px), mode pills (Focus/Short Break/Long Break) wired to switchMode, long break has distinct blue ring color, inline stats line, broadcast toggle chip, no stat grids
 - **Stats** `/dashboard/stats` — compact inline streak ("🔥 N day streak · Best: N"), Activity Calendar, analytics with inline heading stats (no 3-stat grids), breakdown lists with colored dots
 - **Settings** `/dashboard/settings` — form layout, toggle states, theme switching, accent color circles with outline ring
 

@@ -292,6 +292,31 @@ Design doc: `/docs/plans/2026-03-08-ios-app-design.md`
 - **GitHub Actions:** Claude Code review (`claude-code-review.yml`) + general Claude action (`claude.yml`)
 - **License:** AGPL-3.0
 
+## Design Context
+
+> **For design work:** Use impeccable skills (`/critique`, `/polish`, `/arrange`, `/animate`, `/audit`, etc.). Full design brief is in `.impeccable.md`. Use `/impeccable teach` if `.impeccable.md` needs updating.
+
+**Users:** University students using social accountability to beat procrastination. The app should feel like their personal system — proud ownership through XP, streaks, and level badges.
+
+**Brand:** "Duolingo grew up for university." Motivating, Personal, Polished.
+
+**References:** BeReal + Duolingo (social pressure + gamification DNA), Arc Browser + Linear (design language — warm editorial, strategic color).
+
+**Anti-references:** Generic SaaS / AI-generated UI (gradient blobs, icon grids, identical hovers), minimalist/sterile (Todoist, Things 3), cartoon RPG (Habitica).
+
+**Design Principles:**
+1. Earned color, not decoration — color appears on meaningful events, not everywhere
+2. Social proof over empty states — surface friend activity as first-class content
+3. Gamification with taste — XP/streaks/confetti stay, executed with editorial polish
+4. Personal, not personalized — feels like their app (their streaks, their accent color)
+5. Motion as meaning — dashboard motion is calm/utilitarian, landing is theatrical
+
+**Key Components:**
+- `TodayBar` — replaces StreakHero + DailySummaryCard. Unified status surface with streak, pacts due, focus time, streak-risk/freeze controls, and milestone celebrations.
+- `PactCard` — urgency hierarchy: overdue (red/elevated), due today (amber), completed (muted + XP badge), future (default).
+- XP visible in Sidebar (progress ring) and MobileNav (level badge), not just dashboard header.
+- Icons: `@phosphor-icons/react` for UI chrome. Keep emojis for content (templates, categories).
+
 ## Current Status
 
 **Live on Vercel** — github.com/vayungodara/lockin

@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { DM_Sans } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
-import Navbar from '@/components/Navbar';
-import ParticleBackground from '@/components/ParticleBackground';
+import NavbarLanding from '@/components/NavbarLanding';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { ACCENT_PALETTES } from '@/lib/accentColors';
@@ -13,118 +13,42 @@ import styles from '../app/page.module.css';
 import {
   buttonHover,
   buttonTap,
-  iconHover,
-  revealUp,
   cardHover,
-  smoothTransition,
-  quickTransition,
   easeOutQuint,
   prefersReducedMotion,
+  smoothTransition,
+  quickTransition,
 } from '@/lib/animations';
 
-const features = [
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    title: "Personal Pacts",
-    description: "Make commitments that stick. Set deadlines, check in daily, and build accountability streaks.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-        <path d="M23 21V19C23 17.14 21.73 15.57 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M16 3.13C17.73 3.57 19 5.14 19 7C19 8.86 17.73 10.43 16 10.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    title: "Group Accountability",
-    description: "See who is pulling their weight and who is slacking. No more carrying the team alone.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="2"/>
-        <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    title: "Task Ownership",
-    description: "Every task has one owner and one deadline. Crystal clear responsibility, no room for excuses.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    title: "Activity Feed",
-    description: "Real-time updates on who completed what. Social pressure works — let it work for you.",
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-        <path d="M12 6V12L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-      </svg>
-    ),
-    title: "Focus Timer",
-    description: "Pomodoro-style focus sessions. Track your deep work and compete with your past self.",
-    isHero: true,
-  },
-  {
-    icon: (
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      </svg>
-    ),
-    title: "Streaks & Stats",
-    description: "Build momentum with streaks. See your progress over time and celebrate your wins.",
-    isHero: true,
-  },
-];
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-body',
+  weight: ['400', '500', '600'],
+});
 
-const steps = [
-  {
-    number: "1",
-    title: "Sign in with Google",
-    description: "Use your university email. Takes 5 seconds. No passwords to remember.",
-  },
-  {
-    number: "2",
-    title: "Create your first pact",
-    description: "What will you commit to? Make it specific, make it achievable.",
-  },
-  {
-    number: "3",
-    title: "Lock in and deliver",
-    description: "Complete it or miss it — either way, it shows. Your reputation is on the line.",
-  },
-];
-
-export default function LandingPageClient({ isAuthenticated = false }) {
+export default function LandingPageClient({ isAuthenticated = false, returnTo }) {
   const router = useRouter();
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
 
-  const streakCount = 7 + Object.values(checkedPacts).filter(Boolean).length - 1;
+  const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
+  const streakCount = 7 + checkedCount - 1;
   const allComplete = Object.values(checkedPacts).every(Boolean);
 
   const calendarLevels = [3,1,2,0,3,2,1,3,2,3,1,0,2,3,2,1,3,0,2,3,1,2,3,2,0,1,3,2];
-  const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
   const extraChecks = checkedCount - 1;
-  let emptyFilled = 0;
-  const activeLevels = calendarLevels.map((level) => {
-    if (level === 0 && emptyFilled < extraChecks) {
-      emptyFilled++;
-      return 3;
-    }
-    return level;
-  });
+  const activeLevels = (() => {
+    let filled = 0;
+    return calendarLevels.map((level) => {
+      if (level === 0 && filled < extraChecks) {
+        filled++;
+        return 3;
+      }
+      return level;
+    });
+  })();
 
   const handleCta = async () => {
     if (isAuthenticated) {
@@ -132,10 +56,14 @@ export default function LandingPageClient({ isAuthenticated = false }) {
       return;
     }
     const supabase = createClient();
+    const callbackUrl = new URL('/auth/callback', window.location.origin);
+    if (returnTo && typeof returnTo === 'string' && returnTo.startsWith('/') && !returnTo.startsWith('//')) {
+      callbackUrl.searchParams.set('next', returnTo);
+    }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
+        redirectTo: callbackUrl.toString(),
       },
     });
     if (error) {
@@ -144,265 +72,185 @@ export default function LandingPageClient({ isAuthenticated = false }) {
   };
 
   return (
-    <>
-      <ParticleBackground particleCount={50} speed={0.25} connectDistance={90} />
-      <Navbar />
-      
-      <main className={styles.main}>
+    <div className={dmSans.variable}>
+      <NavbarLanding isAuthenticated={isAuthenticated} />
+
+      <main id="main-content" className={styles.main}>
+        {/* ===== HERO SECTION ===== */}
         <section className={styles.hero}>
-          <motion.div
-            className={styles.heroVisual}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: easeOutQuint }}
-          >
-            {/* Floating cards: entrance slide + ambientFloat-style infinite bob.
-               Kept inline because they combine per-property transitions with staggered delays. */}
-            <motion.div
-              className={`${styles.floatingCard} ${styles.card1}`}
-              initial={{ opacity: 0, x: 30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -8, 0] }}
-              transition={{
-                opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                ...(reducedMotion ? {} : { y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: "easeInOut" } })
-              }}
-            >
-              <div className={styles.cardIcon}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M21 12V19C21 20.1046 20.1046 21 19 21H5C3.89543 21 3 20.1046 3 19V5C3 3.89543 3.89543 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-              <span>Pact completed!</span>
-            </motion.div>
-
-            <motion.div
-              className={`${styles.floatingCard} ${styles.card2}`}
-              initial={{ opacity: 0, x: -30, y: 10 }}
-              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -10, 0] }}
-              transition={{
-                opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                ...(reducedMotion ? {} : { y: { delay: 1.4, duration: 4, repeat: Infinity, ease: "easeInOut" } })
-              }}
-            >
-              <div className={styles.cardIcon} style={{ background: 'var(--warning-light)', color: 'var(--warning)' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span>2 hours left</span>
-            </motion.div>
-
-            <motion.div
-              className={`${styles.floatingCard} ${styles.card3}`}
-              initial={{ opacity: 0, x: 30, y: -10 }}
-              animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -6, 0] }}
-              transition={{
-                opacity: { delay: 1, duration: 0.5, ease: easeOutQuint },
-                x: { delay: 1, duration: 0.5, ease: easeOutQuint },
-                ...(reducedMotion ? {} : { y: { delay: 1.6, duration: 3.8, repeat: Infinity, ease: "easeInOut" } })
-              }}
-            >
-              <div className={styles.cardIcon} style={{ background: 'var(--info-light)', color: 'var(--info)' }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M23 21V19C23 17.14 21.73 15.57 20 15.13" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                  <path d="M16 3.13C17.73 3.57 19 5.14 19 7C19 8.86 17.73 10.43 16 10.87" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                </svg>
-              </div>
-              <span>Alex joined</span>
-            </motion.div>
-          </motion.div>
-
-          <motion.div
-            className={styles.heroTag}
-            initial={{ opacity: 0, y: -14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: easeOutQuint }}
-          >
-            {/* Ambient pulse dot — unique small loop, kept inline */}
-            <motion.span
-              className={styles.heroTagDot}
-              animate={reducedMotion ? {} : { scale: [1, 1.15, 1], opacity: [1, 0.8, 1] }}
-              transition={reducedMotion ? {} : { duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-            />
-            Built for students who mean business
-          </motion.div>
-          
-          <motion.h1
-            className={styles.heroTitle}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15, ease: easeOutQuint }}
-          >
-            <span className={styles.titleLine}>
-              Stop saying {/* Strikethrough wipe — unique backgroundSize animation, no preset equivalent */}
-              <motion.span
-                className={styles.strikethrough}
-                initial={{ backgroundSize: "0% 3px" }}
-                animate={{ backgroundSize: "100% 3px" }}
-                transition={{ delay: 0.8, duration: 0.6, ease: easeOutQuint }}
-              >tomorrow</motion.span>
-            </span>
-            <br />
-            <motion.span
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.6, ease: easeOutQuint }}
-            >
-              Start locking in <span className="text-gradient">today</span>
-            </motion.span>
-          </motion.h1>
-          
-          <motion.p
-            className={styles.heroDescription}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
-          >
-            The app that makes sure tomorrow actually comes.
-            {' '}Track commitments, keep your group honest, and finally stop procrastinating.
-          </motion.p>
-          
-          <motion.div
-            className={styles.heroCtas}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
-          >
-            <motion.div whileHover={buttonHover} whileTap={buttonTap}>
-              <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
-                Start Locking In
-                <motion.svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 3 }}
-                  transition={quickTransition}
-                >
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </motion.svg>
-              </button>
-            </motion.div>
-            <motion.div whileHover={buttonHover} whileTap={buttonTap}>
-              <Link href="#how-it-works" className="btn btn-secondary">
-                See How It Works
-              </Link>
-            </motion.div>
-          </motion.div>
-          
-          <motion.div
-            className={styles.heroStats}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.55, ease: easeOutQuint }}
-          >
-            {[
-              { number: "100%", label: "Free forever" },
-              { number: "2min", label: "To get started" },
-              { number: "0", label: "More excuses" },
-            ].map((stat, i) => (
+          <div className={styles.heroGrid}>
+            {/* LEFT COLUMN — text content */}
+            <div className={styles.heroContent}>
+              {/* Pill tag */}
               <motion.div
-                key={stat.label}
-                className={styles.stat}
-                initial={{ opacity: 0, y: 12 }}
+                className={styles.heroTag}
+                initial={{ opacity: 0, y: -14 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.65 + i * 0.08, duration: 0.4, ease: easeOutQuint }}
+                transition={{ duration: 0.5, ease: easeOutQuint }}
               >
-                <motion.span
-                  className={styles.statNumber}
-                  initial={{ opacity: 0, scale: 0.75 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: 0.7 + i * 0.08, duration: 0.35, ease: easeOutQuint }}
-                >
-                  {stat.number}
-                </motion.span>
-                <span className={styles.statLabel}>{stat.label}</span>
+                <span className={styles.heroTagDot} />
+                Built for students
               </motion.div>
-            ))}
-          </motion.div>
-        </section>
 
-        <section id="features" className={styles.features}>
-          <motion.div
-            className={styles.sectionHeader}
-            {...revealUp}
-            viewport={{ amount: 0.5 }}
-          >
-            <h2>Everything you need to <span className="text-gradient">get stuff done</span></h2>
-            <p>No more empty promises. LockIn gives you the tools and the social pressure to follow through.</p>
-          </motion.div>
-          
-          <div className={styles.featureGrid}>
-            {features.map((feature, index) => (
+              {/* Headline */}
+              <motion.h1
+                className={styles.heroTitle}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.1, ease: easeOutQuint }}
+              >
+                Stop lying to<br />
+                your <span className={styles.heroFaded}>future self.</span>
+              </motion.h1>
+
+              {/* Description */}
+              <motion.p
+                className={styles.heroDescription}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
+              >
+                The app that makes sure tomorrow actually comes.
+                {' '}Track commitments, keep your group honest, and finally stop procrastinating.
+              </motion.p>
+
+              {/* Dual CTAs */}
               <motion.div
-                key={feature.title}
-                className={`${styles.featureCard} ${feature.isHero ? styles.featureCardLarge : ''}`}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.3 }}
-                transition={{ duration: 0.5, delay: index * 0.06, ease: easeOutQuint }}
-                whileHover={cardHover}
+                className={styles.heroCtas}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
               >
-                <motion.div
-                  className={styles.featureIcon}
-                  whileHover={iconHover}
+                <motion.button
+                  onClick={handleCta}
+                  className={styles.ctaPrimary}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
                 >
-                  {feature.icon}
-                </motion.div>
-                <h3>{feature.title}</h3>
-                <p>{feature.description}</p>
+                  Start Locking In
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </motion.button>
+                <Link href="#how-it-works" className={styles.ctaOutline}>
+                  See How It Works
+                </Link>
               </motion.div>
-            ))}
+
+              {/* Social proof */}
+              <motion.div
+                className={styles.socialProof}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
+              >
+                <div className={styles.avatarStack}>
+                  {['indigo', 'ocean', 'rose'].map((id, i) => (
+                    <div
+                      key={id}
+                      className={styles.avatar}
+                      style={{
+                        backgroundColor: ACCENT_PALETTES.find(p => p.id === id)?.primary || ACCENT_PALETTES.find(p => p.id === 'indigo')?.primary,
+                        zIndex: 3 - i,
+                      }}
+                    />
+                  ))}
+                </div>
+                <p>Join students who are finally getting things done.</p>
+              </motion.div>
+            </div>
+
+            {/* RIGHT COLUMN — floating cards (desktop only) */}
+            <div className={styles.heroVisual}>
+              <div className={styles.decorativeRing} />
+
+              {/* Completed pact card */}
+              <motion.div
+                className={`${styles.floatingCard} ${styles.cardCompleted}`}
+                initial={{ opacity: 0, x: 30, y: 10 }}
+                animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -8, 0] }}
+                transition={{
+                  opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
+                  x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
+                  ...(reducedMotion ? {} : { y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: 'easeInOut' } }),
+                }}
+              >
+                <div className={styles.cardHeader}>
+                  <div className={styles.cardBadge} data-status="done">Completed</div>
+                  <span className={styles.cardTime}>2h ago</span>
+                </div>
+                <h4>Finish CS homework</h4>
+                <p className={styles.cardBody}>Pact completed on time!</p>
+                <div className={styles.cardFooter}>
+                  <span className={styles.cardXp}>+25 XP earned</span>
+                  <span>🔥 7 day streak</span>
+                </div>
+              </motion.div>
+
+              {/* Active pact card */}
+              <motion.div
+                className={`${styles.floatingCard} ${styles.cardActive}`}
+                initial={{ opacity: 0, x: -30, y: 10 }}
+                animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -12, 0] }}
+                transition={{
+                  opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
+                  x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
+                  ...(reducedMotion ? {} : { y: { delay: 1.4, duration: 4, repeat: Infinity, ease: 'easeInOut' } }),
+                }}
+              >
+                <div className={styles.cardTopRow}>
+                  <div className={styles.cardIcon}>📚</div>
+                  <div>
+                    <h4>Read 30 pages</h4>
+                    <span className={styles.cardSubtext}>Bio 201</span>
+                  </div>
+                </div>
+                <div className={styles.cardProgress}>
+                  <div className={styles.cardProgressHeader}>
+                    <span>Time remaining</span>
+                    <span className={styles.cardTimer}>06:00:00</span>
+                  </div>
+                  <div className={styles.progressBar}>
+                    <div className={styles.progressFill} style={{ width: '45%' }} />
+                  </div>
+                </div>
+                <div className={styles.cardWarning}>
+                  ⚠️ Due today — your group is watching.
+                </div>
+              </motion.div>
+            </div>
           </div>
         </section>
 
-        <motion.section
-          className={styles.socialProof}
-          {...revealUp}
-          viewport={{ amount: 0.5 }}
-        >
-          <div className={styles.socialProofInner}>
-            <div className={styles.avatarStack}>
-              {[
-                ACCENT_PALETTES.find(p => p.id === 'indigo').primary,
-                ACCENT_PALETTES.find(p => p.id === 'ocean').primary,
-                ACCENT_PALETTES.find(p => p.id === 'rose').primary,
-                ACCENT_PALETTES.find(p => p.id === 'emerald').primary,
-                ACCENT_PALETTES.find(p => p.id === 'violet').primary,
-              ].map((color, i) => (
-                <div key={i} className={styles.avatar} style={{ backgroundColor: color, zIndex: 5 - i }} />
-              ))}
-            </div>
-            <p className={styles.socialProofText}>
-              Join students who are finally getting things done
-            </p>
-          </div>
-        </motion.section>
-
+        {/* ===== DASHBOARD PREVIEW — Task 4 ===== */}
         <section className={styles.appPreview}>
           <motion.div
             className={styles.sectionHeader}
-            {...revealUp}
-            viewport={{ amount: 0.5 }}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.15, once: true }}
+            transition={{ duration: 0.5, ease: easeOutQuint }}
           >
-            <h2>Your accountability <span className="text-gradient">command center</span></h2>
-            <p>Everything you need in one clean dashboard. No clutter, no distractions.</p>
+            <h2>
+              Your accountability{' '}
+              <span className={styles.textGradient}>command center</span>.
+            </h2>
+            <p>
+              Not another to-do list you&apos;ll ignore. A real-time dashboard
+              tracking your pacts, streaks, and who&apos;s actually delivering.
+            </p>
           </motion.div>
 
           <motion.div
             className={styles.browserFrame}
+            aria-hidden="true"
+            role="presentation"
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ amount: 0.2 }}
+            viewport={{ amount: 0.1, once: true }}
             transition={{ duration: 0.6, ease: easeOutQuint }}
           >
+            {/* Browser chrome bar */}
             <div className={styles.browserBar}>
               <div className={styles.browserDots}>
                 <span className={styles.dotRed} />
@@ -411,42 +259,99 @@ export default function LandingPageClient({ isAuthenticated = false }) {
               </div>
               <div className={styles.browserUrl}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="2"/>
-                  <path d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  <rect
+                    x="3"
+                    y="11"
+                    width="18"
+                    height="11"
+                    rx="2"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
                 </svg>
                 lockin.app/dashboard
               </div>
             </div>
 
+            {/* Mock dashboard layout */}
             <div className={styles.mockDashboard}>
+              {/* Sidebar */}
               <div className={styles.mockSidebar}>
                 <div className={styles.mockSidebarLogo}>
                   <div className={styles.mockLogoIcon} />
                 </div>
                 <div className={styles.mockNavItems}>
-                  <div className={`${styles.mockNavItem} ${styles.mockNavActive}`}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </div>
-                  <div className={styles.mockNavItem}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/><path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/></svg>
-                  </div>
-                  <div className={styles.mockNavItem}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/><circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/></svg>
-                  </div>
-                  <div className={styles.mockNavItem}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </div>
+                  {[
+                    {
+                      label: 'Overview',
+                      active: true,
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Pacts',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Groups',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                          <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Timer',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                          <path d="M12 6V12L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                        </svg>
+                      ),
+                    },
+                    {
+                      label: 'Stats',
+                      svg: (
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                          <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      ),
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className={`${styles.mockNavItem} ${item.active ? styles.mockNavActive : ''}`}
+                    >
+                      {item.svg}
+                    </div>
+                  ))}
                 </div>
               </div>
 
+              {/* Main content area */}
               <div className={styles.mockMain}>
-                <div className={styles.mockGreeting}>
-                  <div className={styles.mockGreetingText}>
-                    <div className={styles.mockTextLine} style={{ width: '55%', height: '14px' }} />
-                    <div className={styles.mockTextLine} style={{ width: '35%', height: '10px', opacity: 0.5 }} />
+                {/* Header with streak badge */}
+                <div className={styles.mockHeader}>
+                  <div className={styles.mockHeaderText}>
+                    <h3>Today&apos;s Pacts</h3>
                   </div>
                   <div className={styles.mockStreakBadge}>
-                    <span className={styles.mockFireIcon}>🔥</span>
+                    <span>🔥</span>
                     <AnimatePresence mode="popLayout">
                       <motion.span
                         key={streakCount}
@@ -461,63 +366,126 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                   </div>
                 </div>
 
+                {/* Pact cards with colored left borders */}
                 <div className={styles.mockCards}>
                   {[
-                    { title: 'Finish CS homework', meta: 'Due today', warning: false },
-                    { title: 'Read 30 pages', meta: '6 hours left', warning: true },
-                    { title: 'Go to the gym', meta: 'Tomorrow', warning: false },
+                    {
+                      title: 'Finish CS homework',
+                      meta: 'Due today',
+                      status: 'done',
+                      statusLabel: 'Done',
+                      color: 'green',
+                    },
+                    {
+                      title: 'Read 30 pages',
+                      meta: '6 hours left',
+                      status: 'progress',
+                      statusLabel: 'In Progress',
+                      color: 'amber',
+                    },
+                    {
+                      title: 'Go to the gym',
+                      meta: 'Tomorrow',
+                      status: 'upcoming',
+                      statusLabel: 'Upcoming',
+                      color: 'indigo',
+                    },
                   ].map((pact, i) => (
                     <motion.div
                       key={pact.title}
                       className={styles.mockPactCard}
                       initial={{ opacity: 0, x: -10 }}
                       whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ amount: 0.3 }}
-                      transition={{ ...smoothTransition, delay: 0.3 + i * 0.1, duration: 0.4 }}
+                      viewport={{ amount: 0.1, once: true }}
+                      transition={{
+                        ...smoothTransition,
+                        delay: 0.3 + i * 0.1,
+                        duration: 0.4,
+                      }}
                     >
-                      <div className={styles.mockPactHeader}>
-                        <motion.button
-                          className={`${styles.mockCheckbox} ${styles.mockCheckboxClickable} ${!checkedPacts[i] ? styles.mockUnchecked : ''}`}
-                          onClick={() => setCheckedPacts(prev => ({ ...prev, [i]: !prev[i] }))}
-                          whileTap={{ scale: 0.85 }}
-                          animate={checkedPacts[i] ? { scale: [1, 1.2, 1] } : { scale: 1 }}
-                          transition={{ duration: 0.25 }}
-                        >
-                          <motion.svg
-                            width="10" height="10" viewBox="0 0 24 24" fill="none"
-                            initial={false}
-                            animate={{ opacity: checkedPacts[i] ? 1 : 0, scale: checkedPacts[i] ? 1 : 0.5 }}
-                            transition={{ duration: 0.15 }}
-                          >
-                            <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                          </motion.svg>
-                        </motion.button>
-                        <span
-                          className={styles.mockPactTitle}
-                          style={{
-                            textDecoration: checkedPacts[i] ? 'line-through' : 'none',
-                            opacity: checkedPacts[i] ? 0.45 : 1,
-                            transition: 'opacity 0.25s, text-decoration 0.25s',
-                          }}
-                        >
-                          {pact.title}
-                        </span>
-                      </div>
-                      <div className={styles.mockPactMeta}>
-                        <span className={pact.warning ? styles.mockDeadlineWarning : styles.mockDeadline}>
-                          {pact.meta}
-                        </span>
+                      <div
+                        className={`${styles.mockCardBorder} ${styles[`border${pact.color.charAt(0).toUpperCase() + pact.color.slice(1)}`]}`}
+                      />
+                      <div className={styles.mockPactContent}>
+                        <div className={styles.mockPactHeader}>
+                          <div className={styles.mockPactTop}>
+                            <span
+                              className={`${styles.statusBadge} ${styles[`status${pact.color.charAt(0).toUpperCase() + pact.color.slice(1)}`]}`}
+                            >
+                              {pact.statusLabel}
+                            </span>
+                            <span className={styles.mockPactMeta}>
+                              {pact.meta}
+                            </span>
+                          </div>
+                          <div className={styles.mockPactRow}>
+                            <motion.button
+                              className={`${styles.mockCheckbox} ${!checkedPacts[i] ? styles.mockUnchecked : ''}`}
+                              onClick={() =>
+                                setCheckedPacts((prev) => ({
+                                  ...prev,
+                                  [i]: !prev[i],
+                                }))
+                              }
+                              tabIndex={-1}
+                              whileTap={{ scale: 0.85 }}
+                              animate={
+                                checkedPacts[i]
+                                  ? { scale: [1, 1.2, 1] }
+                                  : { scale: 1 }
+                              }
+                              transition={{ duration: 0.25 }}
+                            >
+                              <motion.svg
+                                width="10"
+                                height="10"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                initial={false}
+                                animate={{
+                                  opacity: checkedPacts[i] ? 1 : 0,
+                                  scale: checkedPacts[i] ? 1 : 0.5,
+                                }}
+                                transition={{ duration: 0.15 }}
+                              >
+                                <path
+                                  d="M20 6L9 17L4 12"
+                                  stroke="white"
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </motion.svg>
+                            </motion.button>
+                            <span
+                              className={styles.mockPactTitle}
+                              style={{
+                                textDecoration: checkedPacts[i]
+                                  ? 'line-through'
+                                  : 'none',
+                                opacity: checkedPacts[i] ? 0.4 : 1,
+                              }}
+                            >
+                              {pact.title}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </motion.div>
                   ))}
                 </div>
 
+                {/* Activity calendar */}
                 <motion.div
                   className={styles.mockCalendar}
                   initial={{ opacity: 0, y: 24 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ amount: 0.3 }}
-                  transition={{ duration: 0.5, delay: 0.6, ease: easeOutQuint }}
+                  viewport={{ amount: 0.1, once: true }}
+                  transition={{
+                    duration: 0.5,
+                    delay: 0.6,
+                    ease: easeOutQuint,
+                  }}
                 >
                   <div className={styles.mockCalendarHeader}>
                     <span>Activity</span>
@@ -530,7 +498,6 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                         className={`${styles.mockCalendarCell} ${styles[`mockLevel${level}`]}`}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 0.3 }}
-                        layout
                       />
                     ))}
                   </div>
@@ -539,6 +506,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             </div>
           </motion.div>
 
+          {/* Celebration when all pacts checked */}
           <AnimatePresence>
             {allComplete && (
               <motion.div
@@ -549,151 +517,235 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                 transition={{ duration: 0.5, ease: easeOutQuint }}
               >
                 <p>See? That felt good. Imagine that every day.</p>
-                <motion.div whileHover={buttonHover} whileTap={buttonTap}>
-                  <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
-                    Start Locking In
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </button>
-                </motion.div>
+                <motion.button
+                  onClick={handleCta}
+                  className={styles.ctaPrimary}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
+                >
+                  Start Locking In
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                    <path
+                      d="M5 12H19M19 12L12 5M19 12L12 19"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </motion.button>
               </motion.div>
             )}
           </AnimatePresence>
         </section>
 
-        <section id="how-it-works" className={styles.howItWorks}>
-          <motion.div
-            className={styles.sectionHeader}
-            {...revealUp}
-            viewport={{ amount: 0.5 }}
-          >
-            <h2>Get started in <span className="text-gradient">3 simple steps</span></h2>
-            <p>No complicated setup. No learning curve. Just accountability.</p>
-          </motion.div>
-          
-          <div className={styles.steps}>
-            {steps.map((step, index) => {
-              // Vertical rhythm stagger: step 1 baseline, step 2 raised, step 3 slightly lowered
-              const staggerOffsets = [0, -12, 8];
-              const staggerY = staggerOffsets[index] || 0;
-              return (
-              <motion.div
-                key={step.number}
-                className={styles.step}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: staggerY }}
-                viewport={{ amount: 0.3 }}
-                transition={{ duration: 0.5, delay: index * 0.1, ease: easeOutQuint }}
-                whileHover={{ y: staggerY + cardHover.y, transition: cardHover.transition }}
-              >
-                <motion.div
-                  className={styles.stepNumber}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ amount: 0.3 }}
-                  transition={{ delay: 0.15 + index * 0.08, duration: 0.35, ease: easeOutQuint }}
-                >
-                  {step.number}
-                </motion.div>
-                <h3>{step.title}</h3>
-                <p>{step.description}</p>
-              </motion.div>
-              );
-            })}
-          </div>
-        </section>
-        
-        <section className={styles.ctaSection}>
-          <motion.div
-            className={styles.ctaCard}
-            {...revealUp}
-            viewport={{ amount: 0.4 }}
-          >
-            <motion.h2
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
-            >
-              Ready to stop making excuses?
-            </motion.h2>
-            <motion.p
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }}
-              transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}
-            >
-              Join students who are finally getting things done. Free, simple, and it works.
-            </motion.p>
-            <motion.div
-              whileHover={buttonHover}
-              whileTap={buttonTap}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ amount: 0.3 }}
-              transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
-            >
-              <button onClick={handleCta} className={`btn btn-primary ${styles.ctaButton}`}>
-                Start Locking In
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-            </motion.div>
-          </motion.div>
-        </section>
-        
-        <motion.footer
-          className={styles.footer}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ amount: 0.1 }}
-          transition={{ duration: 0.5, ease: easeOutQuint }}
-        >
-          <div className={styles.footerContent}>
-            <div className={styles.footerTop}>
-              <div className={styles.footerBrand}>
-                <div className={styles.footerLogo}>
-                  <span className={styles.logoIcon}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                      <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                  </span>
-                  LockIn
-                </div>
-                <p className={styles.footerTagline}>
-                  The app that makes sure tomorrow actually comes.
-                </p>
-              </div>
-
-              <div className={styles.footerLinks}>
-                <div className={styles.footerColumn}>
-                  <h4 className={styles.footerColumnTitle}>Product</h4>
-                  <a href="#features" className={styles.footerLink}>Features</a>
-                  <a href="#how-it-works" className={styles.footerLink}>How It Works</a>
-                  <button onClick={handleCta} className={styles.footerLink}>Get Started</button>
-                </div>
-                <div className={styles.footerColumn}>
-                  <h4 className={styles.footerColumnTitle}>Project</h4>
-                  <a href="https://github.com/vayungodara/lockin" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>
-                    GitHub
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <div className={styles.footerBottom}>
-              <p className={styles.footerText}>
-                Built by Vayun Godara
+        {/* ===== FEATURES DARK SECTION — Task 5 ===== */}
+        <section id="features" className={styles.featuresDark}>
+          <div className={styles.featuresInner}>
+            <motion.div className={styles.featuresLeft}
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+              <h2 className={styles.featuresHeading}>Why you&apos;ll actually do it this time.</h2>
+              <p className={styles.featuresDescription}>
+                Standard to-do lists rely on motivation. Motivation fades. LockIn relies on two
+                irrefutable human truths: we care what our friends think, and streaks are addictive.
               </p>
+              <ul className={styles.featureChecklist}>
+                {['Google OAuth — 5-second signup', 'Real-time activity feed', 'XP, levels & achievements'].map((item) => (
+                  <li key={item} className={styles.featureCheckItem}>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                      <circle cx="12" cy="12" r="10" fill="var(--accent-primary)" opacity="0.2"/>
+                      <path d="M9 12L11 14L15 10" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            <div className={styles.featuresRight}>
+              {/* Wide card: Personal Pacts */}
+              <motion.div className={`${styles.bentoCard} ${styles.bentoWide}`}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Personal Pacts</h3>
+                <p>Make commitments that stick. Set deadlines, track daily check-ins, build accountability streaks. Choose from 20+ pact templates or create your own.</p>
+                <div className={styles.bentoReward}>
+                  <div className={styles.bentoRewardLabel}>Active Pact</div>
+                  <div className={styles.bentoRewardStatus}>&#10003; Completed on time</div>
+                  <div className={styles.bentoRewardXp}>+50 XP</div>
+                </div>
+              </motion.div>
+
+              {/* Half card: Group Accountability */}
+              <motion.div className={styles.bentoCard}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Group Accountability</h3>
+                <p>See who is pulling their weight and who is slacking. Kanban boards, task ownership, real-time activity. No more carrying the team alone.</p>
+                <div className={styles.bentoAvatars}>
+                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'ocean')?.primary || '#3B82F6' }} />
+                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'emerald')?.primary || '#10B981' }} />
+                  <div className={styles.bentoAvatarMore}>+4</div>
+                </div>
+              </motion.div>
+
+              {/* Half card: Focus Timer */}
+              <motion.div className={`${styles.bentoCard} ${styles.bentoTimer}`}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
+                whileHover={cardHover}>
+                <h3>Focus Timer</h3>
+                <p>Pomodoro-style deep work sessions. Track your focus hours, compete with your past self, and earn XP for every session.</p>
+                <div className={styles.bentoTimerDisplay}>25:00</div>
+                <div className={styles.bentoTimerGlow} />
+              </motion.div>
             </div>
           </div>
-        </motion.footer>
+        </section>
+
+        {/* ===== MARQUEE — Task 5 ===== */}
+        <div className={styles.marquee} aria-hidden="true">
+          <div className={styles.marqueeTrack}>
+            {[...Array(4)].map((_, i) => (
+              <span key={i} className={styles.marqueeSegment} aria-hidden={i > 0 ? 'true' : undefined}>
+                <span className={styles.marqueeText}>STOP SAYING TOMORROW. LOCK IN TODAY.</span>
+                <span className={styles.marqueeDot}>&bull;</span>
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* ===== HOW IT WORKS — Task 6 ===== */}
+        <section id="how-it-works" className={styles.howItWorks}>
+          <div className={styles.stepsInner}>
+            <motion.div className={styles.stepsLeft}
+              initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+              <h2 className={styles.stepsHeading}>Get started in 3 steps.</h2>
+              <p className={styles.stepsDescription}>
+                No complicated setup. No learning curve. Just accountability that actually works.
+              </p>
+              <div className={styles.stepsArrow}>
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" opacity="0.15">
+                  <path d="M7 7L17 17M17 17V7M17 17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </motion.div>
+
+            <div className={styles.stepsRight}>
+              {/* Step 1: Sign in with Google */}
+              <motion.div className={styles.timelineStep}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, ease: easeOutQuint }}>
+                <div className={styles.stepNumber}>01</div>
+                <div className={styles.stepDot} />
+                <h3 className={styles.stepTitle}>Sign in with Google</h3>
+                <p className={styles.stepText}>
+                  Use your university email. Takes 5 seconds. No passwords to remember, no forms to fill out.
+                </p>
+                <div className={styles.googleMockup}>
+                  <div className={styles.googleIcon}>
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                    </svg>
+                  </div>
+                  <div className={styles.googleText}>
+                    <span className={styles.googleLabel}>Continue with</span>
+                    <span className={styles.googleBold}>Google</span>
+                  </div>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--landing-ink-light)', opacity: 0.4 }}>
+                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </motion.div>
+
+              {/* Step 2: Create your first pact */}
+              <motion.div className={styles.timelineStep}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
+                <div className={styles.stepNumber}>02</div>
+                <div className={styles.stepDot} />
+                <h3 className={styles.stepTitle}>Create your first pact</h3>
+                <p className={styles.stepText}>
+                  What will you commit to? Make it specific, make it achievable. Pick from 20+ templates or write your own.
+                </p>
+              </motion.div>
+
+              {/* Step 3: Lock in and deliver */}
+              <motion.div className={`${styles.timelineStep} ${styles.timelineStepLast}`}
+                initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}>
+                <div className={styles.stepNumber}>03</div>
+                <div className={`${styles.stepDot} ${styles.stepDotFilled}`}>
+                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <h3 className={styles.stepTitle}>Lock in and deliver</h3>
+                <p className={styles.stepText}>
+                  Complete it or miss it — either way, it shows. Your reputation is on the line. Build streaks, earn XP, and watch your consistency compound.
+                </p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        {/* ===== CTA FOOTER — Task 6 ===== */}
       </main>
-    </>
+
+      <footer className={styles.ctaFooter}>
+        <div className={styles.ctaGlow} />
+        <div className={styles.ctaContent}>
+          <motion.div className={styles.ctaLockIcon}
+            animate={reducedMotion ? {} : { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
+            transition={reducedMotion ? {} : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+              <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/>
+              <path d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+            </svg>
+          </motion.div>
+
+          <motion.h2 className={styles.ctaHeadline}
+            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.6, ease: easeOutQuint }}>
+            Tomorrow actually comes.
+          </motion.h2>
+
+          <motion.p className={styles.ctaDescription}
+            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.1, ease: easeOutQuint }}>
+            Join students who are finally getting things done. Free, simple, and it works.
+          </motion.p>
+
+          <motion.button onClick={handleCta} className={styles.ctaButtonLarge}
+            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+            initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ amount: 0.1, once: true }} transition={{ duration: 0.5, delay: 0.15, ease: easeOutQuint }}>
+            Start Locking In
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.button>
+
+          <span className={styles.ctaSubtext}>100% free. Sign in with Google. 2 minutes to start.</span>
+        </div>
+
+        <div className={styles.footerLinks}>
+          <span className={styles.footerBrand}>LockIn.</span>
+          <nav className={styles.footerNav} aria-label="Footer navigation">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How It Works</a>
+            <a href="https://github.com/vayungodara/lockin" target="_blank" rel="noopener noreferrer">GitHub</a>
+          </nav>
+          <span className={styles.footerCredit}>Built by Vayun Godara</span>
+        </div>
+      </footer>
+    </div>
   );
 }

@@ -185,6 +185,16 @@
   --blur-md: 8px;
   --blur-lg: 16px;
   --blur-xl: 24px;
+
+  /* === Landing Page Tokens === */
+  --landing-bg: #F4F2EB;
+  --landing-bg-dark: #E8E5DA;
+  --landing-ink: #09090B;
+  --landing-ink-light: #27272A;
+  --landing-surface: #FFFFFF;
+  --landing-tension: #EA580C;
+  --landing-border: rgba(9, 9, 11, 0.08);
+  --landing-border-strong: rgba(9, 9, 11, 0.15);
 }
 
 /* === DARK MODE — "Deep Space" === */
@@ -262,6 +272,16 @@
   --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.4);
   --shadow-card-hover: 0 8px 24px -4px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-default);
   --streak-color-rgb: 255, 140, 50;
+
+  /* === Landing Page Dark Tokens === */
+  --landing-bg: #141413;
+  --landing-bg-dark: #1C1C1A;
+  --landing-ink: #F4F2EB;
+  --landing-ink-light: #A8A5A0;
+  --landing-surface: #1E1E1C;
+  --landing-tension: #F97316;
+  --landing-border: rgba(244, 242, 235, 0.08);
+  --landing-border-strong: rgba(244, 242, 235, 0.15);
 }
 
 /* System preference fallback — handled by inline script in layout.js

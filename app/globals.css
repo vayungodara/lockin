@@ -9,9 +9,9 @@
   /* === LIGHT MODE — "Luminous" === */
 
   /* Background colors — warm off-whites with violet undertone */
-  --bg-primary: #FAFAFA;
-  --bg-secondary: #F5F5F5;
-  --bg-tertiary: #EEEDF6;
+  --bg-primary: #FAF9F7;
+  --bg-secondary: #F5F4F0;
+  --bg-tertiary: #EDECE6;
   --bg-elevated: #FFFFFF;
   --bg-hover: #ECEAFF;
 
@@ -73,6 +73,14 @@
   --info-glow: rgba(59, 123, 246, 0.25);
   --info-rgb: 59, 123, 246;
 
+  /* Urgency colors — fixed, accent-independent for safety */
+  --urgency-amber: #D97706;
+  --urgency-amber-rgb: 217, 119, 6;
+  --urgency-amber-bg: rgba(217, 119, 6, 0.08);
+  --urgency-red: #DC2626;
+  --urgency-red-rgb: 220, 38, 38;
+  --urgency-red-light: rgba(220, 38, 38, 0.08);
+
   /* Borders */
   --border-subtle: rgba(0, 0, 0, 0.06);
   --border-default: rgba(0, 0, 0, 0.10);
@@ -92,13 +100,14 @@
   
   /* Typography */
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Instrument Sans', var(--font-sans);
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
   
   /* Font sizes - Refined scale */
   --text-xs: 0.75rem;      /* 12px */
   --text-sm: 0.8125rem;    /* 13px */
-  --text-base: 0.9375rem;  /* 15px */
-  --text-lg: 1.0625rem;    /* 17px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
   --text-xl: 1.25rem;      /* 20px */
   --text-2xl: 1.5rem;      /* 24px */
   --text-3xl: 1.875rem;    /* 30px */
@@ -191,9 +200,9 @@
 /* === DARK MODE — "Deep Space" === */
 [data-theme="dark"] {
   /* Background colors — warm neutral darks */
-  --bg-primary: #0C0C0E;
-  --bg-secondary: #111113;
-  --bg-tertiary: #18181B;
+  --bg-primary: #121210;
+  --bg-secondary: #171714;
+  --bg-tertiary: #1C1C19;
   --bg-elevated: #1C1C1F;
   --bg-hover: #252528;
 
@@ -236,6 +245,14 @@
   --info-bg: rgba(110, 168, 254, 0.12);
   --info-glow: rgba(110, 168, 254, 0.35);
   --info-rgb: 110, 168, 254;
+
+  /* Urgency colors — brighter for dark mode */
+  --urgency-amber: #F59E0B;
+  --urgency-amber-rgb: 245, 158, 11;
+  --urgency-amber-bg: rgba(245, 158, 11, 0.12);
+  --urgency-red: #EF4444;
+  --urgency-red-rgb: 239, 68, 68;
+  --urgency-red-light: rgba(239, 68, 68, 0.12);
 
   /* Borders — soft card edges */
   --border-subtle: rgba(255, 255, 255, 0.04);
@@ -312,29 +329,6 @@ body {
   }
 }
 
-/* Subtle background pattern for visual interest */
-body::before {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--accent-primary-rgb), 0.04), transparent),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(var(--accent-tertiary-rgb), 0.03), transparent),
-    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.02), transparent);
-  z-index: -1;
-  pointer-events: none;
-}
-
-[data-theme="dark"] body::before {
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(var(--accent-primary-rgb), 0.08), transparent),
-    radial-gradient(ellipse 50% 40% at 100% 0%, rgba(var(--accent-tertiary-rgb), 0.05), transparent),
-    radial-gradient(ellipse 40% 30% at 0% 80%, rgba(var(--accent-celebration-rgb), 0.03), transparent);
-}
-
 /* Enable smooth transitions only after initial theme is applied.
    Without this gate, body transitions animate the light→dark switch on
    page load, causing a visible flash. The inline themeScript sets
@@ -342,10 +336,6 @@ body::before {
    hydration so subsequent user-initiated theme toggles still animate. */
 html[data-theme-ready] body {
   transition: background-color var(--transition-slow), color var(--transition-slow);
-}
-
-html[data-theme-ready] body::before {
-  transition: opacity var(--transition-slow);
 }
 
 html[data-theme-ready] *::-webkit-scrollbar-thumb {

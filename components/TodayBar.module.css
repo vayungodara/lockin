@@ -11,7 +11,7 @@
   padding: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
   overflow: hidden;
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
   content-visibility: auto;
   contain-intrinsic-size: auto 96px;
 }
@@ -374,7 +374,7 @@
   font-weight: var(--font-semibold);
   cursor: pointer;
   white-space: nowrap;
-  transition: all 0.15s;
+  transition: background 0.15s, color 0.15s;
   flex-shrink: 0;
 }
 

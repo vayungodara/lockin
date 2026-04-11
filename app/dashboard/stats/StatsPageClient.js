@@ -235,7 +235,7 @@ export default function StatsPageClient({ user }) {
 
         {/* Streak Summary — compact inline */}
         <p className={styles.streakInline}>
-          <Fire size={18} weight="fill" color="#EA580C" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
+          <Fire size={18} weight="fill" color="var(--urgency-amber)" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
           {streakData.currentStreak} day streak{' '}
           <span className={styles.streakSep}>&middot;</span>{' '}
           Best: {streakData.longestStreak} day{' '}

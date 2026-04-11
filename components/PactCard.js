@@ -261,17 +261,12 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     return `Due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   };
 
-  const handleComplete = () => {
+  const handleComplete = async () => {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsPending(true);
 
-    // 1. Commit to DB immediately — no timer, no unmount risk
-    commitComplete().finally(() => {
-      setIsPending(false);
-    });
-
-    // 2. Optimistic UI — confetti, sound, update parent
+    // 1. Optimistic UI — confetti, sound, update parent (fires immediately)
     triggerConfetti();
     justCompletedRef.current = true;
     setShowBounce(true);
@@ -281,49 +276,60 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       onUpdate({ ...pact, status: 'completed', completed_at: new Date().toISOString() });
     }
 
-    // 3. Toast with Undo — reverts the committed DB write
-    const recurrenceMsg = pact.is_recurring && pact.recurrence_type
-      ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
-      : '';
+    // 2. Commit to DB — toast only appears after success
+    try {
+      await commitComplete();
 
-    toast.success(`Pact completed!${recurrenceMsg}`, {
-      label: 'Undo',
-      onClick: () => {
-        setShowBounce(false);
-        justCompletedRef.current = false;
-        revertComplete();
-      },
-    });
+      // 3. Toast with Undo — only shown after commit succeeds,
+      //    so the user cannot race the initial write
+      const recurrenceMsg = pact.is_recurring && pact.recurrence_type
+        ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
+        : '';
+
+      toast.success(`Pact completed!${recurrenceMsg}`, {
+        label: 'Undo',
+        onClick: () => {
+          setShowBounce(false);
+          justCompletedRef.current = false;
+          revertComplete();
+        },
+      });
+    } finally {
+      setIsPending(false);
+    }
   };
 
-  const handleMiss = () => {
+  const handleMiss = async () => {
     if (isCompletingRef.current) return;
     isCompletingRef.current = true;
     setIsPending(true);
 
-    // 1. Commit to DB immediately — no timer, no unmount risk
-    commitMiss().finally(() => {
-      setIsPending(false);
-    });
-
-    // 2. Optimistic UI — sound, update parent
+    // 1. Optimistic UI — sound, update parent (fires immediately)
     playMissSound();
 
     if (onUpdate) {
       onUpdate({ ...pact, status: 'missed' });
     }
 
-    // 3. Toast with Undo — reverts the committed DB write
-    const recurrenceMsg = pact.is_recurring && pact.recurrence_type
-      ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
-      : '';
+    // 2. Commit to DB — toast only appears after success
+    try {
+      await commitMiss();
 
-    toast.warning(`Marked as missed.${recurrenceMsg}`, {
-      label: 'Undo',
-      onClick: () => {
-        revertMiss();
-      },
-    });
+      // 3. Toast with Undo — only shown after commit succeeds,
+      //    so the user cannot race the initial write
+      const recurrenceMsg = pact.is_recurring && pact.recurrence_type
+        ? ` It'll reset for the next ${pact.recurrence_type === 'daily' ? 'day' : pact.recurrence_type === 'weekly' ? 'week' : pact.recurrence_type === 'monthly' ? 'month' : 'weekday'}.`
+        : '';
+
+      toast.warning(`Marked as missed.${recurrenceMsg}`, {
+        label: 'Undo',
+        onClick: () => {
+          revertMiss();
+        },
+      });
+    } finally {
+      setIsPending(false);
+    }
   };
 
   const getStatusClass = () => {

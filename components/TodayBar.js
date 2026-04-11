@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
@@ -71,8 +71,6 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
   const [freezeLoading, setFreezeLoading] = useState(false);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
-  const milestoneFiredRef = useRef(false);
-
   useEffect(() => {
     async function fetchSummary() {
       if (!userId) return;
@@ -182,12 +180,14 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
 
   // Fire celebration effects once per session when a milestone is detected
   useEffect(() => {
-    if (isMilestoneDay && milestoneMessage && !milestoneFiredRef.current) {
-      milestoneFiredRef.current = true;
+    if (!isMilestoneDay || !milestoneMessage) return;
+    const milestoneKey = `milestone-fired-${streak}`;
+    if (typeof window !== 'undefined' && !sessionStorage.getItem(milestoneKey)) {
+      sessionStorage.setItem(milestoneKey, 'true');
       fireMilestoneConfetti();
       playStreakMilestone();
     }
-  }, [isMilestoneDay, milestoneMessage]);
+  }, [isMilestoneDay, milestoneMessage, streak]);
 
   const handleUseFreeze = async () => {
     setFreezeLoading(true);

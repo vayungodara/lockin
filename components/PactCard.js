@@ -33,12 +33,12 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     return () => clearTimeout(timer);
   }, [showBounce]);
 
-  // Commit pending action on unmount so we never lose a completion/miss
+  // Cancel pending action on unmount — don't commit, since the optimistic
+  // UI update can cause unmount (list re-sort) which would bypass the undo window
   useEffect(() => {
     return () => {
       if (pendingActionRef.current) {
         clearTimeout(pendingActionRef.current.timer);
-        pendingActionRef.current.commit();
         pendingActionRef.current = null;
       }
     };

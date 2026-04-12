@@ -226,7 +226,6 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   // Format deadline
   const formatDeadline = () => {
-    const now = new Date();
     const diff = deadlineDate - now;
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));

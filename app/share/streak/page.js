@@ -5,8 +5,8 @@ import ShareStreakClient from './ShareStreakClient';
 
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
-  const streak = params?.streak || '0';
-  const name = params?.name || 'Someone';
+  const streak = String(params?.streak || '0').replace(/\D/g, '').slice(0, 5) || '0';
+  const name = String(params?.name || 'Someone').slice(0, 50).replace(/[<>"'&]/g, '');
   
   return {
     title: `${name} is on a ${streak}-day streak! | LockIn`,

@@ -23,6 +23,7 @@ import NotificationBell from './NotificationBell';
 import styles from './Sidebar.module.css';
 
 function getSidebarCollapsed() {
+  if (typeof window === 'undefined') return true;
   const saved = localStorage.getItem('sidebar-collapsed');
   return saved !== null ? saved === 'true' : true;
 }

@@ -69,7 +69,8 @@ export default function PactsPageClient({ user }) {
       const { error } = await supabase
         .from('pacts')
         .delete()
-        .eq('id', pactId);
+        .eq('id', pactId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setPacts(prev => prev.filter(p => p.id !== pactId));

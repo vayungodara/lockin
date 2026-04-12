@@ -1,5 +1,15 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { formatRelativeTime, getActionInfo } from '@/lib/activity';
+import {
+  formatRelativeTime,
+  getActionInfo,
+  logActivity,
+  getGroupActivity,
+  getAllActivity,
+  getGroupStats,
+  HIDDEN_FEED_ACTIONS,
+  TEST_DATA_PATTERNS,
+} from '@/lib/activity';
+import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatRelativeTime', () => {
   beforeEach(() => {
@@ -126,5 +136,171 @@ describe('getActionInfo', () => {
       // Should NOT be the fallback
       expect(info.color).not.toBe('gray');
     });
+  });
+});
+
+describe('HIDDEN_FEED_ACTIONS', () => {
+  it('is an array', () => {
+    expect(Array.isArray(HIDDEN_FEED_ACTIONS)).toBe(true);
+  });
+
+  it('includes task_deleted', () => {
+    expect(HIDDEN_FEED_ACTIONS).toContain('task_deleted');
+  });
+});
+
+describe('TEST_DATA_PATTERNS', () => {
+  it('is an array of regexes', () => {
+    expect(Array.isArray(TEST_DATA_PATTERNS)).toBe(true);
+    TEST_DATA_PATTERNS.forEach((pattern) => {
+      expect(pattern).toBeInstanceOf(RegExp);
+    });
+  });
+
+  it('matches "Bulk Test" titles', () => {
+    const matched = TEST_DATA_PATTERNS.some((p) => p.test('Bulk Test Pact'));
+    expect(matched).toBe(true);
+  });
+
+  it('matches numbered "Test #N" titles', () => {
+    const matched = TEST_DATA_PATTERNS.some((p) => p.test('Test #42'));
+    expect(matched).toBe(true);
+  });
+
+  it('matches "[TEST] foo" titles', () => {
+    const matched = TEST_DATA_PATTERNS.some((p) => p.test('[TEST] sample'));
+    expect(matched).toBe(true);
+  });
+
+  it('does not match normal user-created titles', () => {
+    const matched = TEST_DATA_PATTERNS.some((p) => p.test('Finish history essay'));
+    expect(matched).toBe(false);
+  });
+});
+
+describe('logActivity', () => {
+  it('returns unauthenticated error when no user', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({ data: { user: null }, error: null });
+
+    const result = await logActivity(supabase, 'task_created', 'group-1', { title: 'Do work' });
+    expect(result).toEqual({ success: false, error: 'Not authenticated' });
+  });
+
+  it('returns success on happy path', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'task_created', 'group-1', { title: 'Do work' });
+    expect(result).toEqual({ success: true });
+  });
+
+  it('returns failure with error on insert error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'insert failed' } });
+
+    const result = await logActivity(supabase, 'task_created', 'group-1', { title: 'Do work' });
+    expect(result.success).toBe(false);
+    expect(result.error).toEqual({ message: 'insert failed' });
+  });
+
+  it('returns failure when auth call throws', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({ data: null, error: { message: 'auth error' } });
+
+    const result = await logActivity(supabase, 'task_created', null, {});
+    expect(result.success).toBe(false);
+  });
+
+  it('accepts null groupId for personal pacts', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await logActivity(supabase, 'pact_created', null, { title: 'My pact' });
+    expect(result).toEqual({ success: true });
+  });
+
+  it('resets non-object metadata to empty object', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    // passing a string as metadata — should log a warning and still succeed
+    const result = await logActivity(supabase, 'pact_created', null, 'bad-metadata');
+    expect(result).toEqual({ success: true });
+  });
+});
+
+describe('getGroupActivity', () => {
+  it('returns empty data with no activities', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getGroupActivity(supabase, 'group-1');
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty data and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getGroupActivity(supabase, 'group-1');
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('uses default limit and offset when not provided', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getGroupActivity(supabase, 'group-1');
+    expect(result.data).toEqual([]);
+  });
+});
+
+describe('getAllActivity', () => {
+  it('returns empty data with no activities', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getAllActivity(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty data and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getAllActivity(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+});
+
+describe('getGroupStats', () => {
+  it('returns error state when initial query fails', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'boom' } });
+
+    const result = await getGroupStats(supabase, 'group-1');
+    expect(result.stats).toEqual({});
+    expect(result.leaderboard).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('returns zero stats when group has no members or tasks', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getGroupStats(supabase, 'group-1');
+    expect(result.stats).toEqual({
+      totalTasks: 0,
+      completedTasks: 0,
+      completionRate: 0,
+      activeTasks: 0,
+    });
+    expect(result.leaderboard).toEqual([]);
+    expect(result.error).toBeNull();
   });
 });

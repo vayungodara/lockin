@@ -434,7 +434,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
               )}
               <GroupStats groupId={group.id} />
             </div>
-            <ActivityFeed groupId={group.id} />
+            <ActivityFeed groupId={group.id} pageSize={5} disableInfiniteScroll />
           </div>
         </section>
       )}

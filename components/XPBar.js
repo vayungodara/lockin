@@ -44,6 +44,19 @@ export default function XPBar({ userId, refreshKey }) {
       }
     }
     if (userId) fetchXP();
+
+    // Re-fetch immediately whenever any XP-earning action fires the global event
+    function handleXPEvent() {
+      if (userId) fetchXP();
+    }
+    if (typeof window !== 'undefined') {
+      window.addEventListener('xp-updated', handleXPEvent);
+    }
+    return () => {
+      if (typeof window !== 'undefined') {
+        window.removeEventListener('xp-updated', handleXPEvent);
+      }
+    };
   }, [userId, supabase, refreshKey]);
 
   useEffect(() => {

@@ -346,40 +346,6 @@
 }
 
 /* ============================================
-   Show More / Show Less Toggle
-   ============================================ */
-
-.showMoreBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  margin-top: var(--space-4);
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
-}
-
-.showMoreBtn:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  background: var(--accent-glow);
-}
-
-:global([data-theme="dark"]) .showMoreBtn {
-  border-color: var(--border-default);
-}
-
-:global([data-theme="dark"]) .showMoreBtn:hover {
-  background: rgba(var(--accent-primary-rgb), 0.08);
-}
-
-/* ============================================
    Loading State
    ============================================ */
 

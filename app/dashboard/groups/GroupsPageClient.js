@@ -119,48 +119,6 @@ function GroupCard({ group, isHero = false }) {
   );
 }
 
-// Sort groups by actual activity — most completed tasks first, then member count,
-// then most-recent hero always stays visible even when collapsed.
-function sortByActivity(groups) {
-  return [...groups].sort((a, b) => {
-    const doneDiff = (b.tasksDone || 0) - (a.tasksDone || 0);
-    if (doneDiff !== 0) return doneDiff;
-    return (b.memberCount || 0) - (a.memberCount || 0);
-  });
-}
-
-const DEFAULT_VISIBLE = 3;
-
-function GroupSection({ title, groups, mostActiveId }) {
-  const [showAll, setShowAll] = useState(false);
-  const sorted = useMemo(() => sortByActivity(groups), [groups]);
-  const visible = showAll ? sorted : sorted.slice(0, DEFAULT_VISIBLE);
-  const hiddenCount = sorted.length - DEFAULT_VISIBLE;
-
-  if (groups.length === 0) return null;
-
-  return (
-    <>
-      <h3 className={styles.sectionHeader}>{title}</h3>
-      <div className={styles.groupsGrid}>
-        {visible.map(group => (
-          <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
-        ))}
-      </div>
-      {hiddenCount > 0 && (
-        <button
-          type="button"
-          className={styles.showMoreBtn}
-          onClick={() => setShowAll(v => !v)}
-          aria-expanded={showAll}
-        >
-          {showAll ? 'Show less' : `Show all ${sorted.length} groups`}
-        </button>
-      )}
-    </>
-  );
-}
-
 function GroupSections({ groups }) {
   const ownedGroups = groups.filter(g => g.role === 'owner');
   const joinedGroups = groups.filter(g => g.role !== 'owner');
@@ -177,8 +135,26 @@ function GroupSections({ groups }) {
 
   return (
     <div>
-      <GroupSection title="Your Groups" groups={ownedGroups} mostActiveId={mostActiveId} />
-      <GroupSection title="Joined Groups" groups={joinedGroups} mostActiveId={mostActiveId} />
+      {ownedGroups.length > 0 && (
+        <>
+          <h3 className={styles.sectionHeader}>Your Groups</h3>
+          <div className={styles.groupsGrid}>
+            {ownedGroups.map(group => (
+              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
+            ))}
+          </div>
+        </>
+      )}
+      {joinedGroups.length > 0 && (
+        <>
+          <h3 className={styles.sectionHeader}>Joined Groups</h3>
+          <div className={styles.groupsGrid}>
+            {joinedGroups.map(group => (
+              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

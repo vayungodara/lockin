@@ -165,6 +165,7 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., CS101 Final Project"
                   className={styles.input}
+                  maxLength={100}
                   autoFocus
                 />
                 <span className={styles.hint}>Choose a name your crew will recognize</span>

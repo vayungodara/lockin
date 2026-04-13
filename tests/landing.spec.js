@@ -38,9 +38,9 @@ test.describe('Landing Page', () => {
     await expect(howItWorksButton).toHaveAttribute('href', '#how-it-works');
   });
 
-  test('has a "Start Locking In" button in the navbar', async ({ page }) => {
+  test('has a "Start a Pact" button in the navbar', async ({ page }) => {
     const navbar = page.locator('nav:not([aria-label="Footer navigation"])').first();
-    const startButton = navbar.getByRole('button', { name: /Start Locking In/i });
+    const startButton = navbar.getByRole('button', { name: /Start a Pact/i });
     await expect(startButton).toBeVisible();
   });
 
@@ -83,7 +83,7 @@ test.describe('Landing Page', () => {
   });
 
   test('displays the bottom CTA section', async ({ page }) => {
-    const ctaHeading = page.getByText('Tomorrow actually comes.');
+    const ctaHeading = page.getByRole('heading', { name: 'Tomorrow actually comes.' });
     await expect(ctaHeading).toBeVisible();
   });
 

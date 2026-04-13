@@ -4,6 +4,7 @@
   border-radius: var(--radius-lg);
   display: flex;
   flex-direction: column;
+  min-height: 0;
 }
 
 .header {
@@ -31,6 +32,13 @@
   padding: var(--space-3) var(--space-4);
   display: flex;
   flex-direction: column;
+  /* When the parent constrains height, scroll happens INSIDE the feed
+     — the IntersectionObserver's scroll root is this element, so
+     infinite scroll auto-loads more as the user scrolls here. */
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .loading {

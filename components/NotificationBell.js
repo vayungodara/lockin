@@ -32,15 +32,20 @@ export default function NotificationBell() {
   const prevUnreadRef = useRef(0);
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications();
 
-  // Wiggle bell when unread count increases
+  // Wiggle bell when unread count increases. State updates are deferred via rAF
+  // so React doesn't flag synchronous setState in effect (react-hooks/set-state-in-effect).
   useEffect(() => {
-    if (unreadCount > prevUnreadRef.current) {
-      setWiggle(true);
+    if (unreadCount <= prevUnreadRef.current) {
       prevUnreadRef.current = unreadCount;
-      const timer = setTimeout(() => setWiggle(false), 600);
-      return () => clearTimeout(timer);
+      return;
     }
     prevUnreadRef.current = unreadCount;
+    const rafId = requestAnimationFrame(() => setWiggle(true));
+    const timer = setTimeout(() => setWiggle(false), 600);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
   }, [unreadCount]);
 
   // Calculate dropdown position when opening
@@ -61,20 +66,26 @@ export default function NotificationBell() {
     setIsOpen(!isOpen);
   };
 
-  // Reposition dropdown briefly when opened (covers sidebar collapse animation ~350ms)
+  // Reposition dropdown when layout changes (e.g., sidebar collapse/expand, viewport resize).
+  // ResizeObserver fires on every layout shift instead of polling 25 frames.
   useEffect(() => {
     if (!isOpen || !buttonRef.current) return;
-    let rafId;
-    let frames = 0;
-    const track = () => {
-      updatePosition();
-      frames++;
-      if (frames < 25) {
-        rafId = requestAnimationFrame(track);
-      }
+    const reposition = () => {
+      if (!buttonRef.current) return;
+      const rect = buttonRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        bottom: window.innerHeight - rect.top + 8,
+        left: rect.left
+      });
     };
-    rafId = requestAnimationFrame(track);
-    return () => cancelAnimationFrame(rafId);
+    reposition();
+    const ro = new ResizeObserver(reposition);
+    ro.observe(document.body);
+    window.addEventListener('resize', reposition);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', reposition);
+    };
   }, [isOpen]);
 
   // Close dropdown when clicking outside

@@ -5,9 +5,10 @@ import ShareStreakClient from './ShareStreakClient';
 
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
-  const streak = params?.streak || '0';
-  const name = params?.name || 'Someone';
-  
+  // Sanitize untrusted query params to prevent XSS / metadata injection.
+  const streak = String(parseInt(params?.streak, 10) || 0);
+  const name = (params?.name || 'Someone').replace(/[<>"'&]/g, '').slice(0, 50);
+
   return {
     title: `${name} is on a ${streak}-day streak! | LockIn`,
     description: `${name} has been crushing their goals with LockIn. Join them!`,
@@ -18,7 +19,7 @@ export async function generateMetadata({ searchParams }) {
   };
 }
 
-export default async function ShareStreakPage({ searchParams }) {
+export default async function ShareStreakPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   

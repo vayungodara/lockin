@@ -98,11 +98,12 @@ test.describe('Landing Page', () => {
   });
 
   test('navbar links point to correct sections', async ({ page }) => {
-    const featuresLink = page.locator('nav a[href="#features"]');
+    // Scope to the landing navbar to avoid strict-mode collision with the footer nav
+    const featuresLink = page.locator('nav:not([aria-label="Footer navigation"]) a[href="#features"]');
     await expect(featuresLink).toBeVisible();
     await expect(featuresLink).toHaveText('Features');
 
-    const howItWorksLink = page.locator('nav a[href="#how-it-works"]');
+    const howItWorksLink = page.locator('nav:not([aria-label="Footer navigation"]) a[href="#how-it-works"]');
     await expect(howItWorksLink).toBeVisible();
     await expect(howItWorksLink).toHaveText('How it Works');
   });

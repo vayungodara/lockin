@@ -374,6 +374,97 @@
   opacity: 1;
 }
 
+/* ══════════════════════════════════════════════════════════
+   DARK MODE — full coverage for active pact cards
+   Base card uses --surface-1 (lighter than --bg-primary) so
+   cards visually separate from the dashboard background.
+   ══════════════════════════════════════════════════════════ */
+:global([data-theme="dark"]) .card {
+  background: var(--surface-1);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .card:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+:global([data-theme="dark"]) .pactCardOverdue {
+  background: var(--surface-1);
+  border-color: rgba(var(--danger-rgb), 0.35);
+  box-shadow: var(--shadow-lg);
+}
+
+:global([data-theme="dark"]) .pactCardOverdue:hover {
+  box-shadow: var(--shadow-lg), 0 4px 20px rgba(var(--danger-rgb), 0.25);
+}
+
+:global([data-theme="dark"]) .pactCardDefault:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+/* Text colors — explicit so they never inherit a faint value */
+:global([data-theme="dark"]) .title {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .description {
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .deadline {
+  color: var(--text-tertiary);
+}
+
+/* Action buttons — must be visible against the lighter dark card */
+:global([data-theme="dark"]) .completeBtn {
+  background: var(--success-light);
+  color: var(--success);
+}
+
+:global([data-theme="dark"]) .completeBtn:hover:not(:disabled) {
+  background: var(--success);
+  color: var(--text-inverse);
+  box-shadow: 0 0 12px var(--success-glow);
+}
+
+:global([data-theme="dark"]) .missBtn {
+  background: var(--surface-3);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+}
+
+:global([data-theme="dark"]) .missBtn:hover:not(:disabled) {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: transparent;
+}
+
+/* Status badges */
+:global([data-theme="dark"]) .badge.active {
+  background: var(--gradient-subtle);
+  color: var(--accent-primary);
+}
+
+:global([data-theme="dark"]) .badge.missed {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+:global([data-theme="dark"]) .overdueBadge {
+  background: rgba(var(--danger-rgb), 0.18);
+  color: var(--danger);
+}
+
+:global([data-theme="dark"]) .xpBadge {
+  background: rgba(var(--success-rgb), 0.18);
+  color: var(--success);
+}
+
 /* Dark mode: boost completed card contrast since opacity + faint colors compound */
 :global([data-theme="dark"]) .card.completed {
   opacity: 0.9;

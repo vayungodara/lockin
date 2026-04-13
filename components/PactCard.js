@@ -226,38 +226,43 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   // Format deadline
   const formatDeadline = () => {
-    const now = new Date();
     const diff = deadlineDate - now;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    // Compare dates at local-midnight boundaries so "tomorrow" / "N days"
+    // classification isn't flipped by timezone offsets (new Date() is local,
+    // deadlineDate was parsed from a UTC ISO string).
+    const todayLocal = new Date(); todayLocal.setHours(0, 0, 0, 0);
+    const deadlineLocal = new Date(deadlineDate); deadlineLocal.setHours(0, 0, 0, 0);
+    const days = Math.floor((deadlineLocal - todayLocal) / (1000 * 60 * 60 * 24));
+    // Keep hours math on raw diff for display ("Due in 3 hours")
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
+
     if (pact.status === 'completed') {
       return 'Completed';
     }
-    
+
     if (pact.status === 'missed') {
       return 'Missed';
     }
-    
+
     if (diff < 0) {
       return 'Overdue';
     }
-    
+
     if (days === 0) {
       if (hours === 0) {
         return 'Due in less than an hour';
       }
       return `Due in ${hours} hour${hours === 1 ? '' : 's'}`;
     }
-    
+
     if (days === 1) {
       return 'Due tomorrow';
     }
-    
+
     if (days < 7) {
       return `Due in ${days} days`;
     }
-    
+
     return `Due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   };
 

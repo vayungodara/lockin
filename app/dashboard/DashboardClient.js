@@ -83,12 +83,17 @@ export default function DashboardClient({ user }) {
         }
       }
 
+      // Dashboard only displays up to 3 pacts. Fetch a small working set so
+      // we can still classify overdue/due-today/active locally without
+      // pulling the user's entire pact history. Full list is fetched by
+      // the /dashboard/pacts page. Kept select('*') to avoid drift with
+      // schema migrations that add new columns (e.g. xp_reward, is_recurring).
       const { data, error } = await supabase
         .from('pacts')
         .select('*')
         .eq('user_id', user.id)
         .order('deadline', { ascending: true })
-        .limit(200);
+        .limit(50);
 
       if (error) throw error;
       

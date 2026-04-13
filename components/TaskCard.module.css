@@ -232,8 +232,38 @@
   z-index: 20;
 }
 
-[data-theme="dark"] .loadingOverlay {
+:global([data-theme="dark"]) .loadingOverlay {
   background: rgba(0, 0, 0, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE — full coverage for task cards
+   ══════════════════════════════════════════════════════════ */
+:global([data-theme="dark"]) .card {
+  background: var(--surface-1);
+  border-color: var(--border-default);
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .card:hover {
+  background: var(--surface-2);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
+}
+
+:global([data-theme="dark"]) .actions {
+  background: var(--bg-elevated);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
+}
+
+:global([data-theme="dark"]) .actionBtn {
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .actionBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
 }
 
 .spinner {

@@ -12,7 +12,7 @@ const isTouchDevice = () => {
   return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
 };
 
-export default function TaskCard({ task, currentUser, userRole, members, onUpdate, onDelete }) {
+export default function TaskCard({ task, currentUser, userRole, onUpdate, onDelete }) {
   const [isLoading, setIsLoading] = useState(false);
   const [showActions, setShowActions] = useState(false);
   const [isTouch, setIsTouch] = useState(false);
@@ -104,6 +104,21 @@ export default function TaskCard({ task, currentUser, userRole, members, onUpdat
 
       const actionType = newStatus === 'done' ? 'task_completed' : newStatus === 'in_progress' ? 'task_started' : 'task_reopened';
       await logActivity(supabase, actionType, task.group_id, { task_title: task.title });
+
+      // Award XP when a task transitions into 'done'. Only reward the task's
+      // owner/creator; fall back to the acting user so the call never throws
+      // on missing fields. Best-effort — errors are logged, not propagated.
+      if (newStatus === 'done') {
+        try {
+          const recipientId = task.owner_id || task.assignee_id || task.created_by || currentUser?.id;
+          if (recipientId) {
+            const { awardXP, XP_REWARDS } = await import('@/lib/gamification');
+            await awardXP(supabase, recipientId, 'task_completed', XP_REWARDS.TASK_COMPLETED);
+          }
+        } catch (err) {
+          console.error('Task XP award error:', err);
+        }
+      }
 
       onUpdate({ ...task, ...updates });
     } catch (err) {

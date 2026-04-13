@@ -87,13 +87,61 @@
   gap: var(--space-4);
 }
 
-/* Hero card — most active group gets visual emphasis */
+/* Hero card — most active group gets visual emphasis without breaking the grid */
 .groupCardHero {
-  grid-column: 1 / -1;
   border-left: 3px solid var(--accent-primary);
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-primary-rgb), 0.2),
+    0 4px 16px rgba(var(--accent-primary-rgb), 0.08);
+}
+
+.groupCardHero:hover {
+  box-shadow:
+    var(--shadow-md),
+    0 0 0 1px var(--accent-primary),
+    0 6px 20px rgba(var(--accent-primary-rgb), 0.14);
+}
+
+.groupCardHero .progressFill {
+  height: 6px;
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary),
+    var(--accent-secondary, var(--accent-primary))
+  );
+}
+
+.groupCardHero .progressBar {
+  height: 6px;
+}
+
+/* "Most Active" celebratory badge — anchors top-right of hero card */
+.heroBadge {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-3);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px var(--space-2);
+  background: var(--accent-glow);
+  color: var(--accent-primary);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-radius: var(--radius-sm);
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.heroBadge svg {
+  flex-shrink: 0;
 }
 
 .groupCard {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
@@ -435,7 +483,20 @@
 
 :global([data-theme="dark"]) .groupCardHero {
   border-left-color: var(--accent-primary);
-  box-shadow: var(--shadow-sm), inset 3px 0 12px -4px rgba(var(--accent-primary-rgb), 0.15);
+  box-shadow:
+    0 0 0 1px rgba(var(--accent-primary-rgb), 0.3),
+    0 4px 20px rgba(var(--accent-primary-rgb), 0.18);
+}
+
+:global([data-theme="dark"]) .groupCardHero:hover {
+  box-shadow:
+    var(--shadow-lg),
+    0 0 0 1px var(--accent-primary),
+    0 0 28px rgba(var(--accent-primary-rgb), 0.28);
+}
+
+:global([data-theme="dark"]) .heroBadge {
+  background: rgba(var(--accent-primary-rgb), 0.18);
 }
 
 :global([data-theme="dark"]) .metaDot {

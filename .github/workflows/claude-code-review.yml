@@ -34,23 +34,51 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           classify_inline_comments: 'true'
           include_fix_links: 'true'
+          use_sticky_comment: 'true'
           prompt: |
-            Review this pull request exhaustively. Your job is to find every real bug, logic error, security vulnerability, race condition, and edge case that could break in production.
+            Exhaustive multi-pass code review. Your goal: catch every real bug before merge while posting ZERO false positives. A noisy reviewer gets ignored.
 
-            ## Process
-            1. Read the full diff and understand what changed and why.
-            2. Trace every changed code path through the codebase — follow imports, check callers, verify data flow end-to-end.
-            3. Check each category systematically:
-               - Logic errors, off-by-one, null/undefined access, wrong comparisons
-               - Security: XSS, injection, auth bypasses, exposed secrets, missing RLS checks
-               - Race conditions, stale closures, async bugs, missing await
-               - Edge cases: empty arrays, missing data, network failures, concurrent users
-               - Supabase: client vs server usage, RLS implications, missing error handling
-               - React: missing deps in useEffect, stale state in callbacks, memory leaks
-               - CSS: z-index conflicts, overflow issues, dark mode breakage, mobile layout bugs
-            4. Verify fixes actually work and don't introduce new issues.
-            5. Check what's NOT in the diff — missing migrations, missing test updates, stale imports.
+            ## Severity tags (REQUIRED — use one per finding)
+            - 🔴 **Important** — bug that must be fixed before merge
+            - 🟡 **Nit** — minor issue, worth fixing but not blocking
+            - 🟣 **Pre-existing** — bug in the codebase not introduced by this PR
 
-            Post each finding as an inline review comment on the exact line where the issue is.
-            Read REVIEW.md and CLAUDE.md for project-specific conventions.
-          claude_args: '--model claude-opus-4-6 --allowedTools "Bash(gh:*)"'
+            ## Process (do every step)
+            1. Read `REVIEW.md` and `CLAUDE.md` first — project-specific rules live there.
+            2. Read the full diff. Understand what changed and why.
+            3. For each changed file, trace every modified path end-to-end: grep callers with Bash, read imports, verify data flow through the whole call graph. Don't review in isolation.
+            4. Run the multi-dimension pass below. Flag candidates as you go.
+            5. **Verification pass (critical):** before posting a finding, prove it's reachable in production. Construct the failing input, trace it to the bug, confirm no guard intervenes. If you can't prove reachability, DROP the finding or downgrade to 🟣.
+            6. Check what's NOT in the diff — missing migrations for schema code, missing tests for new routes, stale imports, untouched callers of changed signatures.
+            7. Post findings as inline review comments on the exact line, each starting with the severity marker and including a concrete fix suggestion.
+
+            ## Multi-dimension pass (cover every dimension)
+            1. **Correctness** — logic errors, off-by-one, null/undefined access, wrong comparisons, incorrect state transitions, timezone bugs, broken promises
+            2. **Security** — XSS, injection, auth bypass, exposed secrets, missing RLS, CSRF, weak CSP, unsafe redirects, SSRF, open redirects
+            3. **Concurrency** — race conditions, stale closures, missing await, wrong effect deps, memory leaks, duplicate submits, optimistic-update rollback gaps
+            4. **Data integrity** — Supabase client/server misuse, migration safety (not backwards-compatible?), RLS gaps, unbounded queries, N+1, missing indexes on new WHERE clauses
+            5. **React/Next.js** — `'use client'` misuse, hydration mismatch, stale state in callbacks, createPortal SSR guard, missing/wrong useEffect deps, key prop bugs, server/client boundary leaks
+            6. **CSS/UI** — z-index must use tokens, dark mode parity, mobile `overflow-x: clip` (never `hidden`), breakpoint consistency, keyboard focus, contrast
+            7. **Regressions** — did this PR break any existing caller? Grep every touched function/export.
+            8. **Missing work** — migrations without app code, new API routes without integration tests, removed deps still imported, deleted types still referenced
+
+            ## LockIn-specific watchlist (from CLAUDE.md gotchas — flag these hard)
+            - Supabase: `client.js` in browser, `server.js` (async) in RSC — flag any mixing
+            - Cron routes: must verify `Authorization: Bearer {CRON_SECRET}` header
+            - Mobile overflow: `overflow-x: clip` on html/body, NOT `hidden`
+            - Dark mode: `data-theme="dark"` on `<html>`, NOT `prefers-color-scheme`
+            - XP/streak: prevent double-count, negative values, race on concurrent completions
+            - `createPortal`: guard with `typeof document !== 'undefined'` when not inside `isOpen`
+            - Function naming: non-hooks must NOT start with `use` (ESLint flags it in handlers)
+            - Page containers: don't set `background: var(--bg-primary)` — inherit `--bg-secondary`
+            - CSS variables: new colors/spacing must use tokens from `globals.css`, not hardcoded
+            - Image remotes: new image sources need `next.config.mjs` allowlist
+
+            ## What NOT to flag
+            - Formatting, whitespace, line length — lint handles these
+            - Subjective style unless it violates CLAUDE.md or REVIEW.md explicitly
+            - Speculative "could be refactored" — stay focused on real bugs
+            - Test coverage wishes unless a specific new branch is untested
+
+            End with a summary comment listing severity counts (🔴/🟡/🟣) and the top 3 findings.
+          claude_args: '--model claude-opus-4-6 --allowedTools "Bash(gh:*),Bash(grep:*),Bash(rg:*),Bash(find:*)"'

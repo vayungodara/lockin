@@ -36,6 +36,11 @@ jobs:
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
 
+          # Belt-and-suspenders: only the repo owner can trigger @claude.
+          # GitHub's write-permission gate already blocks external users by
+          # default, but this makes it impossible for anyone else regardless.
+          include_comments_by_actor: "vayungodara"
+
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read

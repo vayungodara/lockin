@@ -6,8 +6,13 @@ import ShareStreakClient from './ShareStreakClient';
 export async function generateMetadata({ searchParams }) {
   const params = await searchParams;
   // Sanitize untrusted query params to prevent XSS / metadata injection.
-  const streak = String(parseInt(params?.streak, 10) || 0);
-  const name = (params?.name || 'Someone').replace(/[<>"'&]/g, '').slice(0, 50);
+  // searchParams values can be `string | string[] | undefined` when the same
+  // key appears multiple times (e.g. `?name=a&name=b`). Coerce to a single
+  // string before calling `.replace` to avoid a TypeError on arrays.
+  const rawStreak = Array.isArray(params?.streak) ? params.streak[0] : params?.streak;
+  const streak = String(parseInt(rawStreak, 10) || 0);
+  const rawName = Array.isArray(params?.name) ? params.name[0] : params?.name;
+  const name = (rawName || 'Someone').replace(/[<>"'&]/g, '').slice(0, 50);
 
   return {
     title: `${name} is on a ${streak}-day streak! | LockIn`,

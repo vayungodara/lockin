@@ -70,21 +70,27 @@ export default function NotificationBell() {
   // ResizeObserver fires on every layout shift instead of polling 25 frames.
   useEffect(() => {
     if (!isOpen || !buttonRef.current) return;
-    const reposition = () => {
-      if (!buttonRef.current) return;
-      const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        bottom: window.innerHeight - rect.top + 8,
-        left: rect.left
-      });
-    };
-    reposition();
-    const ro = new ResizeObserver(reposition);
+
+    updatePosition();
+
+    const ro = new ResizeObserver(updatePosition);
     ro.observe(document.body);
-    window.addEventListener('resize', reposition);
+    window.addEventListener('resize', updatePosition);
+
+    // Sidebar is position:fixed — ResizeObserver on body won't fire when it
+    // collapses/expands. Listen for Sidebar.js's storage-event broadcast and
+    // reposition after its transform animation completes (~350ms).
+    function handleSidebarToggle(e) {
+      if (e?.key === 'sidebar-collapsed') {
+        setTimeout(updatePosition, 380);
+      }
+    }
+    window.addEventListener('storage', handleSidebarToggle);
+
     return () => {
       ro.disconnect();
-      window.removeEventListener('resize', reposition);
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('storage', handleSidebarToggle);
     };
   }, [isOpen]);
 

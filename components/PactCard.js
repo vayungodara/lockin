@@ -226,15 +226,13 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   // Format deadline
   const formatDeadline = () => {
+    // Use ms-based hours-first, days-after math so sub-24h windows are
+    // classified correctly. Example: deadline at 01:00 tomorrow while now
+    // is 23:00 today → hours=2, days=0 → "Due in 2 hours" (NOT "Due tomorrow").
+    // The days===1 branch only triggers when ≥24h remain.
     const diff = deadlineDate - now;
-    // Compare dates at local-midnight boundaries so "tomorrow" / "N days"
-    // classification isn't flipped by timezone offsets (new Date() is local,
-    // deadlineDate was parsed from a UTC ISO string).
-    const todayLocal = new Date(); todayLocal.setHours(0, 0, 0, 0);
-    const deadlineLocal = new Date(deadlineDate); deadlineLocal.setHours(0, 0, 0, 0);
-    const days = Math.floor((deadlineLocal - todayLocal) / (1000 * 60 * 60 * 24));
-    // Keep hours math on raw diff for display ("Due in 3 hours")
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
 
     if (pact.status === 'completed') {
       return 'Completed';

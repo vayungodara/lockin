@@ -11,7 +11,7 @@ import styles from './ActivityFeed.module.css';
 
 const DEFAULT_PAGE_SIZE = 20;
 
-export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_SIZE, hideHeader = false, disableInfiniteScroll = false }) {
+export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_SIZE, hideHeader = false }) {
   const [activities, setActivities] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [hasMore, setHasMore] = useState(false);
@@ -240,28 +240,15 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
             <ActivityItem key={activity.id} activity={activity} />
           ))}
 
-          {/* Sentinel element for infinite scroll — or manual "Show more" button when disabled */}
-          {disableInfiniteScroll ? (
-            hasMore && (
-              <button
-                type="button"
-                className={styles.showMoreBtn}
-                onClick={loadMore}
-                disabled={isLoadingMore}
-              >
-                {isLoadingMore ? 'Loading…' : `Show more activity`}
-              </button>
-            )
-          ) : (
-            <div ref={sentinelCallbackRef} className={styles.sentinel}>
-              {isLoadingMore && (
-                <div className={styles.loadingMore}>
-                  <div className={styles.feedSpinner}></div>
-                  <span>Loading more...</span>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Sentinel element — IntersectionObserver auto-loads more as user scrolls */}
+          <div ref={sentinelCallbackRef} className={styles.sentinel}>
+            {isLoadingMore && (
+              <div className={styles.loadingMore}>
+                <div className={styles.feedSpinner}></div>
+                <span>Loading more...</span>
+              </div>
+            )}
+          </div>
 
           {!hasMore && activities.length > 0 && (
             <div className={styles.endOfFeed}>

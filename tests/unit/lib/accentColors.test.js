@@ -1,8 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   hexToRgb,
   ACCENT_PALETTES,
   DEFAULT_PALETTE_ID,
+  applyAccentToDocument,
 } from '@/lib/accentColors';
 
 describe('hexToRgb', () => {
@@ -84,5 +85,102 @@ describe('DEFAULT_PALETTE_ID', () => {
   it('matches one of the palette IDs', () => {
     const ids = ACCENT_PALETTES.map((p) => p.id);
     expect(ids).toContain(DEFAULT_PALETTE_ID);
+  });
+});
+
+describe('applyAccentToDocument', () => {
+  beforeEach(() => {
+    // Reset root inline styles before each test
+    const root = document.documentElement;
+    root.removeAttribute('style');
+  });
+
+  it('sets CSS custom properties for a known palette in light mode', () => {
+    applyAccentToDocument('ocean', false);
+    const root = document.documentElement;
+
+    const ocean = ACCENT_PALETTES.find((p) => p.id === 'ocean');
+    expect(root.style.getPropertyValue('--accent-primary')).toBe(ocean.primary);
+    expect(root.style.getPropertyValue('--accent-secondary')).toBe(ocean.secondary);
+    expect(root.style.getPropertyValue('--accent-tertiary')).toBe(ocean.tertiary);
+    expect(root.style.getPropertyValue('--accent-primary-hover')).toBe(ocean.hover);
+    expect(root.style.getPropertyValue('--accent-text')).toBe(ocean.primary);
+  });
+
+  it('sets the RGB custom properties derived from the primary and tertiary hex', () => {
+    applyAccentToDocument('emerald', false);
+    const root = document.documentElement;
+
+    const emerald = ACCENT_PALETTES.find((p) => p.id === 'emerald');
+    const pRgb = hexToRgb(emerald.primary);
+    const tRgb = hexToRgb(emerald.tertiary);
+
+    expect(root.style.getPropertyValue('--accent-primary-rgb')).toBe(
+      `${pRgb.r}, ${pRgb.g}, ${pRgb.b}`
+    );
+    expect(root.style.getPropertyValue('--accent-tertiary-rgb')).toBe(
+      `${tRgb.r}, ${tRgb.g}, ${tRgb.b}`
+    );
+  });
+
+  it('uses higher alpha values for dark mode glow', () => {
+    // First apply in dark mode
+    applyAccentToDocument('rose', true);
+    const root = document.documentElement;
+    const darkGlow = root.style.getPropertyValue('--accent-glow');
+
+    // Then apply in light mode
+    applyAccentToDocument('rose', false);
+    const lightGlow = root.style.getPropertyValue('--accent-glow');
+
+    // Both should be rgba() with the same RGB but different alpha
+    expect(darkGlow).toMatch(/^rgba\(/);
+    expect(lightGlow).toMatch(/^rgba\(/);
+    expect(darkGlow).not.toBe(lightGlow);
+  });
+
+  it('removes inline overrides when paletteId is the default (indigo)', () => {
+    // First apply a non-default palette so overrides exist
+    applyAccentToDocument('ocean', false);
+    const root = document.documentElement;
+    expect(root.style.getPropertyValue('--accent-primary')).not.toBe('');
+
+    // Then apply the default — overrides should be cleared
+    applyAccentToDocument(DEFAULT_PALETTE_ID, false);
+    expect(root.style.getPropertyValue('--accent-primary')).toBe('');
+    expect(root.style.getPropertyValue('--accent-secondary')).toBe('');
+    expect(root.style.getPropertyValue('--gradient-primary')).toBe('');
+  });
+
+  it('removes inline overrides when paletteId is falsy', () => {
+    applyAccentToDocument('sunset', false);
+    const root = document.documentElement;
+    expect(root.style.getPropertyValue('--accent-primary')).not.toBe('');
+
+    applyAccentToDocument(null, false);
+    expect(root.style.getPropertyValue('--accent-primary')).toBe('');
+  });
+
+  it('does nothing for an unknown palette id', () => {
+    // Seed with a known palette so any accidental overwrite is detectable
+    applyAccentToDocument('ocean', false);
+    const root = document.documentElement;
+    const before = root.style.getPropertyValue('--accent-primary');
+
+    applyAccentToDocument('not-a-real-palette', false);
+    const after = root.style.getPropertyValue('--accent-primary');
+
+    expect(after).toBe(before);
+  });
+
+  it('builds a valid linear-gradient for --gradient-primary', () => {
+    applyAccentToDocument('violet', false);
+    const root = document.documentElement;
+    const gradient = root.style.getPropertyValue('--gradient-primary');
+
+    expect(gradient).toContain('linear-gradient(135deg,');
+    expect(gradient).toContain('0%');
+    expect(gradient).toContain('50%');
+    expect(gradient).toContain('100%');
   });
 });

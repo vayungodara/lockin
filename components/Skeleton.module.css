@@ -22,6 +22,11 @@
   100% { transform: translateX(350%); }
 }
 
+@keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
 .skeletonText {
   background: var(--surface-2);
   border-radius: var(--radius-sm);

@@ -39,6 +39,19 @@ export function createMockSupabase() {
     mockResolvedValue(value) {
       builder.mockReturnValue(value);
     },
+
+    // Sequence values across consecutive awaits — first await resolves to
+    // values[0], second to values[1], etc. Useful for testing flows that
+    // run multiple queries in sequence (e.g. existence-check then insert)
+    // where the real Supabase client returns different shapes per call.
+    mockReturnValueSequence(values) {
+      let i = 0;
+      builder.then = (resolve) => {
+        const v = values[Math.min(i, values.length - 1)];
+        i += 1;
+        resolve(v);
+      };
+    },
   };
 
   // Every method returns the builder for chaining

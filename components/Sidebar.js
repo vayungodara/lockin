@@ -14,7 +14,7 @@ import {
   snappyTransition,
   smoothTransition,
 } from '@/lib/animations';
-import { House, CheckSquare, UsersThree, Timer, ChartLineUp, GearSix, Sun, Moon, Monitor, ArrowSquareOut, SignOut } from '@phosphor-icons/react';
+import { House, CheckSquare, UsersThree, Timer, ChartBar, GearSix, Sun, Moon, Monitor, ArrowSquareOut, SignOut } from '@phosphor-icons/react';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP, getProgressToNextLevel } from '@/lib/gamification';
 import { useTheme } from './ThemeProvider';
@@ -45,7 +45,7 @@ const navItems = [
   { href: '/dashboard/pacts', label: 'My Pacts', IconComponent: CheckSquare },
   { href: '/dashboard/groups', label: 'Groups', IconComponent: UsersThree },
   { href: '/dashboard/focus', label: 'Focus Timer', IconComponent: Timer },
-  { href: '/dashboard/stats', label: 'Stats', IconComponent: ChartLineUp },
+  { href: '/dashboard/stats', label: 'Stats', IconComponent: ChartBar },
   { href: '/dashboard/settings', label: 'Settings', IconComponent: GearSix },
 ];
 

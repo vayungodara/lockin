@@ -82,7 +82,6 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       window.dispatchEvent(new CustomEvent('xp-updated'));
     } catch (err) {
       console.error('Error committing pact completion:', err);
-      isCompletingRef.current = false;
       // Revert optimistic UI on DB error
       if (onUpdate && pact) {
         onUpdate({ ...pact, status: 'active', completed_at: null });
@@ -112,7 +111,6 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       ).catch(err => console.error('Partner notify error:', err));
     } catch (err) {
       console.error('Error committing pact miss:', err);
-      isCompletingRef.current = false;
       // Revert optimistic UI on DB error
       if (onUpdate && pact) {
         onUpdate({ ...pact, status: 'active' });
@@ -299,6 +297,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       });
     } finally {
       setIsPending(false);
+      isCompletingRef.current = false;
     }
   };
 
@@ -332,6 +331,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       });
     } finally {
       setIsPending(false);
+      isCompletingRef.current = false;
     }
   };
 

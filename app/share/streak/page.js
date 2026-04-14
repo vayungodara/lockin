@@ -27,21 +27,26 @@ export async function generateMetadata({ searchParams }) {
 export default async function ShareStreakPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  
+
   if (!user) {
     redirect('/?returnTo=/share/streak');
   }
-  
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('full_name, avatar_url')
-    .eq('id', user.id)
-    .single();
-  
-  const streakData = await calculateStreak(supabase, user.id);
-  
+
+  // Parallelize profile fetch + streak calculation (streak can scan up to
+  // 366 days of pacts). Matches the pattern used in TodayBar.
+  const [profileRes, streakData] = await Promise.all([
+    supabase
+      .from('profiles')
+      .select('full_name, avatar_url')
+      .eq('id', user.id)
+      .single(),
+    calculateStreak(supabase, user.id),
+  ]);
+
+  const profile = profileRes.data;
+
   return (
-    <ShareStreakClient 
+    <ShareStreakClient
       user={user}
       profile={profile}
       streakData={streakData}

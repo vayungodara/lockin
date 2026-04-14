@@ -8,7 +8,7 @@ import { calculateStreak } from '@/lib/streaks';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
-import { Timer, Snowflake } from '@phosphor-icons/react';
+import { Timer, Snowflake, Flame } from '@phosphor-icons/react';
 import { useToast } from '@/components/Toast';
 import styles from './TodayBar.module.css';
 
@@ -244,10 +244,14 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             <div className={styles.iconWrapper}>
               {isMilestoneDay ? (
                 <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
-                  <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
+                  <span className={styles.streakIcon}>
+                    <Flame size={24} weight="fill" color="var(--urgency-amber)" />
+                  </span>
                 </motion.span>
               ) : (
-                <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
+                <span className={styles.streakIcon}>
+                  <Flame size={24} weight="fill" color="var(--urgency-amber)" />
+                </span>
               )}
               <span className={styles.confettiDotBlue} aria-hidden="true" />
               <span className={styles.confettiDotGreen} aria-hidden="true" />

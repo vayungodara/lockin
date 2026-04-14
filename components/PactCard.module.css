@@ -228,7 +228,7 @@
 .card.completed .title {
   text-decoration: line-through;
   text-decoration-color: var(--text-muted);
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
 }
 
 .badge {
@@ -366,7 +366,7 @@
 }
 
 .card.completed {
-  opacity: 0.7;
+  opacity: 0.8;
   transition: opacity var(--transition-fast);
 }
 
@@ -508,4 +508,9 @@
   animation: shimmerSweep 2s ease-in-out 1;
   pointer-events: none;
   border-radius: inherit;
+}
+
+@keyframes shimmerSweep {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
 }

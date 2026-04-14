@@ -137,7 +137,8 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       offsetRef.current = currentOffset + newActivities.length;
       setActivities(prev => {
         const existingIds = new Set(prev.map(a => a.id));
-        return [...prev, ...newActivities.filter(a => !existingIds.has(a.id))];
+        const unique = newActivities.filter(a => !existingIds.has(a.id));
+        return [...prev, ...unique];
       });
       setHasMore(newActivities.length === pageSize);
     } catch (err) {
@@ -240,7 +241,7 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
             <ActivityItem key={activity.id} activity={activity} />
           ))}
 
-          {/* Sentinel element — IntersectionObserver auto-loads more as user scrolls */}
+          {/* Sentinel element for infinite scroll */}
           <div ref={sentinelCallbackRef} className={styles.sentinel}>
             {isLoadingMore && (
               <div className={styles.loadingMore}>

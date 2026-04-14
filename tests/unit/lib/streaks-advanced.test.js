@@ -370,13 +370,18 @@ describe('updateStreakOnCompletion — milestone freeze idempotency', () => {
     // SECURITY DEFINER to bypass the xp_events INSERT RLS policy).
     expect(rpcNames).toContain('award_xp');
 
-    // Verify the award_xp call contained the milestone-specific event_type
+    // Verify the award_xp call contained the milestone-specific event_type.
+    // Marker now includes the streak's start date so a future 7-day streak
+    // earns its own freeze (markers don't bleed across streak runs).
     const awardXpCall = rpcCalls.find((c) => c[0] === 'award_xp');
     expect(awardXpCall).toBeDefined();
-    expect(awardXpCall[1].p_event_type).toBe('streak_freeze_milestone_7');
+    expect(awardXpCall[1].p_event_type).toMatch(/^streak_freeze_milestone_7_\d{4}-\d{2}-\d{2}$/);
     expect(awardXpCall[1].p_user_id).toBe('user-1');
     // Marker rows carry xp_amount 0 — the reward is a freeze, not XP
     expect(awardXpCall[1].p_xp_amount).toBe(0);
+    // Marker metadata includes the streakStartDate for traceability
+    expect(awardXpCall[1].p_metadata).toMatchObject({ milestone: 7 });
+    expect(awardXpCall[1].p_metadata.streakStartDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
   it('does NOT award a freeze when a marker already exists at milestone 7', async () => {

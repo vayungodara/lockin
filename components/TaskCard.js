@@ -107,17 +107,15 @@ export default function TaskCard({ task, currentUser, userRole, onUpdate, onDele
 
       // Award XP when a task transitions into 'done' from a non-done state.
       // Idempotency guard prevents farming: toggling done → todo → done would
-      // otherwise award XP on every cycle. Only reward the task's owner/creator;
-      // fall back to the acting user so the call never throws on missing fields.
-      // Best-effort — errors are logged, not propagated. Note: `assignee_id` is
-      // NOT a schema field (verified via grep) — kept only owner_id/created_by/currentUser.
-      if (newStatus === 'done' && task.status !== 'done') {
+      // otherwise award XP on every cycle.
+      // Recipient = the user who actually performed the completion. award_xp
+      // enforces auth.uid() == p_user_id, so awarding to task.owner_id when a
+      // group owner closes someone else's task would be silently rejected.
+      // Crediting the actor is also more semantically correct (rewards work).
+      if (newStatus === 'done' && task.status !== 'done' && currentUser?.id) {
         try {
-          const recipientId = task.owner_id || task.created_by || currentUser?.id;
-          if (recipientId) {
-            const { awardXP, XP_REWARDS } = await import('@/lib/gamification');
-            await awardXP(supabase, recipientId, 'task_completed', XP_REWARDS.TASK_COMPLETED);
-          }
+          const { awardXP, XP_REWARDS } = await import('@/lib/gamification');
+          await awardXP(supabase, currentUser.id, 'task_completed', XP_REWARDS.TASK_COMPLETED);
         } catch (err) {
           console.error('Task XP award error:', err);
         }

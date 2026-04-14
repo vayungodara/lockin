@@ -118,6 +118,8 @@ END;
 $$;
 
 -- 4. consume_streak_freeze — decrement pool, stamp cooldown, save today's activity.
+-- Server-side cooldown enforcement (3 days between uses) prevents direct API
+-- callers from draining the entire pool in one session.
 CREATE OR REPLACE FUNCTION public.consume_streak_freeze(
   p_user_id uuid,
   p_today date DEFAULT CURRENT_DATE
@@ -129,6 +131,8 @@ SET search_path TO ''
 AS $$
 DECLARE
   v_remaining INTEGER;
+  v_last_used TIMESTAMPTZ;
+  v_days_since_use NUMERIC;
 BEGIN
   IF auth.uid() IS NULL OR auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Unauthorized: caller must match target user';
@@ -138,11 +142,24 @@ BEGIN
     RAISE EXCEPTION 'today cannot be in the future';
   END IF;
 
-  SELECT streak_freezes_remaining INTO v_remaining
+  SELECT streak_freezes_remaining, streak_freeze_last_used
+  INTO v_remaining, v_last_used
   FROM public.profiles WHERE id = p_user_id;
 
   IF v_remaining IS NULL OR v_remaining <= 0 THEN
     RETURN jsonb_build_object('success', false, 'error', 'No freezes available');
+  END IF;
+
+  -- Server-side cooldown (3 days between uses) — mirrors client guard
+  IF v_last_used IS NOT NULL THEN
+    v_days_since_use := EXTRACT(EPOCH FROM (NOW() - v_last_used)) / 86400;
+    IF v_days_since_use < 3 THEN
+      RETURN jsonb_build_object(
+        'success', false,
+        'error', 'Cooldown active — wait ' || CEIL(3 - v_days_since_use)::text || ' more day(s)',
+        'freezesRemaining', v_remaining
+      );
+    END IF;
   END IF;
 
   PERFORM set_config('app.skip_gamification_trigger', 'true', true);
@@ -158,7 +175,9 @@ BEGIN
 END;
 $$;
 
--- 5. award_streak_freeze — milestone reward (7/14/30-day streaks).
+-- 5. award_streak_freeze — milestone reward (7/14/30/60/90/180/365-day streaks).
+-- Server-side milestone check prevents any authed caller from bumping freezes
+-- via direct API access (any client could otherwise gain up to MAX_FREEZES).
 CREATE OR REPLACE FUNCTION public.award_streak_freeze(
   p_user_id uuid,
   p_amount integer DEFAULT 1,
@@ -171,17 +190,26 @@ SET search_path TO ''
 AS $$
 DECLARE
   v_new_remaining INTEGER;
+  v_current_streak INTEGER;
 BEGIN
   IF auth.uid() IS NULL OR auth.uid() != p_user_id THEN
     RAISE EXCEPTION 'Unauthorized: caller must match target user';
   END IF;
 
-  IF p_amount <= 0 OR p_amount > 3 THEN
-    RAISE EXCEPTION 'Invalid award amount';
+  IF p_amount <= 0 OR p_amount > 1 THEN
+    RAISE EXCEPTION 'Invalid award amount: must be exactly 1';
   END IF;
 
   IF p_max_capacity < 1 OR p_max_capacity > 10 THEN
     RAISE EXCEPTION 'Invalid max capacity';
+  END IF;
+
+  -- Server-side milestone check: only award when current_streak is on a known milestone.
+  SELECT current_streak INTO v_current_streak
+  FROM public.profiles WHERE id = p_user_id;
+
+  IF v_current_streak IS NULL OR v_current_streak NOT IN (7, 14, 30, 60, 90, 180, 365) THEN
+    RAISE EXCEPTION 'Not on a freeze-rewarding streak milestone';
   END IF;
 
   PERFORM set_config('app.skip_gamification_trigger', 'true', true);
@@ -234,7 +262,7 @@ BEGIN
   FOREACH v_recipient IN ARRAY p_recipients LOOP
     IF EXISTS (
       SELECT 1 FROM public.accountability_partnerships ap
-      WHERE ap.status = 'accepted'
+      WHERE ap.status = 'active'  -- app uses 'active' for accepted partnerships (lib/partnerships.js:93)
         AND ((ap.user1_id = v_caller AND ap.user2_id = v_recipient)
           OR (ap.user2_id = v_caller AND ap.user1_id = v_recipient))
     ) THEN

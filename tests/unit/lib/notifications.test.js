@@ -190,8 +190,14 @@ describe('createNotification', () => {
       NOTIFICATION_TYPES.LEVEL_UP,
       'Level up',
       'You reached level 2'
+      // metadata intentionally omitted
     );
     expect(result.data).toEqual({ id: 'n-2' });
     expect(result.error).toBeNull();
+    // Verify the default param actually applied — the inserted row has
+    // metadata: {} (otherwise removing the default would still pass).
+    expect(builder.insert).toHaveBeenCalledTimes(1);
+    const insertedRow = builder.insert.mock.calls[0][0];
+    expect(insertedRow.metadata).toEqual({});
   });
 });

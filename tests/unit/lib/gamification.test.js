@@ -190,11 +190,19 @@ describe('unlockAchievement', () => {
 
   it('returns failure when insert errors', async () => {
     const { supabase, builder } = createMockSupabase();
-    builder.mockReturnValue({ data: null, error: { message: 'insert failed' } });
+    // Sequence: maybeSingle (existence check) returns "not unlocked", then
+    // insert returns the error. Without sequencing, both calls share the
+    // same error and the test would pass via the wrong path because the
+    // lib only destructures `data` from maybeSingle and ignores its error.
+    builder.mockReturnValueSequence([
+      { data: null, error: null },                          // maybeSingle: not yet unlocked
+      { data: null, error: { message: 'insert failed' } }, // insert: fails
+    ]);
 
     const result = await unlockAchievement(supabase, 'user-1', 'streak_7');
     expect(result.success).toBe(false);
     expect(result.error).toBe('insert failed');
+    expect(builder.insert).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -204,12 +204,23 @@ describe('logActivity', () => {
     expect(result.error).toEqual({ message: 'insert failed' });
   });
 
-  it('returns failure when auth call throws', async () => {
+  it('returns failure when auth.getUser returns an error', async () => {
     const { supabase } = createMockSupabase();
+    // The lib turns `{ error }` into a thrown error via `if (authError) throw authError`.
     supabase.auth.getUser.mockResolvedValue({ data: null, error: { message: 'auth error' } });
 
     const result = await logActivity(supabase, 'task_created', null, {});
     expect(result.success).toBe(false);
+    expect(result.error).toEqual({ message: 'auth error' });
+  });
+
+  it('returns failure when auth.getUser rejects (network/exception)', async () => {
+    const { supabase } = createMockSupabase();
+    supabase.auth.getUser.mockRejectedValue(new Error('network down'));
+
+    const result = await logActivity(supabase, 'task_created', null, {});
+    expect(result.success).toBe(false);
+    expect(result.error?.message).toBe('network down');
   });
 
   it('accepts null groupId for personal pacts', async () => {
@@ -227,6 +238,11 @@ describe('logActivity', () => {
     // passing a string as metadata — should log a warning and still succeed
     const result = await logActivity(supabase, 'pact_created', null, 'bad-metadata');
     expect(result).toEqual({ success: true });
+    // Verify the lib actually reset metadata to {} before inserting
+    // (otherwise this test would still pass even if the reset was removed)
+    expect(builder.insert).toHaveBeenCalledTimes(1);
+    const insertedRow = builder.insert.mock.calls[0][0];
+    expect(insertedRow.metadata).toEqual({});
   });
 });
 

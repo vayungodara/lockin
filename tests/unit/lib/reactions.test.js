@@ -154,22 +154,36 @@ describe('toggleReaction', () => {
 
   it('adds the reaction when the user has not reacted yet', async () => {
     const { supabase, builder } = createMockSupabase();
-    // No existing reaction: .single() returns null data, insert returns null error
-    builder.mockReturnValue({ data: null, error: null });
+    // Real Supabase returns { data: null, error: { code: 'PGRST116' } } for
+    // .single() when no row matches — the lib explicitly treats PGRST116 as
+    // "not found" (lib/reactions.js:102) and falls through to insert.
+    builder.mockReturnValueSequence([
+      { data: null, error: { code: 'PGRST116' } }, // existence check
+      { data: null, error: null },                  // insert
+    ]);
 
     const result = await toggleReaction(supabase, 'a1', 'fire');
     expect(result.success).toBe(true);
     expect(result.action).toBe('added');
+    // Prove the insert path actually executed (not the remove path)
+    expect(builder.insert).toHaveBeenCalledTimes(1);
+    expect(builder.delete).not.toHaveBeenCalled();
   });
 
   it('removes the reaction when the user has already reacted', async () => {
     const { supabase, builder } = createMockSupabase();
     // Existing reaction: .single() returns a row, delete returns no error
-    builder.mockReturnValue({ data: { id: 'reaction-123' }, error: null });
+    builder.mockReturnValueSequence([
+      { data: { id: 'reaction-123' }, error: null }, // existence check
+      { data: null, error: null },                    // delete
+    ]);
 
     const result = await toggleReaction(supabase, 'a1', 'fire');
     expect(result.success).toBe(true);
     expect(result.action).toBe('removed');
+    // Prove the remove path actually executed (not the insert path)
+    expect(builder.delete).toHaveBeenCalledTimes(1);
+    expect(builder.insert).not.toHaveBeenCalled();
   });
 
   it('returns failure when auth call errors', async () => {

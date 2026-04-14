@@ -160,6 +160,7 @@
   align-items: center;
   justify-content: center;
   line-height: 1;
+  font-size: 24px;
 }
 
 .streakText {
@@ -473,9 +474,8 @@
     height: 42px;
   }
 
-  .streakIcon svg {
-    width: 20px;
-    height: 20px;
+  .streakIcon {
+    font-size: 20px;
   }
 
   .skeleton {
@@ -509,9 +509,8 @@
     height: 38px;
   }
 
-  .streakIcon svg {
-    width: 18px;
-    height: 18px;
+  .streakIcon {
+    font-size: 18px;
   }
 
   .streakCount {

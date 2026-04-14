@@ -39,24 +39,37 @@
   gap: var(--space-6);
 }
 
-/* Streak — compact inline summary */
-.streakInline {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin: 0;
+/* Streak — hero stat row with weighted hierarchy */
+.streakRow {
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
+  align-items: baseline;
   flex-wrap: wrap;
+  gap: var(--space-4);
+  margin: 0;
 }
 
-.streakEmoji {
-  font-size: 1.1rem;
+.streakPrimary {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
   line-height: 1;
 }
 
-.streakSep {
+.streakPrimaryLabel {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: 500;
+  color: var(--text-secondary);
+  letter-spacing: 0;
+}
+
+.streakMeta {
+  font-size: var(--text-sm);
   color: var(--text-tertiary);
 }
 
@@ -79,6 +92,11 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
+  transition: border-color var(--transition-fast);
+}
+
+.analyticsCard:hover {
+  border-color: var(--border-default);
 }
 
 .analyticsCard h3 {

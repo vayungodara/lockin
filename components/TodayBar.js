@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
+import { calculateStreak } from '@/lib/streaks';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
@@ -131,27 +132,23 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           (sum, s) => sum + (s.duration_minutes || 0), 0
         );
 
-        // If last_activity_date is more than 1 day ago, streak is broken
-        // regardless of what current_streak says (cron may not have reset it).
-        let streak = profile?.current_streak || 0;
-        if (streak > 0 && profile?.last_activity_date) {
-          const now = new Date();
-          const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-          const lastActivity = new Date(profile.last_activity_date + 'T00:00:00Z').getTime();
-          const daysSince = Math.round((todayUTC - lastActivity) / (1000 * 60 * 60 * 24));
-          if (daysSince > 1) streak = 0;
-        }
-
-        // Resolve user's local timezone for streak risk calculation so
-        // "at risk" matches the day boundary they see locally.
+        // Resolve user's local timezone so streak + risk calculations use
+        // the user's local day boundary (matches Stats page / Share page).
         let timezone = 'UTC';
         try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
 
-        // Check streak risk and freeze status in parallel
-        const [risk, freeze] = await Promise.all([
+        // Compute streak live from pacts via the shared `calculateStreak`
+        // helper so Dashboard matches the Stats page. Previously we read
+        // the denormalized `profiles.current_streak` column, which could
+        // drift when cron jobs hadn't run yet. Keep profile reads for XP,
+        // level, and freezes — those aren't re-derivable from pacts.
+        const [streakResult, risk, freeze] = await Promise.all([
+          calculateStreak(supabase, userId, timezone),
           checkStreakAtRisk(supabase, userId, timezone),
           getStreakFreezeStatus(supabase, userId),
         ]);
+
+        const streak = streakResult?.currentStreak ?? 0;
 
         setSummary({
           dueToday,

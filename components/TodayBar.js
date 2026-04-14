@@ -83,12 +83,17 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        // Run all independent queries in parallel
+        let timezone = 'UTC';
+        try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
+
         const [
           { data: activePacts, error: pactsError },
           { data: focusSessions, error: focusError },
           { data: completedToday, error: completedError },
           { data: profile, error: profileError },
+          streakResult,
+          risk,
+          freeze,
         ] = await Promise.all([
           supabase
             .from('pacts')
@@ -109,9 +114,12 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             .gte('completed_at', todayISO),
           supabase
             .from('profiles')
-            .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
+            .select('total_xp, level, streak_freezes_remaining')
             .eq('id', userId)
             .single(),
+          calculateStreak(supabase, userId, timezone),
+          checkStreakAtRisk(supabase, userId, timezone),
+          getStreakFreezeStatus(supabase, userId),
         ]);
 
         if (pactsError) console.warn('TodayBar: failed to fetch active pacts', pactsError);
@@ -131,22 +139,6 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
         const focusMinutes = (focusSessions || []).reduce(
           (sum, s) => sum + (s.duration_minutes || 0), 0
         );
-
-        // Resolve user's local timezone so streak + risk calculations use
-        // the user's local day boundary (matches Stats page / Share page).
-        let timezone = 'UTC';
-        try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
-
-        // Compute streak live from pacts via the shared `calculateStreak`
-        // helper so Dashboard matches the Stats page. Previously we read
-        // the denormalized `profiles.current_streak` column, which could
-        // drift when cron jobs hadn't run yet. Keep profile reads for XP,
-        // level, and freezes — those aren't re-derivable from pacts.
-        const [streakResult, risk, freeze] = await Promise.all([
-          calculateStreak(supabase, userId, timezone),
-          checkStreakAtRisk(supabase, userId, timezone),
-          getStreakFreezeStatus(supabase, userId),
-        ]);
 
         const streak = streakResult?.currentStreak ?? 0;
 

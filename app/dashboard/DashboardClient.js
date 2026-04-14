@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
-import { Plus, Fire } from '@phosphor-icons/react';
+import { Plus, Flame } from '@phosphor-icons/react';
 import { fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
@@ -158,7 +158,7 @@ export default function DashboardClient({ user }) {
               {overduePacts.length > 0 && ` \u00b7 ${overduePacts.length} overdue`}
               {' \u00b7 '}
               <span className={styles.streakHighlight}>
-                <Fire size={16} weight="fill" color="var(--warning)" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
+                <Flame size={16} weight="fill" color="var(--urgency-amber)" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
                 {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
               </span>
             </p>

@@ -35,6 +35,14 @@ function GroupCard({ group, isHero = false }) {
 
   return (
     <Link href={`/dashboard/groups/${group.id}`} className={`${styles.groupCard} ${isHero ? styles.groupCardHero : ''}`}>
+      {isHero && (
+        <span className={styles.heroBadge} aria-label="Most active group">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M13 2L4.5 13H11L10 22L18.5 11H12L13 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+          </svg>
+          Most Active
+        </span>
+      )}
       <div className={styles.groupHeader}>
         <div
           className={styles.groupIcon}
@@ -115,10 +123,14 @@ function GroupSections({ groups }) {
   const ownedGroups = groups.filter(g => g.role === 'owner');
   const joinedGroups = groups.filter(g => g.role !== 'owner');
 
-  // Identify the most active group (highest task count) for hero treatment.
-  // Only apply hero when there are 3+ groups to avoid odd layout with 1-2 cards.
+  // Hero: the group with the most COMPLETED tasks (real progress signal).
+  // Require >= 5 completed tasks to avoid celebrating empty groups.
+  // Only apply with 3+ groups to avoid odd layout with 1-2 cards.
   const mostActiveId = groups.length >= 3
-    ? groups.reduce((best, g) => (g.taskCount > (best?.taskCount || 0) ? g : best), null)?.id
+    ? groups.reduce((best, g) => {
+        if ((g.tasksDone || 0) < 5) return best;
+        return (g.tasksDone || 0) > (best?.tasksDone || 0) ? g : best;
+      }, null)?.id
     : null;
 
   return (

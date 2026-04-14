@@ -54,14 +54,33 @@ export function createMockSupabase() {
   // Default resolved value (no data, no error)
   builder.mockReturnValue({ data: null, error: null });
 
+  // Optional per-call rpc allowlist. When set, rpc() calls for names not in
+  // the list throw, so tests catch typos / missing RPCs that would otherwise
+  // silently resolve to `{data: null, error: null}`. Opt in per-test via
+  // `supabase.__setAllowedRpcs(['foo', 'bar'])`; unset restores lenient mode.
+  let allowedRpcs = null;
+
+  const rpcFn = vi.fn((name, args) => {
+    if (allowedRpcs && !allowedRpcs.includes(name)) {
+      return Promise.reject(
+        new Error(`rpc('${name}') not in allowlist — add it to __setAllowedRpcs()`)
+      );
+    }
+    return Promise.resolve({ data: null, error: null });
+  });
+
   const supabase = {
     from: vi.fn(() => builder),
-    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    rpc: rpcFn,
     auth: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: { id: 'test-user-id' } },
         error: null,
       }),
+    },
+    // Configure the rpc allowlist for a single test. Pass null/undefined to disable.
+    __setAllowedRpcs(list) {
+      allowedRpcs = Array.isArray(list) ? list : null;
     },
   };
 

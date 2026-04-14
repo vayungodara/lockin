@@ -83,6 +83,12 @@ export default function DashboardClient({ user }) {
         }
       }
 
+      // Dashboard only renders max 3 pacts, but the full set is used for
+      // due-today/overdue counts in the header. limit=200 gives headroom for
+      // active+historical so active pacts aren't pushed out of the window
+      // when a user has a long tail of completed/missed pacts. Kept
+      // select('*') to avoid drift with schema migrations that add new
+      // columns (e.g. xp_reward, is_recurring).
       const { data, error } = await supabase
         .from('pacts')
         .select('*')

@@ -226,38 +226,41 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   // Format deadline
   const formatDeadline = () => {
-    const now = new Date();
+    // Use ms-based hours-first, days-after math so sub-24h windows are
+    // classified correctly. Example: deadline at 01:00 tomorrow while now
+    // is 23:00 today → hours=2, days=0 → "Due in 2 hours" (NOT "Due tomorrow").
+    // The days===1 branch only triggers when ≥24h remain.
     const diff = deadlineDate - now;
+    const hours = Math.floor(diff / (1000 * 60 * 60));
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
+
     if (pact.status === 'completed') {
       return 'Completed';
     }
-    
+
     if (pact.status === 'missed') {
       return 'Missed';
     }
-    
+
     if (diff < 0) {
       return 'Overdue';
     }
-    
+
     if (days === 0) {
       if (hours === 0) {
         return 'Due in less than an hour';
       }
       return `Due in ${hours} hour${hours === 1 ? '' : 's'}`;
     }
-    
+
     if (days === 1) {
       return 'Due tomorrow';
     }
-    
+
     if (days < 7) {
       return `Due in ${days} days`;
     }
-    
+
     return `Due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
   };
 

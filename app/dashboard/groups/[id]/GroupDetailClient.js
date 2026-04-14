@@ -434,7 +434,9 @@ export default function GroupDetailClient({ user, group, userRole }) {
               )}
               <GroupStats groupId={group.id} />
             </div>
-            <ActivityFeed groupId={group.id} />
+            <div className={styles.activityPanel}>
+              <ActivityFeed groupId={group.id} pageSize={10} />
+            </div>
           </div>
         </section>
       )}

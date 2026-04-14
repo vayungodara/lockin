@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
+import { fadeInUp, cardHover } from '@/lib/animations';
 import styles from './CompactActivityCard.module.css';
 
 export default function CompactActivityCard({ userId }) {
@@ -131,17 +132,10 @@ export default function CompactActivityCard({ userId }) {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className={styles.card}
-      initial="initial"
-      animate="animate"
-      whileHover="hover"
-      variants={{
-        initial: { opacity: 0, y: 20 },
-        animate: { opacity: 1, y: 0 },
-        hover: { y: -3 }
-      }}
-      transition={{ duration: 0.4 }}
+      {...fadeInUp}
+      whileHover={cardHover}
     >
       <div className={styles.header}>
         <div className={styles.streakMain}>

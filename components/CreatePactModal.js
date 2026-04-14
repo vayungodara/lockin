@@ -217,8 +217,8 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                     <motion.button
                       className={styles.backBtn}
                       onClick={handleBack}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={buttonHover}
+                      whileTap={buttonTap}
                       aria-label="Back to templates"
                       {...fadeInUp}
                     >

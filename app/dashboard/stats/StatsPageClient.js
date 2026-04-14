@@ -7,7 +7,7 @@ import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
-import { Flame } from '@phosphor-icons/react';
+import { Fire } from '@phosphor-icons/react';
 import { fadeInUp } from '@/lib/animations';
 import styles from './StatsPage.module.css';
 
@@ -253,7 +253,7 @@ export default function StatsPageClient({ user }) {
         {/* Streak Summary — hero row */}
         <div className={styles.streakRow}>
           <span className={styles.streakPrimary}>
-            <Flame size={22} weight="fill" color="var(--urgency-amber)" />
+            <Fire size={22} weight="fill" color="var(--warning)" />
             {streakData.currentStreak}
             <span className={styles.streakPrimaryLabel}>day streak</span>
           </span>

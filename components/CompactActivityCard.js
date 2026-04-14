@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { Flame } from '@phosphor-icons/react';
+import { Fire } from '@phosphor-icons/react';
 import { createClient } from '@/lib/supabase/client';
 import { getActivityHeatmap, calculateStreak } from '@/lib/streaks';
 import { fadeInUp, cardHover } from '@/lib/animations';
@@ -140,7 +140,7 @@ export default function CompactActivityCard({ userId }) {
     >
       <div className={styles.header}>
         <div className={styles.streakMain}>
-          <span className={styles.fireIcon}><Flame size={20} weight="fill" color="var(--urgency-amber)" /></span>
+          <span className={styles.fireIcon}><Fire size={20} weight="fill" color="var(--warning)" /></span>
           <span className={styles.streakCount}>{streakData.currentStreak}</span>
           <span className={styles.streakLabel}>day streak</span>
         </div>

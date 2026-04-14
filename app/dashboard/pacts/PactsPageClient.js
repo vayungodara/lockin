@@ -66,10 +66,14 @@ export default function PactsPageClient({ user }) {
 
   const handleDeletePact = async (pactId) => {
     try {
+      // Defense-in-depth: RLS already scopes this to the caller, but adding
+      // the explicit user_id filter ensures a hostile/misconfigured policy
+      // can't expand the delete's blast radius beyond the caller's pacts.
       const { error } = await supabase
         .from('pacts')
         .delete()
-        .eq('id', pactId);
+        .eq('id', pactId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       setPacts(prev => prev.filter(p => p.id !== pactId));

@@ -465,6 +465,9 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* White text is correct here — these cells always have saturated accent
+   backgrounds in both themes, so inverting via --text-inverse produces
+   near-black text on medium-dark indigo (illegible). */
 :global([data-theme="dark"]) .level3 .dayNumber,
 :global([data-theme="dark"]) .level4 .dayNumber {
   color: #FFFFFF;

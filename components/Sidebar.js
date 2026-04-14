@@ -23,8 +23,13 @@ import NotificationBell from './NotificationBell';
 import styles from './Sidebar.module.css';
 
 function getSidebarCollapsed() {
-  const saved = localStorage.getItem('sidebar-collapsed');
-  return saved !== null ? saved === 'true' : true;
+  if (typeof window === 'undefined') return true;
+  try {
+    const saved = localStorage.getItem('sidebar-collapsed');
+    return saved !== null ? saved === 'true' : true;
+  } catch {
+    return true;
+  }
 }
 
 function subscribeToSidebarStorage(callback) {
@@ -114,7 +119,11 @@ export default function Sidebar({ user, onSignOut, onExpandChange, hideXP }) {
 
   const handleCollapseToggle = useCallback(() => {
     const newState = !isCollapsed;
-    localStorage.setItem('sidebar-collapsed', String(newState));
+    try {
+      localStorage.setItem('sidebar-collapsed', String(newState));
+    } catch {
+      // Ignore SecurityError when storage is blocked (strict extensions, enterprise policy)
+    }
     window.dispatchEvent(new StorageEvent('storage', { key: 'sidebar-collapsed' }));
   }, [isCollapsed]);
 

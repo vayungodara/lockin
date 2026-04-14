@@ -142,9 +142,14 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           if (daysSince > 1) streak = 0;
         }
 
+        // Resolve user's local timezone for streak risk calculation so
+        // "at risk" matches the day boundary they see locally.
+        let timezone = 'UTC';
+        try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
+
         // Check streak risk and freeze status in parallel
         const [risk, freeze] = await Promise.all([
-          checkStreakAtRisk(supabase, userId),
+          checkStreakAtRisk(supabase, userId, timezone),
           getStreakFreezeStatus(supabase, userId),
         ]);
 
@@ -191,7 +196,9 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
 
   const handleUseFreeze = async () => {
     setFreezeLoading(true);
-    const result = await applyStreakFreeze(supabase);
+    let timezone = 'UTC';
+    try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
+    const result = await applyStreakFreeze(supabase, timezone);
     setFreezeLoading(false);
 
     if (result.success) {

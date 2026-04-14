@@ -456,12 +456,35 @@
   display: grid;
   grid-template-columns: 1fr 1.5fr;
   gap: var(--space-4);
-  align-items: start;
+  align-items: stretch;
+}
+
+/* Activity panel matches the left column's height so the whole activity
+   feed lives inside one scrollable block instead of endlessly expanding
+   the page. The nested ActivityFeed's IntersectionObserver already roots
+   on its own feed ref, so infinite scroll happens INSIDE this box. */
+.activityPanel {
+  height: 100%;
+  min-height: 500px;
+  max-height: 720px;
+  display: flex;
+  flex-direction: column;
+}
+
+.activityPanel > * {
+  flex: 1;
+  min-height: 0;
 }
 
 @media (max-width: 1024px) {
   .activityGrid {
     grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  .activityPanel {
+    height: auto;
+    max-height: 600px;
   }
 }
 

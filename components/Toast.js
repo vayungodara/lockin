@@ -27,7 +27,9 @@ export function ToastProvider({ children }) {
   }, []);
 
   const addToast = useCallback((message, type = 'info', duration = 4000, action = null) => {
-    const id = Date.now() + Math.random();
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${Date.now()}-${Math.random()}`;
     const effectiveDuration = action ? 5000 : duration;
     setToasts(prev => [...prev, { id, message, type, action }]);
 

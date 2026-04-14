@@ -10,7 +10,7 @@ test.describe('Authentication', () => {
     await expect(page).toHaveURL('/');
 
     // The landing page hero is visible
-    const heroTitle = page.getByText('Stop saying', { exact: false });
+    const heroTitle = page.getByText('Stop lying to', { exact: false });
     await expect(heroTitle).toBeVisible();
   });
 
@@ -29,7 +29,7 @@ test.describe('Authentication', () => {
   test('sign-in page shows LockIn branding', async ({ page }) => {
     await page.goto('/dashboard');
 
-    const logoText = page.getByText('LockIn', { exact: true }).first();
+    const logoText = page.getByText(/LockIn\.?/, { exact: false }).first();
     await expect(logoText).toBeVisible();
   });
 

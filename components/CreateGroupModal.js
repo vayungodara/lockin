@@ -8,15 +8,19 @@ import { useModalScrollLock } from '@/lib/useModalScrollLock';
 import { modalContent, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './CreateGroupModal.module.css';
 
-// Generate a cryptographically secure invite code
+// Generate a cryptographically secure invite code using rejection sampling
+// to avoid modular bias when mapping random bytes to alphabet indices.
 const generateInviteCode = () => {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const bytes = crypto.getRandomValues(new Uint8Array(6));
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(bytes[i] % chars.length);
+  const threshold = 256 - (256 % chars.length); // reject bytes in biased range
+  const code = [];
+  while (code.length < 6) {
+    const byte = crypto.getRandomValues(new Uint8Array(1))[0];
+    if (byte < threshold) {
+      code.push(chars.charAt(byte % chars.length));
+    }
   }
-  return code;
+  return code.join('');
 };
 
 export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
@@ -165,6 +169,7 @@ export default function CreateGroupModal({ isOpen, onClose, onGroupCreated }) {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g., CS101 Final Project"
                   className={styles.input}
+                  maxLength={100}
                   autoFocus
                 />
                 <span className={styles.hint}>Choose a name your crew will recognize</span>

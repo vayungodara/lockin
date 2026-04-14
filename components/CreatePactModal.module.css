@@ -144,9 +144,166 @@
   width: 100%;
 }
 
-[data-theme="dark"] .input[type="date"],
-[data-theme="dark"] .input[type="time"] {
+:global([data-theme="dark"]) .input[type="date"],
+:global([data-theme="dark"]) .input[type="time"] {
   color-scheme: dark;
+}
+
+/* ══════════════════════════════════════════════════════════
+   DARK MODE — full coverage for the Create Pact modal
+   Preserves the glass/blurred-dashboard aesthetic with a
+   darker glass tone and stronger borders for contrast.
+   ══════════════════════════════════════════════════════════ */
+:global([data-theme="dark"]) .overlay {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+:global([data-theme="dark"]) .modal {
+  background: var(--surface-glass);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-2xl);
+}
+
+:global([data-theme="dark"]) .header {
+  border-bottom-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .header h2 {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .headerSubtitle {
+  color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .closeBtn,
+:global([data-theme="dark"]) .backBtn {
+  color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .closeBtn:hover,
+:global([data-theme="dark"]) .backBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .label {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .input,
+:global([data-theme="dark"]) .textarea {
+  background: var(--surface-2);
+  border-color: var(--border-default);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .input::placeholder,
+:global([data-theme="dark"]) .textarea::placeholder {
+  color: var(--text-muted);
+}
+
+:global([data-theme="dark"]) .input:hover,
+:global([data-theme="dark"]) .textarea:hover {
+  border-color: var(--border-strong);
+}
+
+:global([data-theme="dark"]) .input:focus,
+:global([data-theme="dark"]) .textarea:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.25), 0 0 16px rgba(var(--accent-primary-rgb), 0.15);
+}
+
+:global([data-theme="dark"]) .cancelBtn {
+  background: var(--surface-2);
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .cancelBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+  border-color: var(--border-strong);
+}
+
+:global([data-theme="dark"]) .error {
+  background: var(--danger-light);
+  color: var(--danger);
+}
+
+:global([data-theme="dark"]) .recurrenceButtons {
+  background: var(--surface-2);
+}
+
+:global([data-theme="dark"]) .recurrenceBtn {
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .recurrenceBtn:hover {
+  background: var(--surface-3);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .recurrenceBtn.active {
+  background: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+:global([data-theme="dark"]) .recurrenceHint {
+  color: var(--text-tertiary);
+}
+
+:global([data-theme="dark"]) .checkboxText {
+  color: var(--text-secondary);
+}
+
+/* Template picker (step 1) dark mode */
+:global([data-theme="dark"]) .categoryPill {
+  background: transparent;
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .categoryPill:hover {
+  border-color: var(--accent-primary);
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .categoryPillActive {
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--text-inverse);
+}
+
+:global([data-theme="dark"]) .templateCard {
+  background: var(--surface-2);
+  border-color: var(--border-default);
+}
+
+:global([data-theme="dark"]) .templateCard:hover {
+  background: var(--surface-3);
+  border-color: var(--accent-primary);
+  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.2);
+}
+
+:global([data-theme="dark"]) .templateTitle {
+  color: var(--text-primary);
+}
+
+:global([data-theme="dark"]) .scratchBtn {
+  border-color: var(--border-default);
+  color: var(--text-secondary);
+}
+
+:global([data-theme="dark"]) .scratchBtn:hover {
+  border-color: var(--accent-primary);
+  color: var(--accent-primary);
+  background: rgba(var(--accent-primary-rgb), 0.08);
+}
+
+:global([data-theme="dark"]) .templateBadge {
+  background: rgba(var(--accent-primary-rgb), 0.14);
+  color: var(--text-secondary);
 }
 
 

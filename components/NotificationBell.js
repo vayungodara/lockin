@@ -32,15 +32,20 @@ export default function NotificationBell() {
   const prevUnreadRef = useRef(0);
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } = useNotifications();
 
-  // Wiggle bell when unread count increases
+  // Wiggle bell when unread count increases. State updates are deferred via rAF
+  // so React doesn't flag synchronous setState in effect (react-hooks/set-state-in-effect).
   useEffect(() => {
-    if (unreadCount > prevUnreadRef.current) {
-      setWiggle(true);
+    if (unreadCount <= prevUnreadRef.current) {
       prevUnreadRef.current = unreadCount;
-      const timer = setTimeout(() => setWiggle(false), 600);
-      return () => clearTimeout(timer);
+      return;
     }
     prevUnreadRef.current = unreadCount;
+    const rafId = requestAnimationFrame(() => setWiggle(true));
+    const timer = setTimeout(() => setWiggle(false), 600);
+    return () => {
+      cancelAnimationFrame(rafId);
+      clearTimeout(timer);
+    };
   }, [unreadCount]);
 
   // Calculate dropdown position when opening
@@ -61,20 +66,32 @@ export default function NotificationBell() {
     setIsOpen(!isOpen);
   };
 
-  // Reposition dropdown briefly when opened (covers sidebar collapse animation ~350ms)
+  // Reposition dropdown when layout changes (e.g., sidebar collapse/expand, viewport resize).
+  // ResizeObserver fires on every layout shift instead of polling 25 frames.
   useEffect(() => {
     if (!isOpen || !buttonRef.current) return;
-    let rafId;
-    let frames = 0;
-    const track = () => {
-      updatePosition();
-      frames++;
-      if (frames < 25) {
-        rafId = requestAnimationFrame(track);
+
+    updatePosition();
+
+    const ro = new ResizeObserver(updatePosition);
+    ro.observe(document.body);
+    window.addEventListener('resize', updatePosition);
+
+    // Sidebar is position:fixed — ResizeObserver on body won't fire when it
+    // collapses/expands. Listen for Sidebar.js's storage-event broadcast and
+    // reposition after its transform animation completes (~350ms).
+    function handleSidebarToggle(e) {
+      if (e?.key === 'sidebar-collapsed') {
+        setTimeout(updatePosition, 380);
       }
+    }
+    window.addEventListener('storage', handleSidebarToggle);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', updatePosition);
+      window.removeEventListener('storage', handleSidebarToggle);
     };
-    rafId = requestAnimationFrame(track);
-    return () => cancelAnimationFrame(rafId);
   }, [isOpen]);
 
   // Close dropdown when clicking outside

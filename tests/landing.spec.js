@@ -18,8 +18,8 @@ test.describe('Landing Page', () => {
   test('displays the hero headline', async ({ page }) => {
     const heroTitle = page.locator('h1');
     await expect(heroTitle).toBeVisible();
-    await expect(heroTitle).toContainText('tomorrow');
-    await expect(heroTitle).toContainText('locking in');
+    await expect(heroTitle).toContainText('Stop lying to');
+    await expect(heroTitle).toContainText('future self');
   });
 
   test('displays the hero description / tagline', async ({ page }) => {
@@ -38,22 +38,20 @@ test.describe('Landing Page', () => {
     await expect(howItWorksButton).toHaveAttribute('href', '#how-it-works');
   });
 
-  test('has a "Get Started" button in the navbar', async ({ page }) => {
-    const getStartedButton = page.getByRole('navigation').getByRole('button', { name: /Get Started/i });
-    await expect(getStartedButton).toBeVisible();
+  test('has a "Start a Pact" button in the navbar', async ({ page }) => {
+    const navbar = page.locator('nav:not([aria-label="Footer navigation"])').first();
+    const startButton = navbar.getByRole('button', { name: /Start a Pact/i });
+    await expect(startButton).toBeVisible();
   });
 
-  test('displays the features section with all 6 features', async ({ page }) => {
+  test('displays the features section with key feature cards', async ({ page }) => {
     const featuresSection = page.locator('#features');
     await expect(featuresSection).toBeVisible();
 
     const featureTitles = [
       'Personal Pacts',
       'Group Accountability',
-      'Task Ownership',
-      'Activity Feed',
       'Focus Timer',
-      'Streaks & Stats',
     ];
 
     for (const title of featureTitles) {
@@ -85,7 +83,7 @@ test.describe('Landing Page', () => {
   });
 
   test('displays the bottom CTA section', async ({ page }) => {
-    const ctaHeading = page.getByText('Ready to stop making excuses?');
+    const ctaHeading = page.getByRole('heading', { name: 'Tomorrow actually comes.' });
     await expect(ctaHeading).toBeVisible();
   });
 
@@ -98,11 +96,12 @@ test.describe('Landing Page', () => {
   });
 
   test('navbar links point to correct sections', async ({ page }) => {
-    const featuresLink = page.locator('nav a[href="#features"]');
+    // Scope to the landing navbar to avoid strict-mode collision with the footer nav
+    const featuresLink = page.locator('nav:not([aria-label="Footer navigation"]) a[href="#features"]');
     await expect(featuresLink).toBeVisible();
     await expect(featuresLink).toHaveText('Features');
 
-    const howItWorksLink = page.locator('nav a[href="#how-it-works"]');
+    const howItWorksLink = page.locator('nav:not([aria-label="Footer navigation"]) a[href="#how-it-works"]');
     await expect(howItWorksLink).toBeVisible();
     await expect(howItWorksLink).toHaveText('How it Works');
   });

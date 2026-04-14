@@ -150,6 +150,7 @@ export default function CreateTaskModal({ isOpen, onClose, onTaskCreated, groupI
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="What needs to get done?"
                 className={styles.titleInput}
+                aria-label="Task title"
                 autoFocus
               />
 

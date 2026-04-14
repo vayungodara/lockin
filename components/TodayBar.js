@@ -153,7 +153,10 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           freezesRemaining: profile?.streak_freezes_remaining || 0,
         });
 
-        setStreakRisk(risk);
+        const reconciledRisk = (streak === 0 && risk?.atRisk)
+          ? { atRisk: false, streak: 0 }
+          : risk;
+        setStreakRisk(reconciledRisk);
         setFreezeStatus(freeze);
       } catch (err) {
         console.error('Error loading TodayBar summary:', err);

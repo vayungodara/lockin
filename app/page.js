@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import LandingPageClient from '@/components/LandingPageClient'
 
 export const metadata = {
@@ -6,5 +7,9 @@ export const metadata = {
 }
 
 export default function HomePage() {
-  return <LandingPageClient />
+  return (
+    <Suspense>
+      <LandingPageClient />
+    </Suspense>
+  )
 }

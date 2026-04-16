@@ -1,12 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
 import { Fire } from '@phosphor-icons/react';
+import { fadeInUp } from '@/lib/animations';
 import styles from './StatsPage.module.css';
 
 export default function StatsPageClient({ user }) {
@@ -25,6 +27,9 @@ export default function StatsPageClient({ user }) {
       weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(now);
       monthAgo.setMonth(monthAgo.getMonth() - 1);
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
 
       // Detect the user's IANA timezone so streak calculations bucket
       // activity into their local day (matches DashboardLayout persistence).
@@ -35,62 +40,81 @@ export default function StatsPageClient({ user }) {
         // Intl API unavailable — fall back to UTC
       }
 
-      // Fetch streak data using the shared calculation from lib/streaks
-      const streak = await calculateStreak(supabase, user.id, timezone);
+      const uid = user.id;
+
+      // Run streak + all count/lightweight queries in parallel. Count
+      // queries (head: true) return only a count, not rows — a massive
+      // win over the previous "fetch 5000 rows then filter in JS" pattern.
+      const [
+        streak,
+        totalPactsRes,
+        completedPactsRes,
+        missedPactsRes,
+        activePactsRes,
+        thisWeekCompletedRes,
+        thisMonthCompletedRes,
+        focusTotalsRes,
+        thisWeekFocusRes,
+        thisMonthFocusRes,
+        firstFocusRes,
+        recentSessionsRes,
+      ] = await Promise.all([
+        calculateStreak(supabase, uid, timezone),
+        // Pact counts
+        supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid),
+        supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'completed'),
+        supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'missed'),
+        supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'active'),
+        supabase.from('pacts').select('*', { count: 'exact', head: true })
+          .eq('user_id', uid).eq('status', 'completed').gte('completed_at', weekAgo.toISOString()),
+        supabase.from('pacts').select('*', { count: 'exact', head: true })
+          .eq('user_id', uid).eq('status', 'completed').gte('completed_at', monthAgo.toISOString()),
+        // Focus totals — only duration_minutes column, needed for lifetime sum/avg
+        supabase.from('focus_sessions').select('duration_minutes').eq('user_id', uid).limit(5000),
+        supabase.from('focus_sessions').select('*', { count: 'exact', head: true })
+          .eq('user_id', uid).gte('started_at', weekAgo.toISOString()),
+        supabase.from('focus_sessions').select('*', { count: 'exact', head: true })
+          .eq('user_id', uid).gte('started_at', monthAgo.toISOString()),
+        // Earliest session for avg-per-day denominator
+        supabase.from('focus_sessions').select('started_at').eq('user_id', uid)
+          .order('started_at', { ascending: true }).limit(1),
+        // Recent 7 days of sessions for the "Recent Focus Sessions" list
+        supabase.from('focus_sessions').select('id, started_at, duration_minutes, ended_at')
+          .eq('user_id', uid).gte('started_at', sevenDaysAgo.toISOString())
+          .order('started_at', { ascending: false }).limit(20),
+      ]);
+
+      const queryError = [
+        totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
+        thisWeekCompletedRes, thisMonthCompletedRes, focusTotalsRes,
+        thisWeekFocusRes, thisMonthFocusRes, firstFocusRes, recentSessionsRes,
+      ].find(r => r.error);
+      if (queryError) throw queryError.error;
+
       setStreakData(streak);
 
-      // Fetch pact stats
-      const { data: pacts, error: pactsError } = await supabase
-        .from('pacts')
-        .select('status, completed_at, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false })
-        .limit(5000);
-
-      if (pactsError) throw pactsError;
-
-      const completedCount = (pacts || []).filter(p => p.status === 'completed').length;
-      const missedCount = (pacts || []).filter(p => p.status === 'missed').length;
-      const activeCount = (pacts || []).filter(p => p.status === 'active').length;
-      const thisWeekCompleted = (pacts || []).filter(p =>
-        p.status === 'completed' && p.completed_at && new Date(p.completed_at) >= weekAgo
-      ).length;
-      const thisMonthCompleted = (pacts || []).filter(p =>
-        p.status === 'completed' && p.completed_at && new Date(p.completed_at) >= monthAgo
-      ).length;
+      const completedCount = completedPactsRes.count || 0;
+      const missedCount = missedPactsRes.count || 0;
+      const activeCount = activePactsRes.count || 0;
 
       setPactStats({
-        total: (pacts || []).length,
+        total: totalPactsRes.count || 0,
         completed: completedCount,
         missed: missedCount,
         active: activeCount,
-        thisWeek: thisWeekCompleted,
-        thisMonth: thisMonthCompleted,
+        thisWeek: thisWeekCompletedRes.count || 0,
+        thisMonth: thisMonthCompletedRes.count || 0,
         completionRate: completedCount + missedCount > 0
           ? Math.round((completedCount / (completedCount + missedCount)) * 100)
-          : 0
+          : 0,
       });
 
-      // Fetch focus stats
-      const { data: sessions, error: focusError } = await supabase
-        .from('focus_sessions')
-        .select('id, started_at, duration_minutes, ended_at')
-        .eq('user_id', user.id)
-        .order('started_at', { ascending: false })
-        .limit(5000);
-
-      if (focusError) throw focusError;
-
-      const totalMinutes = (sessions || []).reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
-      const sessionsCount = (sessions || []).length;
-      const thisWeekSessions = (sessions || []).filter(s =>
-        s.started_at && new Date(s.started_at) >= weekAgo
-      ).length;
-      const thisMonthSessions = (sessions || []).filter(s =>
-        s.started_at && new Date(s.started_at) >= monthAgo
-      ).length;
-      const daysSinceFirst = sessionsCount > 0
-        ? Math.max(1, Math.ceil((now - new Date((sessions || [])[(sessions || []).length - 1].started_at)) / (1000 * 60 * 60 * 24)))
+      const focusSessions = focusTotalsRes.data || [];
+      const totalMinutes = focusSessions.reduce((acc, s) => acc + (s.duration_minutes || 0), 0);
+      const sessionsCount = focusSessions.length;
+      const firstStartedAt = firstFocusRes.data?.[0]?.started_at;
+      const daysSinceFirst = firstStartedAt
+        ? Math.max(1, Math.ceil((now - new Date(firstStartedAt)) / (1000 * 60 * 60 * 24)))
         : 1;
       const avgPerDay = sessionsCount > 0 ? Math.round(totalMinutes / daysSinceFirst) : 0;
 
@@ -98,21 +122,12 @@ export default function StatsPageClient({ user }) {
         totalMinutes,
         sessionsCount,
         avgDuration: sessionsCount > 0 ? Math.round(totalMinutes / sessionsCount) : 0,
-        thisWeekSessions,
-        thisMonthSessions,
-        avgPerDay
+        thisWeekSessions: thisWeekFocusRes.count || 0,
+        thisMonthSessions: thisMonthFocusRes.count || 0,
+        avgPerDay,
       });
 
-      // Get recent sessions (last 7 days, grouped by day)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      sevenDaysAgo.setHours(0, 0, 0, 0);
-
-      const recentSessionsData = (sessions || [])
-        .filter(s => new Date(s.started_at) >= sevenDaysAgo)
-        .slice(0, 20);
-
-      setRecentSessions(recentSessionsData);
+      setRecentSessions(recentSessionsRes.data || []);
 
     } catch (err) {
       console.error('Error fetching stats:', err);
@@ -203,12 +218,17 @@ export default function StatsPageClient({ user }) {
 
   return (
     <div className={styles.container}>
-      <header className={styles.header}>
+      <motion.header
+        className={styles.header}
+        variants={fadeInUp}
+        initial="initial"
+        animate="animate"
+      >
         <div>
           <h1>Your Stats</h1>
           <p className={styles.subtitle}>Track your productivity and progress</p>
         </div>
-      </header>
+      </motion.header>
 
       <div className={styles.content}>
         {/* Top-level empty state when user has zero activity */}
@@ -233,15 +253,20 @@ export default function StatsPageClient({ user }) {
           />
         )}
 
-        {/* Streak Summary — compact inline */}
-        <p className={styles.streakInline}>
-          <Fire size={18} weight="fill" color="var(--urgency-amber)" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
-          {streakData.currentStreak} day streak{' '}
-          <span className={styles.streakSep}>&middot;</span>{' '}
-          Best: {streakData.longestStreak} day{' '}
-          <span className={styles.streakSep}>&middot;</span>{' '}
-          {streakData.totalCompleted} completed
-        </p>
+        {/* Streak Summary — hero row */}
+        <div className={styles.streakRow}>
+          <span className={styles.streakPrimary}>
+            <Fire size={22} weight="fill" color="var(--warning)" />
+            {streakData.currentStreak}
+            <span className={styles.streakPrimaryLabel}>day streak</span>
+          </span>
+          <span className={styles.streakMeta}>
+            Best: {streakData.longestStreak} {streakData.longestStreak === 1 ? 'day' : 'days'}
+          </span>
+          <span className={styles.streakMeta}>
+            {streakData.totalCompleted} completed
+          </span>
+        </div>
 
         {/* Activity Calendar */}
         <MonthlyCalendar userId={user.id} />

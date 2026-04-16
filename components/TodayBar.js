@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { fadeInUp, streakCelebration } from '@/lib/animations';
+import { calculateStreak } from '@/lib/streaks';
 import { checkStreakAtRisk, applyStreakFreeze, getStreakFreezeStatus, FREEZE_COOLDOWN_DAYS } from '@/lib/streaks-advanced';
 import { fireMilestoneConfetti } from '@/lib/confetti';
 import { playStreakMilestone } from '@/lib/sounds';
@@ -82,12 +83,17 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
 
-        // Run all independent queries in parallel
+        let timezone = 'UTC';
+        try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
+
         const [
           { data: activePacts, error: pactsError },
           { data: focusSessions, error: focusError },
           { data: completedToday, error: completedError },
           { data: profile, error: profileError },
+          streakResult,
+          risk,
+          freeze,
         ] = await Promise.all([
           supabase
             .from('pacts')
@@ -108,9 +114,12 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             .gte('completed_at', todayISO),
           supabase
             .from('profiles')
-            .select('current_streak, last_activity_date, total_xp, level, streak_freezes_remaining')
+            .select('total_xp, level, streak_freezes_remaining')
             .eq('id', userId)
             .single(),
+          calculateStreak(supabase, userId, timezone),
+          checkStreakAtRisk(supabase, userId, timezone),
+          getStreakFreezeStatus(supabase, userId),
         ]);
 
         if (pactsError) console.warn('TodayBar: failed to fetch active pacts', pactsError);
@@ -131,27 +140,7 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           (sum, s) => sum + (s.duration_minutes || 0), 0
         );
 
-        // If last_activity_date is more than 1 day ago, streak is broken
-        // regardless of what current_streak says (cron may not have reset it).
-        let streak = profile?.current_streak || 0;
-        if (streak > 0 && profile?.last_activity_date) {
-          const now = new Date();
-          const todayUTC = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate());
-          const lastActivity = new Date(profile.last_activity_date + 'T00:00:00Z').getTime();
-          const daysSince = Math.round((todayUTC - lastActivity) / (1000 * 60 * 60 * 24));
-          if (daysSince > 1) streak = 0;
-        }
-
-        // Resolve user's local timezone for streak risk calculation so
-        // "at risk" matches the day boundary they see locally.
-        let timezone = 'UTC';
-        try { timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'; } catch {}
-
-        // Check streak risk and freeze status in parallel
-        const [risk, freeze] = await Promise.all([
-          checkStreakAtRisk(supabase, userId, timezone),
-          getStreakFreezeStatus(supabase, userId),
-        ]);
+        const streak = streakResult?.currentStreak ?? 0;
 
         setSummary({
           dueToday,
@@ -164,7 +153,10 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
           freezesRemaining: profile?.streak_freezes_remaining || 0,
         });
 
-        setStreakRisk(risk);
+        const reconciledRisk = (streak === 0 && risk?.atRisk)
+          ? { atRisk: false, streak: 0 }
+          : risk;
+        setStreakRisk(reconciledRisk);
         setFreezeStatus(freeze);
       } catch (err) {
         console.error('Error loading TodayBar summary:', err);
@@ -247,10 +239,10 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             <div className={styles.iconWrapper}>
               {isMilestoneDay ? (
                 <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
-                  <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
+                  <span className={styles.streakIcon} role="img" aria-label="streak">🔥</span>
                 </motion.span>
               ) : (
-                <span className={styles.streakIcon} role="img" aria-label="streak icon">🔥</span>
+                <span className={styles.streakIcon} role="img" aria-label="streak">🔥</span>
               )}
               <span className={styles.confettiDotBlue} aria-hidden="true" />
               <span className={styles.confettiDotGreen} aria-hidden="true" />

@@ -102,7 +102,9 @@
 
 /* Calendar Section */
 .calendarSection {
-  overflow: hidden;
+  /* Clip horizontal slide-animation overflow without hiding vertical rows.
+     Previously `overflow: hidden` was clipping rows 2-6 of the month grid. */
+  overflow-x: clip;
 }
 
 .weekdayRow {
@@ -123,6 +125,9 @@
 .daysGrid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  /* Explicit 6 rows so every week of the month renders — prevents the
+     first-row-only cutoff that occurred when rows 2-6 had no guaranteed height. */
+  grid-template-rows: repeat(6, minmax(var(--cell-size), 1fr));
   gap: var(--cell-gap);
 }
 

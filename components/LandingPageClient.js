@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { DM_Sans } from 'next/font/google';
 import { motion, AnimatePresence } from 'framer-motion';
 import Link from 'next/link';
@@ -26,8 +26,10 @@ const dmSans = DM_Sans({
   weight: ['400', '500', '600'],
 });
 
-export default function LandingPageClient({ isAuthenticated = false, returnTo }) {
+export default function LandingPageClient({ isAuthenticated = false }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get('returnTo');
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
   const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });

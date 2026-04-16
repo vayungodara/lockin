@@ -70,7 +70,7 @@ export default function StatsPageClient({ user }) {
         supabase.from('pacts').select('*', { count: 'exact', head: true })
           .eq('user_id', uid).eq('status', 'completed').gte('completed_at', monthAgo.toISOString()),
         // Focus totals — only duration_minutes column, needed for lifetime sum/avg
-        supabase.from('focus_sessions').select('duration_minutes').eq('user_id', uid),
+        supabase.from('focus_sessions').select('duration_minutes').eq('user_id', uid).limit(5000),
         supabase.from('focus_sessions').select('*', { count: 'exact', head: true })
           .eq('user_id', uid).gte('started_at', weekAgo.toISOString()),
         supabase.from('focus_sessions').select('*', { count: 'exact', head: true })
@@ -84,9 +84,12 @@ export default function StatsPageClient({ user }) {
           .order('started_at', { ascending: false }).limit(20),
       ]);
 
-      if (totalPactsRes.error) throw totalPactsRes.error;
-      if (focusTotalsRes.error) throw focusTotalsRes.error;
-      if (recentSessionsRes.error) throw recentSessionsRes.error;
+      const queryError = [
+        totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
+        thisWeekCompletedRes, thisMonthCompletedRes, focusTotalsRes,
+        thisWeekFocusRes, thisMonthFocusRes, firstFocusRes, recentSessionsRes,
+      ].find(r => r.error);
+      if (queryError) throw queryError.error;
 
       setStreakData(streak);
 

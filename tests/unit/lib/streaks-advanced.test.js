@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { createMockSupabase } from '../../setup/supabase-mock';
+import { createMockSupabase, createTableMock } from '../../setup/supabase-mock';
 import {
   checkStreakAtRisk,
   getStreakFreezeStatus,
@@ -280,49 +280,6 @@ describe('applyStreakFreeze', () => {
     expect(result.freezesRemaining).toBe(2);
   });
 });
-
-/**
- * Helper: build a Supabase mock where each `from(table)` call returns a
- * per-table builder. Use this when the function-under-test reads from
- * multiple tables and we want distinct responses per table.
- *
- * Each builder is thenable — set its resolved value with `.resolveWith(v)`.
- */
-function createTableMock() {
-  function makeBuilder() {
-    const chainMethods = [
-      'select', 'eq', 'neq', 'in', 'not', 'gte', 'order', 'range',
-      'single', 'maybeSingle', 'insert', 'update', 'delete', 'limit',
-    ];
-    const b = {
-      resolveWith(value) {
-        b.then = (resolve) => resolve(value);
-      },
-    };
-    chainMethods.forEach((m) => {
-      b[m] = vi.fn(() => b);
-    });
-    // Default: null data, null error
-    b.resolveWith({ data: null, error: null });
-    return b;
-  }
-
-  const builders = {};
-  const supabase = {
-    from: vi.fn((table) => {
-      if (!builders[table]) builders[table] = makeBuilder();
-      return builders[table];
-    }),
-    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
-    auth: {
-      getUser: vi.fn().mockResolvedValue({
-        data: { user: { id: 'test-user-id' } },
-        error: null,
-      }),
-    },
-  };
-  return { supabase, builders };
-}
 
 describe('updateStreakOnCompletion — milestone freeze idempotency', () => {
   beforeEach(() => {

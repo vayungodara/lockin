@@ -28,6 +28,9 @@ export function createMockSupabase() {
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    limit: vi.fn(),
+    or: vi.fn(),
+    upsert: vi.fn(),
 
     // Set what the final awaited value resolves to
     mockReturnValue(value) {
@@ -58,7 +61,7 @@ export function createMockSupabase() {
   const chainMethods = [
     'select', 'eq', 'neq', 'in', 'not', 'gte',
     'order', 'range', 'single', 'maybeSingle',
-    'insert', 'update', 'delete',
+    'insert', 'update', 'delete', 'limit', 'or', 'upsert',
   ];
   chainMethods.forEach((method) => {
     builder[method].mockReturnValue(builder);
@@ -98,4 +101,48 @@ export function createMockSupabase() {
   };
 
   return { supabase, builder };
+}
+
+/**
+ * Create a per-table mock where each `from(table)` call returns a
+ * dedicated builder. Use this when the function-under-test reads from
+ * multiple tables and we want distinct responses per table.
+ *
+ * Force-create a builder by calling `supabase.from('tableName')` before
+ * the function-under-test, then configure with `.resolveWith(value)`.
+ */
+export function createTableMock() {
+  function makeBuilder() {
+    const methods = [
+      'select', 'eq', 'neq', 'in', 'not', 'gte',
+      'order', 'range', 'single', 'maybeSingle',
+      'insert', 'update', 'delete', 'limit', 'or', 'upsert',
+    ];
+    const b = {
+      resolveWith(value) {
+        b.then = (resolve) => resolve(value);
+      },
+    };
+    methods.forEach((m) => {
+      b[m] = vi.fn(() => b);
+    });
+    b.resolveWith({ data: null, error: null });
+    return b;
+  }
+
+  const builders = {};
+  const supabase = {
+    from: vi.fn((table) => {
+      if (!builders[table]) builders[table] = makeBuilder();
+      return builders[table];
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'test-user-id' } },
+        error: null,
+      }),
+    },
+  };
+  return { supabase, builders };
 }

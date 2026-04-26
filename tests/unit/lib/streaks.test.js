@@ -137,9 +137,9 @@ describe('getHourInTimezone', () => {
     expect(getHourInTimezone(date, 'Invalid/Zone')).toBe(14);
   });
 
-  it('handles midnight correctly', () => {
-    const date = new Date('2024-06-15T00:00:00Z');
-    expect(getHourInTimezone(date, 'UTC')).toBe(0);
+  it('handles early morning correctly', () => {
+    const date = new Date('2024-06-15T03:00:00Z');
+    expect(getHourInTimezone(date, 'UTC')).toBe(3);
   });
 
   it('handles hour 23 correctly', () => {

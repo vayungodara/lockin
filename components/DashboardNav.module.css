@@ -257,7 +257,14 @@
   line-height: 1;
 }
 
-/* Ink-picker placeholder — Wave 3 wires it up. Click no-ops for now. */
+/* Ink-picker — five-ink cascade. The wrap is the anchor for the absolutely-
+   positioned panel rendered by InkPicker. */
+.inkPickerWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
 .inkBtn {
   appearance: none;
   width: 28px;
@@ -457,6 +464,7 @@
   .desktopNav,
   .lockInBtn,
   .inkBtn,
+  .inkPickerWrap,
   .rankChip,
   .avatarLink {
     display: none;

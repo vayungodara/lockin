@@ -1,0 +1,122 @@
+/* ============================================================
+   InkPicker — five-ink cascade panel
+   Anchored to the ink-picker button in DashboardNav. Drops below
+   + slightly right of the trigger. Editorial chrome: low radii,
+   warm cream surface, ink-700 borders, JetBrains-Mono caption.
+   ============================================================ */
+
+.panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 40;
+  min-width: 220px;
+  padding: 14px 14px 12px;
+  background: var(--ink-050);
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.18), 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+  transform-origin: top right;
+}
+
+/* Caption — editorial spine. JetBrains Mono uppercase tracked. */
+.caption {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 10px;
+  white-space: nowrap;
+}
+
+/* Single-column stack — five rows, each a swatch + name. */
+.grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.item {
+  display: block;
+}
+
+/* Row button — swatch left, label right. Active gets ink-dark border. */
+.swatchBtn {
+  position: relative;
+  appearance: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  cursor: pointer;
+  text-align: left;
+  transition:
+    background 140ms cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 140ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.swatchBtn:hover {
+  background: color-mix(in oklch, var(--ink-900) 5%, transparent);
+}
+
+.swatchBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+.swatchBtnActive {
+  border-color: var(--ink-700);
+  background: color-mix(in oklch, var(--ink-900) 4%, transparent);
+}
+
+/* Rotated 36×36 swatch — matches the brand mark style (rotated -8deg, 2px radius).
+   Color is set inline per ink via background style prop. */
+.swatch {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  transform: rotate(-8deg);
+  border-radius: 2px;
+  /* Subtle inner rim so light swatches still read against the cream surface. */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+/* Title Case label — Host Grotesk, mid-weight. */
+.label {
+  flex: 1 1 auto;
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--ink-800);
+  white-space: nowrap;
+}
+
+/* Active marker — small dot in the user's currently-active ink. */
+.activeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--stamp-yellow);
+  flex-shrink: 0;
+}
+
+/* ---- Mobile ≤768px — full-width panel below the picker --- */
+@media (max-width: 768px) {
+  .panel {
+    position: fixed;
+    top: 64px;
+    right: 12px;
+    left: 12px;
+    min-width: 0;
+  }
+}

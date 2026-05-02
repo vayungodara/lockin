@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect, useMemo, useSyncExternalStore } from 'react';
+import { useState, useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP } from '@/lib/gamification';
 import UserAvatar from './UserAvatar';
 import NavMarker from './NavMarker';
+import InkPicker from './InkPicker';
 import styles from './DashboardNav.module.css';
 
 /**
@@ -74,9 +75,11 @@ export default function DashboardNav({ user }) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [inkPickerOpen, setInkPickerOpen] = useState(false);
   const [now, setNow] = useState(() => new Date());
   const [xp, setXp] = useState({ level: 1, totalXP: 0 });
   const supabase = useMemo(() => createClient(), []);
+  const inkBtnRef = useRef(null);
 
   const inkKey = useSyncExternalStore(
     subscribeToInkChange,
@@ -146,9 +149,10 @@ export default function DashboardNav({ user }) {
   };
 
   const handleInkClick = () => {
-    // Wave 3 wires the ink-picker panel here. For now the button is reachable
-    // by keyboard and screen readers but the click is a no-op.
+    setInkPickerOpen((v) => !v);
   };
+
+  const closeInkPicker = () => setInkPickerOpen(false);
 
   const closeMenu = () => setMenuOpen(false);
 
@@ -204,15 +208,25 @@ export default function DashboardNav({ user }) {
             <span className={styles.lockInLabel}>Lock in</span>
           </Link>
 
-          <button
-            type="button"
-            onClick={handleInkClick}
-            className={styles.inkBtn}
-            aria-label="Change ink (coming soon)"
-            title="Change ink"
-          >
-            <span className={styles.inkSwatch} aria-hidden="true" />
-          </button>
+          <div className={styles.inkPickerWrap}>
+            <button
+              ref={inkBtnRef}
+              type="button"
+              onClick={handleInkClick}
+              className={styles.inkBtn}
+              aria-label={`Change ink (current: ${inkLabel})`}
+              aria-haspopup="dialog"
+              aria-expanded={inkPickerOpen}
+              title="Change ink"
+            >
+              <span className={styles.inkSwatch} aria-hidden="true" />
+            </button>
+            <InkPicker
+              isOpen={inkPickerOpen}
+              onClose={closeInkPicker}
+              anchorRef={inkBtnRef}
+            />
+          </div>
 
           <Link
             href="/dashboard/settings"

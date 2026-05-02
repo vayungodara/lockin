@@ -57,11 +57,27 @@ const themeScript = `
 
       // Five-ink cascade (editorial redesign) — read lockin-ink from localStorage
       // and expose it as [data-ink="..."] on <html> before first paint.
-      // Separate from the accent-palette script below; runs in parallel during
-      // the 7-accents-to-5-inks transition. See globals.css :234 for scope rules.
+      // Migrates legacy lockin-accent users on first read so the chosen palette
+      // continues to feel like theirs after the 7→5 transition. The original
+      // lockin-accent value stays in storage in case other surfaces still read
+      // it during Wave 3's component migration.
+      // See globals.css :271 for scope rules.
       var validInks = ['highlighter', 'redpen', 'carbon', 'moss', 'indigo-legacy'];
       var inkKey = localStorage.getItem('lockin-ink');
-      if (!inkKey || validInks.indexOf(inkKey) === -1) inkKey = 'highlighter';
+      if (!inkKey || validInks.indexOf(inkKey) === -1) {
+        var accentToInk = {
+          indigo: 'highlighter',
+          violet: 'indigo-legacy',
+          rose: 'redpen',
+          sunset: 'redpen',
+          ocean: 'carbon',
+          slate: 'carbon',
+          emerald: 'moss'
+        };
+        var legacyAccent = localStorage.getItem('lockin-accent');
+        inkKey = (legacyAccent && accentToInk[legacyAccent]) || 'highlighter';
+        try { localStorage.setItem('lockin-ink', inkKey); } catch (e) {}
+      }
       document.documentElement.setAttribute('data-ink', inkKey);
 
       var accentId = localStorage.getItem('lockin-accent');

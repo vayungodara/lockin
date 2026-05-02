@@ -55,6 +55,15 @@ const themeScript = `
       }
       document.documentElement.setAttribute('data-theme', resolved);
 
+      // Five-ink cascade (editorial redesign) — read lockin-ink from localStorage
+      // and expose it as [data-ink="..."] on <html> before first paint.
+      // Separate from the accent-palette script below; runs in parallel during
+      // the 7-accents-to-5-inks transition. See globals.css :234 for scope rules.
+      var validInks = ['highlighter', 'redpen', 'carbon', 'moss', 'indigo-legacy'];
+      var inkKey = localStorage.getItem('lockin-ink');
+      if (!inkKey || validInks.indexOf(inkKey) === -1) inkKey = 'highlighter';
+      document.documentElement.setAttribute('data-ink', inkKey);
+
       var accentId = localStorage.getItem('lockin-accent');
       if (accentId && accentId !== 'indigo') {
         var palettes = {
@@ -104,9 +113,40 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Editorial redesign fonts — Host Grotesk body + JetBrains Mono.
+            Display serif is system (ui-serif → New York on macOS, Charter/Cambria elsewhere,
+            Georgia as universal fallback) — matches lockin-test's rendered look exactly on macOS.
+            Besley was considered but rendered too chunky/slab vs the lockin-test elegance. */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+          rel="stylesheet"
+        />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body className={`${inter.className} ${instrumentSans.variable}`}>
+        {/* Global SVG filter defs — referenced by inline SVG underlines / highlighter strokes */}
+        <svg
+          aria-hidden
+          focusable="false"
+          width="0"
+          height="0"
+          style={{ position: 'absolute', width: 0, height: 0 }}
+        >
+          <defs>
+            <filter id="marker-roughen" x="-5%" y="-30%" width="110%" height="160%">
+              <feTurbulence
+                type="fractalNoise"
+                baseFrequency="1.6"
+                numOctaves="2"
+                seed="7"
+                result="noise"
+              />
+              <feDisplacementMap in="SourceGraphic" in2="noise" scale="1.8" />
+            </filter>
+          </defs>
+        </svg>
         <a href="#main-content" className="skip-to-content">Skip to content</a>
         <ThemeProvider>
           <ToastProvider>

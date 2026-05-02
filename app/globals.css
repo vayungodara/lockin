@@ -195,6 +195,99 @@
   --landing-tension: #EA580C;
   --landing-border: rgba(9, 9, 11, 0.08);
   --landing-border-strong: rgba(9, 9, 11, 0.15);
+
+  /* ================================================================ */
+  /*  EDITORIAL REDESIGN — Wave 1 foundation (2026-04-19)              */
+  /*  Additive. Existing tokens above are preserved for back-compat.   */
+  /*  Adopts: cream OKLCH palette, stamp semantics, Redaction stack,   */
+  /*  highlighter-yellow brand, low-radius editorial scale.            */
+  /* ================================================================ */
+
+  /* Ink palette — warm paper tinted toward yellow (~85 hue) */
+  --ink-000: oklch(0.99 0.004 85);   /* paper highlight */
+  --ink-050: oklch(0.96 0.012 85);   /* page — cream */
+  --ink-100: oklch(0.94 0.014 85);   /* card — tinted cream */
+  --ink-200: oklch(0.88 0.016 80);   /* elevated */
+  --ink-300: oklch(0.80 0.014 75);   /* divider */
+  --ink-400: oklch(0.60 0.015 70);   /* tertiary text */
+  --ink-500: oklch(0.46 0.014 70);   /* muted text */
+  --ink-600: oklch(0.36 0.014 65);   /* secondary text */
+  --ink-700: oklch(0.26 0.014 60);   /* body text */
+  --ink-800: oklch(0.20 0.014 60);   /* hi-text — ink */
+  --ink-900: oklch(0.12 0.012 55);   /* darkest ink */
+
+  /* Paper — extra-cream surface variant */
+  --paper: oklch(0.97 0.018 88);
+  --paper-ink: oklch(0.20 0.018 60);
+
+  /* Stamp semantic palette — earned color, meaningful events only */
+  --stamp-yellow: oklch(0.88 0.13 92);       /* highlighter — brand signal */
+  --stamp-yellow-ink: oklch(0.18 0.018 70);  /* dark ink on yellow */
+  --stamp-red: oklch(0.52 0.20 26);          /* arterial — MISSED */
+  --stamp-red-soft: oklch(0.74 0.08 26);
+  --stamp-green: oklch(0.52 0.14 142);       /* moss — KEPT */
+  --stamp-green-soft: oklch(0.78 0.06 142);
+  --stamp-blue: oklch(0.50 0.16 245);        /* carbon — LOCKED IN */
+
+  /* Brand color aliases — highlighter yellow replaces the retired
+     indigo→purple→magenta gradient as the primary brand signal.
+     --brand-ink is the dark counterpart for primary CTAs on cream. */
+  --brand-primary: var(--stamp-yellow);
+  --brand-ink: var(--ink-900);
+
+  /* Editorial font stacks — Redaction + Host Grotesk + JetBrains Mono.
+     Namespaced with `-editorial` suffix to avoid clobbering the existing
+     --font-sans / --font-display / --font-mono tokens that components
+     across the app still reference. Wave 3 will promote these once
+     components stop referencing the Inter / Instrument Sans stacks. */
+  /* Display stack matches lockin-test — ui-serif resolves to New York on macOS,
+     Charter/Cambria on other systems, Georgia as the universal fallback. */
+  --font-display-editorial: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-display-heavy-editorial: ui-serif, Georgia, 'Times New Roman', serif;
+  --font-sans-editorial: 'Host Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono-editorial: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  /* Low-radius editorial scale — "mostly square, we're not a SaaS".
+     Namespaced because the existing --radius-sm (6px) and --radius-md
+     (8px) tokens are load-bearing for 49 components. Editorial surfaces
+     opt in explicitly via these variables. */
+  --radius-editorial-xs: 0px;
+  --radius-editorial-sm: 2px;
+  --radius-editorial-md: 4px;
+
+  /* Stamp easing — approved overshoot for the physical-stamp metaphor */
+  --ease-stamp: cubic-bezier(.22, 1.6, .36, 1);
+}
+
+/* ==================================================================== */
+/*  Five-ink accent system (editorial redesign)                          */
+/*  Attribute scope on <html>: [data-ink="highlighter" | "redpen"        */
+/*  | "carbon" | "moss" | "indigo-legacy"]. Highlighter is default       */
+/*  and inherits from :root. Scope overrides --stamp-yellow +            */
+/*  --stamp-yellow-ink so every ink-bearing surface follows the user's   */
+/*  choice. Indigo-legacy maps to a flat single-stop ink so previous     */
+/*  Indigo users don't see a jarring break (gradient retired).           */
+/* ==================================================================== */
+[data-ink="highlighter"] {
+  --stamp-yellow: oklch(0.88 0.13 92);
+  --stamp-yellow-ink: oklch(0.18 0.018 70);
+}
+[data-ink="redpen"] {
+  --stamp-yellow: oklch(0.64 0.22 28);
+  --stamp-yellow-ink: oklch(0.99 0.005 60);
+}
+[data-ink="carbon"] {
+  --stamp-yellow: oklch(0.72 0.15 230);
+  --stamp-yellow-ink: oklch(0.14 0.010 70);
+}
+[data-ink="moss"] {
+  --stamp-yellow: oklch(0.56 0.14 142);
+  --stamp-yellow-ink: oklch(0.99 0.005 140);
+}
+[data-ink="indigo-legacy"] {
+  /* Flat single-stop — gradient retired as brand signal (see .impeccable.md) */
+  --stamp-yellow: oklch(0.58 0.19 278);
+  --stamp-yellow-ink: oklch(0.99 0.005 280);
 }
 
 /* === DARK MODE — "Deep Space" === */
@@ -282,6 +375,59 @@
   --landing-tension: #F97316;
   --landing-border: rgba(244, 242, 235, 0.08);
   --landing-border-strong: rgba(244, 242, 235, 0.15);
+
+  /* ================================================================ */
+  /*  EDITORIAL REDESIGN — Wave 1 dark mode (inverted paper)          */
+  /*  Dark mode is "dark stationery", not "dark SaaS with glow".      */
+  /*  Ink scale inverts: 000 is darkest, 900 is cream. Stamp colors   */
+  /*  stay perceptually similar but drop chroma slightly for softness. */
+  /* ================================================================ */
+  --ink-000: oklch(0.12 0.012 55);   /* warm dark base — was cream */
+  --ink-050: oklch(0.14 0.012 60);   /* page — warm dark ink */
+  --ink-100: oklch(0.18 0.014 60);   /* card */
+  --ink-200: oklch(0.22 0.014 62);   /* elevated */
+  --ink-300: oklch(0.32 0.014 68);   /* divider */
+  --ink-400: oklch(0.52 0.014 72);   /* tertiary text */
+  --ink-500: oklch(0.62 0.012 76);   /* muted text */
+  --ink-600: oklch(0.74 0.012 80);   /* secondary text */
+  --ink-700: oklch(0.84 0.012 82);   /* body text */
+  --ink-800: oklch(0.92 0.012 84);   /* hi-text */
+  --ink-900: oklch(0.96 0.012 85);   /* cream — was darkest ink */
+
+  /* Paper — inverted */
+  --paper: oklch(0.16 0.014 62);
+  --paper-ink: oklch(0.94 0.012 84);
+
+  /* Stamp palette — slightly softer chroma on dark */
+  --stamp-yellow: oklch(0.86 0.11 92);
+  --stamp-yellow-ink: oklch(0.18 0.018 70);
+  --stamp-red: oklch(0.60 0.17 26);
+  --stamp-red-soft: oklch(0.42 0.09 26);
+  --stamp-green: oklch(0.62 0.12 142);
+  --stamp-green-soft: oklch(0.42 0.07 142);
+  --stamp-blue: oklch(0.62 0.14 245);
+}
+
+/* Five-ink scope overrides in dark mode — dark variants tuned for cream-on-ink reads */
+[data-theme="dark"][data-ink="highlighter"] {
+  --stamp-yellow: oklch(0.86 0.11 92);
+  --stamp-yellow-ink: oklch(0.18 0.018 70);
+}
+[data-theme="dark"][data-ink="redpen"] {
+  --stamp-yellow: oklch(0.60 0.17 28);
+  --stamp-yellow-ink: oklch(0.99 0.005 60);
+}
+[data-theme="dark"][data-ink="carbon"] {
+  --stamp-yellow: oklch(0.68 0.13 230);
+  --stamp-yellow-ink: oklch(0.14 0.010 70);
+}
+[data-theme="dark"][data-ink="moss"] {
+  --stamp-yellow: oklch(0.60 0.12 142);
+  --stamp-yellow-ink: oklch(0.12 0.010 140);
+}
+[data-theme="dark"][data-ink="indigo-legacy"] {
+  --stamp-yellow: oklch(0.66 0.16 278);
+  --stamp-yellow-ink: oklch(0.99 0.005 280);
 }
 
 /* System preference fallback — handled by inline script in layout.js
@@ -1115,9 +1261,12 @@ p {
 }
 
 /* === SELECTION STYLING === */
+/* Selection color matches the hero highlighter — opaque highlighter yellow
+   (cascades with the user's chosen ink via --stamp-yellow) on dark ink text.
+   Same behavior as lockin-test: real-highlighter feel, no transparency. */
 ::selection {
-  background: rgba(var(--accent-primary-rgb), 0.3);
-  color: inherit;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
 }
 
 /* === FOCUS VISIBLE === */

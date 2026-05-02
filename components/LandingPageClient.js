@@ -486,7 +486,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
         {/* ═════════════════════════════════════════════════════════
             § 03 — WITNESSES, NOT FOLLOWERS
             ═════════════════════════════════════════════════════════ */}
-        <section className={styles.witnesses}>
+        <section id="witnesses" className={styles.witnesses}>
           <div className={styles.witnessesGrid}>
             <div>
               <div className={styles.sectionLabel}>&sect; 03 &mdash; WITNESSES, NOT FOLLOWERS</div>

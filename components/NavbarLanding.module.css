@@ -1,57 +1,29 @@
 /* ============================================= */
-/* NavbarLanding — Dynamic Island morphing navbar */
+/* NavbarLanding — sticky editorial bar           */
+/* Always visible. No pill morph. No collapse.    */
 /* ============================================= */
 
 .navbar {
-  position: fixed;
-  top: 16px;
-  left: 0;
-  right: 0;
+  position: sticky;
+  top: 0;
   z-index: 400;
-  pointer-events: none;
-  padding: 0 24px;
-  box-sizing: border-box;
-  display: flex;
-  justify-content: center;
+  background: color-mix(in oklch, var(--landing-bg) 95%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--landing-border);
 }
 
-.navInner {
+.inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 24px;
   width: 100%;
-  max-width: 1280px;
-  padding: 12px 24px;
-  background: rgba(244, 242, 235, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--landing-border);
-  border-radius: 16px;
-  pointer-events: auto;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-}
-
-/* Smooth morph transitions */
-.navAnimated {
-  transition:
-    max-width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    padding 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-/* Pill state — compact centered bar */
-.navPill {
-  max-width: 520px;
-  border-radius: 32px;
-  padding: 8px 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
-  cursor: pointer;
-}
-
-/* Dark mode background */
-:global([data-theme="dark"]) .navInner {
-  background: rgba(20, 20, 19, 0.85);
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 60px;
+  box-sizing: border-box;
 }
 
 /* ---- Logo ---- */
@@ -59,15 +31,9 @@
 .logo {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   text-decoration: none;
   flex-shrink: 0;
-}
-
-.logoInner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
 }
 
 /* Flat yellow rotated square — the brand mark per .impeccable.md.
@@ -75,17 +41,16 @@
 .logoMark {
   width: 14px;
   height: 14px;
-  background: var(--stamp-yellow, #F4D03F);
+  background: var(--stamp-yellow);
   transform: rotate(-8deg);
   border-radius: 2px;
   flex-shrink: 0;
   display: inline-block;
 }
 
-/* Besley editorial wordmark in flat ink.
-   No gradient, no background-clip:text. */
+/* Editorial wordmark in flat ink. System serif via the editorial display var. */
 .logoWordmark {
-  font-family: var(--font-display-editorial, 'Besley', ui-serif, Georgia, serif);
+  font-family: var(--font-display-editorial, ui-serif, Georgia, 'Times New Roman', serif);
   font-size: 19px;
   font-weight: 600;
   letter-spacing: -0.015em;
@@ -94,40 +59,22 @@
   white-space: nowrap;
 }
 
-@media (max-width: 768px) {
-  .logoMark {
-    width: 12px;
-    height: 12px;
-  }
-
-  .logoWordmark {
-    font-size: 17px;
-  }
+.logoDot {
+  color: var(--stamp-yellow);
 }
 
-/* ---- Nav Links ---- */
+/* ---- Desktop nav links ---- */
 
-.navLinks {
+.desktopNav {
   display: flex;
   align-items: center;
-  gap: 32px;
-  overflow: hidden;
-  opacity: 1;
-  transition: opacity 0.25s ease, width 0.25s ease;
-}
-
-.navLinksHidden {
-  opacity: 0;
-  visibility: hidden;
-  width: 0;
-  min-width: 0;
-  overflow: hidden;
-  gap: 0;
-  pointer-events: none;
+  gap: 28px;
+  flex: 1 1 auto;
+  justify-content: center;
 }
 
 .navLink {
-  font-family: var(--font-sans);
+  font-family: var(--font-sans, var(--font-sans-editorial));
   font-size: 13px;
   font-weight: 500;
   color: var(--landing-ink);
@@ -137,35 +84,61 @@
 }
 
 .navLink:focus-visible {
-  outline: 2px solid var(--landing-ink);
+  outline: 2px solid var(--stamp-yellow);
   outline-offset: 4px;
   border-radius: 2px;
 }
 
-/* ---- Actions ---- */
+/* ---- Right cluster (Sign in + CTA + mobile toggle) ---- */
 
-.navActions {
+.actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 10px;
   flex-shrink: 0;
 }
 
+.signInBtn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 8px 10px;
+  font-family: var(--font-sans, var(--font-sans-editorial));
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--landing-ink);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: opacity 0.15s ease;
+}
+
+.signInBtn:hover {
+  opacity: 0.7;
+}
+
+.signInBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Flat ink-dark CTA — low radius (4px), Title Case copy in component. */
 .ctaBtn {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 8px 18px;
+  gap: 6px;
+  padding: 8px 16px;
   background: var(--landing-ink);
   color: var(--landing-bg);
   border: none;
-  border-radius: 9999px;
-  font-family: var(--font-sans);
+  border-radius: 4px;
+  font-family: var(--font-sans, var(--font-sans-editorial));
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.15s ease;
 }
 
 .ctaBtn:hover {
@@ -179,25 +152,135 @@
     0 0 0 4px var(--landing-ink);
 }
 
-/* ---- Mobile ---- */
+/* ---- Mobile hamburger toggle ---- */
+
+.menuToggle {
+  display: none;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  margin-left: 4px;
+  color: var(--landing-ink);
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.menuToggle:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+/* ---- Mobile drop-down menu ---- */
+
+.mobileMenu {
+  display: none;
+  border-top: 1px solid var(--landing-border);
+  background: var(--landing-bg);
+  padding: 12px 0 16px;
+  animation: mobileMenuIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes mobileMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileLink {
+  display: block;
+  padding: 14px 24px;
+  font-family: var(--font-sans, var(--font-sans-editorial));
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--landing-ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--landing-border);
+}
+
+.mobileLink:last-of-type {
+  border-bottom: none;
+}
+
+.mobileLink:active {
+  background: color-mix(in oklch, var(--landing-ink) 6%, transparent);
+}
+
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 24px 4px;
+}
+
+.mobileSignIn {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--landing-border-strong, var(--landing-border));
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-family: var(--font-sans, var(--font-sans-editorial));
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--landing-ink);
+  cursor: pointer;
+  text-align: center;
+}
+
+.mobileCta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 16px;
+  background: var(--landing-ink);
+  color: var(--landing-bg);
+  border: none;
+  border-radius: 4px;
+  font-family: var(--font-sans, var(--font-sans-editorial));
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* ---- Responsive ---- */
 
 @media (max-width: 768px) {
-  .navbar {
-    top: 12px;
-    padding: 0 16px;
+  .inner {
+    padding: 0 20px;
+    height: 56px;
+    gap: 12px;
   }
 
-  .navInner {
-    border-radius: 14px;
-    padding: 10px 16px;
+  .logoMark {
+    width: 12px;
+    height: 12px;
   }
 
-  .navLinks {
+  .logoWordmark {
+    font-size: 17px;
+  }
+
+  .desktopNav {
     display: none;
   }
 
+  .signInBtn,
   .ctaBtn {
-    font-size: 12px;
-    padding: 7px 14px;
+    display: none;
+  }
+
+  .menuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobileMenu {
+    display: block;
   }
 }

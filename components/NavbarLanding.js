@@ -1,13 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useScroll, useMotionValueEvent } from 'framer-motion';
 import NavMarker from './NavMarker';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
-import { prefersReducedMotion } from '@/lib/animations';
 import styles from './NavbarLanding.module.css';
 
 const NAV_LINKS = [
@@ -17,35 +15,10 @@ const NAV_LINKS = [
   ['#faq', 'Objections'],
 ];
 
-const SCROLL_THRESHOLD = 80;
-
 export default function NavbarLanding({ isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const toast = useToast();
-  const reducedMotion = prefersReducedMotion();
-
-  const { scrollY } = useScroll();
-
-  useMotionValueEvent(scrollY, 'change', (latest) => {
-    const scrolled = latest > SCROLL_THRESHOLD;
-    setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
-  });
-
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Bar stays full at every scroll position. isScrolled only drives a subtle
-  // height/padding shrink + a soft shadow so the bar reads as "floating" once
-  // you're past the hero. No collapse, no click-to-expand. isMobile retained
-  // for any mobile-only conditional but no longer gates desktop nav visibility.
-  void isMobile;
 
   const handleGetStarted = async () => {
     if (isAuthenticated) {
@@ -66,9 +39,7 @@ export default function NavbarLanding({ isAuthenticated = false }) {
 
   return (
     <header className={styles.navbar}>
-      <div
-        className={`${styles.inner} ${isScrolled ? styles.innerScrolled : ''} ${reducedMotion ? '' : styles.innerAnimated}`}
-      >
+      <div className={styles.inner}>
         <Link href="/" className={styles.logo} aria-label="LockIn — home">
           <span className={styles.logoMark} aria-hidden="true" />
           <span className={styles.logoWordmark}>

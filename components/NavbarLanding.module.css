@@ -30,22 +30,9 @@
   background: var(--landing-bg);
   border: 1px solid var(--landing-border);
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   pointer-events: auto;
   box-sizing: border-box;
-}
-
-/* Subtle shrink + shadow when scrolled past the hero.
-   Bar still shows every nav link — just thins and lifts. */
-.innerAnimated {
-  transition:
-    padding 0.3s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.innerScrolled {
-  padding: 8px 24px;
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ---- Logo ---- */
@@ -289,10 +276,6 @@
     padding: 10px 16px;
     border-radius: 14px;
     gap: 12px;
-  }
-
-  .innerScrolled {
-    padding: 8px 16px;
   }
 
   .logoMark {

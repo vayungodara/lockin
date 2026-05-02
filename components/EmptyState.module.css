@@ -16,7 +16,7 @@
   overflow: hidden;
 }
 
-/* Subtle decorative gradient at top edge */
+/* Subtle decorative top edge — flat highlighter (cascade-aware) */
 .wrapper::before {
   content: '';
   position: absolute;
@@ -24,7 +24,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--gradient-primary);
+  background: var(--stamp-yellow);
   opacity: 0.5;
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }

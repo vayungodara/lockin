@@ -86,7 +86,7 @@
 }
 
 .playBtn {
-  background: var(--gradient-primary);
+  background: var(--stamp-blue);
   color: white;
   box-shadow: var(--shadow-glow-lg);
 }

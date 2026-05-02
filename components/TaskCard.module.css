@@ -126,8 +126,8 @@
 }
 
 .claimBtn:hover {
-  background: var(--gradient-primary);
-  color: white;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
   border-color: transparent;
 }
 

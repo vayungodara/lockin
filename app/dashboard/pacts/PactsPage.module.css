@@ -1,175 +1,201 @@
-/* ============================================
-   My Pacts Page Styles
-   ============================================ */
+/* ============================================================================
+   /dashboard/pacts — editorial sectional layout
+
+   Page spine: § 01 Today → § 02 Upcoming → § 03 Recurring → § 04 Resolved.
+   Each section uses SectionHeader (editorial spine) + a responsive PactCard
+   grid. The page header carries a Redaction display title + mono eyebrow,
+   matching the landing/dashboard direction.
+   ============================================================================ */
 
 .container {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: var(--space-8);
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: clamp(20px, 4vw, 40px);
+  /* Vertical rhythm between sections — wide enough to read as separate
+     spreads, tight enough that a quick scroll covers everything. */
+  display: flex;
+  flex-direction: column;
+  gap: clamp(48px, 6vw, 72px);
 }
 
-/* Header */
+/* ── Page header ─────────────────────────────────────────────────────────── */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: var(--space-8);
+  flex-wrap: wrap;
+  gap: 24px;
+  /* No bottom border here — SectionHeader carries the editorial rule. */
 }
 
 .headerLeft {
   display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
 }
 
-.backBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
+.eyebrow {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
-.backBtn:hover {
-  background: var(--surface-2);
-  color: var(--text-primary);
-}
-
-.header h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.04em;
+.title {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(44px, 7vw, 72px);
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.025em;
+  color: var(--ink-900);
+  margin: 0;
 }
 
 .subtitle {
-  color: var(--text-tertiary);
-  font-size: var(--text-sm);
+  font-family: var(--font-sans-editorial);
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--ink-600);
+  margin: 4px 0 0;
+  max-width: 56ch;
 }
 
-/* Filter Tabs */
-.filterTabs {
-  display: flex;
-  gap: var(--space-2);
-  margin-bottom: var(--space-6);
-  padding: var(--space-1);
-  background: var(--surface-1);
-  border-radius: var(--radius-lg);
-  width: fit-content;
-}
-
-.filterTab {
-  position: relative;
-  padding: var(--space-2) var(--space-4);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-secondary);
-  background: transparent;
-  border: none;
-  border-radius: var(--radius-item);
-  cursor: pointer;
-  transition: color 0.15s ease;
-}
-
-.filterTab:hover {
-  color: var(--text-primary);
-}
-
-.filterTab.active {
-  color: var(--accent-primary);
-  font-weight: 600;
-}
-
-.filterIndicator {
-  position: absolute;
-  inset: 0;
-  background: rgba(var(--accent-primary-rgb), 0.1);
-  border-radius: var(--radius-item);
-  z-index: 0;
-}
-
-.filterLabel {
-  position: relative;
-  z-index: 1;
-}
-
-/* Pacts List */
-.pactsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-}
-
-/* Loading State */
-.loadingState {
-  display: flex;
-  flex-direction: column;
+/* New-pact CTA — flat ink-dark on cream, mono uppercase tracked label. No
+   gradient, no glow. The stamp slam in PactCard does the celebration work
+   when the user actually completes a pact. */
+.newPactBtn {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: var(--space-16);
-  gap: var(--space-4);
+  gap: 8px;
+  padding: 12px 20px;
+  background: var(--ink-900);
+  color: var(--ink-000);
+  border: 1px solid var(--ink-900);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: transform 120ms ease-out, background-color 120ms ease-out;
+  flex-shrink: 0;
 }
 
-.loadingState p {
-  color: var(--text-secondary);
+.newPactBtn:hover {
+  background: var(--ink-800);
+  transform: translateY(-1px);
 }
 
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--surface-3);
-  border-top-color: var(--accent-primary);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+.newPactBtn:active {
+  transform: translateY(0);
 }
 
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+.newPactBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 3px;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
+/* ── Section wrapper ─────────────────────────────────────────────────────── */
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* PactCard grid — editorial 320px-min cards. Single column under 640px so
+   the 26px serif title doesn't break across two short lines. */
+.pactsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+
+/* Empty section row — quiet line under the SectionHeader rule. Direct-positive
+   voice: factual, not coy. */
+.emptyRow {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  color: var(--ink-500);
+  margin: 0;
+  padding: 8px 0 4px;
+}
+
+/* ── Loading skeleton grid ───────────────────────────────────────────────── */
+.loadingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+  margin-top: 48px;
+}
+
+/* ── Show-more toggle (resolved overflow) ────────────────────────────────── */
+.showMoreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: center;
+  margin-top: -32px; /* tug closer to the resolved grid */
+  padding: 10px 18px;
+  background: transparent;
+  border: 1px dashed var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-600);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 120ms ease-out, color 120ms ease-out;
+}
+
+.showMoreBtn:hover {
+  border-color: var(--ink-500);
+  color: var(--ink-800);
+}
+
+.showMoreBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
   .container {
-    padding: var(--space-4);
+    padding: 20px 16px 64px;
+    gap: 40px;
   }
 
   .header {
     flex-direction: column;
     align-items: flex-start;
-    gap: var(--space-4);
   }
 
-  .filterTabs {
+  .newPactBtn {
     width: 100%;
-    overflow-x: auto;
+    justify-content: center;
+  }
+
+  .pactsGrid,
+  .loadingGrid {
+    grid-template-columns: 1fr;
   }
 }
 
-/* ── Dark Mode Overrides ── */
-:global([data-theme="dark"]) .filterTabs {
-  border: 1px solid var(--border-subtle);
+/* ── Dark mode ───────────────────────────────────────────────────────────── */
+/* ink-* tokens auto-invert. The CTA stays "dark on light" semantically — in
+   dark mode the button background is cream (ink-900) and text is dark ink
+   (ink-000), so the contrast direction reads correctly on warm-paper-dark. */
+:global([data-theme='dark']) .newPactBtn {
+  background: var(--ink-900);
+  color: var(--ink-000);
+  border-color: var(--ink-900);
 }
 
-:global([data-theme="dark"]) .filterTab:hover {
-  background: rgba(255, 255, 255, 0.04);
+:global([data-theme='dark']) .newPactBtn:hover {
+  background: var(--ink-800);
 }
-
-:global([data-theme="dark"]) .backBtn {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-xs);
-}
-
-:global([data-theme="dark"]) .backBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-

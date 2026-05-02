@@ -4,18 +4,25 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
+import { getUserAchievements } from '@/lib/gamification';
+import { getCurrentTier, TIERS } from '@/lib/tiers';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
+import SectionHeader from '@/components/SectionHeader';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
-import { Fire } from '@phosphor-icons/react';
 import { fadeInUp } from '@/lib/animations';
 import styles from './StatsPage.module.css';
 
+const WEEKDAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
+
 export default function StatsPageClient({ user }) {
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0, totalCompleted: 0 });
-  const [pactStats, setPactStats] = useState({ total: 0, completed: 0, missed: 0, active: 0, thisWeek: 0, thisMonth: 0 });
+  const [pactStats, setPactStats] = useState({ total: 0, completed: 0, missed: 0, active: 0, completionRate: 0 });
   const [focusStats, setFocusStats] = useState({ totalMinutes: 0, sessionsCount: 0, avgDuration: 0, thisWeekSessions: 0, thisMonthSessions: 0, avgPerDay: 0 });
   const [recentSessions, setRecentSessions] = useState([]);
+  const [weekMinutes, setWeekMinutes] = useState(Array(7).fill(0));
+  const [tierData, setTierData] = useState({ totalXp: 0, level: 1 });
+  const [achievements, setAchievements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const supabase = useMemo(() => createClient(), []);
@@ -31,8 +38,6 @@ export default function StatsPageClient({ user }) {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       sevenDaysAgo.setHours(0, 0, 0, 0);
 
-      // Detect the user's IANA timezone so streak calculations bucket
-      // activity into their local day (matches DashboardLayout persistence).
       let timezone = 'UTC';
       try {
         timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
@@ -42,34 +47,32 @@ export default function StatsPageClient({ user }) {
 
       const uid = user.id;
 
-      // Run streak + all count/lightweight queries in parallel. Count
-      // queries (head: true) return only a count, not rows — a massive
-      // win over the previous "fetch 5000 rows then filter in JS" pattern.
       const [
         streak,
+        profileRes,
+        achievementsRes,
         totalPactsRes,
         completedPactsRes,
         missedPactsRes,
         activePactsRes,
-        thisWeekCompletedRes,
-        thisMonthCompletedRes,
         focusTotalsRes,
         thisWeekFocusRes,
         thisMonthFocusRes,
         firstFocusRes,
+        weekSessionsRes,
         recentSessionsRes,
       ] = await Promise.all([
         calculateStreak(supabase, uid, timezone),
+        // Total XP + Level for tier resolution
+        supabase.from('profiles').select('total_xp, level').eq('id', uid).single(),
+        // Full achievement list (unlocked + locked) for § 05
+        getUserAchievements(supabase, uid),
         // Pact counts
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid),
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'completed'),
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'missed'),
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'active'),
-        supabase.from('pacts').select('*', { count: 'exact', head: true })
-          .eq('user_id', uid).eq('status', 'completed').gte('completed_at', weekAgo.toISOString()),
-        supabase.from('pacts').select('*', { count: 'exact', head: true })
-          .eq('user_id', uid).eq('status', 'completed').gte('completed_at', monthAgo.toISOString()),
-        // Focus totals — only duration_minutes column, needed for lifetime sum/avg
+        // Focus totals — only duration_minutes column for lifetime sum/avg
         supabase.from('focus_sessions').select('duration_minutes').eq('user_id', uid).limit(5000),
         supabase.from('focus_sessions').select('*', { count: 'exact', head: true })
           .eq('user_id', uid).gte('started_at', weekAgo.toISOString()),
@@ -78,20 +81,30 @@ export default function StatsPageClient({ user }) {
         // Earliest session for avg-per-day denominator
         supabase.from('focus_sessions').select('started_at').eq('user_id', uid)
           .order('started_at', { ascending: true }).limit(1),
-        // Recent 7 days of sessions for the "Recent Focus Sessions" list
+        // Last 7 days of sessions with started_at + duration for the week chart
+        supabase.from('focus_sessions').select('started_at, duration_minutes')
+          .eq('user_id', uid).gte('started_at', sevenDaysAgo.toISOString()).limit(500),
+        // Recent sessions list for the bottom of § 04
         supabase.from('focus_sessions').select('id, started_at, duration_minutes, ended_at')
           .eq('user_id', uid).gte('started_at', sevenDaysAgo.toISOString())
           .order('started_at', { ascending: false }).limit(20),
       ]);
 
       const queryError = [
-        totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
-        thisWeekCompletedRes, thisMonthCompletedRes, focusTotalsRes,
-        thisWeekFocusRes, thisMonthFocusRes, firstFocusRes, recentSessionsRes,
+        profileRes, totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
+        focusTotalsRes, thisWeekFocusRes, thisMonthFocusRes, firstFocusRes,
+        weekSessionsRes, recentSessionsRes,
       ].find(r => r.error);
       if (queryError) throw queryError.error;
 
       setStreakData(streak);
+
+      setTierData({
+        totalXp: profileRes.data?.total_xp || 0,
+        level: profileRes.data?.level || 1,
+      });
+
+      setAchievements(achievementsRes.data || []);
 
       const completedCount = completedPactsRes.count || 0;
       const missedCount = missedPactsRes.count || 0;
@@ -102,8 +115,6 @@ export default function StatsPageClient({ user }) {
         completed: completedCount,
         missed: missedCount,
         active: activeCount,
-        thisWeek: thisWeekCompletedRes.count || 0,
-        thisMonth: thisMonthCompletedRes.count || 0,
         completionRate: completedCount + missedCount > 0
           ? Math.round((completedCount / (completedCount + missedCount)) * 100)
           : 0,
@@ -127,8 +138,24 @@ export default function StatsPageClient({ user }) {
         avgPerDay,
       });
 
-      setRecentSessions(recentSessionsRes.data || []);
+      // Build the rolling 7-day chart, Mon..Sun.
+      // weekMinutes[0] = oldest day (6 days ago), weekMinutes[6] = today.
+      const weekData = weekSessionsRes.data || [];
+      const buckets = Array(7).fill(0);
+      const todayMidnight = new Date();
+      todayMidnight.setHours(0, 0, 0, 0);
+      weekData.forEach(s => {
+        const sessionDate = new Date(s.started_at);
+        sessionDate.setHours(0, 0, 0, 0);
+        const daysAgo = Math.floor((todayMidnight - sessionDate) / (1000 * 60 * 60 * 24));
+        if (daysAgo >= 0 && daysAgo < 7) {
+          // Index 0 = 6 days ago, index 6 = today
+          buckets[6 - daysAgo] += s.duration_minutes || 0;
+        }
+      });
+      setWeekMinutes(buckets);
 
+      setRecentSessions(recentSessionsRes.data || []);
     } catch (err) {
       console.error('Error fetching stats:', err);
       setError('Failed to load stats. Please try again.');
@@ -153,7 +180,7 @@ export default function StatsPageClient({ user }) {
     if (date.toDateString() === yesterday.toDateString()) {
       return 'Yesterday';
     }
-    return date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    return date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
   };
 
   const formatTime = (dateStr) => {
@@ -168,38 +195,56 @@ export default function StatsPageClient({ user }) {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  // Group sessions by date for display
+  const formatEarnedDate = (dateStr) => {
+    if (!dateStr) return '';
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  // Weekday label rotation: today's label sits at the right edge.
+  // Today's getDay returns 0=Sun..6=Sat; we display Mon..Sun left-to-right
+  // ending in today, so labels[i] = day-of-week for (today - 6 + i).
+  const weekDayLabels = useMemo(() => {
+    const labels = [];
+    const today = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate() - i);
+      // 0 = Sun in JS; convert to Mon=0..Sun=6
+      const jsDay = d.getDay();
+      const monBased = (jsDay + 6) % 7;
+      labels.push(WEEKDAY_LABELS[monBased]);
+    }
+    return labels;
+  }, []);
+
   const groupedSessions = useMemo(() => {
     const groups = {};
     recentSessions.forEach(session => {
       const dateKey = new Date(session.started_at).toDateString();
-      if (!groups[dateKey]) {
-        groups[dateKey] = [];
-      }
+      if (!groups[dateKey]) groups[dateKey] = [];
       groups[dateKey].push(session);
     });
-    return Object.entries(groups).map(([dateKey, sessions]) => ({
-      date: dateKey,
-      sessions
-    }));
+    return Object.entries(groups).map(([dateKey, sessions]) => ({ date: dateKey, sessions }));
   }, [recentSessions]);
+
+  const tier = useMemo(() => getCurrentTier(tierData.totalXp), [tierData.totalXp]);
+  const weekMax = useMemo(() => Math.max(60, ...weekMinutes), [weekMinutes]);
+  const earnedAchievements = achievements.filter(a => a.unlocked);
 
   if (isLoading) {
     return (
       <div className={styles.container}>
         <header className={styles.header}>
-          <div>
-            <SkeletonText width="160px" height="28px" />
-            <SkeletonText width="240px" height="16px" />
-          </div>
+          <SkeletonText width="80px" height="14px" />
+          <SkeletonText width="200px" height="56px" />
+          <SkeletonText width="280px" height="14px" />
         </header>
         <div className={styles.content}>
-          <SkeletonCard height="100px" />
           <SkeletonCard height="280px" />
-          <div className={styles.analyticsGrid}>
-            <SkeletonCard height="200px" />
-            <SkeletonCard height="200px" />
-          </div>
+          <SkeletonCard height="220px" />
+          <SkeletonCard height="320px" />
+          <SkeletonCard height="240px" />
         </div>
       </div>
     );
@@ -210,11 +255,13 @@ export default function StatsPageClient({ user }) {
       <div className={styles.container}>
         <div className={styles.loading}>
           <p>{error}</p>
-          <button className="btn btn-primary" onClick={fetchStats} style={{ marginTop: '1rem' }}>Try Again</button>
+          <button className="btn btn-primary" onClick={fetchStats}>Try again</button>
         </div>
       </div>
     );
   }
+
+  const hasNoActivity = pactStats.total === 0 && focusStats.sessionsCount === 0;
 
   return (
     <div className={styles.container}>
@@ -224,153 +271,291 @@ export default function StatsPageClient({ user }) {
         initial="initial"
         animate="animate"
       >
-        <div>
-          <h1>Your Stats</h1>
-          <p className={styles.subtitle}>Track your productivity and progress</p>
-        </div>
+        <span className={styles.headerCaption}>§ Stats</span>
+        <h1 className={styles.headerTitle}>Your record.</h1>
+        <span className={styles.headerSubtitle}>
+          Lv. {tierData.level} &middot; {tierData.totalXp} XP &middot; {pactStats.completed} pacts kept
+        </span>
       </motion.header>
 
       <div className={styles.content}>
-        {/* Top-level empty state when user has zero activity */}
-        {pactStats.total === 0 && focusStats.sessionsCount === 0 && (
+        {hasNoActivity && (
           <EmptyState
-            icon={
-              <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="20" y1="90" x2="100" y2="90" stroke="currentColor" strokeWidth="1" opacity="0.1" />
-                <line x1="20" y1="70" x2="100" y2="70" stroke="currentColor" strokeWidth="1" opacity="0.1" />
-                <line x1="20" y1="50" x2="100" y2="50" stroke="currentColor" strokeWidth="1" opacity="0.1" />
-                <path d="M25 80L45 65L60 70L75 45L95 30" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.4" />
-                <circle cx="25" cy="80" r="3" fill="currentColor" opacity="0.3" />
-                <circle cx="45" cy="65" r="3" fill="currentColor" opacity="0.35" />
-                <circle cx="60" cy="70" r="3" fill="currentColor" opacity="0.4" />
-                <circle cx="75" cy="45" r="3" fill="currentColor" opacity="0.45" />
-                <circle cx="95" cy="30" r="4" fill="currentColor" opacity="0.6" />
-                <path d="M90 28L95 30L93 35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" opacity="0.5" />
-              </svg>
-            }
+            floating={false}
             title="Your story starts with day one."
             description="Complete pacts and focus sessions to see your progress here."
           />
         )}
 
-        {/* Streak Summary — hero row */}
-        <div className={styles.streakRow}>
-          <span className={styles.streakPrimary}>
-            <Fire size={22} weight="fill" color="var(--warning)" />
-            {streakData.currentStreak}
-            <span className={styles.streakPrimaryLabel}>day streak</span>
-          </span>
-          <span className={styles.streakMeta}>
-            Best: {streakData.longestStreak} {streakData.longestStreak === 1 ? 'day' : 'days'}
-          </span>
-          <span className={styles.streakMeta}>
-            {streakData.totalCompleted} completed
-          </span>
-        </div>
+        {/* ─────────────── § 01 — Tier ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="01"
+            title="Tier"
+            caption={`Level ${tierData.level} progression`}
+          />
+          <div className={styles.tierBlock}>
+            <div className={styles.tierCurrent}>
+              <span className={styles.tierIndex}>
+                Current tier &middot; {String(tier.index + 1).padStart(2, '0')} / 06
+              </span>
+              <h2 className={styles.tierLabel}>{tier.tier.label}</h2>
+              <span className={styles.tierSubtitle}>&ldquo;{tier.tier.subtitle}&rdquo;</span>
 
-        {/* Activity Calendar */}
-        <MonthlyCalendar userId={user.id} />
+              {tier.next ? (
+                <div className={styles.tierProgressWrap}>
+                  <div className={styles.tierProgressLabels}>
+                    <span>{tierData.totalXp} XP</span>
+                    <span>{tier.xpToNext} to {tier.next.label}</span>
+                  </div>
+                  <div className={styles.tierProgressTrack}>
+                    <motion.div
+                      className={styles.tierProgressFill}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${tier.progressToNext * 100}%` }}
+                      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+                    />
+                  </div>
+                </div>
+              ) : (
+                <div className={styles.tierProgressWrap}>
+                  <div className={styles.tierProgressLabels}>
+                    <span>{tierData.totalXp} XP</span>
+                    <span className={styles.tierCeiling}>Top tier reached</span>
+                  </div>
+                  <div className={styles.tierProgressTrack}>
+                    <div className={styles.tierProgressFill} style={{ width: '100%' }} />
+                  </div>
+                </div>
+              )}
+            </div>
 
-        {/* Analytics Cards */}
-        <div className={styles.analyticsGrid}>
-          {/* Pact Analytics */}
-          <div className={styles.analyticsCard}>
-            <h3>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 11L12 14L22 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M21 12V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H5C4.46957 21 3.96086 20.7893 3.58579 20.4142C3.21071 20.0391 3 19.5304 3 19V5C3 4.46957 3.21071 3.96086 3.58579 3.58579C3.96086 3.21071 4.46957 3 5 3H16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Pact Analytics
-              <span className={styles.headingStat}>&middot; {pactStats.completionRate}% rate</span>
-            </h3>
-            <div className={styles.breakdown}>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--success)' }} />
-                <span className={styles.breakdownLabel}>Completed</span>
-                <span className={styles.breakdownValue}>{pactStats.completed}</span>
+            <div className={styles.tierLadder}>
+              {TIERS.map((band, i) => {
+                const isActive = i === tier.index;
+                const isReached = i < tier.index;
+                const className = [
+                  styles.tierRow,
+                  isActive ? styles.tierRowActive : '',
+                  isReached ? styles.tierRowReached : '',
+                  !isActive && !isReached ? styles.tierRowLocked : '',
+                ].filter(Boolean).join(' ');
+                const rangeText = band.max === Infinity
+                  ? `${band.min}+`
+                  : `${band.min}–${band.max}`;
+                return (
+                  <div key={band.label} className={className}>
+                    <span className={styles.tierRowNumeral}>
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
+                    <div className={styles.tierRowBody}>
+                      <span className={styles.tierRowLabel}>{band.label}</span>
+                      <span className={styles.tierRowSubtitle}>{band.subtitle}</span>
+                    </div>
+                    <span className={styles.tierRowRange}>{rangeText} XP</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────── § 02 — Streak ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="02"
+            title="Streak"
+            caption="Days on the chain"
+          />
+          <div className={styles.streakBlock}>
+            <div className={styles.streakHero}>
+              <span className={styles.streakNumeral}>{streakData.currentStreak}</span>
+              <span className={styles.streakLabel}>
+                {streakData.currentStreak === 1 ? 'day unbroken' : 'days unbroken'}
+              </span>
+            </div>
+            <div className={styles.streakStats}>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Best</span>
+                <span className={styles.streakStatValue}>
+                  {streakData.longestStreak}
+                  <span className={styles.streakStatUnit}>{streakData.longestStreak === 1 ? 'day' : 'days'}</span>
+                </span>
               </div>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--accent-primary)' }} />
-                <span className={styles.breakdownLabel}>Active</span>
-                <span className={styles.breakdownValue}>{pactStats.active}</span>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Kept total</span>
+                <span className={styles.streakStatValue}>{streakData.totalCompleted}</span>
               </div>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--danger)' }} />
-                <span className={styles.breakdownLabel}>Missed</span>
-                <span className={styles.breakdownValue}>{pactStats.missed}</span>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Keep rate</span>
+                <span className={styles.streakStatValue}>
+                  {pactStats.completionRate}
+                  <span className={styles.streakStatUnit}>%</span>
+                </span>
               </div>
             </div>
           </div>
 
-          {/* Focus Analytics */}
-          <div className={styles.analyticsCard}>
-            <h3>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
-              Focus Analytics
-              <span className={styles.headingStat}>&middot; {formatDuration(focusStats.totalMinutes)} total</span>
-            </h3>
-            <div className={styles.breakdown}>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--accent-primary)' }} />
-                <span className={styles.breakdownLabel}>This Week</span>
-                <span className={styles.breakdownValue}>{focusStats.thisWeekSessions} session{focusStats.thisWeekSessions !== 1 ? 's' : ''}</span>
-              </div>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--info)' }} />
-                <span className={styles.breakdownLabel}>This Month</span>
-                <span className={styles.breakdownValue}>{focusStats.thisMonthSessions} session{focusStats.thisMonthSessions !== 1 ? 's' : ''}</span>
-              </div>
-              <div className={styles.breakdownItem}>
-                <span className={styles.breakdownDot} style={{ background: 'var(--success)' }} />
-                <span className={styles.breakdownLabel}>Avg per Day</span>
-                <span className={styles.breakdownValue}>{focusStats.avgPerDay}m</span>
-              </div>
+          {/* Pact breakdown — folded into the same § so it reads as the
+              "your record" detail underneath the streak hero. */}
+          <div className={styles.pactBreakdown}>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotKept}`} />
+                Kept
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.completed}</span>
+            </div>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotActive}`} />
+                Active
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.active}</span>
+            </div>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotMissed}`} />
+                Missed
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.missed}</span>
+            </div>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotRate}`} />
+                Total
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.total}</span>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Recent Focus Sessions */}
-        <div className={styles.sessionsCard}>
-          <h3>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 8V12L15 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
-            </svg>
-            Recent Focus Sessions
-          </h3>
-          {groupedSessions.length === 0 ? (
+        {/* ─────────────── § 03 — Activity ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="03"
+            title="Activity"
+            caption="Calendar view"
+          />
+          <MonthlyCalendar userId={user.id} />
+        </section>
+
+        {/* ─────────────── § 04 — Sessions ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="04"
+            title="Sessions"
+            caption="Focus time"
+          />
+          <div className={styles.sessionsBlock}>
+            <div className={styles.sessionsTotals}>
+              <div className={styles.sessionsStat}>
+                <span className={styles.sessionsStatLabel}>Lifetime</span>
+                <span className={styles.sessionsStatValue}>{formatDuration(focusStats.totalMinutes)}</span>
+              </div>
+              <div className={styles.sessionsStat}>
+                <span className={styles.sessionsStatLabel}>Sessions</span>
+                <span className={styles.sessionsStatValue}>{focusStats.sessionsCount}</span>
+              </div>
+              <div className={styles.sessionsStat}>
+                <span className={styles.sessionsStatLabel}>Avg session</span>
+                <span className={styles.sessionsStatValue}>
+                  {focusStats.avgDuration}
+                  <span className={styles.streakStatUnit}>m</span>
+                </span>
+              </div>
+            </div>
+
+            <div className={styles.sessionsChart}>
+              <span className={styles.sessionsChartTitle}>Last 7 days</span>
+              {weekMinutes.map((mins, i) => (
+                <div key={i} className={styles.chartRow}>
+                  <span className={styles.chartDayLabel}>{weekDayLabels[i]}</span>
+                  <div className={styles.chartTrack}>
+                    <motion.div
+                      className={`${styles.chartFill} ${mins === 0 ? styles.chartFillEmpty : ''}`}
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(100, (mins / weekMax) * 100)}%` }}
+                      transition={{
+                        duration: 0.6,
+                        ease: [0.22, 1, 0.36, 1],
+                        delay: 0.1 + i * 0.04,
+                      }}
+                    />
+                  </div>
+                  <span className={styles.chartValue}>{mins}m</span>
+                </div>
+              ))}
+            </div>
+
+            {groupedSessions.length === 0 ? (
+              <div className={styles.empty}>
+                <p>No focus sessions in the last 7 days.</p>
+                <p className={styles.emptyHint}>The timer is waiting. Go lock in.</p>
+              </div>
+            ) : (
+              <div className={styles.sessionsList}>
+                <span className={styles.sessionsListTitle}>Recent sessions</span>
+                {groupedSessions.map(({ date, sessions }) => (
+                  <div key={date} className={styles.dayGroup}>
+                    <div className={styles.dayHeader}>{formatDate(date)}</div>
+                    <div className={styles.daySessions}>
+                      {sessions.map(session => (
+                        <div key={session.id} className={styles.sessionItem}>
+                          <span className={styles.sessionTag}>Focus</span>
+                          <span className={styles.sessionDuration}>
+                            {session.duration_minutes} min
+                          </span>
+                          <span className={styles.sessionTime}>
+                            {formatTime(session.started_at)}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* ─────────────── § 05 — Achievements ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="05"
+            title="Achievements"
+            caption={`${earnedAchievements.length} of ${achievements.length} earned`}
+          />
+          {achievements.length === 0 ? (
             <div className={styles.empty}>
-              <span className={styles.emptyEmojiSmall}>{'\u23F3'}</span>
-              <p>No focus sessions in the last 7 days.</p>
-              <p className={styles.emptyHint}>The timer is waiting. Go lock in.</p>
+              <p>Achievements load after your first pact.</p>
             </div>
           ) : (
-            <div className={styles.sessionsList}>
-              {groupedSessions.map(({ date, sessions }) => (
-                <div key={date} className={styles.dayGroup}>
-                  <div className={styles.dayHeader}>{formatDate(date)}</div>
-                  <div className={styles.daySessions}>
-                    {sessions.map(session => (
-                      <div key={session.id} className={styles.sessionItem}>
-                        <div className={styles.sessionIcon}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                            <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          </svg>
-                        </div>
-                        <span className={styles.sessionDuration}>{session.duration_minutes} min session</span>
-                        <span className={styles.sessionTime}>at {formatTime(session.started_at)}</span>
-                      </div>
-                    ))}
+            <div className={styles.achGrid}>
+              {achievements.map(a => (
+                <div
+                  key={a.key}
+                  className={`${styles.achCard} ${a.unlocked ? '' : styles.achCardLocked}`}
+                  title={`${a.name} — ${a.description}`}
+                >
+                  <div className={styles.achHeader}>
+                    <span className={styles.achGlyph} aria-hidden="true">
+                      {a.unlocked ? a.icon : '·'}
+                    </span>
+                    <span className={styles.achStatus}>
+                      {a.unlocked ? 'Earned' : 'Locked'}
+                    </span>
                   </div>
+                  <div className={styles.achName}>{a.name}</div>
+                  <div className={styles.achDesc}>{a.description}</div>
+                  {a.unlocked && a.unlockedAt && (
+                    <div className={styles.achDate}>{formatEarnedDate(a.unlockedAt)}</div>
+                  )}
                 </div>
               ))}
             </div>
           )}
-        </div>
+        </section>
       </div>
     </div>
   );

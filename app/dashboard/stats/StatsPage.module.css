@@ -1,296 +1,808 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Stats — editorial port (Wave 2.4)
+
+   Sectional rhythm via SectionHeader. Five seams:
+     § 01 — Tier        ← NEW: tier ladder, 6 bands, motivational chrome
+     § 02 — Streak      monumental serif streak number
+     § 03 — Activity    MonthlyCalendar (already ink-cascade-aware)
+     § 04 — Sessions    focus totals + week chart
+     § 05 — Achievements full grid (more detail than dashboard rail)
+
+   Voice direct-positive throughout. No courthouse vocabulary. Stamps stay
+   semantic; tier accent uses --stamp-yellow which cascades to user's ink.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .container {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: var(--space-6);
+  padding: 32px 24px 64px;
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.loading {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-  color: var(--text-muted);
-}
-
-.header {
-  margin-bottom: var(--space-6);
-}
-
-.header h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.04em;
-}
-
-.subtitle {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  margin-top: var(--space-1);
-}
-
-.content {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-/* Streak — hero stat row with weighted hierarchy */
-.streakRow {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--space-4);
-  margin: 0;
-}
-
-.streakPrimary {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
-  line-height: 1;
-}
-
-.streakPrimaryLabel {
-  font-family: var(--font-sans);
-  font-size: var(--text-base);
-  font-weight: 500;
-  color: var(--text-secondary);
-  letter-spacing: 0;
-}
-
-.streakMeta {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-/* Analytics Grid */
-.analyticsGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-6);
-}
-
-@media (max-width: 768px) {
-  .analyticsGrid {
-    grid-template-columns: 1fr;
+@media (min-width: 768px) {
+  .container {
+    padding: 48px 32px 96px;
   }
 }
 
-/* Analytics Cards */
-.analyticsCard {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-5);
-  transition: border-color var(--transition-fast);
+@media (max-width: 480px) {
+  .container {
+    padding: 24px 16px 48px;
+  }
 }
 
-.analyticsCard:hover {
-  border-color: var(--border-default);
-}
-
-.analyticsCard h3 {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--space-4);
-}
-
-.analyticsCard h3 svg {
-  color: var(--accent-primary);
-}
-
-/* Inline primary stat in heading (e.g. "· 100% rate") */
-.headingStat {
-  font-weight: 500;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
-
-/* Breakdown */
-.breakdown {
+.loading {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-}
-
-.breakdownItem {
-  display: flex;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
+  min-height: 200px;
+  color: var(--ink-500);
+  font-family: var(--font-sans-editorial);
+  gap: 16px;
 }
 
-.breakdownDot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-}
-
-.breakdownLabel {
-  flex: 1;
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-}
-
-.breakdownValue {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-/* Sessions Card */
-.sessionsCard {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  padding: var(--space-4);
-}
-
-.sessionsCard h3 {
+/* ── Page header ─────────────────────────────────────────────────────── */
+.header {
+  margin-bottom: 56px;
   display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-base);
+  flex-direction: column;
+  gap: 8px;
+}
+
+.headerCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.headerTitle {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(40px, 6vw, 64px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--ink-900);
+  margin: 0;
+}
+
+.headerSubtitle {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  color: var(--ink-600);
+  margin-top: 6px;
+}
+
+/* ── Sectional rhythm ────────────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    gap: 48px;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* "View older" / "View all" inside SectionHeader's action slot */
+.sectionAction {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  text-decoration: none;
+  transition: color 120ms ease-out;
+}
+
+.sectionAction:hover {
+  color: var(--ink-800);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 01 — Tier ladder
+   Hero motivational block. Tier label in monumental serif, progress bar
+   to next tier, then a 6-row table of all bands with current highlighted.
+   ═════════════════════════════════════════════════════════════════════ */
+.tierBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 48px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .tierBlock {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.tierCurrent {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.tierIndex {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierLabel {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(48px, 7vw, 80px);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.025em;
+  color: var(--ink-900);
+  margin: 0;
+}
+
+.tierSubtitle {
+  font-family: var(--font-sans-editorial);
+  font-style: italic;
+  font-size: 16px;
+  color: var(--ink-600);
+}
+
+/* Progress bar — flat, low-radius, ink-cascade-aware */
+.tierProgressWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 20px;
+}
+
+.tierProgressLabels {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
   font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 var(--space-4);
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+  font-variant-numeric: tabular-nums;
 }
 
-.sessionsCard h3 svg {
-  color: var(--accent-primary);
+.tierProgressTrack {
+  position: relative;
+  height: 12px;
+  background: var(--ink-200);
+  border-radius: 2px;
+  overflow: hidden;
 }
 
+.tierProgressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--stamp-yellow);
+  /* low rounding on right edge so the fill reads as a stamp, not a chip */
+  border-radius: 2px 0 0 2px;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tierCeiling {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* Right column — list of all 6 tiers */
+.tierLadder {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--ink-300);
+}
+
+.tierRow {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  gap: 16px;
+  align-items: baseline;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--ink-300);
+  transition: background 120ms ease-out;
+}
+
+.tierRowNumeral {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierRowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tierRowLabel {
+  font-family: var(--font-sans-editorial);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--ink-800);
+  letter-spacing: -0.01em;
+}
+
+.tierRowSubtitle {
+  font-family: var(--font-sans-editorial);
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.tierRowRange {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Active tier — solid yellow highlighter strip on the left edge */
+.tierRowActive {
+  position: relative;
+  padding-left: 16px;
+  margin-left: -16px;
+  background: color-mix(in oklch, var(--stamp-yellow) 10%, transparent);
+}
+
+.tierRowActive::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--stamp-yellow);
+}
+
+.tierRowActive .tierRowLabel {
+  color: var(--ink-900);
+}
+
+.tierRowActive .tierRowNumeral {
+  color: var(--ink-700);
+}
+
+.tierRowReached .tierRowLabel {
+  color: var(--ink-700);
+}
+
+.tierRowReached .tierRowSubtitle {
+  color: var(--ink-500);
+}
+
+.tierRowLocked {
+  opacity: 0.55;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 02 — Streak
+   Monumental serif numeral on the left, three meta stats on the right.
+   ═════════════════════════════════════════════════════════════════════ */
+.streakBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: end;
+}
+
+@media (max-width: 768px) {
+  .streakBlock {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+}
+
+.streakHero {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.streakNumeral {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(96px, 14vw, 180px);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--ink-900);
+  font-variant-numeric: lining-nums;
+}
+
+.streakLabel {
+  font-family: var(--font-sans-editorial);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-700);
+  margin-top: 4px;
+}
+
+.streakRiskChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-top: 12px;
+  padding: 5px 10px;
+  background: color-mix(in oklch, var(--stamp-yellow) 18%, var(--ink-100));
+  border: 1px solid color-mix(in oklch, var(--stamp-yellow) 50%, var(--ink-300));
+  border-radius: 2px;
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-800);
+  transform: rotate(-2deg);
+}
+
+.streakStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--ink-300);
+  padding-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .streakStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.streakStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.streakStatLabel {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.streakStatValue {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink-800);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.streakStatUnit {
+  font-family: var(--font-display-editorial);
+  font-size: 0.45em;
+  color: var(--ink-500);
+  margin-left: 4px;
+  letter-spacing: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 04 — Sessions
+   Focus totals up top (3 monumental numerals), week bar chart below.
+   ═════════════════════════════════════════════════════════════════════ */
+.sessionsBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.sessionsTotals {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--ink-300);
+  border-bottom: 1px solid var(--ink-300);
+  padding: 24px 0;
+}
+
+@media (max-width: 600px) {
+  .sessionsTotals {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+.sessionsStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sessionsStatLabel {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.sessionsStatValue {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(36px, 4.2vw, 56px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.025em;
+  color: var(--ink-800);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+/* Week bar chart — horizontal day rows, ink-blue fill */
+.sessionsChart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sessionsChartTitle {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 4px;
+}
+
+.chartRow {
+  display: grid;
+  grid-template-columns: 56px 1fr 56px;
+  align-items: center;
+  gap: 16px;
+}
+
+.chartDayLabel {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.chartTrack {
+  position: relative;
+  height: 18px;
+  background: var(--ink-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.chartFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--stamp-blue);
+  border-radius: 2px 0 0 2px;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.chartFillEmpty {
+  background: transparent;
+}
+
+.chartValue {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: right;
+  color: var(--ink-700);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Recent sessions list — kept editorial */
 .sessionsList {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: 16px;
+  margin-top: 12px;
+  border-top: 1px solid var(--ink-300);
+  padding-top: 24px;
+}
+
+.sessionsListTitle {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
 .dayGroup {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
 }
 
 .dayHeader {
-  font-size: var(--text-sm);
+  font-family: var(--font-sans-editorial);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
-  padding-bottom: var(--space-1);
-  border-bottom: 1px solid var(--border-subtle);
+  letter-spacing: 0.04em;
+  color: var(--ink-700);
+  padding-bottom: 8px;
+  border-bottom: 1px dashed var(--ink-300);
+  margin-bottom: 8px;
 }
 
 .daySessions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  padding-left: var(--space-3);
 }
 
 .sessionItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  background: var(--surface-2);
-  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 12px;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--ink-200);
 }
 
-.sessionIcon {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  background: rgba(var(--accent-primary-rgb), 0.15);
-  color: var(--accent-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.sessionItem:last-child {
+  border-bottom: none;
 }
 
 .sessionDuration {
-  font-size: var(--text-sm);
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
   font-weight: 500;
-  color: var(--text-primary);
+  color: var(--ink-800);
 }
 
 .sessionTime {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  margin-left: auto;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  color: var(--ink-500);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Inline empty (focus sessions) */
+.sessionTag {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--stamp-blue);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § Pact-stat breakdown (folded under § 02 streak block as a sub-block)
+   ═════════════════════════════════════════════════════════════════════ */
+.pactBreakdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--ink-300);
+  padding-top: 20px;
+  margin-top: 8px;
+}
+
+@media (max-width: 600px) {
+  .pactBreakdown {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.pactStat {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pactStatLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.pactStatDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 1px;
+}
+
+.pactStatDotKept { background: var(--stamp-green); }
+.pactStatDotMissed { background: var(--stamp-red); }
+.pactStatDotActive { background: var(--stamp-yellow); }
+.pactStatDotRate { background: var(--ink-700); }
+
+.pactStatValue {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(32px, 3.8vw, 48px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink-800);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.pactStatUnit {
+  font-family: var(--font-display-editorial);
+  font-size: 0.45em;
+  color: var(--ink-500);
+  margin-left: 4px;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 05 — Achievements full grid
+   ═════════════════════════════════════════════════════════════════════ */
+.achGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .achGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.achCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
+  position: relative;
+  min-height: 130px;
+  transition: border-color 120ms ease-out, background 120ms ease-out;
+}
+
+.achCard:hover {
+  border-color: var(--ink-400);
+}
+
+.achCardLocked {
+  border-style: dashed;
+  border-color: var(--ink-300);
+  background: transparent;
+  opacity: 0.6;
+}
+
+.achCardLocked:hover {
+  opacity: 0.85;
+  border-color: var(--ink-400);
+}
+
+.achHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.achGlyph {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  border-radius: 2px;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
+  transform: rotate(-3deg);
+}
+
+.achCardLocked .achGlyph {
+  background: transparent;
+  border: 1px dashed var(--ink-400);
+  color: var(--ink-500);
+  transform: none;
+  font-size: 16px;
+}
+
+.achStatus {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--stamp-green);
+}
+
+.achCardLocked .achStatus {
+  color: var(--ink-500);
+}
+
+.achName {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-800);
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+}
+
+.achDesc {
+  font-family: var(--font-sans-editorial);
+  font-size: 11px;
+  color: var(--ink-600);
+  line-height: 1.4;
+}
+
+.achDate {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  margin-top: auto;
+}
+
+/* ── Empty / error states ─────────────────────────────────────────────── */
 .empty {
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: var(--space-6);
-  gap: var(--space-2);
-  color: var(--text-muted);
+  padding: 40px 20px;
+  gap: 8px;
+  color: var(--ink-500);
+  font-family: var(--font-sans-editorial);
 }
 
 .empty p {
   margin: 0;
 }
 
-.emptyEmojiSmall {
-  font-size: 1.75rem;
-  line-height: 1;
-}
-
 .emptyHint {
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
+  font-size: 13px;
+  color: var(--ink-400);
 }
 
-/* Mobile Responsive */
-@media (max-width: 768px) {
-  .container {
-    padding: var(--space-4);
-  }
-}
-
-@media (max-width: 480px) {
-  .header h1 {
-    font-size: var(--text-xl);
-  }
-}
-
-/* ── Dark Mode Overrides ── */
-:global([data-theme="dark"]) .analyticsCard {
-  border-color: var(--border-default);
+/* ── Dark mode ────────────────────────────────────────────────────────── */
+:global([data-theme="dark"]) .achCard {
   box-shadow: var(--shadow-sm);
 }
-
-:global([data-theme="dark"]) .sessionsCard {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
-}
-
-:global([data-theme="dark"]) .sessionItem {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-:global([data-theme="dark"]) .sessionIcon {
-  background: rgba(var(--accent-primary-rgb), 0.2);
-}
-
-:global([data-theme="dark"]) .dayHeader {
-  border-bottom-color: var(--border-default);
-}
-

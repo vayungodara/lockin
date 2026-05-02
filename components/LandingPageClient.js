@@ -1,30 +1,132 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { DM_Sans } from 'next/font/google';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Link from 'next/link';
 import NavbarLanding from '@/components/NavbarLanding';
+import Stamp from '@/components/Stamp';
+import UserAvatar from '@/components/UserAvatar';
+import Ticker from '@/components/Ticker';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
-import { ACCENT_PALETTES } from '@/lib/accentColors';
 import styles from '../app/page.module.css';
 import {
   buttonHover,
   buttonTap,
-  cardHover,
   easeOutQuint,
   prefersReducedMotion,
-  quickTransition,
+  stampSlamClean,
 } from '@/lib/animations';
 
-const dmSans = DM_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-body',
-  weight: ['400', '500', '600'],
-});
+// ------------------------------------------------------------------
+// Demo data — mock witnesses + feed items used across the landing.
+// No backend, no persistence. Names match the Ticker seed for
+// internal consistency across the mosaic.
+// ------------------------------------------------------------------
+
+const WITNESSES = [
+  { id: 'u-maya',  name: 'Maya Patel' },
+  { id: 'u-theo',  name: 'Theo Ng' },
+  { id: 'u-rin',   name: 'Rin Okafor' },
+  { id: 'u-sam',   name: 'Sam Hughes' },
+  { id: 'u-lia',   name: 'Lia Weaver' },
+  { id: 'u-devin', name: 'Devin Choi' },
+];
+
+const SAMPLE_PACTS = [
+  { index: '0047', title: 'Finish p-set 4 (complex analysis)', kind: 'pending' },
+  { index: '0046', title: 'Draft intro + 2 body paragraphs — history essay', kind: 'kept' },
+  { index: '0044', title: 'Record Spanish oral memos', kind: 'missed' },
+];
+
+const KANBAN_COLUMNS = [
+  {
+    title: 'To Do',
+    dotColor: 'var(--ink-500)',
+    items: [
+      { task: 'Demo video cut', owner: { id: 'u-theo', name: 'Theo Ng' } },
+      { task: 'Slide deck',     owner: { id: 'u-devin', name: 'Devin Choi' } },
+    ],
+  },
+  {
+    title: 'Doing',
+    dotColor: 'var(--stamp-yellow)',
+    items: [
+      { task: 'Intro + motivation', owner: { id: 'u-me',  name: 'You' } },
+      { task: 'Benchmark charts',   owner: { id: 'u-maya', name: 'Maya Patel' } },
+    ],
+  },
+  {
+    title: 'Done',
+    dotColor: 'var(--stamp-green)',
+    items: [
+      { task: 'Abstract',          owner: { id: 'u-me',  name: 'You' } },
+      { task: 'Dataset → S3',      owner: { id: 'u-maya', name: 'Maya Patel' } },
+    ],
+  },
+];
+
+const FEED_ITEMS = [
+  { user: { id: 'u-maya',  name: 'Maya' },  body: 'kept pact #88 — p-set 4',           time: '2m' },
+  { user: { id: 'u-theo',  name: 'Theo' },  body: 'locked in for 50m on slide deck',   time: '8m' },
+  { user: { id: 'u-amr',   name: 'Amr' },   body: 'missed pact #12 — gym',             time: '14m' },
+  { user: { id: 'u-rin',   name: 'Rin' },   body: 'moved Benchmark charts → Doing',    time: '21m' },
+];
+
+const OBJECTIONS = [
+  {
+    q: "isn't this just another habit tracker?",
+    a: "habit trackers lie to you. they let you skip a day and backfill it when nobody's looking. this one doesn't. your friends are the chain.",
+  },
+  {
+    q: 'what if I have a real reason I missed?',
+    a: "add a note. they'll see that too. life happens — but now you explain out loud instead of ghosting yourself.",
+  },
+  {
+    q: "is this public? I don't want strangers seeing me fail.",
+    a: 'no leaderboards. no discoverability. only witnesses you explicitly add see anything. 2–8 close friends, max.',
+  },
+  {
+    q: 'I already use notion / trello / a calendar / a notebook.',
+    a: "cool. those are for what you want to do. this is for what you said you'd do.",
+  },
+];
+
+const NUMBERS = [
+  ['214,881',  'PACTS MADE'],
+  ['82.4%',    'KEPT RATE'],
+  ['17,299',   'MISSED (YOU SEE THESE TOO)'],
+  ['44 MIN',   'MEDIAN FOCUS SESSION'],
+];
+
+// 91 cells for the mini heatmap. Seed determines cell intensity (0-4).
+const HEATMAP_SEED = [
+  2,1,0,3,2,1,2, 3,2,1,0,2,3,1, 2,3,2,1,0,1,2,
+  3,3,2,1,2,3,2, 1,0,2,3,2,1,2, 3,2,1,0,1,2,3,
+  2,1,2,3,3,2,1, 0,2,3,2,1,2,3, 2,1,0,2,3,2,1,
+  2,3,2,1,0,2,3, 2,1,2,3,3,2,1, 2,3,2,1,0,2,3,
+  2,3,1,2,3,2,1,
+];
+
+/**
+ * Landing demo Pomodoro — counts down from 27:00 to 0, then loops at 50:00.
+ * Client-only effect so it's safe to run during hydration.
+ */
+function useDemoCountdown() {
+  const [seconds, setSeconds] = useState(27 * 60);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setSeconds((s) => (s <= 0 ? 50 * 60 : s - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+
+  const mm = Math.floor(seconds / 60).toString().padStart(2, '0');
+  const ss = (seconds % 60).toString().padStart(2, '0');
+  return { mm, ss };
+}
 
 export default function LandingPageClient({ isAuthenticated = false }) {
   const router = useRouter();
@@ -32,24 +134,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
   const returnTo = searchParams.get('returnTo');
   const toast = useToast();
   const reducedMotion = prefersReducedMotion();
-  const [checkedPacts, setCheckedPacts] = useState({ 0: true, 1: false, 2: false });
-
-  const checkedCount = Object.values(checkedPacts).filter(Boolean).length;
-  const streakCount = 7 + checkedCount - 1;
-  const allComplete = Object.values(checkedPacts).every(Boolean);
-
-  const calendarLevels = [3,1,2,0,3,2,1,3,2,3,1,0,2,3,2,1,3,0,2,3,1,2,3,2,0,1,3,2];
-  const extraChecks = checkedCount - 1;
-  const activeLevels = (() => {
-    let filled = 0;
-    return calendarLevels.map((level) => {
-      if (level === 0 && filled < extraChecks) {
-        filled++;
-        return 3;
-      }
-      return level;
-    });
-  })();
+  const { mm, ss } = useDemoCountdown();
 
   const handleCta = async () => {
     if (isAuthenticated) {
@@ -63,9 +148,7 @@ export default function LandingPageClient({ isAuthenticated = false }) {
     }
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: callbackUrl.toString(),
-      },
+      options: { redirectTo: callbackUrl.toString() },
     });
     if (error) {
       toast.error('Sign in failed. Please try again.');
@@ -73,54 +156,48 @@ export default function LandingPageClient({ isAuthenticated = false }) {
   };
 
   return (
-    <div className={dmSans.variable}>
+    // data-theme="light" on the root scopes the landing to light mode even when
+    // the global <html> carries data-theme="dark". Dashboard still respects
+    // the global theme attribute — this only affects the landing tree.
+    <div data-theme="light" className={styles.landingRoot}>
       <NavbarLanding isAuthenticated={isAuthenticated} />
 
       <main id="main-content" className={styles.main}>
-        {/* ===== HERO SECTION ===== */}
+        {/* ═════════════════════════════════════════════════════════
+            HERO — "Stop / lying to / yourself."
+            Opaque highlighter under "yourself." sits BEHIND the text
+            via isolation + z-index: -1.
+            ═════════════════════════════════════════════════════════ */}
         <section className={styles.hero}>
           <div className={styles.heroGrid}>
-            {/* LEFT COLUMN — text content */}
             <div className={styles.heroContent}>
-              {/* Pill tag */}
-              <motion.div
-                className={styles.heroTag}
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, ease: easeOutQuint }}
-              >
-                <span className={styles.heroTagDot} />
-                Built for students
-              </motion.div>
-
-              {/* Headline */}
               <motion.h1
                 className={styles.heroTitle}
-                initial={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 18 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.1, ease: easeOutQuint }}
               >
-                Stop lying to<br />
-                your <span className={styles.heroFaded}>future self.</span>
+                Stop<br />
+                lying to<br />
+                <span className={styles.highlightWord}>yourself.</span>
               </motion.h1>
 
-              {/* Description */}
               <motion.p
                 className={styles.heroDescription}
-                initial={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2, ease: easeOutQuint }}
+                transition={{ duration: 0.5, delay: 0.25, ease: easeOutQuint }}
               >
-                The app that makes sure tomorrow actually comes.
-                {' '}Track commitments, keep your group honest, and finally stop procrastinating.
+                LockIn is an accountability system for students. Make a pact. Your friends sign it.{' '}
+                <em className={styles.emphasis}>If you miss, they see.</em>{' '}
+                No silent failures. No &ldquo;I&apos;ll start tomorrow.&rdquo;
               </motion.p>
 
-              {/* Dual CTAs */}
               <motion.div
                 className={styles.heroCtas}
-                initial={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3, ease: easeOutQuint }}
+                transition={{ duration: 0.5, delay: 0.35, ease: easeOutQuint }}
               >
                 <motion.button
                   onClick={handleCta}
@@ -128,558 +205,420 @@ export default function LandingPageClient({ isAuthenticated = false }) {
                   whileHover={buttonHover}
                   whileTap={buttonTap}
                 >
-                  Start Locking In
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  Lock in with Google
+                  <span aria-hidden="true">→</span>
                 </motion.button>
                 <Link href="#how-it-works" className={styles.ctaOutline}>
-                  See How It Works
+                  See how it works
                 </Link>
               </motion.div>
 
-              {/* Social proof */}
               <motion.div
                 className={styles.socialProof}
-                initial={{ opacity: 1, y: 0 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4, ease: easeOutQuint }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.5, ease: easeOutQuint }}
               >
-                <div className={styles.avatarStack}>
-                  {['indigo', 'ocean', 'rose'].map((id, i) => (
-                    <div
-                      key={id}
-                      className={styles.avatar}
-                      style={{
-                        backgroundColor: ACCENT_PALETTES.find(p => p.id === id)?.primary || ACCENT_PALETTES.find(p => p.id === 'indigo')?.primary,
-                        zIndex: 3 - i,
-                      }}
-                    />
-                  ))}
-                </div>
-                <p>Join students who are finally getting things done.</p>
+                <span className={styles.socialDot} aria-hidden="true" />
+                <p>4,318 students locked in this week</p>
               </motion.div>
             </div>
 
-            {/* RIGHT COLUMN — floating cards (desktop only) */}
+            {/* Right: a stamped MISSED pact card — shows the resolution mechanic */}
             <div className={styles.heroVisual}>
-              <div className={styles.decorativeRing} />
-
-              {/* Completed pact card */}
-              <motion.div
-                className={`${styles.floatingCard} ${styles.cardCompleted}`}
-                initial={{ opacity: 0, x: 30, y: 10 }}
-                animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -8, 0] }}
-                transition={{
-                  opacity: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                  x: { delay: 0.6, duration: 0.5, ease: easeOutQuint },
-                  ...(reducedMotion ? {} : { y: { delay: 1.2, duration: 3.5, repeat: Infinity, ease: 'easeInOut' } }),
-                }}
+              <motion.article
+                className={styles.heroPact}
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4, ease: easeOutQuint }}
               >
-                <div className={styles.cardHeader}>
-                  <div className={styles.cardBadge} data-status="done">Completed</div>
-                  <span className={styles.cardTime}>2h ago</span>
+                <div className={styles.heroPactHeader}>
+                  <span className={styles.caption}>PACT · #0044 · 2026-04-13</span>
+                  <span className={`${styles.caption} ${styles.captionRed}`}>MISSED</span>
                 </div>
-                <h4>Finish CS homework</h4>
-                <p className={styles.cardBody}>Pact completed on time!</p>
-                <div className={styles.cardFooter}>
-                  <span className={styles.cardXp}>+25 XP earned</span>
-                  <span>🔥 7 day streak</span>
-                </div>
-              </motion.div>
+                <div className={styles.ruleDotted} />
 
-              {/* Active pact card */}
-              <motion.div
-                className={`${styles.floatingCard} ${styles.cardActive}`}
-                initial={{ opacity: 0, x: -30, y: 10 }}
-                animate={{ opacity: 1, x: 0, y: reducedMotion ? 0 : [0, -12, 0] }}
-                transition={{
-                  opacity: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                  x: { delay: 0.8, duration: 0.5, ease: easeOutQuint },
-                  ...(reducedMotion ? {} : { y: { delay: 1.4, duration: 4, repeat: Infinity, ease: 'easeInOut' } }),
-                }}
-              >
-                <div className={styles.cardTopRow}>
-                  <div className={styles.cardIcon}>📚</div>
-                  <div>
-                    <h4>Read 30 pages</h4>
-                    <span className={styles.cardSubtext}>Bio 201</span>
+                <h2 className={styles.heroPactTitle}>
+                  &ldquo;Finish recording Spanish oral memos. By 10pm.&rdquo;
+                </h2>
+
+                <div className={styles.heroPactMeta}>
+                  <span>Deadline</span>
+                  <span className={styles.monoInk}>Mon · 10:00 PM</span>
+                  <span className={styles.metaDot}>·</span>
+                  <span>Stake</span>
+                  <span className={styles.stake}>worst clip → group chat</span>
+                </div>
+
+                <div className={styles.ruleDotted} />
+
+                <div className={styles.heroPactWitnesses}>
+                  <span className={styles.caption}>WITNESSES</span>
+                  <div className={styles.avatarStack}>
+                    {WITNESSES.slice(0, 3).map((u) => (
+                      <UserAvatar key={u.id} user={u} size="sm" />
+                    ))}
                   </div>
                 </div>
-                <div className={styles.cardProgress}>
-                  <div className={styles.cardProgressHeader}>
-                    <span>Time remaining</span>
-                    <span className={styles.cardTimer}>06:00:00</span>
-                  </div>
-                  <div className={styles.progressBar}>
-                    <div className={styles.progressFill} style={{ width: '45%' }} />
-                  </div>
-                </div>
-                <div className={styles.cardWarning}>
-                  ⚠️ Due today — your group is watching.
-                </div>
-              </motion.div>
+
+                {/* The stamp slams onto the pact. Only the stamp animates —
+                    the card itself stays put. */}
+                <motion.span
+                  className={styles.heroStamp}
+                  variants={reducedMotion ? undefined : stampSlamClean}
+                  initial={reducedMotion ? undefined : 'initial'}
+                  animate={reducedMotion ? undefined : 'animate'}
+                >
+                  <Stamp kind="missed" size="xl" rotate={null} />
+                </motion.span>
+              </motion.article>
             </div>
           </div>
         </section>
 
-        {/* ===== DASHBOARD PREVIEW — Task 4 ===== */}
-        <section className={styles.appPreview}>
-          <div className={styles.sectionHeader}>
-            <h2>
-              Your accountability{' '}
-              <span className={styles.textGradient}>command center</span>.
-            </h2>
-            <p>
-              Not another to-do list you&apos;ll ignore. A real-time dashboard
-              tracking your pacts, streaks, and who&apos;s actually delivering.
-            </p>
-          </div>
+        {/* ═════════════════════════════════════════════════════════
+            TICKER — replaces the retired orange marquee
+            ═════════════════════════════════════════════════════════ */}
+        <Ticker />
 
-          <div className={styles.browserFrame} aria-hidden="true" role="presentation">
-            {/* Browser chrome bar */}
-            <div className={styles.browserBar}>
-              <div className={styles.browserDots}>
-                <span className={styles.dotRed} />
-                <span className={styles.dotYellow} />
-                <span className={styles.dotGreen} />
-              </div>
-              <div className={styles.browserUrl}>
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                  <rect
-                    x="3"
-                    y="11"
-                    width="18"
-                    height="11"
-                    rx="2"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  />
-                </svg>
-                lockin.app/dashboard
-              </div>
+        {/* ═════════════════════════════════════════════════════════
+            § 01 — HOW IT WORKS — three moves, divider-y list
+            ═════════════════════════════════════════════════════════ */}
+        <section id="how-it-works" className={styles.howItWorks}>
+          <div className={styles.howGrid}>
+            <div className={styles.howLeft}>
+              <div className={styles.sectionLabel}>&sect; 01 &mdash; HOW IT WORKS</div>
+              <h2 className={styles.displayH2}>
+                Three moves.<br />No loopholes.
+              </h2>
+              <p className={styles.howLede}>
+                The whole app is built around one idea: if other people can see whether you
+                followed through, you probably will.
+              </p>
             </div>
 
-            {/* Mock dashboard layout */}
-            <div className={styles.mockDashboard}>
-              {/* Sidebar */}
-              <div className={styles.mockSidebar}>
-                <div className={styles.mockSidebarLogo}>
-                  <div className={styles.mockLogoIcon} />
-                </div>
-                <div className={styles.mockNavItems}>
-                  {[
-                    {
-                      label: 'Overview',
-                      active: true,
-                      svg: (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M3 9L12 2L21 9V20C21 21.1 20.1 22 19 22H5C3.9 22 3 21.1 3 20V9Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Pacts',
-                      svg: (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Groups',
-                      svg: (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M17 21V19C17 16.79 15.21 15 13 15H5C2.79 15 1 16.79 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                          <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Timer',
-                      svg: (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                          <path d="M12 6V12L16 16" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                        </svg>
-                      ),
-                    },
-                    {
-                      label: 'Stats',
-                      svg: (
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                          <path d="M22 12H18L15 21L9 3L6 12H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      ),
-                    },
-                  ].map((item) => (
-                    <div
-                      key={item.label}
-                      className={`${styles.mockNavItem} ${item.active ? styles.mockNavActive : ''}`}
-                    >
-                      {item.svg}
+            <ol className={styles.steps}>
+              {[
+                {
+                  num: '01',
+                  title: 'Make a pact.',
+                  body: 'Write the commitment. Pick a deadline. Pick witnesses. Name a stake if you want to sweat.',
+                  sub: 'e.g. "p-set 4 by 11pm Thursday. Witnesses: Maya, Theo, Rin."',
+                },
+                {
+                  num: '02',
+                  title: 'Your friends sign.',
+                  body: "They see the pact on their feed. When you start a focus session, they see you're locked in. When a deadline passes and you haven't marked it done — they see that too.",
+                  sub: 'no manual "oh it doesn\'t count" revisions.',
+                },
+                {
+                  num: '03',
+                  title: 'It lands in the system.',
+                  body: "Every pact gets stamped: kept or missed. Stats don't lie — but your friends chirping in the group chat work faster.",
+                  sub: "tuesday's version of you cannot negotiate with friday's.",
+                },
+              ].map((step) => (
+                <li key={step.num} className={styles.stepItem}>
+                  <div className={styles.stepNumeral}>{step.num}</div>
+                  <div className={styles.stepBody}>
+                    <h3 className={styles.stepTitle}>{step.title}</h3>
+                    <p className={styles.stepText}>{step.body}</p>
+                    <p className={styles.stepSub}>{step.sub}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* ═════════════════════════════════════════════════════════
+            § 02 — THE SYSTEM — feature mosaic on cream slab
+            ═════════════════════════════════════════════════════════ */}
+        <section id="features" className={styles.systemSlab}>
+          <div className={styles.systemInner}>
+            <div className={styles.systemHeader}>
+              <div>
+                <div className={styles.sectionLabel}>&sect; 02 &mdash; THE SYSTEM</div>
+                <h2 className={styles.displayH2}>
+                  Everything<br />on paper.
+                </h2>
+              </div>
+              <p className={styles.systemLede}>
+                Pacts. Kanban boards. Focus sessions. Heatmaps. Feeds. All wired together,
+                all visible to people who know you.
+              </p>
+            </div>
+
+            <div className={styles.mosaic}>
+              {/* Pacts card — col-span 5 */}
+              <div className={`${styles.paperCard} ${styles.cardPacts}`}>
+                <div className={`${styles.sectionLabel} ${styles.labelRed}`}>&sect; PERSONAL PACTS</div>
+                <h3 className={styles.cardTitle}>
+                  You either<br />kept it, or you didn&apos;t.
+                </h3>
+                <p className={styles.cardLede}>
+                  Commitments with a deadline and an audience. No silent failures —
+                  the system stamps the result the moment the clock runs out.
+                </p>
+
+                <div className={styles.pactList}>
+                  {SAMPLE_PACTS.map((p) => (
+                    <div key={p.index} className={styles.pactRow}>
+                      <div className={styles.pactRowLeft}>
+                        <span className={styles.pactIndex}>#{p.index}</span>
+                        <span className={styles.pactTitle}>{p.title}</span>
+                      </div>
+                      <Stamp kind={p.kind} size="sm" />
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Main content area */}
-              <div className={styles.mockMain}>
-                {/* Header with streak badge */}
-                <div className={styles.mockHeader}>
-                  <div className={styles.mockHeaderText}>
-                    <h3>Today&apos;s Pacts</h3>
-                  </div>
-                  <div className={styles.mockStreakBadge}>
-                    <span>🔥</span>
-                    <AnimatePresence mode="popLayout">
-                      <motion.span
-                        key={streakCount}
-                        initial={{ y: 8, opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -8, opacity: 0 }}
-                        transition={{ ...quickTransition, duration: 0.25 }}
-                      >
-                        {streakCount} day streak
-                      </motion.span>
-                    </AnimatePresence>
-                  </div>
-                </div>
+              {/* Kanban preview card — col-span 7 */}
+              <div className={`${styles.paperCard} ${styles.cardKanban}`}>
+                <div className={`${styles.sectionLabel} ${styles.labelBlue}`}>&sect; GROUP PROJECTS</div>
+                <h3 className={styles.cardTitle}>
+                  Who&apos;s moving.<br />Who&apos;s dead weight.
+                </h3>
+                <p className={styles.cardLede}>
+                  Shared kanban boards with teeth. Every card shows who owns it and when they
+                  last touched it.
+                </p>
 
-                {/* Pact cards with colored left borders */}
-                <div className={styles.mockCards}>
-                  {[
-                    {
-                      title: 'Finish CS homework',
-                      meta: 'Due today',
-                      status: 'done',
-                      statusLabel: 'Done',
-                      color: 'green',
-                    },
-                    {
-                      title: 'Read 30 pages',
-                      meta: '6 hours left',
-                      status: 'progress',
-                      statusLabel: 'In Progress',
-                      color: 'amber',
-                    },
-                    {
-                      title: 'Go to the gym',
-                      meta: 'Tomorrow',
-                      status: 'upcoming',
-                      statusLabel: 'Upcoming',
-                      color: 'indigo',
-                    },
-                  ].map((pact, i) => (
-                    <div key={pact.title} className={styles.mockPactCard}>
-                      <div
-                        className={`${styles.mockCardBorder} ${styles[`border${pact.color.charAt(0).toUpperCase() + pact.color.slice(1)}`]}`}
-                      />
-                      <div className={styles.mockPactContent}>
-                        <div className={styles.mockPactHeader}>
-                          <div className={styles.mockPactTop}>
-                            <span
-                              className={`${styles.statusBadge} ${styles[`status${pact.color.charAt(0).toUpperCase() + pact.color.slice(1)}`]}`}
-                            >
-                              {pact.statusLabel}
-                            </span>
-                            <span className={styles.mockPactMeta}>
-                              {pact.meta}
-                            </span>
+                <div className={styles.kanbanGrid}>
+                  {KANBAN_COLUMNS.map((col) => (
+                    <div key={col.title} className={styles.kanbanCol}>
+                      <div className={styles.kanbanColHeader}>
+                        <span
+                          className={styles.kanbanDot}
+                          style={{ background: col.dotColor }}
+                          aria-hidden="true"
+                        />
+                        <span className={styles.caption}>{col.title}</span>
+                      </div>
+                      <div className={styles.kanbanList}>
+                        {col.items.map((item) => (
+                          <div key={item.task} className={styles.kanbanCard}>
+                            <div className={styles.kanbanCardTask}>{item.task}</div>
+                            <UserAvatar user={item.owner} size="xs" />
                           </div>
-                          <div className={styles.mockPactRow}>
-                            <motion.button
-                              className={`${styles.mockCheckbox} ${!checkedPacts[i] ? styles.mockUnchecked : ''}`}
-                              onClick={() =>
-                                setCheckedPacts((prev) => ({
-                                  ...prev,
-                                  [i]: !prev[i],
-                                }))
-                              }
-                              tabIndex={-1}
-                              whileTap={{ scale: 0.85 }}
-                              animate={
-                                checkedPacts[i]
-                                  ? { scale: [1, 1.2, 1] }
-                                  : { scale: 1 }
-                              }
-                              transition={{ duration: 0.25 }}
-                            >
-                              <motion.svg
-                                width="10"
-                                height="10"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                initial={false}
-                                animate={{
-                                  opacity: checkedPacts[i] ? 1 : 0,
-                                  scale: checkedPacts[i] ? 1 : 0.5,
-                                }}
-                                transition={{ duration: 0.15 }}
-                              >
-                                <path
-                                  d="M20 6L9 17L4 12"
-                                  stroke="white"
-                                  strokeWidth="3"
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                />
-                              </motion.svg>
-                            </motion.button>
-                            <span
-                              className={styles.mockPactTitle}
-                              style={{
-                                textDecoration: checkedPacts[i]
-                                  ? 'line-through'
-                                  : 'none',
-                                opacity: checkedPacts[i] ? 0.4 : 1,
-                              }}
-                            >
-                              {pact.title}
-                            </span>
-                          </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
                   ))}
                 </div>
+              </div>
 
-                {/* Activity calendar */}
-                <div className={styles.mockCalendar}>
-                  <div className={styles.mockCalendarHeader}>
-                    <span>Activity</span>
-                    <span className={styles.mockCalendarMonth}>January</span>
-                  </div>
-                  <div className={styles.mockCalendarGrid}>
-                    {activeLevels.map((level, i) => (
-                      <div
-                        key={i}
-                        className={`${styles.mockCalendarCell} ${styles[`mockLevel${level}`]}`}
-                      />
-                    ))}
+              {/* Focus card — col-span 4 */}
+              <div className={`${styles.paperCard} ${styles.cardFocus}`}>
+                <div className={`${styles.sectionLabel} ${styles.labelBlue}`}>&sect; FOCUS SESSIONS</div>
+                <h3 className={styles.cardTitle}>
+                  When you lock in,<br />they know.
+                </h3>
+                <div className={styles.focusTimer}>
+                  <span className={styles.focusMM}>{mm}</span>
+                  <span className={styles.focusColon}>:</span>
+                  <span className={styles.focusSS}>{ss}</span>
+                </div>
+                <div className={`${styles.caption} ${styles.lockedInLabel}`}>
+                  <span className={styles.pulseDotBlue} aria-hidden="true" />
+                  MAYA IS LOCKED IN
+                </div>
+                <p className={styles.cardFooterText}>
+                  50-minute session on <span className={styles.strongInk}>Benchmark charts</span>. 3 friends watching live.
+                </p>
+              </div>
+
+              {/* Feed card — col-span 4 */}
+              <div className={`${styles.paperCard} ${styles.cardFeed}`}>
+                <div className={`${styles.sectionLabel} ${styles.labelRed}`}>&sect; ACTIVITY FEED</div>
+                <h3 className={styles.cardTitle}>
+                  Ticker tape<br />for your study group.
+                </h3>
+                <ul className={styles.feedList}>
+                  {FEED_ITEMS.map((item, i) => (
+                    <li key={i} className={styles.feedItem}>
+                      <UserAvatar user={item.user} size="sm" />
+                      <div className={styles.feedContent}>
+                        <div className={styles.feedLine}>
+                          <span className={styles.feedUser}>{item.user.name}</span>{' '}
+                          <span className={styles.feedBody}>{item.body}</span>
+                        </div>
+                        <div className={styles.feedTime}>{item.time}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Heatmap card — col-span 4 */}
+              <div className={`${styles.paperCard} ${styles.cardHeatmap}`}>
+                <div className={`${styles.sectionLabel} ${styles.labelGreen}`}>&sect; STREAKS &amp; HEATMAP</div>
+                <h3 className={styles.cardTitle}>
+                  Don&apos;t break<br />the chain.
+                </h3>
+                <div className={styles.streakRow}>
+                  <div className={styles.streakNumber}>12</div>
+                  <div className={styles.streakMeta}>
+                    <div className={styles.caption}>DAY STREAK</div>
+                    <div className={styles.streakBest}>personal best 17</div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Celebration when all pacts checked */}
-          <AnimatePresence>
-            {allComplete && (
-              <motion.div
-                className={styles.mockCelebration}
-                initial={{ opacity: 0, y: 14 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.5, ease: easeOutQuint }}
-              >
-                <p>See? That felt good. Imagine that every day.</p>
-                <motion.button
-                  onClick={handleCta}
-                  className={styles.ctaPrimary}
-                  whileHover={buttonHover}
-                  whileTap={buttonTap}
-                >
-                  Start Locking In
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <path
-                      d="M5 12H19M19 12L12 5M19 12L12 19"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
+                <div className={styles.heatmap} aria-hidden="true">
+                  {HEATMAP_SEED.map((level, i) => (
+                    <div
+                      key={i}
+                      className={styles.heatmapCell}
+                      data-level={level}
                     />
-                  </svg>
-                </motion.button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </section>
-
-        {/* ===== FEATURES DARK SECTION — Task 5 ===== */}
-        <section id="features" className={styles.featuresDark}>
-          <div className={styles.featuresInner}>
-            <div className={styles.featuresLeft}>
-              <h2 className={styles.featuresHeading}>Why you&apos;ll actually do it this time.</h2>
-              <p className={styles.featuresDescription}>
-                Standard to-do lists rely on motivation. Motivation fades. LockIn relies on two
-                irrefutable human truths: we care what our friends think, and streaks are addictive.
-              </p>
-              <ul className={styles.featureChecklist}>
-                {['Google OAuth — 5-second signup', 'Real-time activity feed', 'XP, levels & achievements'].map((item) => (
-                  <li key={item} className={styles.featureCheckItem}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-                      <circle cx="12" cy="12" r="10" fill="var(--accent-primary)" opacity="0.2"/>
-                      <path d="M9 12L11 14L15 10" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    </svg>
-                    {item}
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className={styles.featuresRight}>
-              {/* Wide card: Personal Pacts */}
-              <motion.div className={`${styles.bentoCard} ${styles.bentoWide}`} whileHover={cardHover}>
-                <h3>Personal Pacts</h3>
-                <p>Make commitments that stick. Set deadlines, track daily check-ins, build accountability streaks. Choose from 20+ pact templates or create your own.</p>
-                <div className={styles.bentoReward}>
-                  <div className={styles.bentoRewardLabel}>Active Pact</div>
-                  <div className={styles.bentoRewardStatus}>&#10003; Completed on time</div>
-                  <div className={styles.bentoRewardXp}>+50 XP</div>
+                  ))}
                 </div>
-              </motion.div>
 
-              {/* Half card: Group Accountability */}
-              <motion.div className={styles.bentoCard} whileHover={cardHover}>
-                <h3>Group Accountability</h3>
-                <p>See who is pulling their weight and who is slacking. Kanban boards, task ownership, real-time activity. No more carrying the team alone.</p>
-                <div className={styles.bentoAvatars}>
-                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'ocean')?.primary || '#3B82F6' }} />
-                  <div className={styles.bentoAvatar} style={{ background: ACCENT_PALETTES.find(p => p.id === 'emerald')?.primary || '#10B981' }} />
-                  <div className={styles.bentoAvatarMore}>+4</div>
-                </div>
-              </motion.div>
-
-              {/* Half card: Focus Timer */}
-              <motion.div className={`${styles.bentoCard} ${styles.bentoTimer}`} whileHover={cardHover}>
-                <h3>Focus Timer</h3>
-                <p>Pomodoro-style deep work sessions. Track your focus hours, compete with your past self, and earn XP for every session.</p>
-                <div className={styles.bentoTimerDisplay}>25:00</div>
-                <div className={styles.bentoTimerGlow} />
-              </motion.div>
+                <p className={styles.heatmapFoot}>
+                  Today is day twelve. Don&apos;t make it day zero.
+                </p>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ===== MARQUEE — Task 5 ===== */}
-        <div className={styles.marquee} aria-hidden="true">
-          <div className={styles.marqueeTrack}>
-            {[...Array(4)].map((_, i) => (
-              <span key={i} className={styles.marqueeSegment} aria-hidden={i > 0 ? 'true' : undefined}>
-                <span className={styles.marqueeText}>STOP SAYING TOMORROW. LOCK IN TODAY.</span>
-                <span className={styles.marqueeDot}>&bull;</span>
+        {/* ═════════════════════════════════════════════════════════
+            § 03 — WITNESSES, NOT FOLLOWERS
+            ═════════════════════════════════════════════════════════ */}
+        <section className={styles.witnesses}>
+          <div className={styles.witnessesGrid}>
+            <div>
+              <div className={styles.sectionLabel}>&sect; 03 &mdash; WITNESSES, NOT FOLLOWERS</div>
+              <h2 className={styles.displayH2}>
+                Small circles.<br />Big weight.
+              </h2>
+              <p className={styles.witnessesLede}>
+                No public leaderboards. No strangers. LockIn only works with 2–8 friends who
+                actually know you, because social pressure only bites when it&apos;s people you&apos;ll
+                see in lecture tomorrow.
+              </p>
+
+              <div className={styles.witnessRow}>
+                <div className={styles.avatarStack}>
+                  {WITNESSES.slice(0, 6).map((u) => (
+                    <UserAvatar key={u.id} user={u} size="md" />
+                  ))}
+                </div>
+                <div className={styles.witnessCount}>
+                  <span className={styles.strongInk}>6 witnesses</span> on your circle
+                </div>
+              </div>
+            </div>
+
+            <blockquote className={styles.quote}>
+              <span className={styles.quoteStamp}>
+                <Stamp kind="locked-in" size="lg" />
               </span>
-            ))}
-          </div>
-        </div>
-
-        {/* ===== HOW IT WORKS — Task 6 ===== */}
-        <section id="how-it-works" className={styles.howItWorks}>
-          <div className={styles.stepsInner}>
-            <div className={styles.stepsLeft}>
-              <h2 className={styles.stepsHeading}>Get started in 3 steps.</h2>
-              <p className={styles.stepsDescription}>
-                No complicated setup. No learning curve. Just accountability that actually works.
+              <p className={styles.quoteBody}>
+                &ldquo;I started <span className={styles.quoteUnderline}>four</span> problem sets the
+                night before they were due last semester. Since LockIn, zero. Turns out I&apos;m not
+                built different, I&apos;m just allergic to Rin watching me fail.&rdquo;
               </p>
-              <div className={styles.stepsArrow}>
-                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" opacity="0.15">
-                  <path d="M7 7L17 17M17 17V7M17 17H7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
+              <footer className={styles.quoteFooter}>
+                <UserAvatar user={{ id: 'u-lia', name: 'Lia Weaver' }} size="sm" />
+                <div>
+                  <div className={styles.quoteFooterName}>Lia Weaver</div>
+                  <div className={styles.quoteFooterMeta}>Engineering sophomore · 42 kept pacts</div>
+                </div>
+              </footer>
+            </blockquote>
+          </div>
+        </section>
+
+        {/* ═════════════════════════════════════════════════════════
+            § 04 — THE NUMBERS, ALL OF THEM — dark inverted slab
+            ═════════════════════════════════════════════════════════ */}
+        <section className={styles.numbersSlab}>
+          <div className={styles.numbersInner}>
+            <div className={`${styles.sectionLabel} ${styles.labelOnDark}`}>
+              &sect; 04 &mdash; THE NUMBERS, ALL OF THEM
             </div>
-
-            <div className={styles.stepsRight}>
-              {/* Step 1: Sign in with Google */}
-              <div className={styles.timelineStep}>
-                <div className={styles.stepNumber}>01</div>
-                <div className={styles.stepDot} />
-                <h3 className={styles.stepTitle}>Sign in with Google</h3>
-                <p className={styles.stepText}>
-                  Use your university email. Takes 5 seconds. No passwords to remember, no forms to fill out.
-                </p>
-                <div className={styles.googleMockup}>
-                  <div className={styles.googleIcon}>
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                      <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 01-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
-                      <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-                      <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-                      <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-                    </svg>
-                  </div>
-                  <div className={styles.googleText}>
-                    <span className={styles.googleLabel}>Continue with</span>
-                    <span className={styles.googleBold}>Google</span>
-                  </div>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" style={{ color: 'var(--landing-ink-light)', opacity: 0.4 }}>
-                    <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+            <div className={styles.numbersGrid}>
+              {NUMBERS.map(([n, l]) => (
+                <div key={l} className={styles.numberItem}>
+                  <div className={styles.bigNumber}>{n}</div>
+                  <div className={styles.numberLabel}>{l}</div>
                 </div>
-              </div>
-
-              {/* Step 2: Create your first pact */}
-              <div className={styles.timelineStep}>
-                <div className={styles.stepNumber}>02</div>
-                <div className={styles.stepDot} />
-                <h3 className={styles.stepTitle}>Create your first pact</h3>
-                <p className={styles.stepText}>
-                  What will you commit to? Make it specific, make it achievable. Pick from 20+ templates or write your own.
-                </p>
-              </div>
-
-              {/* Step 3: Lock in and deliver */}
-              <div className={`${styles.timelineStep} ${styles.timelineStepLast}`}>
-                <div className={styles.stepNumber}>03</div>
-                <div className={`${styles.stepDot} ${styles.stepDotFilled}`}>
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
-                    <path d="M20 6L9 17L4 12" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
-                <h3 className={styles.stepTitle}>Lock in and deliver</h3>
-                <p className={styles.stepText}>
-                  Complete it or miss it — either way, it shows. Your reputation is on the line. Build streaks, earn XP, and watch your consistency compound.
-                </p>
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ===== CTA FOOTER — Task 6 ===== */}
+        {/* ═════════════════════════════════════════════════════════
+            § 05 — OBJECTIONS — "Yeah, but…" accordion
+            ═════════════════════════════════════════════════════════ */}
+        <section id="faq" className={styles.objections}>
+          <div className={styles.objectionsGrid}>
+            <div>
+              <div className={styles.sectionLabel}>&sect; 05 &mdash; OBJECTIONS</div>
+              <h2 className={styles.displayH2}>Yeah, but&hellip;</h2>
+            </div>
+
+            <div className={styles.faqList}>
+              {OBJECTIONS.map((item, i) => (
+                <details key={i} className={styles.faqItem}>
+                  <summary className={styles.faqSummary}>
+                    <div className={styles.faqQuestion}>
+                      <span className={styles.faqIndex}>Q&middot;{String(i + 1).padStart(2, '0')}</span>
+                      <span className={styles.faqQ}>{item.q}</span>
+                    </div>
+                    <span className={styles.faqPlus} aria-hidden="true">+</span>
+                  </summary>
+                  <p className={styles.faqA}>{item.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ═════════════════════════════════════════════════════════
+            CLOSING CTA — "Lock in. / Or don't."
+            ═════════════════════════════════════════════════════════ */}
+        <section className={styles.closing}>
+          <div className={styles.sectionLabel}>END OF PAGE</div>
+          <h2 className={styles.closingHeadline}>
+            Lock in.<br />
+            <span className={styles.closingOrDont}>Or don&apos;t.</span>
+          </h2>
+          <p className={styles.closingLede}>
+            It&apos;s 11:47 PM. You were going to start tomorrow. You say that every night.
+          </p>
+          <div className={styles.closingCtas}>
+            <motion.button
+              onClick={handleCta}
+              className={styles.ctaPrimary}
+              whileHover={buttonHover}
+              whileTap={buttonTap}
+            >
+              Lock in with Google
+              <span aria-hidden="true">→</span>
+            </motion.button>
+            <Link href="/dashboard" className={styles.ctaOutline}>
+              Preview the demo dashboard
+            </Link>
+          </div>
+        </section>
       </main>
 
-      <footer className={styles.ctaFooter}>
-        <div className={styles.ctaGlow} />
-        <div className={styles.ctaContent}>
-          <motion.div className={styles.ctaLockIcon}
-            animate={reducedMotion ? {} : { scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
-            transition={reducedMotion ? {} : { duration: 3, repeat: Infinity, ease: 'easeInOut' }}>
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
-              <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M7 11V7C7 4.24 9.24 2 12 2C14.76 2 17 4.24 17 7V11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-          </motion.div>
-
-          <h2 className={styles.ctaHeadline}>
-            Tomorrow actually comes.
-          </h2>
-
-          <p className={styles.ctaDescription}>
-            Join students who are finally getting things done. Free, simple, and it works.
-          </p>
-
-          <motion.button onClick={handleCta} className={styles.ctaButtonLarge}
-            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-            Start Locking In
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-              <path d="M5 12H19M19 12L12 5M19 12L12 19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </motion.button>
-
-          <span className={styles.ctaSubtext}>100% free. Sign in with Google. 2 minutes to start.</span>
-        </div>
-
-        <div className={styles.footerLinks}>
-          <span className={styles.footerBrand}>LockIn.</span>
+      {/* ═════════════════════════════════════════════════════════
+          FOOTER — thin editorial footer, not a sitemap wall
+          ═════════════════════════════════════════════════════════ */}
+      <footer className={styles.footer}>
+        <div className={styles.footerInner}>
+          <div className={styles.footerBrand}>
+            <span className={styles.footerLogoMark} aria-hidden="true" />
+            <span className={styles.footerWordmark}>LockIn.</span>
+          </div>
           <nav className={styles.footerNav} aria-label="Footer navigation">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#features">The system</a>
+            <a href="#faq">Objections</a>
             <a href="https://github.com/vayungodara/lockin" target="_blank" rel="noopener noreferrer">GitHub</a>
           </nav>
           <span className={styles.footerCredit}>Built by Vayun Godara</span>

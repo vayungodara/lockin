@@ -4,18 +4,31 @@ import styles from './NavMarker.module.css';
 
 /**
  * NavMarker — hand-drawn highlighter stroke under nav links on hover.
- * Landing only. Color follows the user's current ink via --stamp-yellow cascade.
+ * Color follows the user's current ink via --stamp-yellow cascade.
  * Reference: lockin-test globals.css:281-313 + .impeccable.md § Component Vocabulary.
  *
  * Wrap the link text: <a><NavMarker>Features</NavMarker></a>
  * The parent anchor owns :hover — we hook onto that via group-hover semantics.
+ *
+ * Variants:
+ *   - "loud" (default) — full-amplitude editorial swipe, used on landing nav.
+ *   - "calm" — shorter sweep, lower amplitude, opacity reduced. Used on
+ *     dashboard nav where motion language stays understated.
+ *
+ * @param {Object} props
+ * @param {React.ReactNode} props.children
+ * @param {"loud"|"calm"} [props.variant="loud"]
  */
-export default function NavMarker({ children }) {
+export default function NavMarker({ children, variant = 'loud' }) {
+  const strokeClass = variant === 'calm'
+    ? `${styles.stroke} ${styles.strokeCalm}`
+    : styles.stroke;
+
   return (
     <span className={styles.wrap}>
       <span className={styles.text}>{children}</span>
       <svg
-        className={styles.stroke}
+        className={strokeClass}
         viewBox="0 0 120 12"
         preserveAspectRatio="none"
         aria-hidden="true"

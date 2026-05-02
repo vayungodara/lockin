@@ -1,0 +1,474 @@
+/* ============================================================
+   DashboardNav — sticky top nav for /dashboard/* routes
+   Editorial direction. Tokens: --bg-primary, --border-subtle,
+   --text-primary, --landing-ink, --stamp-yellow, --stamp-blue,
+   --stamp-green, --ink-100, --ink-300, --ink-500, --ink-900.
+   Light + dark mode (warm cream / inverted paper).
+   ============================================================ */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: color-mix(in oklch, var(--bg-primary) 95%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 40px;
+  height: 60px;
+  box-sizing: border-box;
+}
+
+/* ---- Brand cluster (logo + status pill) ------------------- */
+
+.brandCluster {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+}
+
+.logo:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+.logoMark {
+  width: 14px;
+  height: 14px;
+  background: var(--stamp-yellow);
+  transform: rotate(-8deg);
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.logoWordmark {
+  font-family: var(--font-display-editorial);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.logoDot {
+  color: var(--stamp-yellow);
+}
+
+/* Live time pill — small editorial flourish, ≥1024px only. */
+.statusPill {
+  display: none;
+  align-items: center;
+  gap: 8px;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  background: var(--stamp-green);
+  border-radius: 1px;
+  animation: dashNavStatusPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes dashNavStatusPulse {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
+}
+
+.statusText {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* ---- Section nav links (centered) ------------------------- */
+
+.desktopNav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  justify-content: center;
+}
+
+.navLink {
+  position: relative;
+  padding: 8px 12px;
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-500);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 160ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.navLink:hover {
+  color: var(--ink-800);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.navLinkActive {
+  color: var(--ink-900);
+}
+
+/* 2px highlighter underline beneath the active link, inset 12px from each
+   side so it sits under the label text rather than the full pill. */
+.activeUnderline {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: -1px;
+  height: 2px;
+  background: var(--stamp-yellow);
+  pointer-events: none;
+}
+
+/* ---- Right cluster ---------------------------------------- */
+
+.rightCluster {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+/* Rank chip — "Highlighter · 1280m". Hidden below 1024px. */
+.rankChip {
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--ink-300);
+  border-radius: 2px;
+  background: transparent;
+  font-family: var(--font-sans-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-700);
+  white-space: nowrap;
+}
+
+.rankDot {
+  width: 6px;
+  height: 6px;
+  background: var(--stamp-yellow);
+  border-radius: 1px;
+}
+
+.rankLabel {
+  color: var(--ink-800);
+}
+
+.rankSep {
+  color: var(--ink-400);
+  letter-spacing: 0;
+}
+
+.rankValue {
+  font-family: var(--font-mono-editorial);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+}
+
+/* Lock In CTA — outline carbon-blue, low radius, pulse dot. Routes to /focus. */
+.lockInBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--stamp-blue);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--stamp-blue);
+  font-family: var(--font-sans-editorial);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background 160ms cubic-bezier(.16, 1, .3, 1), color 160ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.lockInBtn:hover {
+  background: var(--stamp-blue);
+  color: var(--ink-000);
+}
+
+.lockInBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+.lockInDot {
+  width: 6px;
+  height: 6px;
+  background: var(--stamp-blue);
+  border-radius: 999px;
+  animation: dashNavLockInPulse 1.6s ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+.lockInBtn:hover .lockInDot {
+  background: currentColor;
+}
+
+@keyframes dashNavLockInPulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.5; }
+}
+
+.lockInLabel {
+  line-height: 1;
+}
+
+/* Ink-picker placeholder — Wave 3 wires it up. Click no-ops for now. */
+.inkBtn {
+  appearance: none;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color 160ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.inkBtn:hover {
+  border-color: var(--ink-500);
+}
+
+.inkBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+.inkSwatch {
+  width: 12px;
+  height: 12px;
+  background: var(--stamp-yellow);
+  transform: rotate(-8deg);
+  border-radius: 2px;
+  display: inline-block;
+}
+
+/* Avatar link to settings */
+.avatarLink {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  border-radius: 2px;
+}
+
+.avatarLink:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+/* ---- Mobile hamburger ------------------------------------- */
+
+.menuToggle {
+  display: none;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  margin-left: 4px;
+  color: var(--ink-800);
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.menuToggle:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+/* ---- Mobile drawer ---------------------------------------- */
+
+.mobileMenu {
+  display: none;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--bg-primary);
+  padding: 8px 0 16px;
+  animation: dashNavMenuIn 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes dashNavMenuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.mobileNav {
+  display: flex;
+  flex-direction: column;
+}
+
+.mobileLink {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 24px;
+  font-family: var(--font-sans-editorial);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-600);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.mobileLink:last-child {
+  border-bottom: none;
+}
+
+.mobileLink:active {
+  background: color-mix(in oklch, var(--ink-900) 6%, transparent);
+}
+
+.mobileLinkActive {
+  color: var(--ink-900);
+  font-weight: 700;
+}
+
+/* Tiny rotated yellow square marks the active mobile row. */
+.mobileMarker {
+  width: 8px;
+  height: 8px;
+  background: transparent;
+  transform: rotate(45deg);
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+.mobileMarkerActive {
+  background: var(--stamp-yellow);
+}
+
+.mobileActions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 24px 4px;
+}
+
+.mobileLockIn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border: 1px solid var(--stamp-blue);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--stamp-blue);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  text-decoration: none;
+}
+
+.mobileSignOut {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
+  padding: 12px 16px;
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-700);
+  cursor: pointer;
+  text-align: center;
+}
+
+.mobileSignOut:hover {
+  border-color: var(--ink-500);
+}
+
+/* ---- Responsive breakpoints ------------------------------- */
+
+/* Rank chip stays from 1024px up — section nav + chip + CTA all fit. */
+@media (min-width: 1024px) {
+  .rankChip { display: inline-flex; }
+}
+
+/* Status pill is editorial flourish — only when there's room for it. */
+@media (min-width: 1280px) {
+  .statusPill { display: inline-flex; }
+}
+
+@media (max-width: 768px) {
+  .inner {
+    padding: 0 20px;
+    height: 56px;
+    gap: 12px;
+  }
+
+  .logoMark {
+    width: 12px;
+    height: 12px;
+  }
+
+  .logoWordmark {
+    font-size: 17px;
+  }
+
+  .desktopNav,
+  .lockInBtn,
+  .inkBtn,
+  .rankChip,
+  .avatarLink {
+    display: none;
+  }
+
+  .menuToggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .mobileMenu {
+    display: block;
+  }
+}

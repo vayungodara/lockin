@@ -34,6 +34,19 @@
   transition: clip-path 380ms cubic-bezier(.16, 1, .3, 1);
 }
 
+/* Calm variant — shorter sweep, lower amplitude, less rotation.
+   Used on dashboard chrome where motion is calm, not editorial.
+   Reference: .impeccable.md § Component Vocabulary — NavMarker. */
+.strokeCalm {
+  left: -2px;
+  right: -2px;
+  width: calc(100% + 4px);
+  height: 8px;
+  color: color-mix(in oklch, var(--stamp-yellow) 60%, transparent);
+  transform: rotate(-0.6deg);
+  transition: clip-path 260ms cubic-bezier(.16, 1, .3, 1);
+}
+
 /* Parent hover triggers the stroke reveal (the <a> wrapping this component) */
 :global(a):hover .stroke,
 :global(a):focus-visible .stroke,

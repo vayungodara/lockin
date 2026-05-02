@@ -36,8 +36,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/pacts', label: 'Pacts' },
   { href: '/dashboard/groups', label: 'Groups' },
   { href: '/dashboard/focus', label: 'Focus' },
-  // TODO: /dashboard/feed route — not implemented yet, points at dashboard root.
-  { href: '/dashboard', label: 'Feed', exact: true, isFeedPlaceholder: true },
+  { href: '/dashboard/stats', label: 'Stats' },
   { href: '/dashboard/settings', label: 'Profile' },
 ];
 
@@ -131,7 +130,6 @@ export default function DashboardNav({ user }) {
   }, [user?.id, supabase]);
 
   const isActive = (item) => {
-    if (item.isFeedPlaceholder) return false;
     if (item.exact) return pathname === item.href;
     return pathname.startsWith(item.href);
   };

@@ -1,8 +1,9 @@
 /* ============================================= */
-/* NavbarLanding — dynamic-island pill collapse   */
-/* Full bar at top, morphs to centered pill on    */
-/* scroll past 80px. Nav links fade out in pill   */
-/* state; reappear when user scrolls back up.     */
+/* NavbarLanding — floating editorial bar         */
+/* Full bar at every scroll position. Subtle      */
+/* shrink + soft shadow once past the hero.       */
+/* No collapse. No click-to-expand. Opaque        */
+/* background so body text never bleeds through.  */
 /* ============================================= */
 
 .navbar {
@@ -25,10 +26,8 @@
   gap: 24px;
   width: 100%;
   max-width: 1280px;
-  padding: 10px 24px;
-  background: color-mix(in oklch, var(--landing-bg) 85%, transparent);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  padding: 12px 24px;
+  background: var(--landing-bg);
   border: 1px solid var(--landing-border);
   border-radius: 16px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
@@ -36,25 +35,17 @@
   box-sizing: border-box;
 }
 
-/* Smooth morph between full bar and pill */
+/* Subtle shrink + shadow when scrolled past the hero.
+   Bar still shows every nav link — just thins and lifts. */
 .innerAnimated {
   transition:
-    max-width 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    border-radius 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    padding 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    box-shadow 0.5s cubic-bezier(0.22, 1, 0.36, 1),
-    gap 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    padding 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Pill state — compact centered island.
-   Smaller surface area + backdrop-blur reads as intentional
-   instead of body text bleeding through a wide bar. */
-.innerPill {
-  max-width: 520px;
-  border-radius: 32px;
-  padding: 8px 20px;
-  gap: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+.innerScrolled {
+  padding: 8px 24px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
 }
 
 /* ---- Logo ---- */
@@ -94,7 +85,7 @@
   color: var(--stamp-yellow);
 }
 
-/* ---- Desktop nav links (fade out in pill state) ---- */
+/* ---- Desktop nav links ---- */
 
 .desktopNav {
   display: flex;
@@ -102,21 +93,6 @@
   gap: 28px;
   flex: 1 1 auto;
   justify-content: center;
-  opacity: 1;
-  overflow: hidden;
-  transition:
-    opacity 0.25s ease,
-    width 0.25s ease,
-    gap 0.25s ease;
-}
-
-.desktopNavHidden {
-  opacity: 0;
-  visibility: hidden;
-  width: 0;
-  min-width: 0;
-  gap: 0;
-  pointer-events: none;
 }
 
 .navLink {
@@ -313,6 +289,10 @@
     padding: 10px 16px;
     border-radius: 14px;
     gap: 12px;
+  }
+
+  .innerScrolled {
+    padding: 8px 16px;
   }
 
   .logoMark {

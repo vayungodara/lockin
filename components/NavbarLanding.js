@@ -41,8 +41,11 @@ export default function NavbarLanding({ isAuthenticated = false }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const showLinks = !isScrolled;
-  const isPill = isScrolled && !isMobile;
+  // Bar stays full at every scroll position. isScrolled only drives a subtle
+  // height/padding shrink + a soft shadow so the bar reads as "floating" once
+  // you're past the hero. No collapse, no click-to-expand. isMobile retained
+  // for any mobile-only conditional but no longer gates desktop nav visibility.
+  void isMobile;
 
   const handleGetStarted = async () => {
     if (isAuthenticated) {
@@ -64,7 +67,7 @@ export default function NavbarLanding({ isAuthenticated = false }) {
   return (
     <header className={styles.navbar}>
       <div
-        className={`${styles.inner} ${isPill ? styles.innerPill : ''} ${reducedMotion ? '' : styles.innerAnimated}`}
+        className={`${styles.inner} ${isScrolled ? styles.innerScrolled : ''} ${reducedMotion ? '' : styles.innerAnimated}`}
       >
         <Link href="/" className={styles.logo} aria-label="LockIn — home">
           <span className={styles.logoMark} aria-hidden="true" />
@@ -73,18 +76,9 @@ export default function NavbarLanding({ isAuthenticated = false }) {
           </span>
         </Link>
 
-        <nav
-          className={`${styles.desktopNav} ${!showLinks ? styles.desktopNavHidden : ''}`}
-          aria-label="Primary"
-        >
+        <nav className={styles.desktopNav} aria-label="Primary">
           {NAV_LINKS.map(([href, label]) => (
-            <a
-              key={href}
-              href={href}
-              className={styles.navLink}
-              tabIndex={showLinks ? 0 : -1}
-              aria-hidden={!showLinks}
-            >
+            <a key={href} href={href} className={styles.navLink}>
               <NavMarker>{label}</NavMarker>
             </a>
           ))}

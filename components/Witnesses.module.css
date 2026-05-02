@@ -1,0 +1,102 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Witnesses — live focus-session board for § 02 of the dashboard.
+
+   Vertical list of peers currently locked in. Gap-driven (no row borders).
+   Avatar tile + name + progress meter + start time per row.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* --- Row --------------------------------------------------------------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.name {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.progressText {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  line-height: 1.2;
+}
+
+.track {
+  width: 100%;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+  overflow: hidden;
+  margin-top: 2px;
+}
+
+.fill {
+  height: 100%;
+  background: var(--stamp-blue);
+  border-radius: 2px;
+  transition: width 400ms ease-out;
+}
+
+.timestamp {
+  flex-shrink: 0;
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+/* --- Empty state ------------------------------------------------------- */
+.empty {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-tertiary);
+  padding: 32px 0;
+  text-align: center;
+}
+
+/* --- Overflow indicator ------------------------------------------------ */
+.more {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-tertiary);
+  padding-top: 12px;
+  text-align: left;
+}

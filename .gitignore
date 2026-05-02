@@ -49,3 +49,9 @@ next-env.d.ts
 /test-results/
 /playwright-report/
 /playwright/.cache/
+
+# claude code worktrees (transient agent workspaces)
+.claude/worktrees/
+
+# visual audit screenshots at repo root (logos/icons in /public are unaffected)
+/*.png

@@ -100,14 +100,18 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-3) var(--space-4);
-  background: var(--gradient-primary);
+  background: var(--brand-ink, var(--text-primary));
   border: none;
   border-radius: var(--radius-lg);
-  color: white;
+  color: var(--ink-050, #F4F2EB);
   font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background var(--transition-fast), opacity var(--transition-fast);
+}
+
+.joinBtn:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
 .joinBtn:disabled {

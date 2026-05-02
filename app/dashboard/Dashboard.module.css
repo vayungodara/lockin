@@ -1,301 +1,68 @@
-.authContainer {
-  min-height: 100vh;
-  min-height: 100dvh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-6);
-  background: var(--bg-secondary);
-}
+/* ═══════════════════════════════════════════════════════════════════════
+   Dashboard — sectional rebuild (Wave 1 C2).
 
-.authCard {
-  width: 100%;
-  max-width: 420px;
-  padding: var(--space-12);
-  background: var(--surface-glass);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-2xl);
-  text-align: center;
-  box-shadow: var(--shadow-xl);
-  animation: fadeInScale 0.4s ease forwards;
-}
+   Single-column layout under DashboardLayout's max-width 1400px shell.
+   Vertical rhythm via `gap` on the root flex container; § seams own their
+   own SectionHeader rule, no global card container around sections.
 
-.authLogo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  margin-bottom: var(--space-8);
-}
+   Mosaic2 = the side-by-side row used twice (§02+§03, §04+§05). Stacks
+   below 1024px.
+   ═══════════════════════════════════════════════════════════════════════ */
 
-.authLogo .logoIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  background: var(--accent-primary);
-  border-radius: var(--radius-xl);
-  color: white;
-  box-shadow: var(--shadow-glow);
-}
-
-.authLogo .logoText {
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.authTitle {
-  font-size: var(--text-2xl);
-  font-weight: var(--font-semibold);
-  margin-bottom: var(--space-3);
-  letter-spacing: var(--tracking-tight);
-}
-
-.authDescription {
-  color: var(--text-secondary);
-  margin-bottom: var(--space-8);
-  line-height: 1.6;
-  font-size: var(--text-base);
-}
-
-.googleButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-3);
-  width: 100%;
-  padding: var(--space-4);
-  background: var(--bg-primary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  font-size: var(--text-base);
-  font-weight: var(--font-medium);
-  cursor: pointer;
-  transition: all var(--transition-base);
-  box-shadow: var(--shadow-sm);
-}
-
-.googleButton:hover {
-  background: var(--surface-2);
-  border-color: var(--border-strong);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.googleButton:active {
-  transform: translateY(0);
-}
-
-.authFooter {
-  margin-top: var(--space-8);
-  font-size: var(--text-sm);
-  color: var(--text-tertiary);
-}
-
-.backLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  margin-top: var(--space-6);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
-}
-
-.backLink:hover {
-  color: var(--accent-primary);
-}
-
-.pageContent {
+.dashboardRoot {
   display: flex;
   flex-direction: column;
-  gap: var(--space-6);
+  gap: 80px;
 }
 
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  margin-bottom: 0;
+.section {
+  /* Sections own their own surfaces — no card container, no padding here.
+     SectionHeader provides its own bottom rule + spacing. */
 }
 
-.pageTitle {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 2.5rem);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  color: var(--text-primary);
-}
-
-.pageSubtitle {
-  font-size: var(--text-base);
-  color: var(--text-secondary);
+/* Right-aligned link inside SectionHeader's `action` slot.
+   Quiet by default; matches the editorial "view all →" pattern. */
+.sectionAction {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
   font-weight: 500;
-  margin-top: var(--space-1);
-}
-
-.streakHighlight {
-  color: #EA580C;
-  font-weight: 600;
-}
-
-:global([data-theme="dark"]) .streakHighlight {
-  color: #FB923C;
-}
-
-.dashboardGrid {
-  display: grid;
-  grid-template-columns: 3fr 2fr;
-  gap: var(--space-8);
-  align-items: start;
-}
-
-.pactsColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.activityColumn {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  align-self: start;
-}
-
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-20);
-  gap: var(--space-4);
-}
-
-.loadingState p {
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-}
-
-.spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--border-default);
-  border-top-color: var(--accent-primary);
-  border-radius: var(--radius-full);
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.pactsSection {
-  margin-top: 0;
-}
-
-.sectionHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--space-5);
-}
-
-.sectionHeader h2 {
-  font-size: var(--text-xl);
-  font-weight: 700;
-  letter-spacing: var(--tracking-tight);
-}
-
-.pactCount {
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  color: var(--accent-primary);
-  background: var(--gradient-subtle);
-  padding: var(--space-1) var(--space-3);
-  border-radius: var(--radius-full);
-}
-
-.viewAllLink {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--text-tertiary);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
-.viewAllLink:hover {
-  color: var(--accent-primary);
+.sectionAction:hover {
+  color: var(--text-primary);
 }
 
-.pactsGrid {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
+/* --- § 01 — Today's pacts grid -------------------------------------- */
+.pactGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
 }
 
-
-.activityFooter {
-  display: flex;
-  justify-content: center;
-  padding: var(--space-4) 0;
-  border-top: 1px solid var(--border-subtle);
-  margin-top: var(--space-2);
+/* --- Mosaic — § 02 + § 03 / § 04 + § 05 ----------------------------- */
+.mosaic2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
 }
 
-.activityFooterLink {
-  font-family: var(--font-display);
-  font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--accent-primary);
-  text-decoration: none;
-  transition: opacity var(--transition-fast);
-}
-
-.activityFooterLink:hover {
-  opacity: 0.8;
-}
-
-@media (max-width: 1024px) {
-  .dashboardGrid {
-    grid-template-columns: 1fr;
+@media (min-width: 1024px) {
+  .mosaic2 {
+    grid-template-columns: 1fr 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .header {
-    flex-direction: column;
-    gap: var(--space-4);
+  .dashboardRoot {
+    gap: 48px;
   }
 
-  .pageTitle {
-    font-size: var(--text-2xl);
+  .pactGrid {
+    grid-template-columns: 1fr;
   }
-}
-
-/* ── Dark Mode Overrides ── */
-:global([data-theme="dark"]) .authCard {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-2xl);
-}
-
-:global([data-theme="dark"]) .googleButton {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
-}
-
-:global([data-theme="dark"]) .googleButton:hover {
-  box-shadow: var(--shadow-md);
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-:global([data-theme="dark"]) .pactCount {
-  background: rgba(var(--accent-primary-rgb), 0.14);
 }

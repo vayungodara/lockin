@@ -4,18 +4,20 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcutsSafe } from '@/lib/KeyboardShortcutsContext';
-import { Plus, Fire } from '@phosphor-icons/react';
-import { fadeInUp, buttonHover, buttonTap, smoothTransition } from '@/lib/animations';
+import { Plus } from '@phosphor-icons/react';
+import { fadeInUp, buttonHover, buttonTap } from '@/lib/animations';
 import { calculateStreak } from '@/lib/streaks';
 import styles from './Dashboard.module.css';
-import Link from 'next/link';
 import PactCard from '@/components/PactCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import TodayBar from '@/components/TodayBar';
 import OnboardingChecklist from '@/components/OnboardingChecklist';
-import XPBar from '@/components/XPBar';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard } from '@/components/Skeleton';
+import SectionHeader from '@/components/SectionHeader';
+import Witnesses from '@/components/Witnesses';
+import MonthlyCalendar from '@/components/MonthlyCalendar';
+import AchievementsRail from '@/components/AchievementsRail';
 
 // Helper to request the layout-level CreatePactModal to open
 function requestCreatePact() {
@@ -83,12 +85,11 @@ export default function DashboardClient({ user }) {
         }
       }
 
-      // Dashboard only renders max 3 pacts, but the full set is used for
-      // due-today/overdue counts in the header. limit=200 gives headroom for
-      // active+historical so active pacts aren't pushed out of the window
-      // when a user has a long tail of completed/missed pacts. Kept
-      // select('*') to avoid drift with schema migrations that add new
-      // columns (e.g. xp_reward, is_recurring).
+      // Dashboard renders today's grid plus headroom for due-today/overdue
+      // counts in the TodayBar. limit=200 gives space for active+historical
+      // so active pacts aren't pushed out by a long tail of completed/missed.
+      // select('*') avoids drift with schema migrations that add new columns
+      // (e.g. xp_reward, is_recurring).
       const { data, error } = await supabase
         .from('pacts')
         .select('*')
@@ -97,7 +98,7 @@ export default function DashboardClient({ user }) {
         .limit(200);
 
       if (error) throw error;
-      
+
       setPacts(data || []);
     } catch (err) {
       console.error('Error fetching pacts:', err);
@@ -116,10 +117,9 @@ export default function DashboardClient({ user }) {
 
   const handlePactUpdate = (updatedPact) => {
     setPacts(prev => prev.map(p => p.id === updatedPact.id ? updatedPact : p));
-    // Refresh TodayBar and XPBar on any status change (including undo back to active)
+    // Refresh TodayBar on any status change (including undo back to active)
     setRefreshKey(k => k + 1);
   };
-
 
   // Calculate stats
   const activePacts = pacts.filter(p => p.status === 'active');
@@ -134,172 +134,195 @@ export default function DashboardClient({ user }) {
   });
   const overduePacts = activePacts.filter(p => new Date(p.deadline) < todayStart);
 
-  // Dashboard shows pacts due today + overdue first; if none, show upcoming or recent completed
+  // § 01 shows urgent pacts first (overdue + due today), with a wider window
+  // than the legacy 3-card preview — the editorial grid wraps to fit. Cap at
+  // 6 to keep the section punchy; if a user wants more they tap "View all".
   const urgentPacts = [...overduePacts, ...pactsDueToday];
-  const dashboardPacts = urgentPacts.length > 0
-    ? urgentPacts.slice(0, 3)
+  const sectionPacts = urgentPacts.length > 0
+    ? urgentPacts.slice(0, 6)
     : activePacts.length > 0
-      ? activePacts.slice(0, 3)
-      : completedPacts.slice(0, 3);
+      ? activePacts.slice(0, 6)
+      : completedPacts.slice(0, 6);
 
-  // User is signed in - show dashboard (middleware redirects unauthenticated users)
+  // User is signed in — middleware redirects unauthenticated users.
   return (
-    <div className={styles.pageContent}>
-      <motion.header
-        className={styles.header}
-        initial={{ opacity: 0, y: -12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={smoothTransition}
-      >
-          <div>
-            <h1 className={styles.pageTitle}>Dashboard</h1>
-            <p className={styles.pageSubtitle}>
-              {pactsDueToday.length > 0 ? `${pactsDueToday.length} pact${pactsDueToday.length !== 1 ? 's' : ''} due today` : 'No pacts due'}
-              {overduePacts.length > 0 && ` \u00b7 ${overduePacts.length} overdue`}
-              {' \u00b7 '}
-              <span className={styles.streakHighlight}>
-                <Fire size={16} weight="fill" color="var(--warning)" style={{ verticalAlign: 'text-bottom', display: 'inline' }} />{' '}
-                {streakData.currentStreak > 0 ? `${streakData.currentStreak} day streak` : 'Start your streak'}
-              </span>
-            </p>
-          </div>
-          <motion.button
-            className="btn btn-primary"
-            onClick={requestCreatePact}
-            whileHover={buttonHover}
-            whileTap={buttonTap}
-          >
-            <Plus size={20} weight="bold" />
-            New Pact
-          </motion.button>
-        </motion.header>
+    <div className={styles.dashboardRoot}>
+      {/* Stays at top — first impression. */}
+      <TodayBar
+        userId={user?.id}
+        refreshKey={refreshKey}
+        currentStreak={streakData.currentStreak}
+        longestStreak={streakData.longestStreak}
+      />
 
-        <XPBar userId={user?.id} refreshKey={refreshKey} />
+      {/* Onboarding self-hides once dismissed/complete; renders inline above
+          the editorial sections so first-time users see the next step. */}
+      <OnboardingChecklist userId={user?.id} onCreatePact={requestCreatePact} />
 
-        <TodayBar
-          userId={user?.id}
-          refreshKey={refreshKey}
-          currentStreak={streakData.currentStreak}
-          longestStreak={streakData.longestStreak}
+      {/* § 01 — Today's pacts: full-width editorial grid. */}
+      <section className={styles.section}>
+        <SectionHeader
+          number="01"
+          title="Today's pacts"
+          action={
+            <a href="/dashboard/pacts" className={styles.sectionAction}>
+              View all
+            </a>
+          }
         />
 
-        <OnboardingChecklist userId={user?.id} onCreatePact={requestCreatePact} />
-
-        {/* Two-column grid: Pacts + Activity */}
-        <div className={styles.dashboardGrid}>
-          {/* Left column: Pacts */}
-          <div className={styles.pactsColumn}>
-            <AnimatePresence mode="wait">
-              {isLoading ? (
-                <motion.div
-                  key="skeletons"
-                  className={styles.pactsGrid}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
+        <AnimatePresence mode="wait">
+          {isLoading ? (
+            <motion.div
+              key="skeletons"
+              className={styles.pactGrid}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.15 }}
+            >
+              <SkeletonCard height="140px" />
+              <SkeletonCard height="140px" />
+              <SkeletonCard height="140px" />
+            </motion.div>
+          ) : error ? (
+            <EmptyState
+              key="error"
+              floating={false}
+              icon={
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
+                  <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              }
+              title="Something went wrong"
+              description={error}
+              action={
+                <motion.button
+                  className="btn btn-primary"
+                  onClick={fetchPacts}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
                 >
-                  <SkeletonCard height="140px" />
-                  <SkeletonCard height="140px" />
-                  <SkeletonCard height="140px" />
-                </motion.div>
-              ) : error ? (
-                <EmptyState
-                  key="error"
-                  floating={false}
-                  icon={
-                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
-                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                      <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  }
-                  title="Something went wrong"
-                  description={error}
-                  action={
-                    <motion.button
-                      className="btn btn-primary"
-                      onClick={fetchPacts}
-                      whileHover={buttonHover}
-                      whileTap={buttonTap}
-                    >
-                      Try Again
-                    </motion.button>
-                  }
-                />
-              ) : pacts.length === 0 ? (
-                <EmptyState
-                  key="empty"
-                  icon={
-                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M40 12C40 12 28 28 28 46C28 54 33 60 40 60C47 60 52 54 52 46C52 28 40 12 40 12Z" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                      <circle cx="40" cy="36" r="5" stroke="var(--accent-primary)" strokeWidth="2" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                      <path d="M28 50C28 50 20 52 18 58C18 58 24 58 28 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                      <path d="M52 50C52 50 60 52 62 58C62 58 56 58 52 56" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-                      <path d="M36 60C36 60 38 68 40 72C42 68 44 60 44 60" stroke="var(--accent-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" opacity="0.5" />
-                      <path d="M38 60C38 60 39 65 40 67C41 65 42 60 42 60" stroke="var(--accent-primary)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.3" />
-                    </svg>
-                  }
-                  title="Nothing here yet. Go make something happen."
-                  description="Create your first pact and start holding yourself accountable."
-                  action={
-                    <motion.button
-                      className="btn btn-primary"
-                      onClick={requestCreatePact}
-                      whileHover={buttonHover}
-                      whileTap={buttonTap}
-                    >
-                      <Plus size={20} weight="bold" />
-                      Create Your First Pact
-                    </motion.button>
-                  }
-                />
-              ) : (
-                <motion.div
-                  key="pacts"
-                  className={styles.pactsSection}
-                  variants={fadeInUp}
-                  initial="initial"
-                  animate="animate"
+                  Try again
+                </motion.button>
+              }
+            />
+          ) : pacts.length === 0 ? (
+            <EmptyState
+              key="empty"
+              floating={false}
+              title="No pacts yet."
+              description="Add your first pact to start building a streak."
+              action={
+                <motion.button
+                  className="btn btn-primary"
+                  onClick={requestCreatePact}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
                 >
-                  <div className={styles.sectionHeader}>
-                    <h2>{activePacts.length > 0 ? "Today\u2019s Pacts" : 'Recent Pacts'}</h2>
-                    <Link href="/dashboard/pacts" className={styles.viewAllLink}>View all</Link>
-                  </div>
-                  <LayoutGroup>
-                    <motion.div className={styles.pactsGrid}>
-                      <AnimatePresence mode="popLayout">
-                        {dashboardPacts.map((pact) => (
-                          <motion.div
-                            key={pact.id}
-                            layout
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                          >
-                            <PactCard
-                              pact={pact}
-                              onUpdate={handlePactUpdate}
-                            />
-                          </motion.div>
-                        ))}
-                      </AnimatePresence>
-                    </motion.div>
-                  </LayoutGroup>
+                  <Plus size={18} weight="bold" />
+                  Create a pact
+                </motion.button>
+              }
+            />
+          ) : sectionPacts.length === 0 ? (
+            <EmptyState
+              key="none-today"
+              floating={false}
+              title="No pacts due today."
+              description="Make one. Your streak depends on it."
+              action={
+                <motion.button
+                  className="btn btn-primary"
+                  onClick={requestCreatePact}
+                  whileHover={buttonHover}
+                  whileTap={buttonTap}
+                >
+                  <Plus size={18} weight="bold" />
+                  Create a pact
+                </motion.button>
+              }
+            />
+          ) : (
+            <motion.div
+              key="pacts"
+              variants={fadeInUp}
+              initial="initial"
+              animate="animate"
+            >
+              <LayoutGroup>
+                <motion.div className={styles.pactGrid}>
+                  <AnimatePresence mode="popLayout">
+                    {sectionPacts.map((pact) => (
+                      <motion.div
+                        key={pact.id}
+                        layout
+                        initial={{ opacity: 0, scale: 0.96 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.96 }}
+                        transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      >
+                        <PactCard
+                          pact={pact}
+                          onUpdate={handlePactUpdate}
+                        />
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+              </LayoutGroup>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
 
-          {/* Right column: Activity */}
-          <div className={styles.activityColumn}>
-            <div className={styles.sectionHeader}>
-              <h2>Activity</h2>
-            </div>
-            <ActivityFeed pageSize={3} hideHeader />
-            <div className={styles.activityFooter}>
-              <Link href="/dashboard/stats" className={styles.activityFooterLink}>View Older Activity &rarr;</Link>
-            </div>
-          </div>
-        </div>
+      {/* § 02 + § 03 — Witnesses + Activity, side-by-side at ≥1024px. */}
+      <div className={styles.mosaic2}>
+        <section className={styles.section}>
+          <SectionHeader
+            number="02"
+            title="Witnesses now"
+            caption="LIVE"
+          />
+          <Witnesses userId={user?.id} />
+        </section>
+
+        <section className={styles.section}>
+          <SectionHeader
+            number="03"
+            title="Activity"
+            action={
+              <a href="/dashboard/stats" className={styles.sectionAction}>
+                View older
+              </a>
+            }
+          />
+          <ActivityFeed pageSize={6} hideHeader />
+        </section>
+      </div>
+
+      {/* § 04 + § 05 — Stats + Achievements, side-by-side at ≥1024px. */}
+      <div className={styles.mosaic2}>
+        <section className={styles.section}>
+          <SectionHeader
+            number="04"
+            title="Stats"
+            action={
+              <a href="/dashboard/stats" className={styles.sectionAction}>
+                View all
+              </a>
+            }
+          />
+          <MonthlyCalendar userId={user?.id} />
+        </section>
+
+        <section className={styles.section}>
+          <SectionHeader
+            number="05"
+            title="Achievements"
+          />
+          <AchievementsRail userId={user?.id} />
+        </section>
+      </div>
     </div>
   );
 }

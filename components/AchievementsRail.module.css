@@ -1,0 +1,162 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   AchievementsRail — § 05 of the dashboard.
+
+   Editorial: low radii (4px), no border-left/right ≥ 2px, no gradients on
+   tile fills. Earned tiles read as warm cream paper; locked tiles dim to
+   glassine grey with a dotted outline.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  color: var(--text-secondary);
+}
+
+.count {
+  font-family: var(--font-display-editorial, var(--font-display));
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--text-primary);
+}
+
+.countLabel {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+}
+
+/* --- Rail ------------------------------------------------------------- */
+.rail {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+/* --- Tile ------------------------------------------------------------- */
+.tile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 14px;
+  border-radius: 4px;
+  border: 1px solid var(--border-subtle);
+  background: var(--surface-1);
+  min-height: 72px;
+  position: relative;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.tileUnlocked {
+  border-color: var(--ink-300);
+  background: var(--surface-1);
+}
+
+.tileLocked {
+  border-style: dashed;
+  border-color: var(--border-subtle);
+  background: transparent;
+  opacity: 0.65;
+}
+
+.tileIcon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  line-height: 1;
+  border-radius: 4px;
+  background: var(--surface-2);
+  /* slight rotation matches the editorial stamp rhythm */
+  transform: rotate(-2deg);
+}
+
+.tileLocked .tileIcon {
+  background: transparent;
+  border: 1px dashed var(--border-subtle);
+  color: var(--text-tertiary);
+  transform: none;
+}
+
+.tileBody {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tileName {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileDesc {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-secondary);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tileBadge {
+  flex-shrink: 0;
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--text-tertiary);
+  padding: 2px 6px;
+  border-radius: 2px;
+  background: var(--surface-2);
+}
+
+/* --- Loading skeleton ------------------------------------------------- */
+.skeleton {
+  background: var(--surface-2);
+  border-color: transparent;
+  min-height: 72px;
+  animation: skeletonPulse 1.4s ease-in-out infinite;
+}
+
+@keyframes skeletonPulse {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 0.9; }
+}
+
+/* --- Empty state ------------------------------------------------------ */
+.empty {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--text-tertiary);
+  padding: 32px 0;
+  text-align: center;
+}
+
+@media (max-width: 540px) {
+  .rail {
+    grid-template-columns: 1fr;
+  }
+}

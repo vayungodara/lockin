@@ -1,22 +1,17 @@
 'use client';
 
-import { useState, useCallback, useMemo, useEffect } from 'react';
-import { usePathname } from 'next/navigation';
+import { useState, useMemo, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { FocusProvider } from '@/lib/FocusContext';
 import { KeyboardShortcutsProvider } from '@/lib/KeyboardShortcutsContext';
 import { NotificationProvider } from '@/lib/NotificationContext';
-import Sidebar from '@/components/Sidebar';
-import MobileNav from '@/components/MobileNav';
+import DashboardNav from '@/components/DashboardNav';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import CommandPalette from '@/components/CommandPalette';
 import CreatePactModal from '@/components/CreatePactModal';
 import styles from './DashboardLayout.module.css';
 
 export default function DashboardLayout({ user, children }) {
-  const pathname = usePathname();
-  const isDashboard = pathname === '/dashboard';
-  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [showCreatePact, setShowCreatePact] = useState(false);
   const supabase = useMemo(() => createClient(), []);
 
@@ -43,22 +38,6 @@ export default function DashboardLayout({ user, children }) {
     }
   }, [user?.id, supabase]);
 
-  const handleSignOut = async () => {
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        console.error('Error signing out:', error.message || error);
-      }
-      window.location.href = '/';
-    } catch (err) {
-      console.error('Error signing out:', err);
-    }
-  };
-
-  const handleExpandChange = useCallback((expanded) => {
-    setSidebarExpanded(expanded);
-  }, []);
-
   // Listen for open-create-pact events dispatched by child pages
   useEffect(() => {
     const handleOpenCreatePact = () => setShowCreatePact(true);
@@ -67,12 +46,12 @@ export default function DashboardLayout({ user, children }) {
   }, []);
 
   // When a pact is created, close the modal and notify child pages
-  const handlePactCreated = useCallback((newPact) => {
+  const handlePactCreated = (newPact) => {
     setShowCreatePact(false);
     if (newPact) {
       window.dispatchEvent(new CustomEvent('pact-created', { detail: newPact }));
     }
-  }, []);
+  };
 
   // Konami code easter egg
   useEffect(() => {
@@ -101,20 +80,15 @@ export default function DashboardLayout({ user, children }) {
     <FocusProvider>
       <NotificationProvider>
         <KeyboardShortcutsProvider>
-          <div id="dashboard-layout" className={styles.layout}>
-            <Sidebar user={user} onSignOut={handleSignOut} onExpandChange={handleExpandChange} hideXP={isDashboard} />
-            <MobileNav userId={user?.id} />
+          <div id="dashboard-layout" className={styles.shell}>
+            <DashboardNav user={user} />
             <CommandPalette onCreatePact={() => setShowCreatePact(true)} />
             <CreatePactModal
               isOpen={showCreatePact}
               onClose={() => setShowCreatePact(false)}
               onPactCreated={handlePactCreated}
             />
-            <main
-              id="main-content"
-              className={styles.main}
-              style={{ transform: sidebarExpanded ? 'translateX(180px)' : 'translateX(0)' }}
-            >
+            <main id="main-content" className={styles.main}>
               <ErrorBoundary message="Something went wrong loading this page.">
                 <div className={styles.contentWrapper}>{children}</div>
               </ErrorBoundary>

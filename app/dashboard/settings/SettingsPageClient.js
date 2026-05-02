@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useTheme } from '@/components/ThemeProvider';
 import { buttonHover, buttonTap } from '@/lib/animations';
@@ -21,7 +22,13 @@ const STORAGE_KEYS = {
 export default function SettingsPageClient({ user }) {
   const { theme, setTheme, accent, setAccent } = useTheme();
   const toast = useToast();
+  const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   // Preload all logo color variants for instant accent swaps
   useEffect(() => {
@@ -373,6 +380,34 @@ export default function SettingsPageClient({ user }) {
               >
                 Reset
               </motion.button>
+            </div>
+          </div>
+        </section>
+
+        {/* Sign Out Section */}
+        <section className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M16 17l5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M21 12H9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Sign Out
+          </h2>
+
+          <div className={styles.settingCard}>
+            <div className={styles.settingRow}>
+              <div className={styles.settingInfo}>
+                <span className={styles.settingLabel}>Sign out</span>
+                <span className={styles.settingDescription}>End your current session on this device.</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleSignOut}
+                className={styles.dangerBtn}
+              >
+                Sign out
+              </button>
             </div>
           </div>
         </section>

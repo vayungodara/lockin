@@ -376,6 +376,33 @@
   color: var(--text-muted);
 }
 
+/* Danger button — destructive actions (sign out, delete) */
+.dangerBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-2) var(--space-4);
+  background: transparent;
+  border: 1px solid var(--stamp-red);
+  border-radius: var(--radius-editorial-md);
+  color: var(--stamp-red);
+  font-family: var(--font-sans-editorial, inherit);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), color var(--transition-fast);
+}
+
+.dangerBtn:hover {
+  background: var(--stamp-red);
+  color: var(--ink-000);
+}
+
+.dangerBtn:focus-visible {
+  outline: 2px solid var(--stamp-red);
+  outline-offset: 2px;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
   .container {

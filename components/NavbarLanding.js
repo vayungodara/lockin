@@ -1,11 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useScroll, useMotionValueEvent } from 'framer-motion';
 import NavMarker from './NavMarker';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
+import { prefersReducedMotion } from '@/lib/animations';
 import styles from './NavbarLanding.module.css';
 
 const NAV_LINKS = [
@@ -15,10 +17,32 @@ const NAV_LINKS = [
   ['#faq', 'Objections'],
 ];
 
+const SCROLL_THRESHOLD = 80;
+
 export default function NavbarLanding({ isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const router = useRouter();
   const toast = useToast();
+  const reducedMotion = prefersReducedMotion();
+
+  const { scrollY } = useScroll();
+
+  useMotionValueEvent(scrollY, 'change', (latest) => {
+    const scrolled = latest > SCROLL_THRESHOLD;
+    setIsScrolled((prev) => (prev === scrolled ? prev : scrolled));
+  });
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const showLinks = !isScrolled;
+  const isPill = isScrolled && !isMobile;
 
   const handleGetStarted = async () => {
     if (isAuthenticated) {
@@ -39,7 +63,9 @@ export default function NavbarLanding({ isAuthenticated = false }) {
 
   return (
     <header className={styles.navbar}>
-      <div className={styles.inner}>
+      <div
+        className={`${styles.inner} ${isPill ? styles.innerPill : ''} ${reducedMotion ? '' : styles.innerAnimated}`}
+      >
         <Link href="/" className={styles.logo} aria-label="LockIn — home">
           <span className={styles.logoMark} aria-hidden="true" />
           <span className={styles.logoWordmark}>
@@ -47,9 +73,18 @@ export default function NavbarLanding({ isAuthenticated = false }) {
           </span>
         </Link>
 
-        <nav className={styles.desktopNav} aria-label="Primary">
+        <nav
+          className={`${styles.desktopNav} ${!showLinks ? styles.desktopNavHidden : ''}`}
+          aria-label="Primary"
+        >
           {NAV_LINKS.map(([href, label]) => (
-            <a key={href} href={href} className={styles.navLink}>
+            <a
+              key={href}
+              href={href}
+              className={styles.navLink}
+              tabIndex={showLinks ? 0 : -1}
+              aria-hidden={!showLinks}
+            >
               <NavMarker>{label}</NavMarker>
             </a>
           ))}

@@ -17,16 +17,11 @@ const REFRESH_MS = 30000;
  * Polls the active witnesses helper every 30 seconds. Renders an empty-state
  * caption when no peers are locked in, or a vertical list (max 5 visible)
  * with avatar tile, progress bar, and start time.
- *
- * @param {{ userId: string, mockData?: Array }} props
- *   `mockData` — dev-only override used by the preview page. Skips the
- *   Supabase fetch and renders the array directly. Never used in production.
  */
-export default function Witnesses({ userId, mockData }) {
-  const [witnesses, setWitnesses] = useState(mockData || []);
+export default function Witnesses({ userId }) {
+  const [witnesses, setWitnesses] = useState([]);
 
   useEffect(() => {
-    if (mockData) return; // dev preview: skip live fetch
     if (!userId) return;
 
     const supabase = createClient();
@@ -44,7 +39,7 @@ export default function Witnesses({ userId, mockData }) {
       cancelled = true;
       clearInterval(interval);
     };
-  }, [userId, mockData]);
+  }, [userId]);
 
   if (witnesses.length === 0) {
     return <div className={styles.empty}>Nobody locked in right now.</div>;

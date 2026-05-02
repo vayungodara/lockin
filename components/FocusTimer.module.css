@@ -1,172 +1,209 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FocusTimer — editorial monumental-serif port
+
+   Replaces the previous ring-with-gradient with a giant clamp-sized serif
+   numeral over a flat linear progress bar. Matches the lockin-test focus
+   reference exactly: tabular display-heavy serif, blue progress fill, low
+   radii, no glow, no shadow.
+
+   Component owns the numeral + bar + labels + control buttons. The page
+   composes the LOCKED IN stamp on top because it needs absolute placement
+   relative to the parent card surface, not the timer block itself.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .timerSection {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-6);
-}
-
-.timerRing {
-  position: relative;
-  width: 280px;
-  height: 280px;
-}
-
-.timerRing::after {
-  content: '';
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  background: transparent;
-  box-shadow: 0 0 30px rgba(var(--accent-primary-rgb), 0.15);
-  animation: breathe 4s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.progressRing {
-  transform: rotate(-90deg);
+  align-items: stretch;
+  gap: 18px;
   width: 100%;
-  height: 100%;
 }
 
-.progressBg {
-  stroke: var(--surface-3);
-}
+/* ── Numeral ─────────────────────────────────────────────────────────── */
 
-.progressBar {
-  transition: stroke-dashoffset 0.5s ease;
-}
-
-.workProgress {
-  stroke: url(#timerGradient);
-  filter: drop-shadow(0 0 12px rgba(var(--accent-primary-rgb), 0.4));
-}
-
-.breakProgress {
-  stroke: var(--success);
-  filter: drop-shadow(0 0 12px rgba(var(--success-rgb), 0.4));
-}
-
-.longBreakProgress {
-  stroke: var(--info);
-  filter: drop-shadow(0 0 12px rgba(var(--info-rgb), 0.4));
-}
-
-.timeDisplay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+.numeral {
+  font-family: var(--font-display-heavy-editorial, var(--font-display, ui-serif));
+  /* Sized to fit the timer card column (~580-680px wide on desktop). At
+     14vw, 4 digits + colon = ~5em ≈ 280-340px tall, which fits without
+     overflowing. Container queries would be cleaner but keep wider
+     browser compat for now. */
+  font-size: clamp(112px, 14vw, 192px);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--ink-700, var(--text-primary));
   text-align: center;
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  /* Slightly tighter top padding so the numeral hugs the section header
+     above on tall viewports. */
+  padding: 8px 0;
 }
 
-.time {
-  font-size: var(--text-6xl);
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
-  letter-spacing: -0.03em;
+.numeralCompact {
+  font-size: clamp(80px, 11vw, 144px);
 }
+
+/* While running the numeral takes on the darker ink color — visual
+   commitment, the timer is "on the record" right now. */
+.numeralRunning {
+  color: var(--ink-900, var(--text-primary));
+}
+
+/* When the work timer hits zero a brief "done" state — moss green to
+   match the KEPT semantic — replaces the dark ink. The page resets state
+   shortly after so this color is glimpsed momentarily. */
+.numeralDone {
+  color: var(--stamp-green);
+}
+
+.numeralPart,
+.numeralColon {
+  display: inline-block;
+}
+
+.numeralColon {
+  /* Slight nudge keeps the colon visually centered between the digit
+     pairs — serif glyph metrics push it slightly low otherwise. */
+  padding: 0 0.04em;
+}
+
+/* ── Linear progress bar ─────────────────────────────────────────────── */
+
+.progressTrack {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  background: var(--ink-200, var(--surface-3));
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  width: 0;
+  transition: width 1000ms linear;
+  background: var(--stamp-blue);
+  border-radius: 0;
+}
+
+.fillWork {
+  background: var(--stamp-blue);
+}
+
+.fillBreak {
+  background: var(--stamp-green);
+}
+
+.fillLongBreak {
+  background: var(--stamp-yellow);
+}
+
+/* ── Progress labels ─────────────────────────────────────────────────── */
+
+.progressLabels {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500, var(--text-tertiary));
+  font-variant-numeric: tabular-nums;
+  padding-top: 4px;
+}
+
+/* ── Controls ────────────────────────────────────────────────────────── */
 
 .controls {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 12px;
 }
 
-.primaryBtn {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
+.btn {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1;
+  padding: 14px 20px;
+  border-radius: var(--radius-editorial-sm, 2px);
+  border: 1.5px solid transparent;
   cursor: pointer;
-  transition: background-color var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base), filter var(--transition-base);
+  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
 }
 
-.playBtn {
-  background: var(--stamp-blue);
-  color: white;
-  box-shadow: var(--shadow-glow-lg);
-}
-
-.playBtn:hover {
-  transform: scale(1.08);
-  box-shadow: 0 0 40px rgba(var(--accent-primary-rgb), 0.4);
-}
-
-.playBtn:active {
-  transform: scale(1.02);
-}
-
-.pauseBtn {
-  background: var(--gradient-warm);
-  color: white;
-  box-shadow: 0 0 24px rgba(var(--warning-rgb), 0.3);
-}
-
-.pauseBtn:hover {
-  transform: scale(1.08);
-}
-
-.secondaryBtn {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background-color var(--transition-base), color var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
-}
-
-.primaryBtn:focus-visible,
-.secondaryBtn:focus-visible {
-  outline: 2px solid var(--accent-primary);
+.btn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
   outline-offset: 2px;
 }
 
-.secondaryBtn:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
-  border-color: var(--border-default);
-  transform: scale(1.05);
+.btnPrimary {
+  background: var(--ink-900, var(--text-primary));
+  color: var(--ink-000, var(--bg-primary));
+  border-color: var(--ink-900, var(--text-primary));
 }
 
-@keyframes breathe {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.8; transform: scale(1.02); }
+.btnPrimary:hover {
+  background: var(--ink-800, var(--text-primary));
+  border-color: var(--ink-800, var(--text-primary));
 }
 
-/* Dark mode overrides for timer ring visibility */
-:global([data-theme="dark"]) .progressBg {
-  stroke: rgba(var(--accent-primary-rgb), 0.18);
+.btnOutline {
+  background: transparent;
+  color: var(--ink-700, var(--text-primary));
+  border-color: var(--ink-300, var(--border-default));
 }
 
-:global([data-theme="dark"]) .workProgress {
-  filter: drop-shadow(0 0 16px rgba(var(--accent-primary-rgb), 0.6));
+.btnOutline:hover {
+  border-color: var(--ink-700, var(--text-primary));
+  color: var(--ink-900, var(--text-primary));
 }
 
-:global([data-theme="dark"]) .breakProgress {
-  filter: drop-shadow(0 0 16px rgba(var(--success-rgb), 0.6));
+.btnDanger {
+  background: transparent;
+  color: var(--stamp-red);
+  border-color: var(--stamp-red);
 }
 
-:global([data-theme="dark"]) .longBreakProgress {
-  filter: drop-shadow(0 0 16px rgba(var(--info-rgb), 0.6));
+.btnDanger:hover {
+  background: var(--stamp-red);
+  color: var(--ink-000, white);
 }
 
-:global([data-theme="dark"]) .timerRing::after {
-  box-shadow: 0 0 40px rgba(var(--accent-primary-rgb), 0.3);
+/* ── LOCKED IN stamp wrapper ────────────────────────────────────────── */
+
+/* Component-side: the page positions the stamp absolutely. This wrapper
+   simply isolates transform context for the slam animation. */
+.stampWrap {
+  display: inline-block;
+  pointer-events: none;
 }
 
-:global([data-theme="dark"]) .playBtn:hover {
-  box-shadow: 0 0 50px rgba(var(--accent-primary-rgb), 0.55);
-}
+/* ── Responsive ──────────────────────────────────────────────────────── */
 
-:global([data-theme="dark"]) .pauseBtn {
-  box-shadow: 0 0 30px rgba(var(--warning-rgb), 0.45);
+@media (max-width: 640px) {
+  .timerSection {
+    gap: 14px;
+  }
+
+  .numeral {
+    padding: 4px 0;
+  }
+
+  .controls {
+    gap: 6px;
+  }
+
+  .btn {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
 }

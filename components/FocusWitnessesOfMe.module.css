@@ -1,0 +1,104 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   FocusWitnessesOfMe — editorial witnesses-of-me roster
+
+   Vertical list of group members who would see "you locked in" if you
+   started a session. When `isRunning`, a pulse dot sits beside each avatar
+   indicating their feed is currently lit.
+
+   Static-ish list (group-scoped peer roster), distinct from <Witnesses />
+   which polls live focus sessions.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-800, var(--text-primary));
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Pulse dot — only present while running. Carbon blue (LOCKED IN
+   semantic), never the user's ink. Steady pulse to suggest "live signal". */
+.pulseDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--stamp-blue);
+  box-shadow: 0 0 0 0 color-mix(in oklch, var(--stamp-blue) 60%, transparent);
+  animation: focusWitnessPulse 1800ms ease-in-out infinite;
+  flex-shrink: 0;
+}
+
+@keyframes focusWitnessPulse {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--stamp-blue) 55%, transparent);
+  }
+  70% {
+    box-shadow: 0 0 0 8px color-mix(in oklch, var(--stamp-blue) 0%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in oklch, var(--stamp-blue) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pulseDot {
+    animation: none;
+  }
+}
+
+/* --- Empty state --- */
+.empty {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-500, var(--text-tertiary));
+  padding: 24px 0;
+  text-align: left;
+}
+
+/* --- Overflow indicator --- */
+.more {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-500, var(--text-tertiary));
+}
+
+/* --- Footer caption — direct-positive, dashboard voice --- */
+.caption {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-600, var(--text-secondary));
+  margin: 0;
+  line-height: 1.4;
+  max-width: 36ch;
+}

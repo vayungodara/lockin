@@ -1,244 +1,301 @@
-/* ── Focus Page: full-bleed centered layout ── */
+/* ═══════════════════════════════════════════════════════════════════════
+   Focus page — editorial port (Wave 2.3)
 
-.container {
-  min-height: 100vh;
-  min-height: 100dvh;
+   Two-column layout at ≥1024px: timer card on the left (1.1fr), sidebar
+   with witnesses-of-me + today's tally + recent sessions on the right
+   (1fr). Stacks on narrow viewports.
+
+   Surfaces are flat cream cards (--ink-100) with hairline ink-300 borders
+   and 4px radii. No glassmorphism, no glow, no gradient — editorial paper.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.page {
   display: flex;
   flex-direction: column;
-  position: relative;
+  gap: 32px;
 }
 
-/* ── Header: absolute positioned like mockup ── */
-.header {
+.pageHeader {
+  /* The SectionHeader inside owns its own bottom rule + spacing. */
+}
+
+/* ── Two-column layout (timer card + sidebar) ────────────────────────── */
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    gap: 40px;
+    align-items: start;
+  }
+}
+
+/* ── Timer card — primary editorial surface ──────────────────────────── */
+
+.timerCard {
+  position: relative;
+  background: var(--ink-100, var(--surface-1));
+  border: 1px solid var(--ink-300, var(--border-default));
+  border-radius: var(--radius-editorial-md, 4px);
+  padding: 32px 32px 36px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 24px;
+  overflow: visible; /* let the LOCKED IN stamp slam past the corner */
+}
+
+@media (max-width: 640px) {
+  .timerCard {
+    padding: 20px 18px 24px;
+    gap: 18px;
+  }
+}
+
+/* ── Card header row (caption + stamp slot) ──────────────────────────── */
+
+.timerHeader {
+  display: flex;
   align-items: flex-start;
-  padding: var(--space-8) var(--space-10);
-  position: relative;
-  z-index: 10;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 36px;
 }
 
-.header h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-  letter-spacing: -0.04em;
-}
-
-/* ── Broadcast pill chip ── */
-.broadcastPill {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  background: var(--surface-1);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--border-subtle);
-  box-shadow: var(--shadow-xs);
-  cursor: pointer;
-  transition: all var(--transition-fast);
-}
-
-.broadcastPill:hover {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
-}
-
-.broadcastPill svg {
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-}
-
-.broadcastLabel {
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
+.statusCaption {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
   font-weight: 500;
-  color: var(--text-primary);
-  white-space: nowrap;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500, var(--text-tertiary));
 }
 
-/* ── Toggle switch ── */
-.toggleSwitch {
-  position: relative;
-  width: 36px;
-  height: 20px;
-  margin-left: var(--space-2);
-  flex-shrink: 0;
+.statusRunning {
+  color: var(--stamp-blue);
 }
 
-.toggleInput {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  position: absolute;
-}
-
-.toggleTrack {
-  position: absolute;
-  inset: 0;
-  background: var(--surface-3);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
-  transition: all var(--transition-fast);
-  cursor: pointer;
-}
-
-.toggleTrack::after {
-  content: '';
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 14px;
-  height: 14px;
-  background: white;
-  border-radius: var(--radius-full);
-  box-shadow: var(--shadow-xs);
-  transition: transform var(--transition-fast);
-}
-
-.toggleInput:checked + .toggleTrack {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-}
-
-.toggleInput:checked + .toggleTrack::after {
-  transform: translateX(16px);
-}
-
-.toggleInput:focus-visible + .toggleTrack {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: 2px;
-}
-
-/* ── Focus layout: centered hero ── */
-.focusLayout {
-  display: flex;
-  flex-direction: column;
+.stampSlot {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: calc(100vh - 200px);
-  min-height: calc(100dvh - 200px);
-  gap: var(--space-6);
-  flex: 1;
-  padding-bottom: var(--space-8);
+  justify-content: flex-end;
+  /* Reserve space so the slam doesn't reflow the surrounding row. */
+  min-height: 32px;
+  min-width: 0;
 }
 
-/* ── Mode selector: warm pill design ── */
-.modeSelector {
+/* ── Mode selector — editorial bordered tabs ─────────────────────────── */
+
+.modeRow {
   display: flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  background: var(--bg-tertiary);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .modeButton {
-  padding: var(--space-2) var(--space-5);
-  border-radius: var(--radius-full);
-  font-family: var(--font-display);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  font-weight: 600;
+  padding: 8px 14px;
+  border: 1.5px solid var(--ink-300, var(--border-default));
+  border-radius: var(--radius-editorial-sm, 2px);
   background: transparent;
-  border: none;
+  color: var(--ink-700, var(--text-secondary));
   cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease;
+  letter-spacing: 0.01em;
   white-space: nowrap;
 }
 
-.modeButton:hover {
-  color: var(--text-primary);
+.modeButton:hover:not(:disabled) {
+  border-color: var(--ink-700, var(--text-primary));
+  color: var(--ink-900, var(--text-primary));
 }
 
 .modeButton:focus-visible {
-  outline: 2px solid var(--accent-primary);
-  outline-offset: -2px;
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
 }
 
 .modeButtonActive {
-  background: var(--surface-1);
-  color: var(--text-primary);
-  box-shadow: var(--shadow-sm);
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
+  border-color: var(--stamp-yellow);
 }
 
-/* ── Inline stats ── */
-.inlineStats {
-  font-size: 14px;
-  color: var(--text-tertiary);
-  text-align: center;
+.modeButtonActive:hover {
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
+  border-color: var(--stamp-yellow);
+}
+
+.modeButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ── Dotted rule + running copy ──────────────────────────────────────── */
+
+.ruleDotted {
+  width: 100%;
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--ink-400, var(--border-default)) 0 50%,
+    transparent 50% 100%
+  );
+  background-size: 8px 1px;
+  background-repeat: repeat-x;
+  margin-top: 8px;
+}
+
+.runningCopy {
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  font-style: italic;
+  color: var(--ink-500, var(--text-tertiary));
   margin: 0;
-  font-weight: 500;
-  letter-spacing: -0.01em;
+  max-width: 52ch;
+  line-height: 1.45;
 }
 
-.lastSession {
+/* ── Sidebar (right column) ──────────────────────────────────────────── */
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.sideSection {
+  /* SectionHeader provides its own rule + bottom spacing. Sections share
+     the page's cream background — no inner card surface. */
+}
+
+/* ── Today block — monumental serif tally ────────────────────────────── */
+
+.todayBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.todayHeadline {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+.todayNumeral {
+  font-family: var(--font-display-heavy-editorial, var(--font-display, ui-serif));
+  font-size: clamp(56px, 7vw, 72px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  color: var(--ink-900, var(--text-primary));
+  font-variant-numeric: tabular-nums;
+}
+
+.todayLabel {
+  font-family: var(--font-mono-editorial, var(--font-mono));
   font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-  margin: 0;
   font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500, var(--text-tertiary));
 }
 
-/* ── Error state ── */
+.todaySub {
+  margin: 0;
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  color: var(--ink-600, var(--text-secondary));
+}
+
+/* ── Recent sessions list ────────────────────────────────────────────── */
+
+.recentList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.recentRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ink-300, var(--border-subtle));
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-variant-numeric: tabular-nums;
+}
+
+.recentRow:last-child {
+  border-bottom: 0;
+}
+
+.recentTime {
+  font-size: 13px;
+  color: var(--ink-700, var(--text-primary));
+}
+
+.recentDuration {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-500, var(--text-tertiary));
+}
+
+.recentEmpty {
+  font-family: var(--font-mono-editorial, var(--font-mono));
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--ink-500, var(--text-tertiary));
+  padding: 16px 0;
+}
+
+/* ── Error state ─────────────────────────────────────────────────────── */
+
 .errorBox {
-  text-align: center;
-  color: var(--text-secondary);
-  font-size: var(--text-sm);
-  padding: var(--space-3) var(--space-5);
-  background: var(--surface-1);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 16px;
+  background: var(--ink-100, var(--surface-1));
+  border: 1px solid var(--stamp-red);
+  border-radius: var(--radius-editorial-sm, 2px);
 }
 
-.errorBox button {
-  margin-top: var(--space-2);
+.errorBox p {
+  margin: 0;
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  color: var(--ink-700, var(--text-primary));
 }
 
-/* ── Dark Mode Overrides ── */
-:global([data-theme="dark"]) .broadcastPill {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+.errorRetry {
+  align-self: flex-start;
+  padding: 8px 14px;
+  font-family: var(--font-sans-editorial, var(--font-sans));
+  font-size: 13px;
+  font-weight: 600;
+  background: transparent;
+  color: var(--stamp-red);
+  border: 1.5px solid var(--stamp-red);
+  border-radius: var(--radius-editorial-sm, 2px);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
-:global([data-theme="dark"]) .modeSelector {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--border-default);
-}
-
-:global([data-theme="dark"]) .modeButtonActive {
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-sm);
-}
-
-:global([data-theme="dark"]) .toggleTrack {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-default);
-}
-
-/* ── Responsive ── */
-@media (max-width: 640px) {
-  .header {
-    padding: var(--space-5) var(--space-4);
-    flex-direction: column;
-    gap: var(--space-3);
-  }
-
-  .header h1 {
-    font-size: var(--text-2xl);
-  }
-
-  .focusLayout {
-    min-height: calc(100vh - 240px);
-    min-height: calc(100dvh - 240px);
-    gap: var(--space-5);
-    padding-bottom: var(--space-6);
-  }
-
-  .modeButton {
-    padding: var(--space-2) var(--space-4);
-    font-size: var(--text-xs);
-  }
+.errorRetry:hover {
+  background: var(--stamp-red);
+  color: var(--ink-000, white);
 }

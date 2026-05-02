@@ -11,11 +11,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Agent Policy
 
 **Always use specialized/plugin agents** — never general-purpose when a domain agent exists:
-- **Bugs & implementation:** `frontend-mobile-development:frontend-developer` or `javascript-typescript:javascript-pro`
+- **Frontend — UI, components, design, a11y:** `lockin-frontend` (skip for typos/one-line fixes)
+- **Bugs & implementation (non-UI):** `javascript-typescript:javascript-pro`
 - **Security:** `comprehensive-review:security-auditor`
 - **Code review:** `feature-dev:code-reviewer` or `comprehensive-review:code-reviewer`
 - **Debugging:** `unit-testing:debugger` or `agent-teams:team-debugger`
-- **Visual/design:** `ui-design:ui-designer`
 - **iOS:** `multi-platform-apps:ios-developer`
 - **Performance:** `vercel:performance-optimizer`
 - **Architecture:** `feature-dev:code-architect`
@@ -236,6 +236,7 @@ All tables use RLS. Users access only their own data or group data.
 9. **Image remotes:** `next.config.mjs` allows images from `*.supabase.co` and `*.googleusercontent.com`
 10. **createPortal SSR:** Guard `createPortal(...)` with `typeof document !== 'undefined'` when the portal renders outside an `isOpen` conditional
 11. **Function naming:** Don't prefix non-hook functions with `use` — ESLint's `react-hooks/rules-of-hooks` will flag calls inside event handlers
+12. **Glassmorphism scope:** Glass surfaces (`backdrop-filter: blur()`, `--surface-glass`) are allowed **only on modals and overlays** — never on `PactCard`, sidebar, auth cards, buttons, inputs, or page surfaces. See `.impeccable.md` → Intentional Deviations → Glassmorphism.
 
 ## iOS App (`/lockin-ios/`)
 

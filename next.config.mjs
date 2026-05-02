@@ -55,9 +55,9 @@ const nextConfig = {
     const csp = [
       "default-src 'self'",
       `script-src ${scriptSrc}`,
-      "style-src 'self' 'unsafe-inline'",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "img-src 'self' data: blob: https://*.supabase.co https://*.googleusercontent.com",
-      "font-src 'self' data:",
+      "font-src 'self' data: https://fonts.gstatic.com",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://vitals.vercel-insights.com https://vercel.live wss://*.vercel.live",
       "frame-src 'self' https://vercel.live https://accounts.google.com",
       "frame-ancestors 'none'",

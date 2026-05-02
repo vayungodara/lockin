@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import Image from 'next/image';
+import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import styles from './GroupDetail.module.css';
 import TaskCard from '@/components/TaskCard';
@@ -9,6 +9,20 @@ import CreateTaskModal from '@/components/CreateTaskModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import GroupStats from '@/components/GroupStats';
 import NudgeButton from '@/components/NudgeButton';
+import SectionHeader from '@/components/SectionHeader';
+import UserAvatar from '@/components/UserAvatar';
+
+const COLUMN_CAPTIONS = {
+  todo: 'Untouched',
+  doing: 'In motion',
+  done: 'Delivered',
+};
+
+const COLUMN_EMPTY = {
+  todo: 'Drop a task here.',
+  doing: 'Nobody&rsquo;s moving.',
+  done: 'Nothing delivered yet.',
+};
 
 export default function GroupDetailClient({ user, group, userRole }) {
   const [tasks, setTasks] = useState([]);
@@ -48,7 +62,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
       // (group_members.user_id references auth.users, not profiles directly,
       //  so PostgREST cannot auto-join — we do it manually)
       const profilesMap = {};
-      const memberUserIds = membersData.map(m => m.user_id);
+      const memberUserIds = membersData.map((m) => m.user_id);
       if (memberUserIds.length > 0) {
         const { data: memberProfiles, error: profilesError } = await supabase
           .from('profiles')
@@ -56,7 +70,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
           .in('id', memberUserIds);
 
         if (!profilesError && memberProfiles) {
-          memberProfiles.forEach(p => {
+          memberProfiles.forEach((p) => {
             profilesMap[p.id] = p;
           });
         }
@@ -79,15 +93,19 @@ export default function GroupDetailClient({ user, group, userRole }) {
           const active = new Set();
           const userMinutes = {};
 
-          focusData.forEach(session => {
-            // Check for active status (started within last 30 mins and not ended)
-            if (!session.ended_at && new Date(session.started_at) > new Date(thirtyMinutesAgo)) {
+          focusData.forEach((session) => {
+            // Active = started in last 30 mins and not ended
+            if (
+              !session.ended_at &&
+              new Date(session.started_at) > new Date(thirtyMinutesAgo)
+            ) {
               active.add(session.user_id);
             }
 
             // Aggregate minutes for leaderboard
             if (session.duration_minutes && session.ended_at) {
-              userMinutes[session.user_id] = (userMinutes[session.user_id] || 0) + session.duration_minutes;
+              userMinutes[session.user_id] =
+                (userMinutes[session.user_id] || 0) + session.duration_minutes;
             }
           });
 
@@ -98,7 +116,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
               id,
               minutes,
               full_name: profilesMap[id]?.full_name || 'Unknown',
-              avatar_url: profilesMap[id]?.avatar_url
+              avatar_url: profilesMap[id]?.avatar_url,
             }))
             .sort((a, b) => b.minutes - a.minutes)
             .slice(0, 5);
@@ -108,22 +126,24 @@ export default function GroupDetailClient({ user, group, userRole }) {
       }
 
       // Transform members data using joined profiles
-      const transformedMembers = membersData.map(m => ({
+      const transformedMembers = membersData.map((m) => ({
         id: m.user_id,
         role: m.role,
         joined_at: m.joined_at,
         full_name: profilesMap[m.user_id]?.full_name || 'Unknown',
-        avatar_url: profilesMap[m.user_id]?.avatar_url
+        avatar_url: profilesMap[m.user_id]?.avatar_url,
       }));
 
       setMembers(transformedMembers);
 
       // Get unique owner IDs not already in profilesMap
-      const ownerIds = [...new Set(
-        tasksData
-          .filter(t => t.owner_id && !profilesMap[t.owner_id])
-          .map(t => t.owner_id)
-      )];
+      const ownerIds = [
+        ...new Set(
+          tasksData
+            .filter((t) => t.owner_id && !profilesMap[t.owner_id])
+            .map((t) => t.owner_id)
+        ),
+      ];
 
       // Only fetch owner profiles that we don't already have from the members join
       if (ownerIds.length > 0) {
@@ -137,16 +157,16 @@ export default function GroupDetailClient({ user, group, userRole }) {
         }
 
         if (!ownerError && ownerProfiles) {
-          ownerProfiles.forEach(p => {
+          ownerProfiles.forEach((p) => {
             profilesMap[p.id] = p;
           });
         }
       }
 
       // Attach owner info to tasks (using the shared profilesMap)
-      const tasksWithOwners = tasksData.map(task => ({
+      const tasksWithOwners = tasksData.map((task) => ({
         ...task,
-        owner: task.owner_id ? profilesMap[task.owner_id] || null : null
+        owner: task.owner_id ? profilesMap[task.owner_id] || null : null,
       }));
 
       setTasks(tasksWithOwners);
@@ -181,118 +201,189 @@ export default function GroupDetailClient({ user, group, userRole }) {
   }, []);
 
   const handleTaskCreated = (newTask) => {
-    // Add the new task with owner info
-    const owner = members.find(m => m.id === newTask.owner_id);
+    const owner = members.find((m) => m.id === newTask.owner_id);
     const taskWithOwner = {
       ...newTask,
-      owner: owner ? {
-        id: owner.id,
-        full_name: owner.full_name,
-        avatar_url: owner.avatar_url
-      } : null
+      owner: owner
+        ? {
+            id: owner.id,
+            full_name: owner.full_name,
+            avatar_url: owner.avatar_url,
+          }
+        : null,
     };
-    setTasks(prev => [taskWithOwner, ...prev]);
+    setTasks((prev) => [taskWithOwner, ...prev]);
   };
 
   const handleTaskUpdate = (updatedTask) => {
-    setTasks(prev => prev.map(t => t.id === updatedTask.id ? {
-      ...t,
-      ...updatedTask,
-      owner: updatedTask.owner_id
-        ? members.find(m => m.id === updatedTask.owner_id)
-        : t.owner
-    } : t));
+    setTasks((prev) =>
+      prev.map((t) =>
+        t.id === updatedTask.id
+          ? {
+              ...t,
+              ...updatedTask,
+              owner: updatedTask.owner_id
+                ? members.find((m) => m.id === updatedTask.owner_id)
+                : t.owner,
+            }
+          : t
+      )
+    );
   };
 
   const handleTaskDelete = (taskId) => {
-    setTasks(prev => prev.filter(t => t.id !== taskId));
+    setTasks((prev) => prev.filter((t) => t.id !== taskId));
   };
 
   // Group tasks by status (memoized to avoid recomputing on unrelated re-renders)
-  const todoTasks = useMemo(() => tasks.filter(t => t.status === 'todo'), [tasks]);
-  const inProgressTasks = useMemo(() => tasks.filter(t => t.status === 'in_progress'), [tasks]);
-  const doneTasks = useMemo(() => tasks.filter(t => t.status === 'done'), [tasks]);
+  const todoTasks = useMemo(
+    () => tasks.filter((t) => t.status === 'todo'),
+    [tasks]
+  );
+  const inProgressTasks = useMemo(
+    () => tasks.filter((t) => t.status === 'in_progress'),
+    [tasks]
+  );
+  const doneTasks = useMemo(
+    () => tasks.filter((t) => t.status === 'done'),
+    [tasks]
+  );
+
+  const displayMembers = members.slice(0, 8);
+  const extraMembers = Math.max(0, members.length - 8);
+  const groupTagline =
+    group.course || (group.description ? null : 'Study circle');
 
   return (
     <div className={styles.container}>
-      {/* Header */}
+      {/* Back link */}
+      <Link href="/dashboard/groups" className={styles.backLink}>
+        ← All groups
+      </Link>
+
+      {/* Editorial header */}
       <header className={styles.header}>
         <div className={styles.headerLeft}>
-          <div>
-            <h1>{group.name}</h1>
-            {group.description && (
-              <p className={styles.description}>{group.description}</p>
-            )}
+          <div className={styles.headerCaption}>
+            {groupTagline ? `${groupTagline} · ` : ''}
+            BOARD {String(group.id).slice(0, 8).toUpperCase()}
+          </div>
+          <h1>{group.name}</h1>
+          {group.description && (
+            <p className={styles.description}>{group.description}</p>
+          )}
+
+          <div className={styles.headerMeta}>
+            <div className={styles.headerRoster}>
+              {displayMembers.map((m) => (
+                <UserAvatar
+                  key={m.id}
+                  user={{
+                    id: m.id,
+                    full_name: m.full_name,
+                    avatar_url: m.avatar_url,
+                  }}
+                  size="md"
+                  className={styles.headerRosterTile}
+                />
+              ))}
+              {extraMembers > 0 && (
+                <span className={styles.headerRosterExtra}>+{extraMembers}</span>
+              )}
+            </div>
+            <span className={styles.divider} aria-hidden="true" />
+            <div className={styles.headerStat}>
+              <span className={styles.headerStatLabel}>Members</span>
+              <span className={styles.headerStatValue}>{members.length}</span>
+            </div>
+            <div className={styles.headerStat}>
+              <span className={styles.headerStatLabel}>Tasks</span>
+              <span className={styles.headerStatValue}>{tasks.length}</span>
+            </div>
           </div>
         </div>
+
         <div className={styles.headerActions}>
-          <button className={styles.inviteBtn} onClick={handleCopyInviteLink}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            {copiedCode ? 'Copied!' : 'Copy Invite Link'}
+          <button
+            type="button"
+            className={styles.inviteBtn}
+            onClick={handleCopyInviteLink}
+          >
+            {copiedCode ? 'Copied!' : 'Copy invite link'}
           </button>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Add Task
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            + Add task
           </button>
         </div>
       </header>
 
-      {/* Members Section */}
-      <section className={styles.membersSection}>
-        <h2 className={styles.sectionTitle}>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M17 21V19C17 16.7909 15.2091 15 13 15H5C2.79086 15 1 16.7909 1 19V21" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            <circle cx="9" cy="7" r="4" stroke="currentColor" strokeWidth="2"/>
-            <path d="M23 21V19C23 17.1362 21.7252 15.5701 20 15.126" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            <path d="M16 3.12598C17.7252 3.57004 19 5.13616 19 7C19 8.86384 17.7252 10.43 16 10.874" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-          </svg>
-          Members ({members.length})
-        </h2>
-        <div className={styles.membersList}>
-          {members.map((member) => (
-            <div key={member.id} className={styles.memberCard}>
-              {member.avatar_url ? (
-                  <Image
-                    src={member.avatar_url}
-                    alt={member.full_name || 'Member'}
-                    className={styles.memberAvatar}
-                    width={36}
-                    height={36}
+      {/* Members detail row — chips + nudge buttons (keeps `Locked In`,
+          `You`, `Owner` tags + nudge action accessible). */}
+      {!isLoading && members.length > 0 && (
+        <section className={styles.membersSection}>
+          <div className={styles.membersList}>
+            {members.map((member) => {
+              const isActive = activeMembers.has(member.id);
+              return (
+                <div
+                  key={member.id}
+                  className={`${styles.memberCard} ${isActive ? styles.memberCardActive : ''}`}
+                >
+                  <UserAvatar
+                    user={{
+                      id: member.id,
+                      full_name: member.full_name,
+                      avatar_url: member.avatar_url,
+                    }}
+                    size="sm"
                   />
-              ) : (
-                <div className={styles.memberAvatarPlaceholder}>
-                  {(member.full_name || 'U').charAt(0).toUpperCase()}
-                </div>
-              )}
-              <span className={styles.memberName}>
-                {member.full_name || 'Unknown'}
-                {member.id === user.id && <span className={styles.youBadge}>You</span>}
-                {activeMembers.has(member.id) && (
-                  <span className={styles.lockedInBadge}>
-                    <span className={styles.lockedInDot}></span>
-                    Locked In
+                  <span className={styles.memberName}>
+                    {member.full_name || 'Unknown'}
+                    {member.id === user.id && (
+                      <span className={styles.youBadge}>You</span>
+                    )}
+                    {isActive && (
+                      <span className={styles.lockedInChip}>
+                        <span
+                          className={styles.lockedInDot}
+                          aria-hidden="true"
+                        />
+                        Locked In
+                      </span>
+                    )}
+                    {member.role === 'owner' && (
+                      <span className={styles.ownerBadge}>Owner</span>
+                    )}
                   </span>
-                )}
-                {member.role === 'owner' && <span className={styles.ownerBadge}>Owner</span>}
-              </span>
-              {member.id !== user.id && (
-                <NudgeButton userId={member.id} userName={member.full_name || 'them'} />
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
+                  {member.id !== user.id && (
+                    <NudgeButton
+                      userId={member.id}
+                      userName={member.full_name || 'them'}
+                    />
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
-      {/* Kanban Board */}
+      {/* § 01 — Today's tasks */}
       {error ? (
         <div className={styles.loadingState}>
           <p>{error}</p>
-          <button className="btn btn-primary" onClick={fetchData} style={{ marginTop: '1rem' }}>Try Again</button>
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={fetchData}
+            style={{ marginTop: '1rem' }}
+          >
+            Try again
+          </button>
         </div>
       ) : isLoading ? (
         <div className={styles.loadingState}>
@@ -301,23 +392,27 @@ export default function GroupDetailClient({ user, group, userRole }) {
         </div>
       ) : (
         <section className={styles.kanbanSection}>
+          <SectionHeader number={1} title="Today's tasks" caption="Board" />
           <div className={styles.kanbanBoard}>
-            {/* To Do Column */}
+            {/* To Do */}
             <div className={styles.kanbanColumn}>
               <div className={styles.columnHeader}>
-                <div className={`${styles.columnDot} ${styles.dotTodo}`}></div>
-                <h3>To Do</h3>
+                <span className={`${styles.columnDot} ${styles.dotTodo}`} />
+                <h3>To do</h3>
                 <span className={styles.columnCount}>{todoTasks.length}</span>
+                <span className={styles.columnCaption}>
+                  {COLUMN_CAPTIONS.todo}
+                </span>
               </div>
               <div className={styles.columnContent}>
                 {todoTasks.length === 0 ? (
                   <div className={styles.columnEmpty}>
-                    <p>No tasks yet</p>
+                    <p>{COLUMN_EMPTY.todo}</p>
                   </div>
                 ) : (
                   todoTasks.map((task) => (
-                    <TaskCard 
-                      key={task.id} 
+                    <TaskCard
+                      key={task.id}
                       task={task}
                       currentUser={user}
                       userRole={userRole}
@@ -330,22 +425,27 @@ export default function GroupDetailClient({ user, group, userRole }) {
               </div>
             </div>
 
-            {/* In Progress Column */}
+            {/* Doing */}
             <div className={styles.kanbanColumn}>
               <div className={styles.columnHeader}>
-                <div className={`${styles.columnDot} ${styles.dotProgress}`}></div>
-                <h3>In Progress</h3>
-                <span className={styles.columnCount}>{inProgressTasks.length}</span>
+                <span className={`${styles.columnDot} ${styles.dotProgress}`} />
+                <h3>Doing</h3>
+                <span className={styles.columnCount}>
+                  {inProgressTasks.length}
+                </span>
+                <span className={styles.columnCaption}>
+                  {COLUMN_CAPTIONS.doing}
+                </span>
               </div>
               <div className={styles.columnContent}>
                 {inProgressTasks.length === 0 ? (
                   <div className={styles.columnEmpty}>
-                    <p>Nothing in progress</p>
+                    <p>Nobody&rsquo;s moving.</p>
                   </div>
                 ) : (
                   inProgressTasks.map((task) => (
-                    <TaskCard 
-                      key={task.id} 
+                    <TaskCard
+                      key={task.id}
                       task={task}
                       currentUser={user}
                       userRole={userRole}
@@ -358,22 +458,25 @@ export default function GroupDetailClient({ user, group, userRole }) {
               </div>
             </div>
 
-            {/* Done Column */}
+            {/* Done */}
             <div className={styles.kanbanColumn}>
               <div className={styles.columnHeader}>
-                <div className={`${styles.columnDot} ${styles.dotDone}`}></div>
+                <span className={`${styles.columnDot} ${styles.dotDone}`} />
                 <h3>Done</h3>
                 <span className={styles.columnCount}>{doneTasks.length}</span>
+                <span className={styles.columnCaption}>
+                  {COLUMN_CAPTIONS.done}
+                </span>
               </div>
               <div className={styles.columnContent}>
                 {doneTasks.length === 0 ? (
                   <div className={styles.columnEmpty}>
-                    <p>Nothing completed yet</p>
+                    <p>Nothing delivered yet.</p>
                   </div>
                 ) : (
                   doneTasks.map((task) => (
-                    <TaskCard 
-                      key={task.id} 
+                    <TaskCard
+                      key={task.id}
                       task={task}
                       currentUser={user}
                       userRole={userRole}
@@ -389,44 +492,48 @@ export default function GroupDetailClient({ user, group, userRole }) {
         </section>
       )}
 
-      {/* Stats & Activity Section - Side by Side */}
+      {/* § 02 — Group stats / activity */}
       {!isLoading && (
         <section className={styles.activitySection}>
+          <SectionHeader
+            number={2}
+            title="Group activity"
+            caption="This week"
+          />
           <div className={styles.activityGrid}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className={styles.activitySidebar}>
               {focusLeaderboard.length > 0 && (
                 <div className={styles.leaderboardCard}>
                   <div className={styles.leaderboardHeader}>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <circle cx="12" cy="12" r="10"/>
-                      <path d="M12 6v6l4 2"/>
-                    </svg>
-                    Weekly Focus Top 5
+                    Weekly focus · top 5
                   </div>
                   <div className={styles.leaderboardList}>
                     {focusLeaderboard.map((member, index) => (
-                      <div key={member.id} className={styles.leaderboardItem}>
+                      <div
+                        key={member.id}
+                        className={styles.leaderboardItem}
+                      >
                         <div className={styles.rank}>
-                          {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : <span className={styles.rankNumber}>{index + 1}</span>}
+                          <span className={styles.rankNumber}>
+                            {String(index + 1).padStart(2, '0')}
+                          </span>
                         </div>
                         <div className={styles.leaderboardUser}>
-                          {member.avatar_url ? (
-                            <Image
-                              src={member.avatar_url}
-                              alt={member.full_name}
-                              className={styles.memberAvatar}
-                              width={24}
-                              height={24}
-                              style={{ width: '24px', height: '24px' }}
-                            />
-                          ) : (
-                            <div className={styles.memberAvatarPlaceholder} style={{ width: '24px', height: '24px', fontSize: '10px' }}>
-                              {(member.full_name || 'U').charAt(0).toUpperCase()}
-                            </div>
-                          )}
-                          <span className={styles.leaderboardName}>{member.full_name}</span>
+                          <UserAvatar
+                            user={{
+                              id: member.id,
+                              full_name: member.full_name,
+                              avatar_url: member.avatar_url,
+                            }}
+                            size="xs"
+                          />
+                          <span className={styles.leaderboardName}>
+                            {member.full_name}
+                          </span>
                         </div>
-                        <div className={styles.leaderboardTime}>{member.minutes}m</div>
+                        <div className={styles.leaderboardTime}>
+                          {member.minutes}m
+                        </div>
                       </div>
                     ))}
                   </div>
@@ -442,7 +549,7 @@ export default function GroupDetailClient({ user, group, userRole }) {
       )}
 
       {/* Create Task Modal */}
-      <CreateTaskModal 
+      <CreateTaskModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onTaskCreated={handleTaskCreated}

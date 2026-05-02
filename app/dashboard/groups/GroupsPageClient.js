@@ -1,127 +1,125 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import styles from './GroupsPage.module.css';
 import Link from 'next/link';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import JoinGroupModal from '@/components/JoinGroupModal';
 import EmptyState from '@/components/EmptyState';
-// Warm muted palette for group letter-initial avatars
-const WARM_GROUP_COLORS = [
-  { bg: 'rgba(196, 131, 106, 0.14)', text: '#C4836A' }, // Terracotta
-  { bg: 'rgba(122, 154, 126, 0.14)', text: '#7A9A7E' }, // Sage
-  { bg: 'rgba(201, 165, 77, 0.14)',  text: '#C9A54D' }, // Amber
-  { bg: 'rgba(139, 134, 128, 0.14)', text: '#8B8680' }, // Warm gray
-  { bg: 'rgba(107, 143, 173, 0.14)', text: '#6B8FAD' }, // Dusty blue
-];
-
-function getGroupColor(name) {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return WARM_GROUP_COLORS[Math.abs(hash) % WARM_GROUP_COLORS.length];
-}
+import UserAvatar from '@/components/UserAvatar';
 
 function GroupCard({ group, isHero = false }) {
-  const color = getGroupColor(group.name);
   const displayMembers = (group.members || []).slice(0, 4);
   const extraMembers = Math.max(0, (group.members || []).length - 4);
+  const todoCount = group.tasksTodo ?? 0;
+  const doingCount = group.tasksDoing ?? 0;
+  const doneCount = group.tasksDone ?? 0;
   const progressPct = group.taskCount > 0
-    ? Math.round((group.tasksDone / group.taskCount) * 100)
+    ? Math.round(((group.tasksDone || 0) / group.taskCount) * 100)
     : 0;
 
   return (
-    <Link href={`/dashboard/groups/${group.id}`} className={`${styles.groupCard} ${isHero ? styles.groupCardHero : ''}`}>
+    <Link
+      href={`/dashboard/groups/${group.id}`}
+      className={`${styles.groupCard} ${isHero ? styles.groupCardHero : ''}`}
+    >
       {isHero && (
         <span className={styles.heroBadge} aria-label="Most active group">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M13 2L4.5 13H11L10 22L18.5 11H12L13 2Z" fill="currentColor" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
-          </svg>
           Most Active
         </span>
       )}
-      <div className={styles.groupHeader}>
-        <div
-          className={styles.groupIcon}
-          style={{ background: color.bg, color: color.text }}
-        >
-          {group.name.charAt(0).toUpperCase()}
-        </div>
-        <div className={styles.groupInfo}>
-          <div className={styles.groupTitleRow}>
-            <h3>{group.name}</h3>
+
+      <div className={styles.cardHead}>
+        <div className={styles.cardHeadInner}>
+          <div className={styles.cardCaption}>
+            {group.memberCount} {group.memberCount === 1 ? 'member' : 'members'}
             {group.role === 'owner' && (
-              <span className={styles.ownerBadge}>Owner</span>
+              <span className={styles.ownerTag}>Owner</span>
             )}
           </div>
-          <p className={styles.groupMeta}>
-            {group.memberCount} member{group.memberCount !== 1 ? 's' : ''}
-            <span className={styles.metaDot}></span>
-            {group.taskCount} task{group.taskCount !== 1 ? 's' : ''}
-          </p>
+          <h3 className={styles.cardTitle}>{group.name}</h3>
+        </div>
+
+        <div className={styles.roster}>
+          {displayMembers.map((member) => (
+            <UserAvatar
+              key={member.user_id}
+              user={{
+                id: member.user_id,
+                full_name: member.full_name,
+                avatar_url: member.avatar_url,
+              }}
+              size="sm"
+              className={styles.rosterTile}
+            />
+          ))}
+          {extraMembers > 0 && (
+            <span className={styles.rosterExtra}>+{extraMembers}</span>
+          )}
         </div>
       </div>
 
       {group.description && (
-        <p className={styles.groupDescription}>{group.description}</p>
+        <p className={styles.cardDescription}>{group.description}</p>
       )}
 
+      <div className={styles.ruleDotted} />
+
+      <div className={styles.statsRow}>
+        <div className={styles.statBlock}>
+          <div className={styles.statLabel}>To Do</div>
+          <div className={styles.statValue}>{todoCount}</div>
+        </div>
+        <div className={`${styles.statBlock} ${styles.statBlockDoing}`}>
+          <div className={styles.statLabel}>Doing</div>
+          <div className={styles.statValue}>{doingCount}</div>
+        </div>
+        <div className={`${styles.statBlock} ${styles.statBlockDone}`}>
+          <div className={styles.statLabel}>Done</div>
+          <div className={styles.statValue}>{doneCount}</div>
+        </div>
+        <div className={styles.statPct}>{progressPct}%</div>
+      </div>
+
       {group.taskCount > 0 && (
-        <div className={styles.progressSection}>
-          <div className={styles.progressLabel}>
-            <span>{group.tasksDone} of {group.taskCount} done</span>
-            <span>{progressPct}%</span>
-          </div>
-          <div className={styles.progressBar}>
-            <div
-              className={styles.progressFill}
-              style={{ width: `${progressPct}%` }}
-            />
-          </div>
+        <div className={styles.progressBar}>
+          <div
+            className={styles.progressFill}
+            style={{ width: `${progressPct}%` }}
+          />
         </div>
       )}
 
       <div className={styles.cardFooter}>
-        <div className={styles.avatarStack}>
-          {displayMembers.map((member, i) => (
-            <div
-              key={member.user_id}
-              className={styles.avatar}
-              style={{ zIndex: displayMembers.length - i }}
-              title={member.full_name || 'Member'}
-            >
-              {member.avatar_url ? (
-                <Image
-                  src={member.avatar_url}
-                  alt={member.full_name || 'Member'}
-                  width={28}
-                  height={28}
-                  className={styles.avatarImg}
-                />
-              ) : (
-                <span className={styles.avatarFallback}>
-                  {(member.full_name || '?').charAt(0).toUpperCase()}
-                </span>
-              )}
-            </div>
-          ))}
-          {extraMembers > 0 && (
-            <div className={styles.avatarExtra}>
-              +{extraMembers}
-            </div>
-          )}
-        </div>
+        <span className={styles.cardFooterLabel}>Enter board</span>
+        <span className={styles.cardFooterArrow}>→</span>
       </div>
     </Link>
   );
 }
 
-function GroupSections({ groups }) {
-  const ownedGroups = groups.filter(g => g.role === 'owner');
-  const joinedGroups = groups.filter(g => g.role !== 'owner');
+function CreateCard({ onClick }) {
+  return (
+    <button type="button" className={styles.createCard} onClick={onClick}>
+      <div>
+        <div className={styles.cardCaption}>§ CREATE</div>
+        <h3 className={styles.cardTitle}>Start a new group.</h3>
+        <p
+          className={styles.cardDescription}
+          style={{ marginTop: 8 }}
+        >
+          Pull your friends in. 2–8 members is the sweet spot.
+        </p>
+      </div>
+      <div className={styles.createPlus}>+</div>
+    </button>
+  );
+}
+
+function GroupSections({ groups, onCreateClick }) {
+  const ownedGroups = groups.filter((g) => g.role === 'owner');
+  const joinedGroups = groups.filter((g) => g.role !== 'owner');
 
   // Hero: the group with the most COMPLETED tasks (real progress signal).
   // Require >= 5 completed tasks to avoid celebrating empty groups.
@@ -137,21 +135,33 @@ function GroupSections({ groups }) {
     <div>
       {ownedGroups.length > 0 && (
         <>
-          <h3 className={styles.sectionHeader}>Your Groups</h3>
+          <div className={styles.sectionCaption}>§ Your groups</div>
           <div className={styles.groupsGrid}>
-            {ownedGroups.map(group => (
-              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
+            {ownedGroups.map((group) => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                isHero={group.id === mostActiveId}
+              />
             ))}
+            {joinedGroups.length === 0 && (
+              <CreateCard onClick={onCreateClick} />
+            )}
           </div>
         </>
       )}
       {joinedGroups.length > 0 && (
         <>
-          <h3 className={styles.sectionHeader}>Joined Groups</h3>
+          <div className={styles.sectionCaption}>§ Joined groups</div>
           <div className={styles.groupsGrid}>
-            {joinedGroups.map(group => (
-              <GroupCard key={group.id} group={group} isHero={group.id === mostActiveId} />
+            {joinedGroups.map((group) => (
+              <GroupCard
+                key={group.id}
+                group={group}
+                isHero={group.id === mostActiveId}
+              />
             ))}
+            <CreateCard onClick={onCreateClick} />
           </div>
         </>
       )}
@@ -187,7 +197,7 @@ export default function GroupsPageClient({ user }) {
       }
 
       // Get the group IDs
-      const groupIds = memberData.map(m => m.group_id);
+      const groupIds = memberData.map((m) => m.group_id);
 
       // Fetch the actual groups
       const { data: groupsData, error: groupsError } = await supabase
@@ -203,15 +213,23 @@ export default function GroupsPageClient({ user }) {
 
       // Fetch members (with user_id for profile lookup) and tasks (with status) in parallel
       const [membersResult, tasksResult] = await Promise.all([
-        supabase.from('group_members').select('group_id, user_id').in('group_id', groupIds),
-        supabase.from('tasks').select('group_id, status').in('group_id', groupIds),
+        supabase
+          .from('group_members')
+          .select('group_id, user_id')
+          .in('group_id', groupIds),
+        supabase
+          .from('tasks')
+          .select('group_id, status')
+          .in('group_id', groupIds),
       ]);
 
       if (membersResult.error) throw membersResult.error;
       if (tasksResult.error) throw tasksResult.error;
 
       // Collect all unique user IDs across groups for profile fetch
-      const allUserIds = [...new Set((membersResult.data || []).map(m => m.user_id))];
+      const allUserIds = [
+        ...new Set((membersResult.data || []).map((m) => m.user_id)),
+      ];
 
       // Fetch profiles for avatar stacking
       let profilesMap = {};
@@ -240,18 +258,28 @@ export default function GroupsPageClient({ user }) {
         return acc;
       }, {});
 
-      // Build per-group task stats
+      // Build per-group task stats (todo / doing / done) so the editorial
+      // card can render the three-column breakdown that mirrors lockin-test.
       const taskStatsByGroup = (tasksResult.data || []).reduce((acc, row) => {
-        if (!acc[row.group_id]) acc[row.group_id] = { total: 0, done: 0 };
+        if (!acc[row.group_id]) {
+          acc[row.group_id] = { total: 0, todo: 0, doing: 0, done: 0 };
+        }
         acc[row.group_id].total += 1;
-        if (row.status === 'done') acc[row.group_id].done += 1;
+        if (row.status === 'todo') acc[row.group_id].todo += 1;
+        else if (row.status === 'in_progress') acc[row.group_id].doing += 1;
+        else if (row.status === 'done') acc[row.group_id].done += 1;
         return acc;
       }, {});
 
       const groupsWithCounts = (groupsData || []).map((group) => {
-        const membership = memberData.find(m => m.group_id === group.id);
+        const membership = memberData.find((m) => m.group_id === group.id);
         const groupMembers = membersByGroup[group.id] || [];
-        const taskStats = taskStatsByGroup[group.id] || { total: 0, done: 0 };
+        const taskStats = taskStatsByGroup[group.id] || {
+          total: 0,
+          todo: 0,
+          doing: 0,
+          done: 0,
+        };
 
         return {
           ...group,
@@ -259,6 +287,8 @@ export default function GroupsPageClient({ user }) {
           memberCount: groupMembers.length,
           members: groupMembers,
           taskCount: taskStats.total,
+          tasksTodo: taskStats.todo,
+          tasksDoing: taskStats.doing,
           tasksDone: taskStats.done,
         };
       });
@@ -277,41 +307,52 @@ export default function GroupsPageClient({ user }) {
   }, [fetchGroups]);
 
   const handleGroupCreated = (newGroup) => {
-    setGroups(prev => [...prev, {
-      ...newGroup,
-      role: 'owner',
-      memberCount: 1,
-      members: [{ user_id: user.id, full_name: null, avatar_url: null }],
-      taskCount: 0,
-      tasksDone: 0,
-    }]);
+    setGroups((prev) => [
+      ...prev,
+      {
+        ...newGroup,
+        role: 'owner',
+        memberCount: 1,
+        members: [{ user_id: user.id, full_name: null, avatar_url: null }],
+        taskCount: 0,
+        tasksDone: 0,
+      },
+    ]);
   };
 
-  const handleGroupJoined = (joinedGroup) => {
+  const handleGroupJoined = () => {
     fetchGroups(); // Refresh to get accurate counts
   };
 
   return (
     <div className={styles.container}>
+      {/* Editorial header — § GROUPS caption + hero serif title + CTAs */}
       <div className={styles.header}>
         <div>
-          <h1>Groups</h1>
-          <p className={styles.subtitle}>{groups.length} group{groups.length !== 1 ? 's' : ''}</p>
+          <div className={styles.headerCaption}>§ GROUPS</div>
+          <h1 className={styles.headerTitle}>
+            Who&rsquo;s moving,
+            <br />who isn&rsquo;t.
+          </h1>
+          <p className={styles.headerSubtitle}>
+            Shared boards. Every task stamped with an owner. If a card hasn&rsquo;t
+            moved in a week, the group notices — because everyone can see.
+          </p>
         </div>
         <div className={styles.headerActions}>
-          <button className="btn btn-secondary" onClick={() => setIsJoinModalOpen(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M15 3H19C19.5304 3 20.0391 3.21071 20.4142 3.58579C20.7893 3.96086 21 4.46957 21 5V19C21 19.5304 20.7893 20.0391 20.4142 20.4142C20.0391 20.7893 19.5304 21 19 21H15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M10 17L15 12L10 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <path d="M15 12H3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+          <button
+            type="button"
+            className={styles.btnSecondary}
+            onClick={() => setIsJoinModalOpen(true)}
+          >
             Join Group
           </button>
-          <button className="btn btn-primary" onClick={() => setIsCreateModalOpen(true)}>
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-            Create Group
+          <button
+            type="button"
+            className={styles.btnPrimary}
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            + New group
           </button>
         </div>
       </div>
@@ -320,12 +361,6 @@ export default function GroupsPageClient({ user }) {
       {error ? (
         <EmptyState
           floating={false}
-          icon={
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: 'var(--danger)' }}>
-              <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-              <path d="M12 8V12M12 16H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-            </svg>
-          }
           title="Something went wrong"
           description={error}
           action={{ label: 'Try Again', onClick: fetchGroups }}
@@ -337,46 +372,36 @@ export default function GroupsPageClient({ user }) {
         </div>
       ) : groups.length === 0 ? (
         <EmptyState
-          icon={
-            <svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="42" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-              <path d="M42 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
-              <path d="M42 68L34 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M42 68L50 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M42 52L28 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M42 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
-              <circle cx="78" cy="38" r="8" stroke="currentColor" strokeWidth="1.5" opacity="0.5" fill="rgba(var(--accent-primary-rgb), 0.08)" />
-              <path d="M78 46V68" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
-              <path d="M78 68L70 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M78 68L86 82" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M78 52L92 42" stroke="currentColor" strokeWidth="1.5" opacity="0.4" strokeLinecap="round" />
-              <path d="M78 52L60 28" stroke="currentColor" strokeWidth="2" opacity="0.6" strokeLinecap="round" />
-              <circle cx="60" cy="28" r="3" fill="currentColor" opacity="0.3" />
-              <path d="M60 18V22" stroke="currentColor" strokeWidth="1.5" opacity="0.25" strokeLinecap="round" />
-              <path d="M52 22L55 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
-              <path d="M68 22L65 25" stroke="currentColor" strokeWidth="1.5" opacity="0.2" strokeLinecap="round" />
-            </svg>
-          }
           title="Better together. Way better."
-          description="Create a group to tackle projects with friends and hold each other accountable."
-          action={{ label: '+ Create Your First Group', onClick: () => setIsCreateModalOpen(true) }}
+          description="Start a group to lock in with friends and hold each other accountable."
+          action={{
+            label: '+ Create your first group',
+            onClick: () => setIsCreateModalOpen(true),
+          }}
           secondaryAction={
-            <button className={styles.emptyActionSecondary} onClick={() => setIsJoinModalOpen(true)}>
-              Join a Group
+            <button
+              type="button"
+              className={styles.emptyActionSecondary}
+              onClick={() => setIsJoinModalOpen(true)}
+            >
+              Join a group
             </button>
           }
         />
       ) : (
-        <GroupSections groups={groups} />
+        <GroupSections
+          groups={groups}
+          onCreateClick={() => setIsCreateModalOpen(true)}
+        />
       )}
 
       {/* Modals */}
-      <CreateGroupModal 
+      <CreateGroupModal
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onGroupCreated={handleGroupCreated}
       />
-      <JoinGroupModal 
+      <JoinGroupModal
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
         onGroupJoined={handleGroupJoined}

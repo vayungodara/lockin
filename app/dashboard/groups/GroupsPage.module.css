@@ -1,417 +1,506 @@
-/* ============================================
-   Groups Page Styles
-   ============================================ */
+/* ═══════════════════════════════════════════════════════════════════════
+   Groups page — editorial port (Wave 2.2)
+
+   Header: § GROUPS caption + hero serif title + + New group CTA.
+   Grid:   `paper` cards (cream, low-radius) with WitnessTile rosters,
+           `Pact #` index in JetBrains Mono, To Do/Doing/Done numerals,
+           progress bar, "Enter board →" footer.
+   Voice:  direct-positive ("Start a group to lock in with friends").
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .container {
   min-height: 100vh;
   min-height: 100dvh;
-  padding: var(--space-8);
-  max-width: 1000px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 32px 40px 96px;
 }
 
-/* Header */
+/* --- Header ------------------------------------------------------------- */
 .header {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  margin-bottom: var(--space-8);
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
 }
 
-.headerLeft {
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+.headerCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 12px;
 }
 
-.backBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
-  transition: all var(--transition-fast);
+.headerTitle {
+  font-family: var(--font-display-heavy-editorial);
+  font-weight: 400;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 0.92;
+  letter-spacing: -0.02em;
+  color: var(--ink-900);
+  margin: 0;
+  word-break: break-word;
 }
 
-.backBtn:hover {
-  background: var(--surface-2);
-  color: var(--text-primary);
-}
-
-.header h1 {
-  font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  letter-spacing: -0.04em;
-}
-
-.subtitle {
-  color: var(--text-tertiary);
-  font-size: var(--text-sm);
+.headerSubtitle {
+  margin-top: 16px;
+  font-family: var(--font-sans-editorial);
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink-600);
+  max-width: 52ch;
 }
 
 .headerActions {
   display: flex;
-  gap: var(--space-3);
+  gap: 8px;
+  align-items: center;
 }
 
-/* ============================================
-   Section Headers
-   ============================================ */
-
-.sectionHeader {
-  font-size: var(--text-sm);
+/* --- Editorial buttons (page-local — globals.css .btn-primary still
+       carries the retired indigo→purple gradient) -------------------- */
+.btnPrimary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--ink-900);
+  color: var(--ink-000);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
   font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: var(--space-3);
-  margin-top: var(--space-6);
+  letter-spacing: 0.02em;
+  border: 1px solid var(--ink-900);
+  border-radius: var(--radius-editorial-sm);
+  cursor: pointer;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
-.sectionHeader:first-child {
+.btnPrimary:hover {
+  background: var(--ink-700);
+  border-color: var(--ink-700);
+}
+
+.btnSecondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--ink-000);
+  color: var(--ink-800);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  cursor: pointer;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.btnSecondary:hover {
+  background: var(--ink-100);
+  border-color: var(--ink-400);
+}
+
+/* --- Section caption (between owned / joined) -------------------------- */
+.sectionCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin: 32px 0 16px;
+}
+
+.sectionCaption:first-child {
   margin-top: 0;
 }
 
-/* ============================================
-   Group Cards
-   ============================================ */
-
+/* --- Grid --------------------------------------------------------------- */
 .groupsGrid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 16px;
 }
 
-/* Hero card — most active group gets visual emphasis without breaking the grid */
+/* --- Group card (paper surface, ink-cream cream-on-ink, low radius) ---- */
+.groupCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px;
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  text-decoration: none;
+  color: inherit;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.18);
+}
+
+.groupCard:hover {
+  background: var(--ink-100);
+  border-color: var(--ink-400);
+}
+
+/* Hero card — most active group. No left-border stripe (impeccable bans
+   ≥2px side stripes); use a stamp-yellow underline + caption tag instead. */
 .groupCardHero {
-  border-left: 3px solid var(--accent-primary);
-  box-shadow:
-    0 0 0 1px rgba(var(--accent-primary-rgb), 0.2),
-    0 4px 16px rgba(var(--accent-primary-rgb), 0.08);
+  border-color: var(--ink-400);
 }
 
-.groupCardHero:hover {
-  box-shadow:
-    var(--shadow-md),
-    0 0 0 1px var(--accent-primary),
-    0 6px 20px rgba(var(--accent-primary-rgb), 0.14);
+.groupCardHero::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 0;
+  height: 3px;
+  background: var(--stamp-yellow);
+  border-radius: 0;
+  pointer-events: none;
 }
 
-.groupCardHero .progressFill {
-  height: 6px;
-  background: linear-gradient(
-    90deg,
-    var(--accent-primary),
-    var(--accent-secondary, var(--accent-primary))
-  );
-}
-
-.groupCardHero .progressBar {
-  height: 6px;
-}
-
-/* "Most Active" celebratory badge — anchors top-right of hero card */
+/* Sticker-style badge — top-left, slight negative offset, rotated like
+   a hand-applied label. Sits on the card edge so it never collides with
+   the roster on the right. */
 .heroBadge {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
+  top: -8px;
+  left: 16px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 3px var(--space-2);
-  background: var(--accent-glow);
-  color: var(--accent-primary);
+  padding: 4px 8px;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
+  font-family: var(--font-mono-editorial);
   font-size: 10px;
   font-weight: 700;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-editorial-sm);
   line-height: 1;
   white-space: nowrap;
   pointer-events: none;
+  transform: rotate(-2deg);
+  box-shadow: 0 1px 3px rgba(20, 15, 5, 0.18);
+  z-index: 2;
 }
 
 .heroBadge svg {
   flex-shrink: 0;
 }
 
-.groupCard {
-  position: relative;
+/* Card head: caption + name + roster */
+.cardHead {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-3);
-  padding: var(--space-5);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  cursor: pointer;
-  text-decoration: none;
-  color: inherit;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
 
-.groupCard:hover {
-  border-color: var(--accent-primary);
-  box-shadow: var(--shadow-md), 0 0 0 1px var(--accent-primary);
-}
-
-/* Card header: icon + name/meta */
-.groupHeader {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.groupIcon {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--text-lg);
-  font-weight: 700;
-  flex-shrink: 0;
-  line-height: 1;
-}
-
-.groupInfo {
+.cardHeadInner {
   flex: 1;
   min-width: 0;
 }
 
-.groupTitleRow {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.groupTitleRow h3 {
-  font-size: var(--text-base);
-  font-weight: 600;
-  color: var(--text-primary);
+.cardCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 8px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.ownerBadge {
-  padding: 2px var(--space-2);
-  background: var(--accent-glow);
-  color: var(--accent-primary);
-  font-size: 11px;
-  font-weight: 600;
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  flex-shrink: 0;
+.cardCaption .ownerTag {
+  margin-left: 8px;
+  color: var(--stamp-yellow-ink);
+  background: var(--stamp-yellow);
+  padding: 2px 6px;
+  border-radius: var(--radius-editorial-sm);
+  letter-spacing: 0.1em;
 }
 
-.groupMeta {
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  margin-top: 2px;
-}
-
-.metaDot {
-  display: inline-block;
-  width: 3px;
-  height: 3px;
-  border-radius: var(--radius-full);
-  background: var(--text-muted);
-  margin: 0 var(--space-1);
-  flex-shrink: 0;
-}
-
-/* Description */
-.groupDescription {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+.cardTitle {
+  font-family: var(--font-display-editorial);
+  font-weight: 400;
+  font-size: clamp(24px, 2.6vw, 30px);
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
+  margin: 0;
+  /* clamp to 2 lines */
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.5;
+  word-break: break-word;
 }
 
-/* ============================================
-   Progress Bar
-   ============================================ */
+.cardDescription {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--ink-600);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
-.progressSection {
+/* --- Roster (top-right of card head) ----------------------------------- */
+.roster {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.rosterTile + .rosterTile,
+.rosterTile + .rosterExtra {
+  margin-left: -6px;
+}
+
+.rosterTile {
+  position: relative;
+  outline: 2px solid var(--ink-000);
+}
+
+.rosterExtra {
+  width: 28px;
+  height: 28px;
+  border-radius: 2px;
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  outline: 2px solid var(--ink-000);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans-editorial);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ink-600);
+  flex-shrink: 0;
+  position: relative;
+}
+
+/* --- Editorial dotted rule between sections of the card --------------- */
+.ruleDotted {
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--ink-300) 50%,
+    transparent 50%
+  );
+  background-size: 6px 1px;
+  background-repeat: repeat-x;
+}
+
+/* --- Stats row (To Do / Doing / Done / %) ----------------------------- */
+.statsRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 16px;
+  align-items: end;
+}
+
+.statBlock {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
+  min-width: 0;
 }
 
-.progressLabel {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  color: var(--text-tertiary);
+.statLabel {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
   font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
+.statValue {
+  font-family: var(--font-display-editorial);
+  font-weight: 400;
+  font-size: 28px;
+  line-height: 1;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Doing — slight emphasis via the active ink. Use ink-700 for the label
+   so it stays readable across all five inks (stamp-yellow-ink resolves to
+   white on Red Pen / Moss / Indigo, which would vanish on cream paper). */
+.statBlockDoing .statLabel {
+  color: var(--ink-600);
+}
+
+.statBlockDoing .statValue {
+  color: var(--ink-900);
+}
+
+.statBlockDone .statLabel,
+.statBlockDone .statValue {
+  color: var(--stamp-green);
+}
+
+.statPct {
+  font-family: var(--font-display-heavy-editorial);
+  font-weight: 400;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--ink-900);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* --- Slim progress bar (no indigo gradient) -------------------------- */
 .progressBar {
   width: 100%;
-  height: 4px;
-  background: var(--surface-2);
-  border-radius: var(--radius-full);
+  height: 3px;
+  background: var(--ink-200);
   overflow: hidden;
+  border-radius: 0;
 }
 
 .progressFill {
   height: 100%;
-  background: var(--accent-primary);
-  border-radius: var(--radius-full);
-  transition: width 0.3s ease;
+  background: var(--stamp-green);
+  transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* ============================================
-   Card Footer — Avatar Stack
-   ============================================ */
+.groupCardHero .progressFill {
+  height: 100%;
+  background: var(--stamp-green);
+}
 
+/* --- Card footer (Enter board →) ------------------------------------- */
 .cardFooter {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: var(--space-3);
-  border-top: 1px solid var(--border-subtle);
-  margin-top: auto;
-}
-
-.avatarStack {
-  display: flex;
-  align-items: center;
-}
-
-.avatar {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  border: 2px solid var(--border-default);
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--surface-3);
-  flex-shrink: 0;
-  position: relative;
-}
-
-.avatar + .avatar,
-.avatar + .avatarExtra {
-  margin-left: -8px;
-}
-
-.avatarImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-full);
-}
-
-.avatarFallback {
+  font-family: var(--font-mono-editorial);
   font-size: 11px;
   font-weight: 600;
-  color: var(--text-secondary);
-  line-height: 1;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
-.avatarExtra {
-  width: 28px;
-  height: 28px;
-  border-radius: var(--radius-full);
-  border: 2px solid var(--border-default);
-  background: var(--surface-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-  margin-left: -8px;
-  position: relative;
+.cardFooterLabel {
+  color: var(--ink-500);
 }
 
-/* ============================================
-   Loading State
-   ============================================ */
+.cardFooterArrow {
+  color: var(--stamp-yellow-ink);
+  background: var(--stamp-yellow);
+  padding: 4px 10px;
+  border-radius: var(--radius-editorial-sm);
+  transition: transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
 
+.groupCard:hover .cardFooterArrow {
+  transform: translateX(3px);
+}
+
+/* --- Create card (last cell — dashed surface, "Start a new group.") --- */
+.createCard {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px;
+  min-height: 240px;
+  background: transparent;
+  border: 1px dashed var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
+}
+
+.createCard:hover {
+  background: var(--ink-100);
+  border-color: var(--ink-500);
+}
+
+.createPlus {
+  font-family: var(--font-display-heavy-editorial);
+  font-size: 36px;
+  line-height: 1;
+  color: var(--stamp-yellow-ink);
+}
+
+/* --- Loading state -------------------------------------------------- */
 .loadingState {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-16);
-  gap: var(--space-4);
-}
-
-.loadingState p {
-  color: var(--text-secondary);
+  padding: 96px 16px;
+  gap: 16px;
+  color: var(--ink-600);
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
 }
 
 .spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--surface-3);
-  border-top-color: var(--accent-primary);
+  width: 28px;
+  height: 28px;
+  border: 2px solid var(--ink-300);
+  border-top-color: var(--stamp-yellow);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
+  to { transform: rotate(360deg); }
 }
 
-/* ============================================
-   Empty State (secondary action button only;
-   primary empty state handled by shared EmptyState component)
-   ============================================ */
-
+/* --- Empty state secondary action button --------------------------- */
 .emptyActionSecondary {
-  padding: var(--space-3) var(--space-6);
-  background: transparent;
-  color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-lg);
-  font-size: var(--text-sm);
+  padding: 10px 18px;
+  background: var(--ink-000);
+  color: var(--ink-700);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.15s ease, color 0.15s ease;
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
 .emptyActionSecondary:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
+  background: var(--ink-100);
+  border-color: var(--ink-500);
 }
 
-/* ============================================
-   Responsive
-   ============================================ */
-
+/* --- Responsive ---------------------------------------------------- */
 @media (max-width: 768px) {
   .container {
-    padding: var(--space-4);
+    padding: 24px 20px 64px;
   }
 
   .header {
     flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-4);
+    align-items: stretch;
   }
 
   .headerActions {
@@ -420,90 +509,51 @@
 
   .headerActions button {
     flex: 1;
+    justify-content: center;
   }
 
   .groupsGrid {
     grid-template-columns: 1fr;
   }
+
+  .statsRow {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .statPct {
+    grid-column: 1 / -1;
+    text-align: right;
+    font-size: 28px;
+  }
 }
 
-/* ── Dark Mode Overrides ── */
+/* --- Dark mode (inverted paper) ----------------------------------- */
 :global([data-theme="dark"]) .groupCard {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--ink-100);
+  border-color: var(--ink-300);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .groupCard:hover {
-  border-color: var(--accent-primary);
-  box-shadow: var(--shadow-lg), 0 0 0 1px var(--accent-primary), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+  background: var(--ink-200);
+  border-color: var(--ink-400);
+}
+
+:global([data-theme="dark"]) .rosterTile,
+:global([data-theme="dark"]) .rosterExtra {
+  outline-color: var(--ink-100);
+}
+
+:global([data-theme="dark"]) .rosterExtra {
+  background: var(--ink-200);
+  border-color: var(--ink-300);
+  color: var(--ink-700);
 }
 
 :global([data-theme="dark"]) .progressBar {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ink-200);
 }
 
-:global([data-theme="dark"]) .progressFill {
-  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.4);
-}
-
-:global([data-theme="dark"]) .ownerBadge {
-  background: rgba(var(--accent-primary-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .cardFooter {
-  border-top-color: var(--border-default);
-}
-
-:global([data-theme="dark"]) .avatar {
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .avatarExtra {
-  border-color: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .backBtn {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-xs);
-}
-
-:global([data-theme="dark"]) .backBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
-}
-
-:global([data-theme="dark"]) .emptyActionSecondary {
-  border-color: var(--border-default);
-}
-
-:global([data-theme="dark"]) .emptyActionSecondary:hover {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 12px rgba(var(--accent-primary-rgb), 0.15);
-}
-
-:global([data-theme="dark"]) .groupCardHero {
-  border-left-color: var(--accent-primary);
-  box-shadow:
-    0 0 0 1px rgba(var(--accent-primary-rgb), 0.3),
-    0 4px 20px rgba(var(--accent-primary-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .groupCardHero:hover {
-  box-shadow:
-    var(--shadow-lg),
-    0 0 0 1px var(--accent-primary),
-    0 0 28px rgba(var(--accent-primary-rgb), 0.28);
-}
-
-:global([data-theme="dark"]) .heroBadge {
-  background: rgba(var(--accent-primary-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .metaDot {
-  background: var(--text-tertiary);
-}
-
-:global([data-theme="dark"]) .spinner {
-  border-color: rgba(255, 255, 255, 0.08);
-  border-top-color: var(--accent-primary);
+:global([data-theme="dark"]) .createCard:hover {
+  background: var(--ink-200);
 }

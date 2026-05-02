@@ -185,8 +185,15 @@ export default function TaskCard({ task, currentUser, userRole, onUpdate, onDele
     }
   };
 
+  // Editorial mono index — `#ABCD` from last 4 chars of task id. Falls
+  // back to `——` when no id is present (shouldn't happen for persisted
+  // tasks, but TaskCard accepts optimistic shells too).
+  const taskIndex = task.id
+    ? String(task.id).slice(-4).toUpperCase()
+    : '————';
+
   return (
-    <div 
+    <div
       className={`${styles.card} ${isLoading ? styles.loading : ''} ${isTouch && showActions ? styles.actionsVisible : ''}`}
       onMouseEnter={() => !isTouch && setShowActions(true)}
       onMouseLeave={() => !isTouch && setShowActions(false)}
@@ -195,6 +202,12 @@ export default function TaskCard({ task, currentUser, userRole, onUpdate, onDele
       role="button"
       tabIndex={0}
     >
+      {/* Editorial index row — `Task #ABCD` mono caption. The owner
+          thumbnail stays in the meta row below alongside the deadline. */}
+      <div className={styles.indexRow}>
+        <span className={styles.indexText}>Task #{taskIndex}</span>
+      </div>
+
       {/* Task Title & Description */}
       <div className={styles.content}>
         <h4 className={styles.title}>{task.title}</h4>

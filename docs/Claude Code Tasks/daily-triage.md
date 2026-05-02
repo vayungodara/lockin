@@ -1,10 +1,12 @@
 You are an autonomous Claude Code task running daily for the LockIn project (github.com/vayungodara/lockin). LockIn is a student accountability app built with Next.js 16 (App Router), JavaScript only (no TypeScript), Supabase, Framer Motion, and CSS Modules.
 
 This task has THREE parts that run in parallel, then a merge/fix/report phase:
-- **Part A**: Bug hunting + security + performance (subagent: `@code-bug-hunter`)
-- **Part B**: Frontend/CSS audit (subagent: `@frontend-auditor`)
+- **Part A**: Bug hunting + security + performance (general-purpose subagent with the inline prompt in Step 3)
+- **Part B**: Frontend/CSS audit (general-purpose subagent with the inline prompt in Step 3)
 - **Part C**: DB health check (direct SQL from main session — subagents can't access Supabase MCP)
 - **Part D**: Merge results, read Notion, apply fixes, write reports, open PR (orchestrator — you)
+
+Spawn both subagents via the `Agent` tool with `subagent_type: "general-purpose"`. There are no registered LockIn-specific agent types — the subagent instructions live entirely in the prompts below.
 
 ---
 
@@ -74,16 +76,16 @@ Query the Notion database for recent visual audit findings:
 
 Launch both subagents AND run DB health queries from the main session simultaneously. Subagents are READ-ONLY — do not let them edit files.
 
-### Subagent 1: `@code-bug-hunter`
-Pass it yesterday's triage report content for cross-referencing.
+### Subagent 1: Code bug hunter (general-purpose)
+Dispatch via `Agent` tool with `subagent_type: "general-purpose"` and a prompt that includes: yesterday's triage report content for cross-referencing, plus explicit instructions to act as a read-only LockIn code bug hunter.
 It returns: structured findings table with file paths, line numbers, severity (critical/high/medium/low), categories (JS bug, security, performance, code quality), fix suggestions, and an EASY_FIXES subset.
-Tools: Read, Glob, Grep, Bash (read-only — cannot edit files).
+Instruct the subagent to use only Read, Glob, Grep, Bash (read-only — must NOT edit files).
 
-### Subagent 2: `@frontend-auditor`
-Pass it yesterday's frontend audit content and the visual audit finding descriptions from Notion (Step 2) as text context.
+### Subagent 2: Frontend auditor (general-purpose)
+Dispatch via `Agent` tool with `subagent_type: "general-purpose"` and a prompt that includes: yesterday's frontend audit content, the visual audit finding descriptions from Notion (Step 2) as text context, plus explicit instructions to act as a read-only LockIn CSS/design auditor.
 It returns: page-by-page scores (layout, typography, color, components, motion, dark mode, responsive), AI-generated tells, hardcoded values, missing dark mode overrides, animation violations, quick wins, and top 5 highest impact changes.
-Tools: Read, Glob, Grep, Bash (read-only — cannot edit files).
-This agent audits CSS/JS source code. It cannot view images — the visual audit's text descriptions in Notion provide rendered-page context.
+Instruct the subagent to use only Read, Glob, Grep, Bash (read-only — must NOT edit files).
+The subagent audits CSS/JS source code. It cannot view images — the visual audit's text descriptions in Notion provide rendered-page context.
 
 **IMPORTANT context for the frontend auditor (post-redesign):**
 - Dashboard uses TodayBar (components/TodayBar.js) — NOT StreakHero or DailySummaryCard. Don't flag these as missing.

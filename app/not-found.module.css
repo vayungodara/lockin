@@ -14,13 +14,12 @@
 }
 
 .heading {
+  font-family: var(--font-display-editorial);
   font-size: var(--text-6xl);
-  font-weight: var(--font-extrabold);
+  font-weight: 700;
+  letter-spacing: -0.03em;
   margin-bottom: var(--space-4);
-  background: var(--gradient-primary);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--text-primary);
 }
 
 .message {
@@ -32,14 +31,14 @@
 .link {
   display: inline-block;
   padding: var(--space-3) var(--space-6);
-  background: var(--gradient-primary);
-  color: white;
+  background: var(--brand-ink, var(--text-primary));
+  color: var(--ink-050, #F4F2EB);
   border-radius: var(--radius-lg);
   font-weight: var(--font-semibold);
   font-size: var(--text-base);
   text-decoration: none;
   box-shadow: var(--shadow-md);
-  transition: transform var(--transition-base), box-shadow var(--transition-base);
+  transition: transform var(--transition-base), box-shadow var(--transition-base), background var(--transition-base);
 }
 
 .link:hover,
@@ -55,7 +54,7 @@
 
 @media (forced-colors: active) {
   .heading {
-    -webkit-text-fill-color: currentColor;
+    color: currentColor;
     background: none;
   }
 }

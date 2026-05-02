@@ -6,20 +6,34 @@
 .toggleButton {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
-  padding: 2px var(--space-2);
+  gap: 5px;
+  padding: 2px 4px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-muted);
-  font-size: 12px;
+  color: var(--ink-500);
+  font-family: var(--font-sans-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: color 0.15s ease;
 }
 
 .toggleButton:hover {
-  background: var(--surface-2);
-  color: var(--text-secondary);
+  color: var(--ink-900);
+}
+
+/* Number sits in mono for the tabular feel; same letter-spacing fights
+   the parent transform so we reset spacing for the digit. */
+.toggleCount {
+  font-family: var(--font-mono-editorial);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0;
+}
+
+.toggleText {
+  letter-spacing: 0.16em;
 }
 
 .panel {

@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { getComments, postComment, deleteComment } from '@/lib/comments';
 import { formatRelativeTime } from '@/lib/activity';
-import { ChatCircle } from '@phosphor-icons/react';
 import { useToast } from '@/components/Toast';
 import styles from './ActivityComments.module.css';
 
@@ -74,9 +73,9 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
       <button
         className={styles.toggleButton}
         onClick={toggleComments}
+        aria-expanded={showComments}
       >
-        <ChatCircle size={14} weight="regular" />
-        {commentCount > 0 ? commentCount : ''} {showComments ? 'Hide' : commentCount > 0 ? '' : 'Comment'}
+        {renderToggleLabel(commentCount, showComments)}
       </button>
 
       <AnimatePresence>
@@ -141,5 +140,42 @@ export default function ActivityComments({ activityId, initialCount = 0 }) {
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+/* Editorial trigger label — `[ N comments → ]` when there are comments,
+   `[ comment + ]` when there are none, `[ hide ↑ ]` when expanded. The
+   bracketed look reads as a tracked uppercase editorial annotation in
+   the row, not a button-styled chip. */
+function renderToggleLabel(count, isOpen) {
+  if (isOpen) {
+    return (
+      <>
+        <span aria-hidden="true">[</span>
+        <span className={styles.toggleText}>hide</span>
+        <span aria-hidden="true">↑</span>
+        <span aria-hidden="true">]</span>
+      </>
+    );
+  }
+  if (count > 0) {
+    const label = count === 1 ? 'comment' : 'comments';
+    return (
+      <>
+        <span aria-hidden="true">[</span>
+        <span className={styles.toggleCount}>{count}</span>
+        <span className={styles.toggleText}>{label}</span>
+        <span aria-hidden="true">→</span>
+        <span aria-hidden="true">]</span>
+      </>
+    );
+  }
+  return (
+    <>
+      <span aria-hidden="true">[</span>
+      <span className={styles.toggleText}>comment</span>
+      <span aria-hidden="true">+</span>
+      <span aria-hidden="true">]</span>
+    </>
   );
 }

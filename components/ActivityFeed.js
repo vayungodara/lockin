@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import { staggerContainer } from '@/lib/animations';
 import { createClient } from '@/lib/supabase/client';
 import { getGroupActivity, getAllActivity, HIDDEN_FEED_ACTIONS, TEST_DATA_PATTERNS } from '@/lib/activity';
-import { Clock } from '@phosphor-icons/react';
 import ActivityItem from './ActivityItem';
 import styles from './ActivityFeed.module.css';
 
@@ -198,7 +197,6 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
       <div className={styles.container}>
         {!hideHeader && (
           <div className={styles.header}>
-            <Clock size={18} weight="regular" />
             <h3>Activity</h3>
           </div>
         )}
@@ -215,18 +213,15 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
     <div className={styles.container}>
       {!hideHeader && (
         <div className={styles.header}>
-          <Clock size={18} weight="regular" />
           <h3>Activity</h3>
         </div>
       )}
 
       {activities.length === 0 ? (
         <div className={styles.empty}>
-          <div className={styles.emptyIcon}>
-            <Clock size={32} weight="light" />
-          </div>
-          <p>No activity yet</p>
-          <span>{groupId ? 'Activity will appear here as your team works' : 'Your activity will appear here as you work'}</span>
+          <span className={styles.emptyText}>
+            {groupId ? 'Nothing yet. Start a task.' : 'Nothing yet. Add your first pact.'}
+          </span>
         </div>
       ) : (
         <motion.div
@@ -245,16 +240,14 @@ export default function ActivityFeed({ groupId = null, pageSize = DEFAULT_PAGE_S
             {isLoadingMore && (
               <div className={styles.loadingMore}>
                 <div className={styles.feedSpinner}></div>
-                <span>Loading more...</span>
+                <span>Loading more</span>
               </div>
             )}
           </div>
 
           {!hasMore && activities.length > 0 && (
             <div className={styles.endOfFeed}>
-              <div className={styles.endLine}></div>
-              <span>You&apos;re all caught up</span>
-              <div className={styles.endLine}></div>
+              <span>End of feed</span>
             </div>
           )}
         </motion.div>

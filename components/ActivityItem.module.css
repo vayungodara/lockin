@@ -1,220 +1,138 @@
-/* ── Item container ─────────────────────────────────── */
+/* ───────────────────────────────────────────────────────────────────────
+   ActivityItem — editorial diary row.
 
-.item {
+   Single horizontal line: avatar  ·  copy  ·  inline stamp  ·  timestamp
+   Reactions + comments live below, indented under the name. No timeline,
+   no glow, no border-left accents. Spacing is gap-driven; rows are
+   separated by a soft 1px ink-300 hairline at the bottom.
+   ─────────────────────────────────────────────────────────────────────── */
+
+.row {
   display: flex;
-  gap: var(--space-3);
-  position: relative;
-  padding: var(--space-2) var(--space-3);
-  margin: 0 calc(-1 * var(--space-3));
-  border-radius: var(--radius-item);
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px 8px;
+  margin: 0 -8px;
+  border-radius: var(--radius-editorial-sm);
+  border-bottom: 1px solid var(--ink-300);
   transition: background-color 0.15s ease;
 }
 
-.item:hover {
-  background: var(--surface-hover, var(--surface-2));
+/* Drop the trailing rule on the last row so the section ends cleanly. */
+.row:last-child {
+  border-bottom: 0;
 }
 
-.item.newItem {
-  animation: newItemFlash 2s ease-out forwards;
+.row:hover {
+  background: color-mix(in oklch, var(--ink-300) 14%, transparent);
 }
 
-@keyframes newItemFlash {
-  0% { background: rgba(var(--accent-celebration-rgb), 0.15); }
-  100% { background: transparent; }
-}
-
-/* ── Timeline (icon + vertical line) ───────────────── */
-
-.timeline {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex-shrink: 0;
-  width: 32px;
-  padding-top: 1px;
-}
-
-.icon {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-full);
+/* ── Top line: avatar + copy + inline stamp + timestamp ─────────────── */
+.rowHead {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  position: relative;
-  z-index: 1;
-}
-
-.item:hover .icon {
-  transform: scale(1.08);
-}
-
-.iconPurple {
-  background: rgba(var(--accent-primary-rgb), 0.12);
-  color: var(--accent-primary);
-}
-
-.iconGreen {
-  background: var(--success-bg);
-  color: var(--success);
-}
-
-.iconYellow {
-  background: var(--warning-bg);
-  color: var(--warning);
-}
-
-.iconBlue {
-  background: var(--info-bg);
-  color: var(--info);
-}
-
-.iconRed {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
-.iconGray {
-  background: var(--surface-2);
-  color: var(--text-tertiary);
-}
-
-.line {
-  width: 2px;
-  flex: 1;
-  min-height: 8px;
-  background: var(--border-subtle);
-  margin-top: var(--space-2);
-}
-
-.item:last-child .line {
-  display: none;
-}
-
-/* ── Content area ──────────────────────────────────── */
-
-.content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  gap: 10px;
   min-width: 0;
-  padding-top: 4px;
-  padding-bottom: var(--space-3);
 }
-
-.item:last-child .content {
-  padding-bottom: 0;
-}
-
-.header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-2);
-}
-
-.main {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-2);
-  min-width: 0;
-  flex: 1;
-}
-
-/* ── Avatar ────────────────────────────────────────── */
 
 .avatar {
-  width: 22px;
-  height: 22px;
-  border-radius: var(--radius-full);
   flex-shrink: 0;
-  overflow: hidden;
-  background: var(--gradient-primary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 1px;
 }
 
-.avatarImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.avatar span {
-  font-size: 10px;
-  font-weight: var(--font-semibold);
-  color: white;
-}
-
-/* ── Text content ──────────────────────────────────── */
-
-.text {
-  font-size: var(--text-sm);
-  line-height: 1.5;
-  color: var(--text-secondary);
+/* The activity sentence. flex-wrap so long pact titles don't overflow.
+   align-items: baseline so the verb + target sit on the same baseline as
+   the name even though weights differ. */
+.copy {
+  flex: 1;
+  min-width: 0;
   display: flex;
   flex-wrap: wrap;
-  gap: 3px;
   align-items: baseline;
-  word-break: break-word;
-  overflow-wrap: break-word;
+  gap: 4px;
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--ink-500);
 }
 
-.userName {
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+/* Name reads as the actor — heavier weight, full ink. */
+.name {
+  font-weight: 600;
+  color: var(--ink-900);
 }
 
-.verb {
-  color: var(--text-tertiary);
-  font-weight: var(--font-normal, 400);
+/* Verb + target are 500 — distinct from the name without competing. */
+.verbText {
+  font-weight: 500;
+  color: var(--ink-500);
 }
 
+/* The target (pact title, task title, group name) is the noun the verb
+   acts on. Slightly heavier than the verb, capped width with ellipsis so
+   long titles don't push the timestamp off the row. */
 .target {
-  color: var(--text-primary);
-  font-weight: var(--font-medium);
-  max-width: 220px;
+  font-weight: 500;
+  color: var(--ink-700);
+  max-width: 240px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  display: inline-block;
-  vertical-align: bottom;
 }
 
-.time {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
+/* Optional suffix like "— 50m" for focus sessions. Tabular mono so the
+   minute count aligns rhythmically with the right-side timestamp. */
+.suffix {
+  font-family: var(--font-mono-editorial);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Inline Stamp variant — the kept/missed mark sits between the copy and
+   the timestamp. The Stamp component is already rotated -3° at rest;
+   we just give it a tiny bit of breathing room. */
+.inlineStamp {
   flex-shrink: 0;
-  white-space: nowrap;
   margin-left: 2px;
 }
 
-.time::before {
-  content: '\00b7';
-  margin-right: 5px;
-  color: var(--text-muted);
+/* Timestamp — JetBrains Mono 11px, ink-tertiary. Right-aligned via
+   margin-left: auto when no stamp is present, otherwise the inline stamp
+   handles the spacing. */
+.time {
+  flex-shrink: 0;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  margin-left: auto;
 }
 
-/* ── Footer (reactions + comments) ─────────────────── */
+/* When the stamp exists, push the timestamp tight against it instead of
+   margin-auto far right — keeps the editorial rhythm compact. */
+.inlineStamp + .time {
+  margin-left: 8px;
+}
 
-.footer {
+/* ── Indented row (reactions + comments) ────────────────────────────── */
+/* 28px avatar + 10px gap = 38px to align the reactions row under the
+   start of the name. */
+.indented {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
-  margin-left: 30px;
+  gap: 4px;
+  margin-left: 38px;
 }
 
-/* ── Reactions ─────────────────────────────────────── */
-
+/* ── Reactions ──────────────────────────────────────────────────────── */
 .reactions {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 6px;
 }
 
 .reactionBubbles {
@@ -223,46 +141,48 @@
 }
 
 .reactionBubble {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 2px;
-  padding: 2px 6px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
+  gap: 3px;
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
   font-size: 12px;
+  font-family: var(--font-sans-editorial);
 }
 
 .reactionBubble:hover {
-  background-color: var(--surface-3);
-  border-color: var(--border-default);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
+  border-color: var(--ink-500);
 }
 
 .reactionBubble.active {
-  background: var(--gradient-subtle);
-  border-color: var(--accent-primary);
+  background: color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
+  border-color: var(--stamp-yellow);
 }
 
 .reactionCount {
   font-size: 11px;
-  font-weight: var(--font-medium);
-  color: var(--text-secondary);
+  font-family: var(--font-mono-editorial);
+  font-weight: 500;
+  color: var(--ink-700);
+  font-variant-numeric: tabular-nums;
 }
 
 .reactionTrigger {
   display: flex;
   align-items: center;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   cursor: pointer;
 }
 
 .reactionTriggerOpen {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-default);
-  box-shadow: var(--shadow-lg);
-  padding: 4px 6px;
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  padding: 3px 5px;
   cursor: default;
 }
 
@@ -270,18 +190,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: var(--radius-full);
+  width: 22px;
+  height: 22px;
+  border-radius: var(--radius-editorial-sm);
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: var(--ink-500);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+  transition: background-color 0.15s ease, color 0.15s ease, opacity 0.15s ease;
   opacity: 0;
 }
 
-.item:hover .addReactionBtn {
+.row:hover .addReactionBtn {
   opacity: 1;
 }
 
@@ -292,8 +212,8 @@
 }
 
 .addReactionBtn:hover {
-  background: var(--surface-2);
-  color: var(--text-secondary);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
+  color: var(--ink-900);
 }
 
 .reactionPickerInline {
@@ -310,97 +230,72 @@
   height: 22px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-full);
-  color: var(--text-muted);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-500);
   cursor: pointer;
   margin-left: 2px;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .reactionClose:hover {
-  background: var(--surface-2);
-  color: var(--text-secondary);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
+  color: var(--ink-900);
 }
 
 .reactionOption {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   font-size: 16px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-editorial-sm);
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background-color 0.15s ease;
 }
 
 .reactionOption:hover {
-  background: var(--surface-2);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
 }
 
 .reactionOption.selected {
-  background: var(--gradient-subtle);
+  background: color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }
 
-/* ── Mobile ────────────────────────────────────────── */
-
+/* ── Mobile ─────────────────────────────────────────────────────────── */
 @media (max-width: 640px) {
-  .item {
-    margin: 0 calc(-1 * var(--space-2));
-    padding: var(--space-2);
+  .row {
+    margin: 0 -4px;
+    padding: 10px 4px;
   }
 
   .target {
-    max-width: 150px;
+    max-width: 140px;
   }
 
-  .footer {
-    margin-left: 0;
+  /* On narrow screens let the timestamp drop below the copy if everything
+     can't fit on one line. The flex-wrap on .copy already handles this
+     for the sentence; the time stays right-aligned by margin-left: auto. */
+  .indented {
+    margin-left: 32px;
   }
 }
 
-/* ── Dark mode overrides ── */
-:global([data-theme="dark"]) .item:hover {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-:global([data-theme="dark"]) .reactionBubble {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--border-default);
+/* ── Dark mode overrides ────────────────────────────────────────────── */
+:global([data-theme="dark"]) .row:hover {
+  background: color-mix(in oklch, var(--ink-200) 80%, transparent);
 }
 
 :global([data-theme="dark"]) .reactionBubble:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: var(--border-strong);
+  background: color-mix(in oklch, var(--ink-200) 60%, transparent);
 }
 
 :global([data-theme="dark"]) .reactionTriggerOpen {
-  background: var(--bg-elevated);
-  box-shadow: var(--shadow-xl);
+  background: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .addReactionBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .iconPurple {
-  background: rgba(var(--accent-primary-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .iconGreen {
-  background: rgba(var(--success-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .iconYellow {
-  background: rgba(var(--warning-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .iconBlue {
-  background: rgba(var(--info-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .iconRed {
-  background: rgba(var(--danger-rgb), 0.18);
+  background: color-mix(in oklch, var(--ink-200) 60%, transparent);
 }

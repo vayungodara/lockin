@@ -5,16 +5,40 @@ import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useConfetti } from '@/lib/confetti';
-import { cardHover, buttonHover, buttonTap, celebrationBounce, celebrationGlow } from '@/lib/animations';
+import { buttonHover, buttonTap, celebrationBounce } from '@/lib/animations';
 import { useToast } from '@/components/Toast';
 import { playCompletionSound, playMissSound } from '@/lib/sounds';
+import Stamp from '@/components/Stamp';
 import styles from './PactCard.module.css';
 
+/**
+ * Personal commitment card — editorial redesign.
+ *
+ * Single-urgency-signal rule (per .impeccable.md principle #2):
+ *  - Pending, deadline > 4h away  → clean card (index + title + footer).
+ *  - Pending, deadline ≤ 4h away  → rotated `CLOSES SOON` highlighter sticker,
+ *    top-right, ~3° tilt. No border tints, no glow, no pulse on the card.
+ *  - In-progress (focus active)   → `<Stamp kind="locked-in" />` + pulse dot on
+ *    the primary avatar (not the whole card).
+ *  - Kept (completed on time)     → `<Stamp kind="kept" slam />`, card
+ *    opacity 0.85.
+ *  - Missed                       → `<Stamp kind="missed" slam />`, card
+ *    opacity 0.80.
+ *
+ * The stamp IS the urgency/resolution signal — no stacking glow bars, pulse
+ * dots, and border-color shifts on the same surface.
+ *
+ * @param {Object} props
+ * @param {Object} props.pact     — Supabase `pacts` row
+ * @param {Function} [props.onUpdate] — optimistic-UI parent callback
+ * @param {Function} [props.onDelete] — delete handler (shown on resolved pacts)
+ */
 export default function PactCard({ pact, onUpdate, onDelete }) {
   const [isPending, setIsPending] = useState(false);
   const isCompletingRef = useRef(false);
   const justCompletedRef = useRef(false);
   const [showBounce, setShowBounce] = useState(false);
+  const [justResolved, setJustResolved] = useState(false);
   const cardRef = useRef(null);
   const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
@@ -153,6 +177,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       if (onUpdate) {
         onUpdate({ ...pact, status: 'active', completed_at: null });
       }
+      setJustResolved(false);
       window.dispatchEvent(new CustomEvent('xp-updated'));
     } catch (err) {
       console.error('Error reverting pact completion:', err);
@@ -177,6 +202,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
       if (onUpdate) {
         onUpdate({ ...pact, status: 'active' });
       }
+      setJustResolved(false);
     } catch (err) {
       console.error('Error reverting pact miss:', err);
       toast.error('Failed to undo. Please try again.');
@@ -192,75 +218,69 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
   const now = new Date();
   const deadlineDate = new Date(pact.deadline);
-  const isOverdue = deadlineDate < now && pact.status === 'active';
-  const isDueToday = !isOverdue && pact.status === 'active' &&
-    deadlineDate.toDateString() === now.toDateString();
+  const msUntilDeadline = deadlineDate - now;
+  const hoursUntilDeadline = msUntilDeadline / (1000 * 60 * 60);
+  const isActive = pact.status === 'active';
+  const isOverdue = msUntilDeadline < 0 && isActive;
   const isCompleted = pact.status === 'completed';
+  const isMissed = pact.status === 'missed';
+  // "In progress" — an active focus session is running against this pact.
+  // Uses `in_progress` flag (optional — falsy when not set, non-breaking).
+  const isInProgress = isActive && pact.in_progress === true;
+  // Closes soon: pending + ≤4h until deadline (already-overdue counts).
+  const closesSoon = isActive && hoursUntilDeadline <= 4;
 
-  // Determine urgency tier for card-level CSS class
-  const urgencyTierClass = isOverdue ? styles.pactCardOverdue
-    : isDueToday ? styles.pactCardDueToday
-    : isCompleted ? styles.pactCardCompleted
-    : styles.pactCardDefault;
+  // Pact index — monospace Pact #0047 label. Uses pact.index if present,
+  // else last 4 chars of id, else an em-dash placeholder.
+  const pactIndex = pact.index
+    ? String(pact.index).padStart(4, '0')
+    : pact.id
+    ? String(pact.id).slice(-4).toUpperCase()
+    : '————';
 
-  // Hours overdue for badge text
-  const hoursOverdue = isOverdue
-    ? Math.floor((now - deadlineDate) / (1000 * 60 * 60))
-    : 0;
+  // Format deadline as `Mon · 10:00 PM` (JetBrains mono header)
+  const deadlineHeaderLabel = (() => {
+    if (!pact.deadline) return '—';
+    const weekday = deadlineDate.toLocaleDateString('en-US', { weekday: 'short' });
+    const time = deadlineDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+    return `${weekday} · ${time}`;
+  })();
 
-  // Hours remaining for "Due in X hours" text
-  const hoursUntilDue = isDueToday
-    ? Math.max(0, Math.floor((deadlineDate - now) / (1000 * 60 * 60)))
-    : 0;
+  // Footer time label — short, factual, colored per state.
+  const footerTimeLabel = (() => {
+    const timeStr = deadlineDate.toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+    }).toLowerCase();
 
-  // Deadline urgency coloring (for deadline text)
-  const hoursRemaining = pact.deadline ? (deadlineDate - now) / (1000 * 60 * 60) : null;
-  const deadlineUrgencyClass = hoursRemaining !== null
-    ? hoursRemaining < 6 ? styles.urgencyCritical
-    : hoursRemaining < 12 ? styles.urgencyHigh
-    : hoursRemaining < 24 ? styles.urgencyMedium
-    : styles.urgencyLow
-    : '';
-
-  // Format deadline
-  const formatDeadline = () => {
-    // Use ms-based hours-first, days-after math so sub-24h windows are
-    // classified correctly. Example: deadline at 01:00 tomorrow while now
-    // is 23:00 today → hours=2, days=0 → "Due in 2 hours" (NOT "Due tomorrow").
-    // The days===1 branch only triggers when ≥24h remain.
-    const diff = deadlineDate - now;
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (pact.status === 'completed') {
-      return 'Completed';
+    if (isCompleted) {
+      const when = pact.completed_at
+        ? new Date(pact.completed_at).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+          }).toLowerCase()
+        : timeStr;
+      return `kept · ${when}`;
     }
-
-    if (pact.status === 'missed') {
-      return 'Missed';
+    if (isMissed) return `missed · ${timeStr}`;
+    if (isInProgress) return `locked in · due ${timeStr}`;
+    if (isOverdue) {
+      const hoursOver = Math.max(1, Math.floor(-hoursUntilDeadline));
+      return `overdue · ${hoursOver}h`;
     }
-
-    if (diff < 0) {
-      return 'Overdue';
+    if (hoursUntilDeadline < 1) return `due in <1h · ${timeStr}`;
+    if (hoursUntilDeadline < 24) {
+      const h = Math.floor(hoursUntilDeadline);
+      return `due in ${h}h · ${timeStr}`;
     }
-
-    if (days === 0) {
-      if (hours === 0) {
-        return 'Due in less than an hour';
-      }
-      return `Due in ${hours} hour${hours === 1 ? '' : 's'}`;
-    }
-
-    if (days === 1) {
-      return 'Due tomorrow';
-    }
-
-    if (days < 7) {
-      return `Due in ${days} days`;
-    }
-
-    return `Due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
-  };
+    const days = Math.floor(hoursUntilDeadline / 24);
+    if (days === 1) return `due tomorrow · ${timeStr}`;
+    if (days < 7) return `due in ${days}d · ${timeStr}`;
+    return `due ${deadlineDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`;
+  })();
 
   const handleComplete = async () => {
     if (isCompletingRef.current) return;
@@ -271,6 +291,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     triggerConfetti();
     justCompletedRef.current = true;
     setShowBounce(true);
+    setJustResolved(true);
     playCompletionSound();
 
     if (onUpdate) {
@@ -308,6 +329,7 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
 
     // 1. Optimistic UI — sound, update parent (fires immediately)
     playMissSound();
+    setJustResolved(true);
 
     if (onUpdate) {
       onUpdate({ ...pact, status: 'missed' });
@@ -335,78 +357,67 @@ export default function PactCard({ pact, onUpdate, onDelete }) {
     }
   };
 
-  const getStatusClass = () => {
-    if (pact.status === 'completed') return styles.completed;
-    if (pact.status === 'missed') return styles.missed;
-    if (isOverdue) return `${styles.missed} ${styles.overdue}`;
-    return styles.active;
-  };
+  // State-based class (drives opacity muting + footer text color)
+  const stateClass = isCompleted
+    ? styles.cardKept
+    : isMissed
+    ? styles.cardMissed
+    : isInProgress
+    ? styles.cardInProgress
+    : styles.cardPending;
 
   return (
     <motion.div
       ref={cardRef}
-      className={`${styles.card} ${getStatusClass()} ${urgencyTierClass}`}
-      whileHover={pact.status === 'active' ? cardHover : undefined}
-      animate={showBounce ? celebrationGlow.animate : undefined}
-      style={{ position: 'relative' }}
+      className={`${styles.card} ${stateClass}`}
+      whileHover={isActive ? { y: -1 } : undefined}
+      transition={{ duration: 0.12, ease: 'easeOut' }}
     >
       {ConfettiComponent}
 
-      {/* Overdue pulsing indicator dot */}
-      {isOverdue && <span className={styles.pulseDot} aria-hidden="true" />}
-
-      {/* Due today amber indicator dot */}
-      {isDueToday && <span className={styles.amberDot} aria-hidden="true" />}
+      {/* CLOSES SOON sticker — only when active + ≤4h away */}
+      {closesSoon && (
+        <span className={styles.closesSoonSticker} aria-label="Closes soon">
+          CLOSES SOON
+        </span>
+      )}
 
       <div className={styles.content}>
-        <div className={styles.header}>
-          <h3 className={styles.title}>{pact.title}</h3>
-          <div className={styles.badgeGroup}>
-            {/* Overdue hours badge */}
-            {isOverdue && (
-              <span className={styles.overdueBadge}>
-                {hoursOverdue === 0 ? 'Just overdue' : `${hoursOverdue}h overdue`}
-              </span>
-            )}
-
-            {/* Completed XP reward badge */}
-            {isCompleted && (
-              <span className={styles.xpBadge}>
-                +{pact.xp_reward || 10} XP
-              </span>
-            )}
-
-            <span className={`${styles.badge} ${getStatusClass()}`}>
-              {pact.status === 'completed' ? 'Done' : pact.status === 'missed' ? 'Missed' : isOverdue ? 'Overdue' : 'Active'}
-            </span>
-          </div>
+        {/* Editorial index row — `Pact #0047 · Mon · 10:00 PM` */}
+        <div className={styles.indexRow}>
+          <span className={styles.indexText}>
+            Pact #{pactIndex} · {deadlineHeaderLabel}
+          </span>
+          {/* Resolution / progress stamp sits next to the index */}
+          {isCompleted && (
+            <Stamp kind="kept" size="md" slam={justResolved} />
+          )}
+          {isMissed && (
+            <Stamp kind="missed" size="md" slam={justResolved} />
+          )}
+          {isInProgress && !isCompleted && !isMissed && (
+            <Stamp kind="locked-in" size="md" />
+          )}
         </div>
+
+        <h3 className={styles.title}>{pact.title}</h3>
 
         {pact.description && (
           <p className={styles.description}>{pact.description}</p>
         )}
 
         <div className={styles.footer}>
-          <div className={`${styles.deadline} ${pact.status === 'active' ? deadlineUrgencyClass : ''}`}>
-            {/* Overdue: no clock icon, use warning icon */}
-            {isOverdue ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 9V13M12 17H12.01M5.07 19H18.93C20.52 19 21.5 17.28 20.7 15.89L13.77 3.97C12.97 2.58 11.03 2.58 10.23 3.97L3.3 15.89C2.5 17.28 3.48 19 5.07 19Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : isCompleted ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2"/>
-                <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
-              </svg>
+          <div className={styles.footerMeta}>
+            {isInProgress && !isCompleted && !isMissed && (
+              <span className={styles.pulseDot} aria-hidden="true" />
             )}
-            {isDueToday && hoursUntilDue > 0 ? `Due in ${hoursUntilDue} hour${hoursUntilDue === 1 ? '' : 's'}` : formatDeadline()}
+            <span className={styles.timeLabel}>{footerTimeLabel}</span>
+            {isCompleted && (
+              <span className={styles.xpChip}>+{pact.xp_reward || 10} XP</span>
+            )}
           </div>
-          
-          {pact.status === 'active' ? (
+
+          {isActive ? (
             <div className={styles.actions}>
               <motion.button
                 onClick={handleMiss}

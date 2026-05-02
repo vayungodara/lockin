@@ -1,0 +1,86 @@
+/* ------------------------------------------------------------------ */
+/*  Ticker — horizontal infinite-scroll activity stream                */
+/*  Replaces the old orange marquee with an editorial stamp-and-ink   */
+/*  ticker-tape. Loops every 45s; reduced motion pauses at rest.      */
+/* ------------------------------------------------------------------ */
+
+.ticker {
+  overflow: hidden;
+  border-top: 1px solid var(--ink-300);
+  border-bottom: 1px solid var(--ink-300);
+  background: var(--ink-000);
+}
+
+/* The track is set to max-content width so the doubled item list lives
+   on a single row. The -50% translate on the keyframe wraps to the
+   seam of the second copy, which reads as a continuous loop. */
+.track {
+  display: flex;
+  width: max-content;
+  padding: 10px 0;
+  animation: tickerScroll 45s linear infinite;
+}
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .track {
+    animation: none;
+  }
+}
+
+/* Single ticker row — mono timestamp, bold ink username, regular body,
+   decorative star separator. 12px uppercase tracked — classic stock-
+   ticker rhythm without crossing into newsprint crowding. */
+.item {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  margin: 0 32px;
+  font-family: var(--font-sans-editorial, 'Host Grotesk', system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+}
+
+.time {
+  font-family: var(--font-mono-editorial, 'JetBrains Mono', ui-monospace, monospace);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-500);
+  margin-right: 16px;
+  font-weight: 500;
+}
+
+.user {
+  color: var(--ink-900);
+  font-weight: 800;
+  margin-right: 12px;
+}
+
+.body {
+  color: var(--ink-700);
+  font-weight: 500;
+  /* Body copy in the ticker intentionally stays lowercase to match the
+     anchor's approved voice — "kept pact", "locked in", "moved task".
+     The uppercase text-transform on the parent is overridden here. */
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+/* Decorative separators. Three colors cycle across items so the ticker
+   feels inked, not sterile. 16px off each side for air. */
+.starRed,
+.starGreen,
+.starYellow {
+  margin: 0 32px;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.starRed    { color: var(--stamp-red); }
+.starGreen  { color: var(--stamp-green); }
+.starYellow { color: var(--stamp-yellow); }

@@ -1,0 +1,72 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   UserAvatar — initial-tile primary, photo fallback.
+
+   Square-ish 2px radius (not a circle) — matches the witness-tile aesthetic
+   of the editorial redesign. The tile IS brand identity: an ink color the
+   user has chosen (or been hashed into), framed with the two-letter initial
+   in bold Host Grotesk.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 2px;
+  font-family: var(--font-sans-editorial);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  color: var(--ink-000);
+  background: var(--stamp-yellow);
+  overflow: hidden;
+  user-select: none;
+  /* Subtle dimension without competing with the card shadow. */
+  box-shadow: 0 1px 0 rgba(20, 15, 5, 0.08);
+}
+
+/* --- Sizes --------------------------------------------------------------- */
+.tileXs {
+  width: 20px;
+  height: 20px;
+  font-size: 9px;
+}
+
+.tileSm {
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+}
+
+.tileMd {
+  width: 36px;
+  height: 36px;
+  font-size: 12px;
+}
+
+.tileLg {
+  width: 48px;
+  height: 48px;
+  font-size: 14px;
+}
+
+/* --- Ring (focused state) ------------------------------------------------ */
+.ring {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
+}
+
+/* --- Photo --------------------------------------------------------------- */
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* --- Dark mode ----------------------------------------------------------- */
+/* Stamp-yellow already includes a dark-mode variant in globals.css — the
+   tile inherits automatically. Shadow softens into the warm-dark base. */
+:global([data-theme="dark"]) .tile {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}

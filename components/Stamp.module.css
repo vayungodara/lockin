@@ -1,0 +1,111 @@
+/* ------------------------------------------------------------------ */
+/*  Stamp — rubber-stamp resolution label                             */
+/*  Hero mechanic of the editorial redesign. Rotated -3deg at rest.   */
+/*  Rough-edge imperfection lives in the ::after radial-gradient.     */
+/* ------------------------------------------------------------------ */
+
+.stamp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans-editorial);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  border: 2.5px solid currentColor;
+  border-radius: var(--radius-editorial-md);
+  white-space: nowrap;
+  user-select: none;
+  position: relative;
+  /* Hint to the compositor — rotation + scale on slam should be GPU-smooth */
+  will-change: transform;
+  /* The -3deg rest rotation is applied inline via the component so callers
+     can opt out or customize. Slam animations inherit rotation from the
+     stampSlam preset itself, not this stylesheet. */
+}
+
+/* Pseudo-elements inherit the rounded corners of the parent stamp. */
+.stamp::before,
+.stamp::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Rough-edge imperfection — deliberate ink-splotch irregularity.
+   Two radial gradients on opposing sides simulate uneven stamp pressure.
+   Very low opacity + mix-blend-mode: multiply so the effect reads on any
+   stamp color without washing it out. */
+.stamp::after {
+  background-image:
+    radial-gradient(circle at 15% 50%, transparent 30%, currentColor 31%, transparent 32%),
+    radial-gradient(circle at 85% 40%, transparent 20%, currentColor 21%, transparent 22%);
+  background-size: 40px 40px;
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+}
+
+/* ---------- Sizes ---------- */
+
+.stampSm {
+  font-size: 10px;
+  padding: 4px 10px;
+  border-width: 2px;
+  letter-spacing: 0.16em;
+}
+
+.stampMd {
+  font-size: 12px;
+  padding: 6px 14px;
+  border-width: 2.5px;
+  letter-spacing: 0.18em;
+}
+
+.stampLg {
+  font-size: 16px;
+  padding: 10px 20px;
+  border-width: 3px;
+  letter-spacing: 0.2em;
+}
+
+.stampXl {
+  font-size: 26px;
+  padding: 14px 28px;
+  border-width: 4px;
+  letter-spacing: 0.22em;
+}
+
+/* ---------- Variants ---------- */
+
+/* Moss green — KEPT. Earned color, celebrates resolution. */
+.stampKept {
+  color: var(--stamp-green);
+}
+
+/* Red pen — MISSED. Warm arterial, not corporate-error red. */
+.stampMissed {
+  color: var(--stamp-red);
+}
+
+/* Carbon blue — LOCKED IN. Worn during an active focus session. */
+.stampLockedIn {
+  color: var(--stamp-blue);
+}
+
+/* Highlighter yellow — PENDING. Yellow-on-yellow would be unreadable, so
+   this variant fills with the brand yellow and uses dark stamp-ink for the
+   label + border. The rough-edge ::after keeps currentColor = yellow-ink,
+   which reads as a darker splotch on the yellow fill — correct. */
+.stampPending {
+  color: var(--stamp-yellow-ink);
+  background-color: var(--stamp-yellow);
+  border-color: var(--stamp-yellow-ink);
+}
+
+/* Muted neutral — VOID. Cancelled or nullified pacts. No splotches of color,
+   just the quiet gray ink. */
+.stampVoid {
+  color: var(--ink-500);
+}

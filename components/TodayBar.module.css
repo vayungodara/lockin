@@ -1,215 +1,131 @@
-/* ── TodayBar: unified streak + daily summary status bar ── */
-/* Double-nested card: cream outer wrapper + white inner card */
+/* ═══════════════════════════════════════════════════════════════════════
+   TodayBar — editorial-stamps redesign
+
+   Single editorial surface. Monumental serif streak numeral on the left,
+   direct-positive pact status middle, focus time right. CLOSES SOON-style
+   chip carries streak-risk urgency. Voice stays direct-positive throughout.
+
+   Stripped from the previous revision:
+     - Double-nested cream-outer + white-inner card
+     - rgba(--accent-primary-rgb, …) indigo leaks (hover, badges, icons)
+     - --accent-primary milestone text (now ink-700 + chip pattern)
+     - Hard-coded hex (#FFFCF5, #fff)
+     - Tier-based streak-color-rgb glow shadows on hover
+     - 🔥 emoji in streak headline (number IS the moment)
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .bar {
-  --streak-color-rgb: 255, 184, 0;
   position: relative;
   width: 100%;
-  background: #FFFCF5;
-  border: 1px solid rgba(255, 184, 0, 0.25);
-  border-radius: var(--radius-2xl);
-  padding: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.02);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  padding: 0;
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.18);
   overflow: hidden;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  transition: border-color 120ms ease-out;
   content-visibility: auto;
-  contain-intrinsic-size: auto 96px;
+  contain-intrinsic-size: auto 160px;
+  color: var(--ink-800);
 }
 
 .bar:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.18);
-  box-shadow: 0 2px 16px rgba(var(--accent-primary-rgb), 0.06);
+  border-color: var(--ink-400);
 }
 
-/* ── Inner white card ── */
-.barInner {
-  background: var(--bg-elevated, #fff);
-  border: 1px solid rgba(255, 184, 0, 0.15);
-  border-radius: 14px;
-  overflow: hidden;
-}
-
-/* ── Background decoration ── */
-.bgDecoration {
-  position: absolute;
-  top: -60%;
-  right: -5%;
-  width: 180px;
-  height: 180px;
-  background: radial-gradient(circle, rgba(var(--streak-color-rgb), 0.05) 0%, transparent 70%);
-  border-radius: var(--radius-full);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* ── Tier-based tinting on OUTER wrapper ── */
-.base {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.2);
-}
-
-.warm {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.25);
-}
-
-.fire {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.25);
-}
-
-.electric {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.28);
-}
-
-.diamond {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.3);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 20px rgba(var(--streak-color-rgb), 0.06);
-}
-
+/* Tier modifiers — kept as opt-in accents but very restrained.
+   Earned color: only on real milestones (electric / diamond / legendary). */
+.diamond,
 .legendary {
-  background: #FFFCF5;
-  border-color: rgba(var(--streak-color-rgb), 0.35);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 0 28px rgba(var(--streak-color-rgb), 0.08);
+  border-color: color-mix(in oklch, var(--stamp-yellow) 35%, var(--ink-300));
 }
 
 /* ── Primary row: 3 zones ── */
 .primaryRow {
   position: relative;
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: stretch;
-  min-height: 76px;
-  z-index: 1;
+  min-height: 140px;
 }
 
-/* ── Zone divider (amber, not gray) ── */
+/* ── Zone divider — hairline editorial ink ── */
 .zoneDivider {
   width: 1px;
   align-self: stretch;
-  background: rgba(255, 184, 0, 0.08);
-  flex-shrink: 0;
+  background: var(--ink-300);
 }
 
-/* ── Zone 1: Streak (with amber gradient tint) ── */
+/* ── Zone 1: Streak — monumental serif numeral ── */
 .streakZone {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  flex: 1;
+  gap: 20px;
   min-width: 0;
-  padding: var(--space-4) var(--space-5);
-  background: linear-gradient(to right, rgba(255, 184, 0, 0.06), transparent);
+  padding: 24px 28px;
 }
 
-.iconWrapper {
-  position: relative;
-  display: flex;
+.streakCountWrap {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
+  justify-content: flex-start;
   flex-shrink: 0;
-  background: rgba(var(--streak-color-rgb), 0.12);
-  border-radius: 50%;
-}
-
-/* ── Confetti dots ── */
-.confettiDotBlue {
-  position: absolute;
-  top: -2px;
-  right: -4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--accent-primary);
-}
-
-.confettiDotGreen {
-  position: absolute;
-  bottom: -4px;
-  left: -2px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: var(--success);
-}
-
-.fire .iconWrapper,
-.electric .iconWrapper,
-.diamond .iconWrapper,
-.legendary .iconWrapper {
-  background: rgba(var(--streak-color-rgb), 0.14);
-  animation: iconPulse 3s ease-in-out infinite;
-}
-
-@keyframes iconPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 rgba(var(--streak-color-rgb), 0);
-    transform: scale(1);
-  }
-  50% {
-    box-shadow: 0 0 12px rgba(var(--streak-color-rgb), 0.12);
-    transform: scale(1.03);
-  }
-}
-
-.streakIcon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  font-size: 24px;
-}
-
-.streakText {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.streakHeadline {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-2);
-  flex-wrap: wrap;
 }
 
 .streakCount {
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: 800;
-  color: var(--text-primary);
-  line-height: 1;
-  letter-spacing: -0.03em;
+  font-family: var(--font-display-editorial);
+  font-size: clamp(72px, 10vw, 128px);
+  font-weight: 400;
+  letter-spacing: -0.025em;
+  line-height: 0.85;
+  color: var(--ink-800);
+  font-variant-numeric: lining-nums;
+  font-feature-settings: 'lnum' 1;
+}
+
+.streakMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .streakLabel {
-  font-size: var(--text-base);
-  font-weight: var(--font-semibold);
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.bestBadge {
-  font-size: 11px;
-  font-weight: var(--font-semibold);
-  color: var(--text-tertiary);
-  background: rgba(var(--accent-primary-rgb), 0.06);
-  padding: 1px var(--space-2);
-  border-radius: var(--radius-full);
-  white-space: nowrap;
+  font-family: var(--font-sans-editorial);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ink-700);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
 }
 
 .microCopy {
-  font-size: var(--text-xs);
-  color: var(--text-secondary);
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  color: var(--ink-500);
   margin: 0;
   line-height: 1.4;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* "Best · 47" — JetBrains Mono uppercase chip, editorial style */
+.bestBadge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  padding: 3px 8px;
+  border-radius: var(--radius-editorial-sm);
+  margin-top: 4px;
   white-space: nowrap;
 }
 
@@ -218,57 +134,69 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 4px;
-  flex: 1;
+  gap: 8px;
   min-width: 0;
-  padding: var(--space-4) var(--space-5);
+  padding: 24px 28px;
 }
 
-.zoneRow {
+.zoneCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  line-height: 1;
+}
+
+.pactStatusLine {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 10px;
+  min-width: 0;
 }
 
-.zoneDot {
-  width: 10px;
-  height: 10px;
-  border-radius: var(--radius-full);
-  flex-shrink: 0;
-}
-
-.zoneDot.active {
-  background: rgba(255, 184, 0, 1);
-  box-shadow: 0 0 8px rgba(255, 184, 0, 0.6);
-}
-
-.zoneDot.done {
-  background: var(--success);
-}
-
-.zoneDot.warning {
-  background: var(--warning);
-  box-shadow: 0 0 6px rgba(var(--warning-rgb, 245, 158, 11), 0.4);
-}
-
-.zoneDot.danger {
-  background: var(--danger);
-  box-shadow: 0 0 6px rgba(var(--danger-rgb, 239, 68, 68), 0.4);
-}
-
-.zoneValue {
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-medium);
+.pactStatusText {
+  font-family: var(--font-sans-editorial);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink-800);
+  letter-spacing: -0.01em;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.zoneNumber {
-  font-family: var(--font-display);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+.completedFragment {
+  color: var(--ink-500);
+  font-weight: 400;
+}
+
+/* Status dot — small ink mark in front of the line. Semantic colors stay
+   semantic (green = kept, red = overdue) — they don't cascade with ink. */
+.zoneDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ink-400);
+}
+
+.zoneDot.active {
+  background: var(--stamp-yellow);
+}
+
+.zoneDot.done {
+  background: var(--stamp-green);
+}
+
+.zoneDot.danger {
+  background: var(--stamp-red);
+}
+
+.zoneDot.neutral {
+  background: var(--ink-400);
 }
 
 /* ── Zone 3: Focus time ── */
@@ -276,111 +204,129 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-3);
-  flex: 1;
+  gap: 12px;
   min-width: 0;
-  padding: var(--space-4) var(--space-5);
+  padding: 24px 28px;
 }
 
 .focusContent {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: 14px;
+  min-width: 0;
 }
 
-.focusIconCircle {
-  display: flex;
+.focusIconWrap {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(var(--accent-primary-rgb), 0.1);
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-editorial-sm);
+  border: 1px solid var(--ink-300);
+  color: var(--ink-600);
   flex-shrink: 0;
-}
-
-.focusIcon {
-  font-size: 0.95rem;
-  line-height: 1;
 }
 
 .focusText {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .focusValue {
-  font-family: var(--font-display);
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
-  line-height: 1.1;
+  font-family: var(--font-display-editorial);
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: var(--ink-800);
+  line-height: 1;
 }
 
-.focusLabel {
-  font-size: 11px;
-  color: var(--text-secondary);
-  font-weight: var(--font-medium);
-}
-
-/* ── Freeze badge (small pill) ── */
+/* ── Freeze badge — editorial chip, not pill ── */
 .freezeBadge {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 3px;
-  padding: 2px var(--space-2);
-  background: var(--info-bg);
-  border-radius: var(--radius-full);
+  gap: 4px;
+  padding: 4px 8px;
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-mono-editorial);
   font-size: 11px;
-  font-weight: var(--font-semibold);
-  color: var(--info);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ink-600);
   flex-shrink: 0;
-}
-
-.freezeBadgeIcon {
-  font-size: 11px;
 }
 
 /* ── Secondary row (expandable) ── */
 .secondaryRow {
   overflow: hidden;
-  border-top: 1px solid rgba(255, 184, 0, 0.08);
+  border-top: 1px solid var(--ink-300);
+  background: color-mix(in oklch, var(--stamp-yellow) 6%, var(--ink-000));
 }
 
-/* ── Risk banner ── */
+/* ── Risk banner — CLOSES SOON chip pattern ── */
 .riskBanner {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-5);
-  background: var(--warning-bg);
-  font-size: var(--text-sm);
-  color: var(--warning);
-  font-weight: var(--font-medium);
+  gap: 12px;
+  padding: 14px 28px;
+}
+
+/* Streak-risk chip — mirrors the CLOSES SOON sticker spec: 11px uppercase
+   tracked, 1px stamp-yellow border, 2px radius, 4px padding. Semantic
+   urgency, but uses the brand-cascade-aware --stamp-yellow rather than a
+   stamp-red because the call-to-action is "save it", not "you blew it". */
+.riskChip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--stamp-yellow-ink);
+  background: var(--stamp-yellow);
+  border: 1px solid var(--stamp-yellow);
+  border-radius: var(--radius-editorial-sm);
+  padding: 4px 8px;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .riskText {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-700);
+  flex: 1;
   min-width: 0;
 }
 
 .freezeBtn {
-  padding: 4px 12px;
-  background: var(--info-bg);
-  color: var(--info);
-  border: 1px solid var(--info);
-  border-radius: var(--radius-md);
+  padding: 6px 12px;
+  background: transparent;
+  color: var(--ink-700);
+  border: 1px solid var(--ink-400);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-sans-editorial);
   font-size: 12px;
-  font-weight: var(--font-semibold);
+  font-weight: 600;
+  letter-spacing: 0.02em;
   cursor: pointer;
   white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  transition: background-color 120ms ease-out, color 120ms ease-out, border-color 120ms ease-out;
   flex-shrink: 0;
+  min-height: 32px;
 }
 
 .freezeBtn:hover:not(:disabled) {
-  background: var(--info);
-  color: white;
+  background: var(--ink-800);
+  color: var(--ink-000);
+  border-color: var(--ink-800);
 }
 
 .freezeBtnDisabled,
@@ -390,33 +336,46 @@
   border-style: dashed;
 }
 
-/* ── Milestone banner ── */
+/* ── Milestone banner — restrained editorial chip + serif callout ── */
 .milestoneBanner {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-3) var(--space-5);
-  background: rgba(var(--accent-primary-rgb), 0.06);
+  gap: 12px;
+  padding: 14px 28px;
 }
 
-.milestoneEmoji {
-  font-size: 1.2rem;
+.milestoneChip {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--stamp-yellow-ink);
+  background: var(--stamp-yellow);
+  border: 1px solid var(--stamp-yellow);
+  border-radius: var(--radius-editorial-sm);
+  padding: 4px 8px;
+  white-space: nowrap;
   flex-shrink: 0;
 }
 
 .milestoneText {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--accent-primary);
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink-700);
+  letter-spacing: -0.005em;
 }
 
 /* ── Skeleton placeholder ── */
 .skeleton {
   width: 100%;
-  height: 80px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-2xl);
+  height: 160px;
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
@@ -428,8 +387,8 @@
 /* ── Responsive: stack vertically on mobile ── */
 @media (max-width: 768px) {
   .primaryRow {
-    flex-direction: column;
-    align-items: stretch;
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
     min-height: 0;
   }
 
@@ -440,189 +399,91 @@
   }
 
   .streakZone {
-    flex: none;
-    padding: var(--space-4);
+    padding: 22px 22px 18px;
+    align-items: center;
   }
 
   .pactsZone {
-    flex: none;
-    padding: var(--space-3) var(--space-4);
+    padding: 16px 22px;
   }
 
   .focusZone {
-    flex: none;
-    padding: var(--space-3) var(--space-4);
+    padding: 16px 22px;
   }
 
-  .riskBanner {
-    flex-direction: column;
-    text-align: center;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
-  }
-
+  .riskBanner,
   .milestoneBanner {
-    padding: var(--space-3) var(--space-4);
+    flex-wrap: wrap;
+    padding: 14px 22px;
+    gap: 10px;
   }
 
-  .streakCount {
-    font-size: var(--text-2xl);
+  .riskText {
+    flex: 1 1 100%;
+    order: 3;
   }
 
-  .iconWrapper {
-    width: 42px;
-    height: 42px;
-  }
-
-  .streakIcon {
-    font-size: 20px;
-  }
-
-  .skeleton {
-    height: 180px;
+  .freezeBtn {
+    flex: 1 1 auto;
   }
 }
 
 @media (max-width: 480px) {
-  .bar {
-    padding: 4px;
-  }
-
   .streakZone {
-    padding: var(--space-3);
+    padding: 18px 18px 14px;
   }
 
-  .pactsZone {
-    padding: var(--space-2) var(--space-3);
-  }
-
+  .pactsZone,
   .focusZone {
-    padding: var(--space-2) var(--space-3);
+    padding: 14px 18px;
   }
 
-  .streakHeadline {
-    gap: var(--space-1);
+  .pactStatusText,
+  .riskText,
+  .milestoneText {
+    font-size: 14px;
   }
 
-  .iconWrapper {
-    width: 38px;
-    height: 38px;
-  }
-
-  .streakIcon {
-    font-size: 18px;
-  }
-
-  .streakCount {
-    font-size: var(--text-xl);
+  .focusValue {
+    font-size: 24px;
   }
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode — inverted paper ── */
+/* The ink-* tokens auto-invert in dark mode: ink-000 becomes the warm
+   dark base, ink-800 becomes near-cream. Card surface moves to ink-100
+   (slightly lifted) so it reads against the page's ink-050 background. */
 :global([data-theme="dark"]) .bar {
-  background: rgba(255, 184, 0, 0.04);
-  border-color: rgba(255, 184, 0, 0.1);
-}
-
-:global([data-theme="dark"]) .barInner {
-  background: var(--bg-elevated);
-  border-color: rgba(255, 184, 0, 0.08);
+  background: var(--ink-100);
+  border-color: var(--ink-300);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .bar:hover {
-  box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--accent-primary-rgb), 0.06);
-}
-
-:global([data-theme="dark"]) .base {
-  background: rgba(var(--streak-color-rgb), 0.04);
-  border-color: rgba(var(--streak-color-rgb), 0.1);
-}
-
-:global([data-theme="dark"]) .warm {
-  background: rgba(var(--streak-color-rgb), 0.04);
-  border-color: rgba(var(--streak-color-rgb), 0.12);
-}
-
-:global([data-theme="dark"]) .fire {
-  background: rgba(var(--streak-color-rgb), 0.05);
-  border-color: rgba(var(--streak-color-rgb), 0.14);
-}
-
-:global([data-theme="dark"]) .electric {
-  background: rgba(var(--streak-color-rgb), 0.06);
-  border-color: rgba(var(--streak-color-rgb), 0.16);
-}
-
-:global([data-theme="dark"]) .diamond {
-  background: rgba(var(--streak-color-rgb), 0.06);
-  border-color: rgba(var(--streak-color-rgb), 0.18);
-  box-shadow: 0 0 24px rgba(var(--streak-color-rgb), 0.08);
-}
-
-:global([data-theme="dark"]) .legendary {
-  background: rgba(var(--streak-color-rgb), 0.08);
-  border-color: rgba(var(--streak-color-rgb), 0.22);
-  box-shadow: 0 0 32px rgba(var(--streak-color-rgb), 0.12);
-}
-
-:global([data-theme="dark"]) .streakZone {
-  background: linear-gradient(to right, rgba(255, 184, 0, 0.06), transparent);
-}
-
-:global([data-theme="dark"]) .zoneDivider {
-  background: rgba(255, 184, 0, 0.06);
+  border-color: var(--ink-400);
 }
 
 :global([data-theme="dark"]) .secondaryRow {
-  border-top-color: rgba(255, 184, 0, 0.06);
+  background: color-mix(in oklch, var(--stamp-yellow) 8%, var(--ink-100));
 }
 
-:global([data-theme="dark"]) .iconWrapper {
-  background: rgba(var(--streak-color-rgb), 0.16);
-}
-
-:global([data-theme="dark"]) .fire .iconWrapper,
-:global([data-theme="dark"]) .electric .iconWrapper,
-:global([data-theme="dark"]) .diamond .iconWrapper,
-:global([data-theme="dark"]) .legendary .iconWrapper {
-  background: rgba(var(--streak-color-rgb), 0.24);
-  box-shadow: 0 0 16px rgba(var(--streak-color-rgb), 0.12);
-}
-
-:global([data-theme="dark"]) .focusIconCircle {
-  background: rgba(var(--accent-primary-rgb), 0.15);
-}
-
-:global([data-theme="dark"]) .bestBadge {
-  background: rgba(var(--accent-primary-rgb), 0.1);
-}
-
-:global([data-theme="dark"]) .riskBanner {
-  background: rgba(var(--warning-rgb), 0.12);
-}
-
-:global([data-theme="dark"]) .freezeBtn {
-  background: rgba(var(--info-rgb), 0.15);
-  border-color: rgba(var(--info-rgb), 0.4);
-}
-
-:global([data-theme="dark"]) .freezeBtn:hover:not(:disabled) {
-  box-shadow: 0 0 14px rgba(var(--info-rgb), 0.3);
-}
-
-:global([data-theme="dark"]) .milestoneBanner {
-  background: rgba(var(--accent-primary-rgb), 0.12);
+:global([data-theme="dark"]) .focusIconWrap {
+  border-color: var(--ink-300);
+  color: var(--ink-700);
 }
 
 :global([data-theme="dark"]) .freezeBadge {
-  background: rgba(var(--info-rgb), 0.15);
+  border-color: var(--ink-300);
+  color: var(--ink-700);
 }
 
-:global([data-theme="dark"]) .bgDecoration {
-  background: radial-gradient(circle, rgba(var(--streak-color-rgb), 0.08) 0%, transparent 70%);
+:global([data-theme="dark"]) .freezeBtn {
+  border-color: var(--ink-400);
+  color: var(--ink-700);
 }
 
-:global([data-theme="dark"]) .skeleton {
-  background: rgba(20, 20, 23, 0.7);
-  border-color: var(--border-default);
+:global([data-theme="dark"]) .freezeBtn:hover:not(:disabled) {
+  background: var(--ink-800);
+  color: var(--ink-000);
+  border-color: var(--ink-800);
 }

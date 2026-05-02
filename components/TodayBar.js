@@ -16,15 +16,15 @@ import styles from './TodayBar.module.css';
 const STREAK_MILESTONES = [7, 14, 30, 50, 100];
 
 function getMilestoneMessage(streak) {
-  if (streak >= 100) return { emoji: '\uD83D\uDC51', text: 'Legendary. 100 days locked in.' };
-  if (streak >= 50) return { emoji: '\uD83D\uDC8E', text: '50 days. Diamond hands.' };
-  if (streak >= 30) return { emoji: '\uD83D\uDD25', text: '30 days. Monthly master.' };
-  if (streak >= 14) return { emoji: '\u26A1', text: '2 weeks strong. Keep going.' };
-  if (streak >= 7) return { emoji: '\uD83C\uDFAF', text: 'One week locked in. W.' };
+  if (streak >= 100) return { text: '100 days locked in. Legendary.' };
+  if (streak >= 50) return { text: '50 days. Diamond hands.' };
+  if (streak >= 30) return { text: '30 days. Monthly master.' };
+  if (streak >= 14) return { text: '2 weeks strong. Keep going.' };
+  if (streak >= 7) return { text: 'One week locked in.' };
   return null;
 }
 
-/* ── Streak tier system (from StreakHero) ── */
+/* ── Streak tier system ── */
 const MICRO_COPY = [
   "Don't break the chain.",
   "Your streak is watching.",
@@ -35,12 +35,12 @@ const MICRO_COPY = [
 ];
 
 function getStreakTier(streak) {
-  if (streak >= 100) return { icon: '\uD83D\uDC51', tier: 'legendary', label: 'Legendary' };
-  if (streak >= 30) return { icon: '\uD83D\uDC8E', tier: 'diamond', label: 'Diamond' };
-  if (streak >= 14) return { icon: '\u26A1', tier: 'electric', label: 'Electric' };
-  if (streak >= 7) return { icon: '\uD83D\uDD25', tier: 'fire', label: 'On fire' };
-  if (streak >= 3) return { icon: '\uD83D\uDD25', tier: 'warm', label: 'Warming up' };
-  return { icon: '\uD83D\uDD25', tier: 'base', label: '' };
+  if (streak >= 100) return { tier: 'legendary' };
+  if (streak >= 30) return { tier: 'diamond' };
+  if (streak >= 14) return { tier: 'electric' };
+  if (streak >= 7) return { tier: 'fire' };
+  if (streak >= 3) return { tier: 'warm' };
+  return { tier: 'base' };
 }
 
 function getMicroCopy(streak) {
@@ -194,7 +194,7 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
     setFreezeLoading(false);
 
     if (result.success) {
-      toast.success(`Streak saved! ${result.freezesRemaining} freeze${result.freezesRemaining !== 1 ? 's' : ''} remaining.`);
+      toast.success(`Streak saved. ${result.freezesRemaining} freeze${result.freezesRemaining !== 1 ? 's' : ''} remaining.`);
       setStreakRisk({ atRisk: false, streak: streakRisk.streak });
       setFreezeStatus(prev => ({
         ...prev,
@@ -215,7 +215,32 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
 
   const freezesRemaining = freezeStatus?.freezesRemaining ?? summary.freezesRemaining;
   const showSecondaryRow = (streakRisk?.atRisk) || (isMilestoneDay && milestoneMessage);
-  const totalDue = summary.dueToday + summary.overdue;
+
+  // Compose pact-status copy as a single direct-positive line.
+  // Voice: "3 pacts due today", "2 overdue", "All done for today", "No pacts due"
+  let pactStatusText;
+  let pactStatusTone = 'neutral';
+  if (summary.overdue > 0) {
+    pactStatusText = `${summary.overdue} overdue`;
+    pactStatusTone = 'danger';
+    if (summary.dueToday > 0) {
+      pactStatusText += ` · ${summary.dueToday} due today`;
+    }
+  } else if (summary.dueToday > 0) {
+    pactStatusText = `${summary.dueToday} pact${summary.dueToday !== 1 ? 's' : ''} due today`;
+    pactStatusTone = 'active';
+  } else if (summary.completedToday > 0) {
+    pactStatusText = 'All done for today';
+    pactStatusTone = 'done';
+  } else {
+    pactStatusText = 'No pacts due';
+    pactStatusTone = 'neutral';
+  }
+
+  const completedSuffix =
+    summary.completedToday > 0 && (summary.overdue + summary.dueToday) > 0
+      ? ` · ${summary.completedToday} kept`
+      : '';
 
   return (
     <motion.div
@@ -226,109 +251,69 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
       role="region"
       aria-label="Today's summary"
     >
-      {/* Background decoration */}
-      <div className={styles.bgDecoration} aria-hidden="true" />
+      {/* ── Primary row: 3 zones ── */}
+      <div className={styles.primaryRow}>
 
-      {/* ── Inner white card ── */}
-      <div className={styles.barInner}>
-        {/* ── Primary row: 3 zones ── */}
-        <div className={styles.primaryRow}>
-
-          {/* Zone 1: Streak */}
-          <div className={styles.streakZone}>
-            <div className={styles.iconWrapper}>
-              {isMilestoneDay ? (
-                <motion.span {...streakCelebration} style={{ display: 'inline-block' }}>
-                  <span className={styles.streakIcon} role="img" aria-label="streak">🔥</span>
-                </motion.span>
-              ) : (
-                <span className={styles.streakIcon} role="img" aria-label="streak">🔥</span>
-              )}
-              <span className={styles.confettiDotBlue} aria-hidden="true" />
-              <span className={styles.confettiDotGreen} aria-hidden="true" />
-            </div>
-            <div className={styles.streakText}>
-              <div className={styles.streakHeadline}>
-                <span className={styles.streakCount}>{streak}</span>
-                <span className={styles.streakLabel}>day streak!</span>
-                {longestStreak > 0 && longestStreak > streak && (
-                  <span className={styles.bestBadge} title={`Best: ${longestStreak} days`}>
-                    Best: {longestStreak}
-                  </span>
-                )}
-              </div>
-              <p className={styles.microCopy}>{microCopy}</p>
-            </div>
-          </div>
-
-          {/* Zone divider */}
-          <div className={styles.zoneDivider} aria-hidden="true" />
-
-          {/* Zone 2: Pacts due */}
-          <div className={styles.pactsZone}>
-            {summary.overdue > 0 ? (
-              <>
-                <div className={styles.zoneRow}>
-                  <span className={`${styles.zoneDot} ${styles.danger}`} />
-                  <span className={styles.zoneValue}>
-                    <span className={styles.zoneNumber}>{summary.overdue}</span> overdue
-                  </span>
-                </div>
-                {summary.dueToday > 0 && (
-                  <div className={styles.zoneRow}>
-                    <span className={`${styles.zoneDot} ${styles.warning}`} />
-                    <span className={styles.zoneValue}>
-                      <span className={styles.zoneNumber}>{summary.dueToday}</span> due today
-                    </span>
-                  </div>
-                )}
-              </>
-            ) : summary.dueToday > 0 ? (
-              <div className={styles.zoneRow}>
-                <span className={`${styles.zoneDot} ${styles.active}`} />
-                <span className={styles.zoneValue}>
-                  <span className={styles.zoneNumber}>{summary.dueToday}</span> pact{summary.dueToday !== 1 ? 's' : ''} due today
-                </span>
-              </div>
-            ) : (
-              <div className={styles.zoneRow}>
-                <span className={`${styles.zoneDot} ${styles.done}`} />
-                <span className={styles.zoneValue}>
-                  {summary.completedToday > 0 ? 'All done for today' : 'No pacts due'}
-                </span>
-              </div>
-            )}
-            {summary.completedToday > 0 && totalDue > 0 && (
-              <div className={styles.zoneRow}>
-                <span className={`${styles.zoneDot} ${styles.done}`} />
-                <span className={styles.zoneValue}>
-                  <span className={styles.zoneNumber}>{summary.completedToday}</span> completed
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Zone divider */}
-          <div className={styles.zoneDivider} aria-hidden="true" />
-
-          {/* Zone 3: Focus time + freeze badge */}
-          <div className={styles.focusZone}>
-            <div className={styles.focusContent}>
-              <span className={styles.focusIconCircle} aria-hidden="true">
-                <Timer size={18} weight="fill" color="currentColor" />
+        {/* Zone 1: Streak — monumental serif numeral */}
+        <div className={styles.streakZone}>
+          {isMilestoneDay ? (
+            <motion.span {...streakCelebration} className={styles.streakCountWrap}>
+              <span className={styles.streakCount}>{streak}</span>
+            </motion.span>
+          ) : (
+            <span className={styles.streakCountWrap}>
+              <span className={styles.streakCount}>{streak}</span>
+            </span>
+          )}
+          <div className={styles.streakMeta}>
+            <span className={styles.streakLabel}>day streak</span>
+            <p className={styles.microCopy}>{microCopy}</p>
+            {longestStreak > 0 && longestStreak > streak && (
+              <span className={styles.bestBadge} title={`Best: ${longestStreak} days`}>
+                Best · {longestStreak}
               </span>
-              <div className={styles.focusText}>
-                <span className={styles.focusValue}>{summary.focusMinutes}m</span>
-                <span className={styles.focusLabel}>focused</span>
-              </div>
-            </div>
-            {freezesRemaining > 0 && (
-              <div className={styles.freezeBadge} title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}>
-                <span className={styles.freezeBadgeIcon}><Snowflake size={14} weight="fill" /></span>
-                <span>{freezesRemaining}</span>
-              </div>
             )}
           </div>
+        </div>
+
+        {/* Zone divider */}
+        <div className={styles.zoneDivider} aria-hidden="true" />
+
+        {/* Zone 2: Pacts due — single direct-positive line */}
+        <div className={styles.pactsZone}>
+          <span className={styles.zoneCaption}>Today</span>
+          <div className={styles.pactStatusLine}>
+            <span className={`${styles.zoneDot} ${styles[pactStatusTone]}`} aria-hidden="true" />
+            <span className={styles.pactStatusText}>
+              {pactStatusText}
+              {completedSuffix && <span className={styles.completedFragment}>{completedSuffix}</span>}
+            </span>
+          </div>
+        </div>
+
+        {/* Zone divider */}
+        <div className={styles.zoneDivider} aria-hidden="true" />
+
+        {/* Zone 3: Focus time + freeze badge */}
+        <div className={styles.focusZone}>
+          <div className={styles.focusContent}>
+            <span className={styles.focusIconWrap} aria-hidden="true">
+              <Timer size={16} weight="regular" />
+            </span>
+            <div className={styles.focusText}>
+              <span className={styles.zoneCaption}>Locked in</span>
+              <span className={styles.focusValue}>{summary.focusMinutes}m</span>
+            </div>
+          </div>
+          {freezesRemaining > 0 && (
+            <div
+              className={styles.freezeBadge}
+              title={`${freezesRemaining} streak freeze${freezesRemaining !== 1 ? 's' : ''} available`}
+            >
+              <Snowflake size={12} weight="regular" />
+              <span>{freezesRemaining}</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -342,11 +327,12 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.25, ease: [0.25, 0.1, 0.25, 1] }}
           >
-            {/* At-risk banner takes priority */}
+            {/* At-risk banner takes priority — uses CLOSES SOON chip pattern */}
             {streakRisk?.atRisk ? (
               <div className={styles.riskBanner}>
+                <span className={styles.riskChip}>1 day left</span>
                 <span className={styles.riskText}>
-                  {'\u26A0\uFE0F'} Complete a pact to save your {streakRisk.streak}-day streak!
+                  Keep a pact to save your {streakRisk.streak}-day streak
                 </span>
                 {freezeStatus?.available ? (
                   <button
@@ -354,17 +340,17 @@ export default function TodayBar({ userId, refreshKey, currentStreak, longestStr
                     onClick={handleUseFreeze}
                     disabled={freezeLoading}
                   >
-                    {freezeLoading ? 'Using...' : `Use Freeze (${freezesRemaining} left)`}
+                    {freezeLoading ? 'Using…' : `Use freeze (${freezesRemaining} left)`}
                   </button>
                 ) : freezesRemaining > 0 && freezeStatus?.cooldownEnds ? (
                   <button className={`${styles.freezeBtn} ${styles.freezeBtnDisabled}`} disabled>
-                    Cooldown: {formatCooldown(freezeStatus.cooldownEnds)}
+                    Cooldown · {formatCooldown(freezeStatus.cooldownEnds)}
                   </button>
                 ) : null}
               </div>
             ) : isMilestoneDay && milestoneMessage ? (
               <div className={styles.milestoneBanner}>
-                <span className={styles.milestoneEmoji}>{milestoneMessage.emoji}</span>
+                <span className={styles.milestoneChip}>Milestone</span>
                 <span className={styles.milestoneText}>{milestoneMessage.text}</span>
               </div>
             ) : null}

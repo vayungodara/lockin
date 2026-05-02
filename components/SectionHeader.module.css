@@ -1,0 +1,83 @@
+/* ------------------------------------------------------------------ */
+/*  SectionHeader — editorial spine for multi-section pages            */
+/*  § 0N — Title, above a flat 1px rule. No gradients. No glow.        */
+/* ------------------------------------------------------------------ */
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 12px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--ink-300);
+}
+
+.leftCluster {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  /* min-width 0 lets the title wrap gracefully on narrow viewports
+     without forcing the whole flex row to overflow. */
+  min-width: 0;
+}
+
+/* JetBrains Mono § numeral. Small, tracked, quiet — sets the documentary
+   rhythm without competing with the title. padding-top nudges it onto
+   the visual baseline of the bigger serif title next to it. */
+.numeral {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  padding-top: 4px;
+  white-space: nowrap;
+  /* Tabular figures keep the numeral grid uniform across sections */
+  font-variant-numeric: tabular-nums;
+  /* Keep the §-numeral column from collapsing if the title is long */
+  flex-shrink: 0;
+}
+
+.titleBlock {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.caption {
+  font-family: var(--font-sans-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  margin-bottom: 6px;
+}
+
+/* Redaction display — the editorial anchor. Fluid between 24-32px so it
+   scales gracefully on mobile without a media query. -0.015em tightens
+   the serif spacing to read as a title, not prose. */
+.title {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(24px, 3.5vw, 32px);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
+  margin: 0;
+  /* Allow multi-word titles to wrap cleanly on narrow rows */
+  word-break: break-word;
+}
+
+/* Right-aligned action slot. Usually a small "View all →" link or icon
+   button. align-self: flex-end keeps it on the editorial rule even when
+   the title wraps to two lines. */
+.action {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  align-self: flex-end;
+  padding-bottom: 2px;
+}

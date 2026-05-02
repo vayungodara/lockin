@@ -1,10 +1,10 @@
 # Dashboard editorial-stamps redesign — design spec
 
-**Status:** Approved 2026-05-02 (Vayun: A/A/A/A on Wave 0.5 brainstorm).
+**Status:** Approved 2026-05-02 (Vayun: A/A/A/A on Wave 0.5 brainstorm; demo dashboard scope dropped on second pass).
 **Branch:** `redesign/2026-05-02-navbar-dashboard` (off `redesign/2026-04-19-editorial-stamps`, which carries the landing redesign and the new Stamp/SectionHeader/UserAvatar/NavMarker/Ticker components).
 **Anchor:** `.impeccable.md` — voice (direct-positive on dashboard), ink cascade, OKLCH cream palette, system-serif display + Host Grotesk + JetBrains Mono, single-signal urgency, glass on modals only.
 
-This spec covers Waves 1–4 of the dashboard redesign. Wave 0 (landing navbar swap) is already shipped on this branch. Wave 5 (audit/polish) is a follow-up pass, not in this spec.
+This spec covers Waves 1–3 of the dashboard redesign. Wave 0 (landing navbar swap) is already shipped on this branch. Wave 4 (audit/polish) is a follow-up pass, not in this spec.
 
 ---
 
@@ -13,24 +13,28 @@ This spec covers Waves 1–4 of the dashboard redesign. Wave 0 (landing navbar s
 Apply the editorial-stamps direction to the product. Same warm-paper feel, same rubber-stamp resolution mechanic, same § sectional rhythm — extended from marketing into the surfaces students use daily.
 
 **In scope**
-- Wave 1: Public demo dashboard at `/preview` (no auth, no gate, lived-in mock data).
-- Wave 2: Authenticated `/dashboard` rebuild with the same structure, real Supabase data.
-- Wave 3: `/dashboard/pacts`, `/dashboard/groups`, `/dashboard/focus`, `/dashboard/stats`, `/dashboard/settings` ported to the editorial direction.
-- Wave 4: Ink-picker UI in the header (and accessible from settings) writing `lockin-ink` to localStorage; one-time migration from old `lockin-accent` keys.
+- Wave 1: Authenticated `/dashboard` rebuild with real Supabase data, new top-nav chrome, sectional rhythm.
+- Wave 2: `/dashboard/pacts`, `/dashboard/groups`, `/dashboard/focus`, `/dashboard/stats`, `/dashboard/settings` ported to the editorial direction.
+- Wave 3: Ink-picker UI in the header (and accessible from settings) writing `lockin-ink` to localStorage; one-time migration from old `lockin-accent` keys.
 
 **Out of scope**
-- Wave 5 audit/polish — separate session.
+- Public demo dashboard at `/preview` — dropped 2026-05-02 after second pass. Maintenance cost too high for a solo project; sign-in friction is already minimal (Google OAuth, one click). If a try-before-sign-in flow is wanted later, build it after the real dashboard exists.
+- Wave 4 audit/polish — separate session.
 - Backend / API changes (no DB migrations, no new endpoints).
 - iOS app (`/lockin-ios/`) — independent track.
 - Performance tuning beyond what the rebuild incidentally improves.
 
+**Agent assignment for the build**
+- Frontend (UI components, layout, CSS, motion, ink picker) → `lockin-frontend` agent.
+- Backend touches (Supabase queries, RLS sanity, data-layer edge cases, any cron/email work that the rebuild surfaces) → `/codex:rescue`.
+
 ---
 
-## 2. Decisions locked in (Wave 0.5 brainstorm)
+## 2. Decisions locked in (Wave 0.5 brainstorm + 2026-05-02 second pass)
 
 | Decision | Pick | Why |
 |---|---|---|
-| Demo route | `/preview` (no gate, lived-in mock data) | Friction kills evaluation. Lived-in data makes editorial restraint legible. Short route leaves room for `/preview/pacts` etc. |
+| Demo dashboard | **Dropped.** | Maintenance debt across `/preview/*` routes + `previewMode` prop + `lib/demoData.js` outweighs marketing payoff. LockIn signup friction is already one click. |
 | Dashboard structure | Hybrid — keep TodayBar, port lockin-test sectional rhythm + live witnesses board | TodayBar is a good first impression for returning users; sectional rhythm and witnesses board are the lockin-test wins worth porting. |
 | Sidebar | **Kill it.** Replace with sticky top nav (lockin-test pattern). | Sidebars read SaaS. Top nav reads confident, simplifies mobile, makes warm-paper consistent across surfaces. |
 | Ink picker | Header dropdown next to avatar (always reachable) + settings page entry | Ink is identity, not preference. One-click access; the recolor cascade is the wow moment. |
@@ -41,15 +45,15 @@ Apply the editorial-stamps direction to the product. Same warm-paper feel, same 
 
 ### 3.1 Top nav (replaces Sidebar + MobileNav)
 
-New `components/DashboardNav.js` + `.module.css` mounted in `app/dashboard/layout.js` and `app/preview/layout.js`. Pattern adapted from `/tmp/lockin-test/components/nav.tsx`.
+New `components/DashboardNav.js` + `.module.css` mounted in `app/dashboard/layout.js`. Pattern adapted from `/tmp/lockin-test/components/nav.tsx`.
 
 **Desktop (≥768px) layout left → right:**
-1. Logo (yellow rotated square + "LockIn." with yellow `.`) → links to `/dashboard` (or `/preview` in preview scope).
+1. Logo (yellow rotated square + "LockIn." with yellow `.`) → links to `/dashboard`.
 2. Status pill (shown ≥1024px only, hidden below): live time stamp + active-state dot — small editorial flourish. Optional polish; drop if it adds noise.
 3. Section links: `Today` / `Pacts` / `Groups` / `Focus` / `Feed` / `Profile`. Active state: 2px highlighter underline beneath link, inset 12px from each side. Use the same NavMarker hover behavior as the landing nav (so users recognize the system); calm version — shorter sweep, lower amplitude.
 4. Right cluster:
    - Rank chip — "Highlighter · 1280m" or equivalent, derived from XP/Level (don't rename to "Marks/Ranks/Seals" — keep the XP/Level/Streak labels per `.impeccable.md`).
-   - **Lock In** button — outline-style with carbon-blue border, pulse dot. Routes to `/dashboard/focus` (or `/preview/focus` in preview).
+   - **Lock In** button — outline-style with carbon-blue border, pulse dot. Routes to `/dashboard/focus`.
    - Ink-picker button — 28×28 with a 12×12 yellow rotated square inside. Click opens panel.
    - Avatar — links to `/dashboard/profile` or settings.
 
@@ -60,7 +64,7 @@ New `components/DashboardNav.js` + `.module.css` mounted in `app/dashboard/layou
 
 **Sticky behavior:** `position: sticky; top: 0; z-index: 30;` Background `color-mix(in oklch, var(--bg-primary) 95%, transparent)` + `backdrop-filter: blur(12px)`. Bottom border `1px solid var(--border-subtle)`. Same spec as the landing navbar.
 
-### 3.2 Dashboard page structure (`/preview` and `/dashboard`)
+### 3.2 Dashboard page structure (`/dashboard`)
 
 ```
 [ Sticky DashboardNav ]
@@ -95,24 +99,15 @@ Per `.impeccable.md` voice scope:
 
 ## 4. Data + state
 
-### 4.1 Demo route data
-
-`/preview` uses mock data only. Source it from a new module: `lib/demoData.js`.
-
-**Mock fidelity (Wave 0.5 pick A — lived-in):**
-- 8 pacts: 2 kept today, 1 missed today, 3 pending due in next 4h (one with `CLOSES SOON`), 1 locked-in active, 1 due tomorrow.
-- 5 witnesses (group members): 2 currently in focus sessions with progress bars, 3 idle with last-activity timestamps.
-- Activity feed: 12 entries from last 24h — kept stamps, missed stamps, focus completions, comments, reactions.
-- Stats: heatmap with realistic fill density (5–60% across last 90 days), streak at 12 days, personal best 17.
-- Achievements: 4 earned (First Steps, Week Warrior, Lock-In Apprentice, Streak Sage), 4 locked (Monthly Master, Focus Fiend, Group Founder, Decade Done).
-
-**No Supabase calls.** All components on `/preview` accept their data as props; Supabase fetches happen on `/dashboard` parents only.
-
-### 4.2 Authenticated dashboard
+### 4.1 Authenticated dashboard data flow
 
 Existing `app/dashboard/page.js` + `DashboardClient.js` keep their Supabase data flow. The rebuild is structural (replace section markup), not a data refactor. Today's pacts, focus sessions, activity, achievements, stats — all already wired.
 
-### 4.3 Ink picker state
+The new `Witnesses` component reads from existing `focus_sessions` data (active sessions for users in the current user's groups). No schema changes; new query only.
+
+If any backend touches surface during the rebuild (a missing query, an RLS gap, a cron job that needs adjustment), delegate to `/codex:rescue`. The frontend agent should not edit Supabase queries — it should flag what it needs and the orchestrator routes to codex.
+
+### 4.2 Ink picker state
 
 - localStorage key: `lockin-ink` — values `highlighter | redpen | carbon | moss | indigo-legacy`.
 - The ink is read by the existing `[data-ink="..."]` boot script on `<html>` (already in `app/layout.js`).
@@ -134,12 +129,12 @@ Existing `app/dashboard/page.js` + `DashboardClient.js` keep their Supabase data
 | Component | Action |
 |---|---|
 | `DashboardNav.js` + `.module.css` | NEW. Sticky top nav. Replaces Sidebar in dashboard layout. |
-| `Sidebar.js`, `Sidebar.module.css` | Stop importing into dashboard layout. Keep file in repo for one wave so we can confirm nothing else references it; delete in Wave 4 final pass. |
-| `MobileNav.js`, `.module.css` | Same — stop importing, delete in Wave 4 final pass. |
+| `Sidebar.js`, `Sidebar.module.css` | Stop importing into dashboard layout. Keep file in repo for one wave so we can confirm nothing else references it; delete in Wave 3 final pass. |
+| `MobileNav.js`, `.module.css` | Same — stop importing, delete in Wave 3 final pass. |
 | `TodayBar.js` | Keep. Restyle minimally to match new tokens. Streak number uses display-editorial system serif. |
 | `PactCard.js` | Already updated for editorial-stamps in the landing-redesign PR. No structural change in this spec. |
 | `ActivityFeed.js` | Refactor to a simpler list using `Stamp` + `WitnessTile` rows. Reactions stay. Comments collapse to inline text + count, expandable. |
-| `Witnesses.js` (NEW) | Live focus-session board. Reads from existing `focus_sessions` table data. WitnessTile + minute counter + progress bar. |
+| `Witnesses.js` (NEW) | Live focus-session board. Reads from existing `focus_sessions` table data via existing Supabase client. WitnessTile + minute counter + progress bar. |
 | `Heatmap`, `MonthlyCalendar` | Restyle to ink cascade (tile color uses `--stamp-yellow` at varying opacity per current ink). |
 | `Achievements.js` | Restyle rail. Earned vs. locked visual distinction via opacity + cream-paper vs. glassine treatment. Keep "Achievement" label. |
 | `InkPicker.js` + `.module.css` (NEW) | Panel triggered from DashboardNav. 5 ink swatches with live preview-on-hover. Selection writes localStorage + dispatches `storage` event so the boot script re-applies. |
@@ -148,55 +143,41 @@ Existing `app/dashboard/page.js` + `DashboardClient.js` keep their Supabase data
 
 ## 6. Routing
 
-| Route | Auth | New? |
+| Route | Auth | Status |
 |---|---|---|
-| `/preview` | No | NEW |
-| `/preview/pacts` | No | NEW (Wave 3) |
-| `/preview/focus` | No | NEW (Wave 3) |
-| `/preview/groups` | No | NEW (Wave 3) |
-| `/preview/feed` | No | NEW (Wave 3) |
-| `/preview/profile` | No | NEW (Wave 3) |
 | `/dashboard`, `/dashboard/*` | Yes | Existing — restructured |
 
-Preview routes share `app/preview/layout.js` with DashboardNav scoped to `/preview/*`. Dashboard routes share `app/dashboard/layout.js`.
-
-`app/preview/layout.js` uses the same DashboardNav component but with `previewMode: true` prop — that flag swaps the nav's link prefix (`/dashboard/*` → `/preview/*`) and replaces the Sign out / avatar cluster with a "Try LockIn — Sign in →" CTA that routes to `/`.
+No new routes in this spec.
 
 ---
 
 ## 7. Build sequence
 
-1. **Wave 1 — Public demo dashboard.**
-   - New `lib/demoData.js`.
-   - New `app/preview/layout.js` + `app/preview/page.js` + `app/preview/loading.js`.
-   - New `components/DashboardNav.js` + `.module.css` (with `previewMode` prop).
-   - New `components/Witnesses.js` + `.module.css`.
-   - Restyle `TodayBar.js`, `ActivityFeed.js`, `Heatmap.module.css`, `Achievements.module.css` to ink-cascade-aware tokens.
-   - Verify at 1440 + 1024 + 390 in browser. Take screenshots.
-
-2. **Wave 2 — Authenticated dashboard.**
+1. **Wave 1 — Authenticated dashboard rebuild.**
+   - New `components/DashboardNav.js` + `.module.css`.
+   - New `components/Witnesses.js` + `.module.css` (reads existing `focus_sessions` data).
    - Update `app/dashboard/layout.js` — drop Sidebar import, mount DashboardNav.
-   - Rewrite `app/dashboard/page.js` + `DashboardClient.js` to mirror `/preview/page.js` structure with real Supabase data.
-   - Verify all existing data flows still work (TodayBar, pacts, witnesses, activity, achievements, stats).
-   - Visual diff against `/preview` — they should look identical with different data.
+   - Rewrite `app/dashboard/page.js` + `DashboardClient.js` to mirror the structure in §3.2 with real Supabase data.
+   - Restyle `TodayBar.js`, `ActivityFeed.js`, `Heatmap.module.css`, `Achievements.module.css` to ink-cascade-aware tokens.
+   - Verify all existing data flows still work (TodayBar streak, pact CRUD, witnesses, activity reactions, achievements rail, heatmap).
+   - Verify at 1440 + 1024 + 390. Light + dark mode.
 
-3. **Wave 3 — Other auth routes.**
+2. **Wave 2 — Other auth routes.**
    - Port `/dashboard/pacts` → grid of PactCards by category.
    - Port `/dashboard/focus` → timer page with witnesses-of-me view.
    - Port `/dashboard/groups` + `/dashboard/groups/[id]` → group list + Kanban with editorial chrome.
    - Port `/dashboard/stats` → expanded heatmap + streak + chart breakdowns.
    - Port `/dashboard/settings` → editorial settings sections (profile, timer, theme, **ink**, shortcuts).
-   - Mirror all on `/preview/*` for the demo flow.
 
-4. **Wave 4 — Ink-picker UI + cleanup.**
+3. **Wave 3 — Ink-picker UI + cleanup.**
    - New `components/InkPicker.js` + `.module.css`.
    - Mount in DashboardNav.
-   - Add ink section to `/dashboard/settings` (+ `/preview/settings`).
+   - Add ink section to `/dashboard/settings`.
    - Migration logic from `lockin-accent` → `lockin-ink`.
    - Delete unreferenced `Sidebar.js` + `MobileNav.js` (after confirming no remaining imports via grep).
    - Audit `app/dashboard/*` for surviving `#6366f1` indigo-gradient leaks.
 
-5. **Wave 5 — Audit + polish (separate session, not this spec).**
+4. **Wave 4 — Audit + polish (separate session, not this spec).**
    - `/critique`, `/audit`, `/polish` over the rebuilt dashboard.
    - Address findings.
    - Open PR.
@@ -214,15 +195,15 @@ Preview routes share `app/preview/layout.js` with DashboardNav scoped to `/previ
 - Dashboard supports BOTH light and dark mode (landing is light-only). Dark mode = inverted paper.
 - No new npm dependencies — use existing primitives (Framer Motion, CSS Modules, Phosphor icons).
 - Confrontational-wry voice stays banned on dashboard surfaces.
+- Frontend agents do not edit Supabase queries / RLS / cron jobs. Anything backend goes to `/codex:rescue`.
 
 ---
 
 ## 9. Acceptance criteria
 
-- [ ] `/preview` renders without auth, no Supabase calls, no console errors.
 - [ ] `/dashboard` renders with real data, all existing flows work (TodayBar streak, pact CRUD, focus timer, activity reactions, stats heatmap, achievements rail).
-- [ ] DashboardNav sticky at top across all dashboard + preview routes; identical chrome on both.
-- [ ] Sidebar.js and MobileNav.js no longer imported anywhere under `/app/dashboard` or `/app/preview`.
+- [ ] DashboardNav sticky at top across all dashboard routes; identical chrome on every surface.
+- [ ] Sidebar.js and MobileNav.js no longer imported anywhere under `/app/dashboard`.
 - [ ] Ink-picker switches the cascade live without reload.
 - [ ] Migration from `lockin-accent` → `lockin-ink` runs once on first visit; no double-write.
 - [ ] No `#6366f1` or indigo→purple→magenta gradient surviving anywhere outside the explicit legacy ink + level-up easter-egg paths.
@@ -237,6 +218,6 @@ Preview routes share `app/preview/layout.js` with DashboardNav scoped to `/previ
 ## 10. Risks + open questions
 
 - **Sidebar removal blast radius.** The current sidebar holds: nav, XP ring, level badge, accent picker, sign-out, keyboard shortcut hint. Each must land somewhere in the new top nav or settings — verify nothing is dropped. Accent picker functionality is replaced by the new InkPicker.
-- **`/preview` discoverability.** This spec doesn't add a "View demo →" link from the landing page. Open question: do we add a `Try the demo` text link near the navbar Sign-in / Start a pact buttons? Recommend yes — small text link, goes in Wave 1 nav update. **Mark as TBD pending Vayun confirmation during Wave 1.**
 - **DashboardNav vs NavbarLanding.** Two separate components, intentional. Landing nav uses anchor links to landing sections; dashboard nav uses route links + active-state highlighter underline + Lock In CTA + ink picker. They share the logo + nav-link visual language but not the code.
 - **Ink-cascade-aware data viz.** Heatmap currently uses fixed indigo colors. Wave 1 restyle requires the heatmap fill to follow `--stamp-yellow`. Verify this works in dark mode (cream-on-dark heatmap should still be legible).
+- **Backend touchpoints during rebuild.** The Witnesses component needs a query against `focus_sessions` filtered to current user's group members. If the existing data layer doesn't expose this cleanly, surface to `/codex:rescue` rather than letting the frontend agent improvise a Supabase query.

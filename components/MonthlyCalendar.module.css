@@ -36,7 +36,7 @@
 }
 
 .title svg {
-  color: var(--accent-primary);
+  color: var(--stamp-yellow);
 }
 
 .shareBtn {
@@ -54,9 +54,9 @@
 }
 
 .shareBtn:hover {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: white;
+  background: var(--stamp-yellow);
+  border-color: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
 }
 
 /* Month Navigation */
@@ -219,23 +219,28 @@
 }
 
 .today {
-  box-shadow: inset 0 0 0 2px var(--accent-primary);
+  box-shadow: inset 0 0 0 2px var(--stamp-yellow);
   animation: ringPulse 2.5s ease-in-out infinite;
 }
 
 .selected {
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary);
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--stamp-yellow);
   transform: scale(1.05);
   z-index: 10;
 }
 
-/* Activity Levels */
+/* ── Activity Levels — ink-cascade fill via color-mix ────────────────
+   Tile color follows the user's selected ink (Highlighter, Red Pen,
+   Carbon, Moss, Indigo-legacy) by remapping --stamp-yellow.
+   level0 uses --ink-300 for a faint paper tint; levels 1-4 step the
+   ink opacity. Text color flips to --stamp-yellow-ink on the saturated
+   tiers so dark ink reads cleanly on bright fills. */
 .level0 {
-  background: var(--surface-2);
+  background: color-mix(in oklch, var(--ink-300) 30%, transparent);
 }
 
 .level1 {
-  background: rgba(var(--accent-primary-rgb), 0.15);
+  background: color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }
 
 .level1 .dayNumber {
@@ -243,7 +248,7 @@
 }
 
 .level2 {
-  background: rgba(var(--accent-primary-rgb), 0.3);
+  background: color-mix(in oklch, var(--stamp-yellow) 55%, transparent);
 }
 
 .level2 .dayNumber {
@@ -251,27 +256,27 @@
 }
 
 .level3 {
-  background: rgba(var(--accent-primary-rgb), 0.45);
+  background: color-mix(in oklch, var(--stamp-yellow) 75%, transparent);
 }
 
 .level3 .dayNumber {
-  color: var(--text-inverse);
+  color: var(--stamp-yellow-ink);
 }
 
 .level3 .activityDot {
-  background: var(--text-inverse);
+  background: var(--stamp-yellow-ink);
 }
 
 .level4 {
-  background: rgba(var(--accent-primary-rgb), 0.6);
+  background: var(--stamp-yellow);
 }
 
 .level4 .dayNumber {
-  color: var(--text-inverse);
+  color: var(--stamp-yellow-ink);
 }
 
 .level4 .activityDot {
-  background: var(--text-inverse);
+  background: var(--stamp-yellow-ink);
 }
 
 /* Detail Panel */
@@ -454,12 +459,8 @@
   border-color: var(--border-default);
 }
 
-:global([data-theme="dark"]) .level0 {
-  background: rgba(255, 255, 255, 0.04);
-}
-
 :global([data-theme="dark"]) .dayCell:hover:not(.future):not(.otherMonth) {
-  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.25);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
 }
 
 :global([data-theme="dark"]) .detailContent {
@@ -470,19 +471,20 @@
   background: rgba(255, 255, 255, 0.08);
 }
 
-/* White text is correct here — these cells always have saturated accent
-   backgrounds in both themes, so inverting via --text-inverse produces
-   near-black text on medium-dark indigo (illegible). */
-:global([data-theme="dark"]) .level3 .dayNumber,
-:global([data-theme="dark"]) .level4 .dayNumber {
-  color: #FFFFFF;
+/* Bump low-opacity tiers in dark mode so faint cells stay legible.
+   Cream-on-dark needs slightly stronger fills than cream-on-cream. */
+:global([data-theme="dark"]) .level0 {
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
 }
 
-:global([data-theme="dark"]) .level3 .activityDot,
-:global([data-theme="dark"]) .level4 .activityDot {
-  background: #FFFFFF;
+:global([data-theme="dark"]) .level1 {
+  background: color-mix(in oklch, var(--stamp-yellow) 40%, transparent);
+}
+
+:global([data-theme="dark"]) .level2 {
+  background: color-mix(in oklch, var(--stamp-yellow) 65%, transparent);
 }
 
 :global([data-theme="dark"]) .selected {
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent-primary), 0 0 12px rgba(var(--accent-primary-rgb), 0.25);
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--stamp-yellow), 0 0 12px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }

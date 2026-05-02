@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useScroll, useMotionValueEvent } from 'framer-motion';
-import ThemeToggle from './ThemeToggle';
+import NavMarker from './NavMarker';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import { prefersReducedMotion } from '@/lib/animations';
@@ -83,34 +82,23 @@ export default function NavbarLanding({ isAuthenticated = false }) {
           }
         }}
       >
-        <Link href="/" className={styles.logo}>
+        <Link href="/" className={styles.logo} aria-label="LockIn — home">
           <div className={styles.logoInner}>
-            <Image
-              src="/logos/indigo-lock.png"
-              alt=""
-              width={26}
-              height={32}
-              priority
-              style={{ width: 'auto', height: '24px' }}
-            />
-            <Image
-              src="/logos/indigo-text.png"
-              alt="LockIn"
-              width={107}
-              height={28}
-              priority
-              style={{ width: 'auto', height: '20px' }}
-            />
+            <span className={styles.logoMark} aria-hidden="true" />
+            <span className={styles.logoWordmark}>LockIn</span>
           </div>
         </Link>
 
         <div className={`${styles.navLinks} ${!showLinks ? styles.navLinksHidden : ''}`}>
-          <a href="#features" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>Features</a>
-          <a href="#how-it-works" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>How it Works</a>
+          <a href="#features" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>
+            <NavMarker>Features</NavMarker>
+          </a>
+          <a href="#how-it-works" className={styles.navLink} tabIndex={showLinks ? 0 : -1}>
+            <NavMarker>How it Works</NavMarker>
+          </a>
         </div>
 
         <div className={styles.navActions}>
-          <ThemeToggle />
           <button onClick={handleGetStarted} className={styles.ctaBtn}>
             Start a Pact
           </button>

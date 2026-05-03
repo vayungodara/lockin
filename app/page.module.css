@@ -308,7 +308,12 @@
 }
 
 .heroPact {
-  background: var(--ink-000);
+  /* Warm cream surface — slightly elevated above the page (--ink-050)
+     but tinted yellow-warm via higher chroma than --ink-000. Avoids the
+     bright-white SaaS card look on cream paper. Same family as --paper
+     used for the witnesses quote, but a half-step lighter so it still
+     reads as "elevated paper" against --ink-050. */
+  background: oklch(0.98 0.014 88);
   border: 1px solid var(--ink-300);
   border-radius: 3px;
   padding: 40px 36px;

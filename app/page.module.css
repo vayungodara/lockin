@@ -1247,6 +1247,15 @@
     padding: 80px 20px 48px;
   }
 
+  /* Kanban card was overflowing the viewport at 390px — its 3-column
+     min-content (~147px each) forced .mosaic's grid track wider than
+     its parent. minmax(0, 1fr) lets the column actually shrink, and
+     min-width: 0 on .kanbanCol + overflow: hidden on .paperCard
+     keeps oversized children clipped to the card. */
+  .paperCard {
+    overflow: hidden;
+  }
+
   .heroTitle {
     font-size: clamp(56px, 16vw, 96px);
     line-height: 0.88;
@@ -1311,7 +1320,10 @@
   }
 
   .mosaic {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr) lets the single column actually shrink below the
+       widest child's max-content. Without this, the kanban grid's
+       min-content forced the whole mosaic ~508px wide on a 339px parent. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 20px;
   }
 
@@ -1328,13 +1340,31 @@
   }
 
   .kanbanGrid {
-    grid-template-columns: repeat(3, 1fr);
+    /* Three columns with minmax(0, 1fr) so each can shrink below its
+       min-content. At 390px, parent is ~291px wide → cols ~91px each. */
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 8px;
+  }
+
+  .kanbanCol {
+    /* Allow col to shrink under content; pairs with minmax(0, 1fr) above. */
+    min-width: 0;
+    /* Tighter padding to give content more room at narrow widths. */
+    padding: 8px;
   }
 
   .kanbanCard {
     padding: 6px 8px;
     font-size: 11px;
+    /* Keep cards from forcing horizontal overflow when long task names
+       wrap. white-space: normal lets words break onto two lines instead
+       of overflowing. */
+    word-break: break-word;
+  }
+
+  .kanbanCardTask {
+    /* Slightly tighter line-height since cards may now be 2 lines. */
+    line-height: 1.25;
   }
 
   .numbersInner {

@@ -227,9 +227,9 @@ export default function DashboardNav({ user }) {
           </div>
 
           <Link
-            href="/dashboard/settings"
+            href="/dashboard/profile"
             className={styles.avatarLink}
-            aria-label="Settings"
+            aria-label="Profile"
           >
             <UserAvatar user={avatarUser} size="sm" isSelf showPhoto />
           </Link>

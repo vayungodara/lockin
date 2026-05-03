@@ -4,8 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
-import { getUserAchievements } from '@/lib/gamification';
-import { getCurrentTier, TIERS } from '@/lib/tiers';
 import MonthlyCalendar from '@/components/MonthlyCalendar';
 import SectionHeader from '@/components/SectionHeader';
 import EmptyState from '@/components/EmptyState';
@@ -15,14 +13,22 @@ import styles from './StatsPage.module.css';
 
 const WEEKDAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
 
+/**
+ * Stats — pure analytics surface.
+ *
+ * Tier ladder + achievements moved to /dashboard/profile (the editorial
+ * ledger surface). This page is now four seams of analytics:
+ *   § 01 — Activity     monthly heatmap
+ *   § 02 — Sessions     focus totals + week chart + recent list
+ *   § 03 — Pacts        kept rate + breakdown
+ *   § 04 — Streaks      current/best/risk
+ */
 export default function StatsPageClient({ user }) {
   const [streakData, setStreakData] = useState({ currentStreak: 0, longestStreak: 0, totalCompleted: 0 });
   const [pactStats, setPactStats] = useState({ total: 0, completed: 0, missed: 0, active: 0, completionRate: 0 });
   const [focusStats, setFocusStats] = useState({ totalMinutes: 0, sessionsCount: 0, avgDuration: 0, thisWeekSessions: 0, thisMonthSessions: 0, avgPerDay: 0 });
   const [recentSessions, setRecentSessions] = useState([]);
   const [weekMinutes, setWeekMinutes] = useState(Array(7).fill(0));
-  const [tierData, setTierData] = useState({ totalXp: 0, level: 1 });
-  const [achievements, setAchievements] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const supabase = useMemo(() => createClient(), []);
@@ -49,8 +55,6 @@ export default function StatsPageClient({ user }) {
 
       const [
         streak,
-        profileRes,
-        achievementsRes,
         totalPactsRes,
         completedPactsRes,
         missedPactsRes,
@@ -63,10 +67,6 @@ export default function StatsPageClient({ user }) {
         recentSessionsRes,
       ] = await Promise.all([
         calculateStreak(supabase, uid, timezone),
-        // Total XP + Level for tier resolution
-        supabase.from('profiles').select('total_xp, level').eq('id', uid).single(),
-        // Full achievement list (unlocked + locked) for § 05
-        getUserAchievements(supabase, uid),
         // Pact counts
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid),
         supabase.from('pacts').select('*', { count: 'exact', head: true }).eq('user_id', uid).eq('status', 'completed'),
@@ -84,27 +84,20 @@ export default function StatsPageClient({ user }) {
         // Last 7 days of sessions with started_at + duration for the week chart
         supabase.from('focus_sessions').select('started_at, duration_minutes')
           .eq('user_id', uid).gte('started_at', sevenDaysAgo.toISOString()).limit(500),
-        // Recent sessions list for the bottom of § 04
+        // Recent sessions list for the bottom of § Sessions
         supabase.from('focus_sessions').select('id, started_at, duration_minutes, ended_at')
           .eq('user_id', uid).gte('started_at', sevenDaysAgo.toISOString())
           .order('started_at', { ascending: false }).limit(20),
       ]);
 
       const queryError = [
-        profileRes, totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
+        totalPactsRes, completedPactsRes, missedPactsRes, activePactsRes,
         focusTotalsRes, thisWeekFocusRes, thisMonthFocusRes, firstFocusRes,
         weekSessionsRes, recentSessionsRes,
       ].find(r => r.error);
       if (queryError) throw queryError.error;
 
       setStreakData(streak);
-
-      setTierData({
-        totalXp: profileRes.data?.total_xp || 0,
-        level: profileRes.data?.level || 1,
-      });
-
-      setAchievements(achievementsRes.data || []);
 
       const completedCount = completedPactsRes.count || 0;
       const missedCount = missedPactsRes.count || 0;
@@ -195,12 +188,6 @@ export default function StatsPageClient({ user }) {
     return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
   };
 
-  const formatEarnedDate = (dateStr) => {
-    if (!dateStr) return '';
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  };
-
   // Weekday label rotation: today's label sits at the right edge.
   // Today's getDay returns 0=Sun..6=Sat; we display Mon..Sun left-to-right
   // ending in today, so labels[i] = day-of-week for (today - 6 + i).
@@ -228,9 +215,7 @@ export default function StatsPageClient({ user }) {
     return Object.entries(groups).map(([dateKey, sessions]) => ({ date: dateKey, sessions }));
   }, [recentSessions]);
 
-  const tier = useMemo(() => getCurrentTier(tierData.totalXp), [tierData.totalXp]);
   const weekMax = useMemo(() => Math.max(60, ...weekMinutes), [weekMinutes]);
-  const earnedAchievements = achievements.filter(a => a.unlocked);
 
   if (isLoading) {
     return (
@@ -242,9 +227,9 @@ export default function StatsPageClient({ user }) {
         </header>
         <div className={styles.content}>
           <SkeletonCard height="280px" />
-          <SkeletonCard height="220px" />
           <SkeletonCard height="320px" />
-          <SkeletonCard height="240px" />
+          <SkeletonCard height="220px" />
+          <SkeletonCard height="180px" />
         </div>
       </div>
     );
@@ -272,9 +257,9 @@ export default function StatsPageClient({ user }) {
         animate="animate"
       >
         <span className={styles.headerCaption}>§ Stats</span>
-        <h1 className={styles.headerTitle}>Your record.</h1>
+        <h1 className={styles.headerTitle}>{formatDuration(focusStats.totalMinutes)} locked in.</h1>
         <span className={styles.headerSubtitle}>
-          Lv. {tierData.level} &middot; {tierData.totalXp} XP &middot; {pactStats.completed} pacts kept
+          {focusStats.sessionsCount} sessions &middot; {pactStats.completed} pacts kept &middot; {pactStats.completionRate}% kept rate
         </span>
       </motion.header>
 
@@ -287,163 +272,20 @@ export default function StatsPageClient({ user }) {
           />
         )}
 
-        {/* ─────────────── § 01 — Tier ─────────────── */}
+        {/* ─────────────── § 01 — Activity ─────────────── */}
         <section className={styles.section}>
           <SectionHeader
             number="01"
-            title="Tier"
-            caption={`Level ${tierData.level} progression`}
-          />
-          <div className={styles.tierBlock}>
-            <div className={styles.tierCurrent}>
-              <span className={styles.tierIndex}>
-                Current tier &middot; {String(tier.index + 1).padStart(2, '0')} / 06
-              </span>
-              <h2 className={styles.tierLabel}>{tier.tier.label}</h2>
-              <span className={styles.tierSubtitle}>&ldquo;{tier.tier.subtitle}&rdquo;</span>
-
-              {tier.next ? (
-                <div className={styles.tierProgressWrap}>
-                  <div className={styles.tierProgressLabels}>
-                    <span>{tierData.totalXp} XP</span>
-                    <span>{tier.xpToNext} to {tier.next.label}</span>
-                  </div>
-                  <div className={styles.tierProgressTrack}>
-                    <motion.div
-                      className={styles.tierProgressFill}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${tier.progressToNext * 100}%` }}
-                      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-                    />
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.tierProgressWrap}>
-                  <div className={styles.tierProgressLabels}>
-                    <span>{tierData.totalXp} XP</span>
-                    <span className={styles.tierCeiling}>Top tier reached</span>
-                  </div>
-                  <div className={styles.tierProgressTrack}>
-                    <div className={styles.tierProgressFill} style={{ width: '100%' }} />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className={styles.tierLadder}>
-              {TIERS.map((band, i) => {
-                const isActive = i === tier.index;
-                const isReached = i < tier.index;
-                const className = [
-                  styles.tierRow,
-                  isActive ? styles.tierRowActive : '',
-                  isReached ? styles.tierRowReached : '',
-                  !isActive && !isReached ? styles.tierRowLocked : '',
-                ].filter(Boolean).join(' ');
-                const rangeText = band.max === Infinity
-                  ? `${band.min}+`
-                  : `${band.min}–${band.max}`;
-                return (
-                  <div key={band.label} className={className}>
-                    <span className={styles.tierRowNumeral}>
-                      {String(i + 1).padStart(2, '0')}
-                    </span>
-                    <div className={styles.tierRowBody}>
-                      <span className={styles.tierRowLabel}>{band.label}</span>
-                      <span className={styles.tierRowSubtitle}>{band.subtitle}</span>
-                    </div>
-                    <span className={styles.tierRowRange}>{rangeText} XP</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </section>
-
-        {/* ─────────────── § 02 — Streak ─────────────── */}
-        <section className={styles.section}>
-          <SectionHeader
-            number="02"
-            title="Streak"
-            caption="Days on the chain"
-          />
-          <div className={styles.streakBlock}>
-            <div className={styles.streakHero}>
-              <span className={styles.streakNumeral}>{streakData.currentStreak}</span>
-              <span className={styles.streakLabel}>
-                {streakData.currentStreak === 1 ? 'day unbroken' : 'days unbroken'}
-              </span>
-            </div>
-            <div className={styles.streakStats}>
-              <div className={styles.streakStat}>
-                <span className={styles.streakStatLabel}>Best</span>
-                <span className={styles.streakStatValue}>
-                  {streakData.longestStreak}
-                  <span className={styles.streakStatUnit}>{streakData.longestStreak === 1 ? 'day' : 'days'}</span>
-                </span>
-              </div>
-              <div className={styles.streakStat}>
-                <span className={styles.streakStatLabel}>Kept total</span>
-                <span className={styles.streakStatValue}>{streakData.totalCompleted}</span>
-              </div>
-              <div className={styles.streakStat}>
-                <span className={styles.streakStatLabel}>Keep rate</span>
-                <span className={styles.streakStatValue}>
-                  {pactStats.completionRate}
-                  <span className={styles.streakStatUnit}>%</span>
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Pact breakdown — folded into the same § so it reads as the
-              "your record" detail underneath the streak hero. */}
-          <div className={styles.pactBreakdown}>
-            <div className={styles.pactStat}>
-              <span className={styles.pactStatLabel}>
-                <span className={`${styles.pactStatDot} ${styles.pactStatDotKept}`} />
-                Kept
-              </span>
-              <span className={styles.pactStatValue}>{pactStats.completed}</span>
-            </div>
-            <div className={styles.pactStat}>
-              <span className={styles.pactStatLabel}>
-                <span className={`${styles.pactStatDot} ${styles.pactStatDotActive}`} />
-                Active
-              </span>
-              <span className={styles.pactStatValue}>{pactStats.active}</span>
-            </div>
-            <div className={styles.pactStat}>
-              <span className={styles.pactStatLabel}>
-                <span className={`${styles.pactStatDot} ${styles.pactStatDotMissed}`} />
-                Missed
-              </span>
-              <span className={styles.pactStatValue}>{pactStats.missed}</span>
-            </div>
-            <div className={styles.pactStat}>
-              <span className={styles.pactStatLabel}>
-                <span className={`${styles.pactStatDot} ${styles.pactStatDotRate}`} />
-                Total
-              </span>
-              <span className={styles.pactStatValue}>{pactStats.total}</span>
-            </div>
-          </div>
-        </section>
-
-        {/* ─────────────── § 03 — Activity ─────────────── */}
-        <section className={styles.section}>
-          <SectionHeader
-            number="03"
             title="Activity"
             caption="Calendar view"
           />
           <MonthlyCalendar userId={user.id} />
         </section>
 
-        {/* ─────────────── § 04 — Sessions ─────────────── */}
+        {/* ─────────────── § 02 — Sessions ─────────────── */}
         <section className={styles.section}>
           <SectionHeader
-            number="04"
+            number="02"
             title="Sessions"
             caption="Focus time"
           />
@@ -519,42 +361,80 @@ export default function StatsPageClient({ user }) {
           </div>
         </section>
 
-        {/* ─────────────── § 05 — Achievements ─────────────── */}
+        {/* ─────────────── § 03 — Pacts ─────────────── */}
         <section className={styles.section}>
           <SectionHeader
-            number="05"
-            title="Achievements"
-            caption={`${earnedAchievements.length} of ${achievements.length} earned`}
+            number="03"
+            title="Pacts"
+            caption="Kept rate breakdown"
           />
-          {achievements.length === 0 ? (
-            <div className={styles.empty}>
-              <p>Achievements load after your first pact.</p>
+          <div className={styles.pactBreakdown}>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotKept}`} />
+                Kept
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.completed}</span>
             </div>
-          ) : (
-            <div className={styles.achGrid}>
-              {achievements.map(a => (
-                <div
-                  key={a.key}
-                  className={`${styles.achCard} ${a.unlocked ? '' : styles.achCardLocked}`}
-                  title={`${a.name} — ${a.description}`}
-                >
-                  <div className={styles.achHeader}>
-                    <span className={styles.achGlyph} aria-hidden="true">
-                      {a.unlocked ? a.icon : '·'}
-                    </span>
-                    <span className={styles.achStatus}>
-                      {a.unlocked ? 'Earned' : 'Locked'}
-                    </span>
-                  </div>
-                  <div className={styles.achName}>{a.name}</div>
-                  <div className={styles.achDesc}>{a.description}</div>
-                  {a.unlocked && a.unlockedAt && (
-                    <div className={styles.achDate}>{formatEarnedDate(a.unlockedAt)}</div>
-                  )}
-                </div>
-              ))}
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotActive}`} />
+                Active
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.active}</span>
             </div>
-          )}
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotMissed}`} />
+                Missed
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.missed}</span>
+            </div>
+            <div className={styles.pactStat}>
+              <span className={styles.pactStatLabel}>
+                <span className={`${styles.pactStatDot} ${styles.pactStatDotRate}`} />
+                Total
+              </span>
+              <span className={styles.pactStatValue}>{pactStats.total}</span>
+            </div>
+          </div>
+        </section>
+
+        {/* ─────────────── § 04 — Streaks ─────────────── */}
+        <section className={styles.section}>
+          <SectionHeader
+            number="04"
+            title="Streaks"
+            caption="Days on the chain"
+          />
+          <div className={styles.streakBlock}>
+            <div className={styles.streakHero}>
+              <span className={styles.streakNumeral}>{streakData.currentStreak}</span>
+              <span className={styles.streakLabel}>
+                {streakData.currentStreak === 1 ? 'day unbroken' : 'days unbroken'}
+              </span>
+            </div>
+            <div className={styles.streakStats}>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Best</span>
+                <span className={styles.streakStatValue}>
+                  {streakData.longestStreak}
+                  <span className={styles.streakStatUnit}>{streakData.longestStreak === 1 ? 'day' : 'days'}</span>
+                </span>
+              </div>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Kept total</span>
+                <span className={styles.streakStatValue}>{streakData.totalCompleted}</span>
+              </div>
+              <div className={styles.streakStat}>
+                <span className={styles.streakStatLabel}>Keep rate</span>
+                <span className={styles.streakStatValue}>
+                  {pactStats.completionRate}
+                  <span className={styles.streakStatUnit}>%</span>
+                </span>
+              </div>
+            </div>
+          </div>
         </section>
       </div>
     </div>

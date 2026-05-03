@@ -1,0 +1,606 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   Profile — editorial ledger surface for a user's record.
+
+   Three seams:
+     § Your record   identity block (avatar + display name + joined date)
+     § 01 — Tier         current band hero + 6-row ladder, current row inverted
+     § 02 — Streak       monumental streak numeral + 4-cell stat grid
+     § 03 — Achievements earned cards (180px tall) + locked subsection
+
+   Voice rule: direct-positive throughout. No courthouse vocabulary.
+   Colors: OKLCH tokens only — --stamp-yellow cascades to user's ink;
+   semantic resolution colors (--stamp-green / --stamp-red / --stamp-blue)
+   stay fixed. No border-left ≥2px accents. No gradient text. No glass.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.container {
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 32px 24px 64px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding: 48px 32px 96px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 24px 16px 48px;
+  }
+}
+
+.loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  color: var(--ink-500);
+  font-family: var(--font-sans-editorial);
+  gap: 16px;
+}
+
+/* ── Page header — identity block ─────────────────────────────────────── */
+.header {
+  margin-bottom: 56px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.headerCaption {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.identityRow {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.identityRow :global(.tile),
+.identityRow > span:first-child {
+  width: 96px;
+  height: 96px;
+  border-radius: 4px;
+  font-size: 28px;
+}
+
+.identityBody {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.displayName {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(40px, 6.4vw, 72px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  color: var(--ink-900);
+  margin: 0;
+  word-break: break-word;
+}
+
+.joinedLine {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* ── Sectional rhythm ────────────────────────────────────────────────── */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 64px;
+}
+
+@media (max-width: 768px) {
+  .content {
+    gap: 48px;
+  }
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 01 — Tier
+   Hero motivational block. Tier label in MONUMENTAL serif (96-200px).
+   Right column: 6-row ladder with current row INVERTED (yellow bg).
+   ═════════════════════════════════════════════════════════════════════ */
+.tierBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  gap: 56px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .tierBlock {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.tierMonumental {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.tierIndex {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierLabel {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(72px, 14vw, 156px);
+  font-weight: 400;
+  line-height: 0.9;
+  letter-spacing: -0.035em;
+  color: var(--ink-900);
+  margin: 0;
+}
+
+.tierSubtitle {
+  font-family: var(--font-display-editorial);
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 22px);
+  color: var(--ink-600);
+  letter-spacing: -0.01em;
+}
+
+/* Progress bar — flat, low-radius, ink-cascade-aware */
+.tierProgressWrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 24px;
+}
+
+.tierProgressLabels {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierProgressTrack {
+  position: relative;
+  height: 12px;
+  background: var(--ink-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.tierProgressFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--stamp-yellow);
+  border-radius: 2px 0 0 2px;
+  transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.tierCeiling {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* Right column — list of all 6 tiers, tall rows */
+.tierLadder {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--ink-300);
+}
+
+.tierRow {
+  display: grid;
+  grid-template-columns: 28px 1fr auto 18px;
+  gap: 16px;
+  align-items: center;
+  padding: 18px 12px;
+  border-bottom: 1px solid var(--ink-300);
+  transition: background 120ms ease-out;
+}
+
+.tierRowNumeral {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+}
+
+.tierRowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.tierRowLabel {
+  font-family: var(--font-sans-editorial);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink-800);
+  letter-spacing: -0.01em;
+}
+
+.tierRowSubtitle {
+  font-family: var(--font-display-editorial);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--ink-500);
+}
+
+.tierRowRange {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tierRowCheck {
+  font-family: var(--font-sans-editorial);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--stamp-green);
+  text-align: center;
+  line-height: 1;
+}
+
+.tierRowCheckEmpty {
+  display: block;
+  width: 18px;
+  height: 1px;
+}
+
+/* INVERTED active row — yellow bg, dark ink text. */
+.tierRowActive {
+  background: var(--stamp-yellow);
+  border-bottom-color: var(--stamp-yellow);
+}
+
+.tierRowActive .tierRowNumeral,
+.tierRowActive .tierRowLabel,
+.tierRowActive .tierRowSubtitle,
+.tierRowActive .tierRowRange {
+  color: var(--stamp-yellow-ink);
+}
+
+.tierRowActive .tierRowCheck {
+  color: var(--stamp-yellow-ink);
+}
+
+.tierRowReached .tierRowLabel {
+  color: var(--ink-700);
+}
+
+.tierRowReached .tierRowSubtitle {
+  color: var(--ink-500);
+}
+
+.tierRowLocked .tierRowLabel,
+.tierRowLocked .tierRowSubtitle,
+.tierRowLocked .tierRowRange,
+.tierRowLocked .tierRowNumeral {
+  opacity: 0.55;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 02 — Streak
+   Monumental serif numeral on the left, 4-cell stat grid on the right.
+   ═════════════════════════════════════════════════════════════════════ */
+.streakBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: 40px;
+  align-items: end;
+}
+
+@media (max-width: 900px) {
+  .streakBlock {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    align-items: start;
+  }
+}
+
+.streakHero {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.streakNumeral {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(96px, 14vw, 180px);
+  font-weight: 400;
+  line-height: 0.85;
+  letter-spacing: -0.04em;
+  color: var(--ink-900);
+  font-variant-numeric: lining-nums;
+}
+
+.streakLabel {
+  font-family: var(--font-sans-editorial);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--ink-700);
+  margin-top: 6px;
+}
+
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  border-top: 1px solid var(--ink-300);
+  padding-top: 20px;
+}
+
+@media (max-width: 480px) {
+  .statGrid {
+    gap: 18px;
+  }
+}
+
+.statCell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.statLabel {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.statValue {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(28px, 3.4vw, 40px);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--ink-800);
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.statUnit {
+  font-family: var(--font-display-editorial);
+  font-size: 0.45em;
+  color: var(--ink-500);
+  margin-left: 4px;
+  letter-spacing: 0;
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   § 03 — Achievements
+   180px tall editorial cards. Earned: full bg + rotated yellow stamp glyph.
+   Locked: separate "Not yet" subsection, dashed outline, 0.55 opacity.
+   ═════════════════════════════════════════════════════════════════════ */
+.achGrid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+@media (max-width: 480px) {
+  .achGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+.achCard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 18px 18px 16px;
+  min-height: 180px;
+  background: var(--ink-100);
+  border: 2px solid var(--ink-300);
+  border-radius: 4px;
+  transition: border-color 120ms ease-out, transform 120ms ease-out;
+}
+
+.achCard:hover {
+  border-color: var(--ink-400);
+}
+
+.achCardLocked {
+  border-style: dashed;
+  border-color: var(--ink-300);
+  background: transparent;
+  opacity: 0.55;
+}
+
+.achCardLocked:hover {
+  opacity: 0.75;
+  border-color: var(--ink-400);
+}
+
+.achIndex {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* Rotated yellow stamp glyph in top-right corner of earned cards. */
+.achStamp {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
+  border-radius: 2px;
+  transform: rotate(-6deg);
+  box-shadow: 0 1px 0 rgba(20, 15, 5, 0.08);
+}
+
+.achStampGlyph {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.achName {
+  font-family: var(--font-display-editorial);
+  font-size: clamp(20px, 2.2vw, 26px);
+  font-weight: 400;
+  line-height: 1.05;
+  letter-spacing: -0.018em;
+  color: var(--ink-900);
+  margin: 0;
+  /* Reserve right gutter so the title doesn't run under the stamp glyph. */
+  padding-right: 56px;
+  word-break: break-word;
+}
+
+.achCardLocked .achName {
+  padding-right: 0;
+  color: var(--ink-700);
+}
+
+.achDesc {
+  font-family: var(--font-sans-editorial);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--ink-600);
+  margin: 0;
+}
+
+.achDate {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-variant-numeric: tabular-nums;
+  margin-top: auto;
+}
+
+/* "Not yet" locked-subsection header */
+.lockedSection {
+  margin-top: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lockedHeader {
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+/* ── Empty / error states ─────────────────────────────────────────────── */
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+  gap: 8px;
+  color: var(--ink-500);
+  font-family: var(--font-sans-editorial);
+}
+
+.empty p {
+  margin: 0;
+}
+
+.emptyHint {
+  font-size: 13px;
+  color: var(--ink-400);
+}
+
+/* ═════════════════════════════════════════════════════════════════════
+   Footer line — single uppercase tracked summary
+   ═════════════════════════════════════════════════════════════════════ */
+.footerLine {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--ink-300);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+}
+
+.footerSep {
+  color: var(--ink-400);
+  margin: 0 4px;
+}
+
+/* ── Dark mode ────────────────────────────────────────────────────────── */
+:global([data-theme="dark"]) .achCard {
+  box-shadow: var(--shadow-sm);
+}
+
+:global([data-theme="dark"]) .achStamp {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.3);
+}

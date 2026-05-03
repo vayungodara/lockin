@@ -7,7 +7,6 @@ import Link from 'next/link';
 import NavbarLanding from '@/components/NavbarLanding';
 import Stamp from '@/components/Stamp';
 import UserAvatar from '@/components/UserAvatar';
-import Ticker from '@/components/Ticker';
 import { useToast } from '@/components/Toast';
 import { createClient } from '@/lib/supabase/client';
 import styles from '../app/page.module.css';
@@ -275,11 +274,6 @@ export default function LandingPageClient({ isAuthenticated = false }) {
             </div>
           </div>
         </section>
-
-        {/* ═════════════════════════════════════════════════════════
-            TICKER — replaces the retired orange marquee
-            ═════════════════════════════════════════════════════════ */}
-        <Ticker />
 
         {/* ═════════════════════════════════════════════════════════
             § 01 — HOW IT WORKS — three moves, divider-y list

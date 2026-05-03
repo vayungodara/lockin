@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getLevelFromXP } from '@/lib/gamification';
+import { getCurrentTier } from '@/lib/tiers';
 import UserAvatar from './UserAvatar';
 import NavMarker from './NavMarker';
 import InkPicker from './InkPicker';
@@ -129,6 +130,8 @@ export default function DashboardNav({ user }) {
     };
   }, [user?.id, supabase]);
 
+  const tier = useMemo(() => getCurrentTier(xp.totalXP), [xp.totalXP]);
+
   const isActive = (item) => {
     if (item.exact) return pathname === item.href;
     return pathname.startsWith(item.href);
@@ -194,12 +197,16 @@ export default function DashboardNav({ user }) {
         </nav>
 
         <div className={styles.rightCluster}>
-          <div className={styles.rankChip} aria-label={`Ink: ${inkLabel}, total XP ${xp.totalXP}`}>
+          <Link
+            href="/dashboard/profile"
+            className={styles.rankChip}
+            aria-label={`Tier: ${tier.tier.label}, ink ${inkLabel}, ${xp.totalXP} XP. View profile.`}
+          >
             <span className={styles.rankDot} />
-            <span className={styles.rankLabel}>{inkLabel}</span>
+            <span className={styles.rankLabel}>{tier.tier.label}</span>
             <span className={styles.rankSep}>·</span>
-            <span className={styles.rankValue}>{`${xp.totalXP}m`}</span>
-          </div>
+            <span className={styles.rankValue}>{`${xp.totalXP}`}</span>
+          </Link>
 
           <Link href="/dashboard/focus" className={styles.lockInBtn}>
             <span className={styles.lockInDot} aria-hidden="true" />

@@ -161,8 +161,9 @@
   flex-shrink: 0;
 }
 
-/* Rank chip — "Highlighter · 1280m". Hidden below 1024px.
-   Height-locked to 32px so it aligns with Lock In CTA, ink swatch, avatar. */
+/* Rank chip — "Unbroken · 1308". Links to /dashboard/profile.
+   Hidden below 1024px. Height-locked to 32px so it aligns with Lock In
+   CTA, ink swatch, avatar. */
 .rankChip {
   display: none;
   align-items: center;
@@ -179,6 +180,18 @@
   text-transform: uppercase;
   color: var(--ink-700);
   white-space: nowrap;
+  text-decoration: none;
+  transition: border-color 160ms cubic-bezier(.16, 1, .3, 1), color 160ms cubic-bezier(.16, 1, .3, 1);
+}
+
+.rankChip:hover {
+  border-color: var(--ink-500);
+  color: var(--ink-900);
+}
+
+.rankChip:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
 }
 
 .rankDot {

@@ -148,8 +148,8 @@
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px var(--accent-glow);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
   transform: scale(1.005);
 }
 
@@ -187,8 +187,8 @@
   width: 40px;
   height: 40px;
   border-radius: var(--radius-full);
-  background: var(--accent-glow);
-  color: var(--accent-primary);
+  background: color-mix(in oklch, var(--stamp-yellow) 18%, transparent);
+  color: var(--stamp-yellow-ink);
   flex-shrink: 0;
 }
 
@@ -271,13 +271,13 @@
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
-  box-shadow: 0 0 20px var(--accent-glow);
+  box-shadow: var(--shadow-sm);
 }
 
 .submitBtn:hover:not(:disabled) {
   background: var(--accent-primary-hover);
   transform: translateY(-1px);
-  box-shadow: 0 0 30px var(--accent-glow);
+  box-shadow: var(--shadow-md);
 }
 
 .submitBtn:disabled {
@@ -374,7 +374,7 @@
 
 :global([data-theme="dark"]) .input:focus,
 :global([data-theme="dark"]) .textarea:focus {
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.2);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
 }
 
 :global([data-theme="dark"]) .inviteSection {
@@ -383,7 +383,7 @@
 }
 
 :global([data-theme="dark"]) .inviteSection:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.5);
+  border-color: var(--border-strong);
 }
 
 :global([data-theme="dark"]) .cancelBtn:hover {
@@ -391,9 +391,9 @@
 }
 
 :global([data-theme="dark"]) .submitBtn {
-  box-shadow: 0 0 24px rgba(var(--accent-primary-rgb), 0.3);
+  box-shadow: var(--shadow-md);
 }
 
 :global([data-theme="dark"]) .submitBtn:hover:not(:disabled) {
-  box-shadow: 0 0 36px rgba(var(--accent-primary-rgb), 0.4);
+  box-shadow: var(--shadow-lg);
 }

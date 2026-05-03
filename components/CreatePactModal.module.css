@@ -127,8 +127,8 @@
 .input:focus,
 .textarea:focus {
   outline: none;
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.15), 0 0 16px rgba(var(--accent-primary-rgb), 0.1);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
   transform: scale(1.005);
 }
 
@@ -210,8 +210,8 @@
 
 :global([data-theme="dark"]) .input:focus,
 :global([data-theme="dark"]) .textarea:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.25), 0 0 16px rgba(var(--accent-primary-rgb), 0.15);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
 }
 
 :global([data-theme="dark"]) .cancelBtn {
@@ -282,8 +282,8 @@
 
 :global([data-theme="dark"]) .templateCard:hover {
   background: var(--surface-3);
-  border-color: var(--accent-primary);
-  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.2);
+  border-color: var(--stamp-yellow);
+  box-shadow: var(--shadow-sm);
 }
 
 :global([data-theme="dark"]) .templateTitle {
@@ -296,13 +296,13 @@
 }
 
 :global([data-theme="dark"]) .scratchBtn:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  background: rgba(var(--accent-primary-rgb), 0.08);
+  border-color: var(--stamp-yellow);
+  color: var(--stamp-yellow);
+  background: color-mix(in oklch, var(--stamp-yellow) 8%, transparent);
 }
 
 :global([data-theme="dark"]) .templateBadge {
-  background: rgba(var(--accent-primary-rgb), 0.14);
+  background: color-mix(in oklch, var(--stamp-yellow) 14%, transparent);
   color: var(--text-secondary);
 }
 
@@ -648,9 +648,9 @@
 }
 
 .templateCard:hover {
-  border-color: var(--accent-primary);
+  border-color: var(--stamp-yellow);
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .templateCard:active {
@@ -689,9 +689,9 @@
 }
 
 .scratchBtn:hover {
-  border-color: var(--accent-primary);
-  color: var(--accent-primary);
-  background: rgba(var(--accent-primary-rgb), 0.04);
+  border-color: var(--stamp-yellow);
+  color: var(--stamp-yellow);
+  background: color-mix(in oklch, var(--stamp-yellow) 8%, transparent);
 }
 
 /* =============================================
@@ -706,7 +706,7 @@
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
   color: var(--text-secondary);
-  background: rgba(var(--accent-primary-rgb), 0.08);
+  background: color-mix(in oklch, var(--stamp-yellow) 14%, transparent);
   border-radius: var(--radius-full);
   align-self: flex-start;
 }

@@ -172,7 +172,7 @@
 .select:focus {
   outline: none;
   border-color: var(--info);
-  box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.15);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--stamp-yellow) 25%, transparent);
 }
 
 .textarea {
@@ -339,7 +339,7 @@
 :global([data-theme="dark"]) .input:focus,
 :global([data-theme="dark"]) .textarea:focus,
 :global([data-theme="dark"]) .select:focus {
-  box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.2);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }
 
 :global([data-theme="dark"]) .titleInput {

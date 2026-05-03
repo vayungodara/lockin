@@ -8,26 +8,36 @@
 :root {
   /* === LIGHT MODE — "Luminous" === */
 
-  /* Background colors — warm off-whites with violet undertone */
-  --bg-primary: #FAF9F7;
-  --bg-secondary: #F5F4F0;
-  --bg-tertiary: #EDECE6;
-  --bg-elevated: #FFFFFF;
-  --bg-hover: #ECEAFF;
+  /* Background colors — warm cream-paper neutrals (OKLCH).
+     Migrated from indigo-undertoned hex (#FAF9F7 etc.) on 2026-05-02
+     to drop the AI-SaaS-2024 violet cast. Hue 85 = same warm yellow
+     family as --ink-* cream tokens; chroma stays low (≤0.012) so
+     these read as paper-neutral, not tinted-yellow. --bg-elevated
+     stays oklch(1 0 0) since it's used on modal overlays, where
+     bright-white is intentional per .impeccable.md.                */
+  --bg-primary: oklch(0.98 0.005 85);
+  --bg-secondary: oklch(0.96 0.008 85);
+  --bg-tertiary: oklch(0.93 0.010 85);
+  --bg-elevated: oklch(1 0 0);
+  --bg-hover: oklch(0.93 0.010 85);
 
-  /* Surface colors — frosted glass foundations */
-  --surface-1: rgba(255, 255, 255, 0.85);
-  --surface-2: rgba(245, 244, 255, 0.7);
-  --surface-3: rgba(236, 234, 255, 0.6);
+  /* Surface colors — translucent paper, no indigo cast */
+  --surface-1: oklch(1 0 0 / 0.85);
+  --surface-2: oklch(0.96 0.008 85 / 0.7);
+  --surface-3: oklch(0.93 0.010 85 / 0.6);
   --surface-overlay: rgba(99, 102, 241, 0.02);
-  --surface-glass: rgba(255, 255, 255, 0.65);
+  --surface-glass: oklch(1 0 0 / 0.65);
 
-  /* Text colors — Rich, readable */
-  --text-primary: #161529;
-  --text-secondary: #524E68;
-  --text-tertiary: #656180;
-  --text-muted: #706C8A;
-  --text-inverse: #FFFFFF;
+  /* Text colors — warm ink (OKLCH cream-paper compatible).
+     Migrated from indigo-undertoned hex (#161529 etc.) on 2026-05-02.
+     Hue 60-72 = warm dark ink; chroma stays low so they read as
+     "ink on paper," not "color on paper". Luminance preserved
+     (~0.18 / 0.42 / 0.50 / 0.54) to keep contrast unchanged.       */
+  --text-primary: oklch(0.18 0.014 60);
+  --text-secondary: oklch(0.42 0.014 70);
+  --text-tertiary: oklch(0.50 0.014 70);
+  --text-muted: oklch(0.54 0.014 72);
+  --text-inverse: oklch(1 0 0);
 
   /* Gradient Accents — clean 2-stop indigo family */
   --gradient-primary: linear-gradient(150deg, #4338CA 0%, #6366F1 100%);
@@ -81,10 +91,10 @@
   --urgency-red-rgb: 220, 38, 38;
   --urgency-red-light: rgba(220, 38, 38, 0.08);
 
-  /* Borders */
-  --border-subtle: rgba(0, 0, 0, 0.06);
-  --border-default: rgba(0, 0, 0, 0.10);
-  --border-strong: rgba(0, 0, 0, 0.16);
+  /* Borders — black at low alpha kept identical via OKLCH equivalent */
+  --border-subtle: oklch(0 0 0 / 0.06);
+  --border-default: oklch(0 0 0 / 0.10);
+  --border-strong: oklch(0 0 0 / 0.16);
   --border-focus: rgba(var(--accent-primary-rgb), 0.5);
 
   /* Shadows — neutral */

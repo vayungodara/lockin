@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import Image from 'next/image';
 import styles from './UserAvatar.module.css';
 
@@ -56,11 +57,14 @@ export default function UserAvatar({
   isSelf = false,
   className = '',
 }) {
+  const [photoFailed, setPhotoFailed] = useState(false);
+  const [photoLoaded, setPhotoLoaded] = useState(false);
+
   if (!user) return null;
 
   const displayName = user.name || user.full_name || 'User';
-  const avatarUrl = user.avatar_url;
-  const usePhoto = showPhoto && !preferInitials && Boolean(avatarUrl);
+  const avatarUrl = normalizeGoogleAvatarUrl(user.avatar_url);
+  const usePhoto = showPhoto && !preferInitials && Boolean(avatarUrl) && !photoFailed;
 
   const sizeClass = SIZE_CLASS[size] || SIZE_CLASS.md;
   const pixelSize = SIZE_PIXELS[size] || SIZE_PIXELS.md;
@@ -68,23 +72,40 @@ export default function UserAvatar({
     .filter(Boolean)
     .join(' ');
 
+  const initials = deriveInitials(displayName);
+  const ink = resolveInk(user, isSelf);
+
   if (usePhoto) {
+    // Tile background shows through only while the photo is still loading.
+    // Once loaded, fade the colored backdrop out so the photo reads as
+    // identity, not "photo on a colored square."
+    const wrapperBg = photoLoaded ? 'transparent' : ink.bg;
     return (
-      <span className={classNames} aria-label={displayName}>
+      <span
+        className={classNames}
+        style={{ background: wrapperBg, color: ink.fg }}
+        aria-label={displayName}
+      >
+        {!photoLoaded && (
+          <span className={styles.initialsLayer} aria-hidden="true">{initials}</span>
+        )}
         <Image
           src={avatarUrl}
-          alt={displayName}
+          alt=""
           width={pixelSize}
           height={pixelSize}
           className={styles.photo}
+          style={{ opacity: photoLoaded ? 1 : 0 }}
           unoptimized
+          onLoad={(e) => {
+            if (e.currentTarget.naturalWidth > 0) setPhotoLoaded(true);
+            else setPhotoFailed(true);
+          }}
+          onError={() => setPhotoFailed(true)}
         />
       </span>
     );
   }
-
-  const initials = deriveInitials(displayName);
-  const ink = resolveInk(user, isSelf);
 
   return (
     <span
@@ -95,6 +116,18 @@ export default function UserAvatar({
       {initials}
     </span>
   );
+}
+
+/* -------------------------------------------------------------------------
+   Google avatar URLs (lh3.googleusercontent.com/a/...) return 404 / 0×0
+   without an explicit size suffix. Append `=s96-c` so the photo loads.
+   Other URLs pass through untouched.
+   ------------------------------------------------------------------------- */
+function normalizeGoogleAvatarUrl(url) {
+  if (!url) return url;
+  if (!url.includes('googleusercontent.com')) return url;
+  if (/=s\d+(-c)?(-rwa?)?$/.test(url)) return url;
+  return url + (url.includes('=') ? '-s96-c' : '=s96-c');
 }
 
 /* -------------------------------------------------------------------------
@@ -182,7 +215,7 @@ const SIZE_CLASS = {
 
 const SIZE_PIXELS = {
   xs: 20,
-  sm: 28,
+  sm: 32,
   md: 36,
   lg: 48,
 };

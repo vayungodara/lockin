@@ -8,7 +8,6 @@ import MonthlyCalendar from '@/components/MonthlyCalendar';
 import SectionHeader from '@/components/SectionHeader';
 import EmptyState from '@/components/EmptyState';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
-import { fadeInUp } from '@/lib/animations';
 import styles from './StatsPage.module.css';
 
 const WEEKDAY_LABELS = ['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'];
@@ -250,18 +249,13 @@ export default function StatsPageClient({ user }) {
 
   return (
     <div className={styles.container}>
-      <motion.header
-        className={styles.header}
-        variants={fadeInUp}
-        initial="initial"
-        animate="animate"
-      >
+      <header className={styles.header}>
         <span className={styles.headerCaption}>§ Stats</span>
         <h1 className={styles.headerTitle}>{formatDuration(focusStats.totalMinutes)} locked in.</h1>
         <span className={styles.headerSubtitle}>
           {focusStats.sessionsCount} sessions &middot; {pactStats.completed} pacts kept &middot; {pactStats.completionRate}% kept rate
         </span>
-      </motion.header>
+      </header>
 
       <div className={styles.content}>
         {hasNoActivity && (

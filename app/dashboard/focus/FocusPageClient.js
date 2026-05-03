@@ -1,11 +1,9 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcuts } from '@/lib/KeyboardShortcutsContext';
 import { useFocus } from '@/lib/FocusContext';
-import { fadeInUp } from '@/lib/animations';
 import SectionHeader from '@/components/SectionHeader';
 import FocusTimer, { FocusControls, LockedInBadge } from '@/components/FocusTimer';
 import FocusWitnessesOfMe from '@/components/FocusWitnessesOfMe';
@@ -115,12 +113,7 @@ export default function FocusPageClient({ user }) {
   );
 
   return (
-    <motion.div
-      className={styles.page}
-      variants={fadeInUp}
-      initial="initial"
-      animate="animate"
-    >
+    <div className={styles.page}>
       {/* Page header */}
       <header className={styles.pageHeader}>
         <SectionHeader
@@ -257,6 +250,6 @@ export default function FocusPageClient({ user }) {
           </section>
         </aside>
       </div>
-    </motion.div>
+    </div>
   );
 }

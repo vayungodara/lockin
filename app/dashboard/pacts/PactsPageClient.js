@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { Plus, CaretDown } from '@phosphor-icons/react';
 import { createClient } from '@/lib/supabase/client';
-import { staggerContainer, staggerItem, fadeInUp } from '@/lib/animations';
+import { staggerContainer, staggerItem } from '@/lib/animations';
 import styles from './PactsPage.module.css';
 import PactCard from '@/components/PactCard';
 import SectionHeader from '@/components/SectionHeader';
@@ -318,7 +318,7 @@ export default function PactsPageClient({ user }) {
  */
 function PageHeader({ totalCount }) {
   return (
-    <motion.header className={styles.header} {...fadeInUp}>
+    <header className={styles.header}>
       <div className={styles.headerLeft}>
         <div className={styles.eyebrow}>§ The pacts ledger</div>
         <h1 className={styles.title}>Pacts.</h1>
@@ -336,7 +336,7 @@ function PageHeader({ totalCount }) {
         <Plus size={16} weight="bold" />
         <span>New pact</span>
       </button>
-    </motion.header>
+    </header>
   );
 }
 

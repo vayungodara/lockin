@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useModalScrollLock } from '@/lib/useModalScrollLock';
-import { modalContent, buttonHover, buttonTap, fadeInUp } from '@/lib/animations';
+import { buttonHover, buttonTap, fadeInUp } from '@/lib/animations';
 import { PACT_TEMPLATES, TEMPLATE_CATEGORIES } from '@/lib/pactTemplates';
 import styles from './CreatePactModal.module.css';
 
@@ -200,7 +200,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
               className={styles.overlay}
               onClick={handleClose}
             >
-              <motion.div
+              <div
                 key="pact-modal"
                 ref={modalRef}
                 className={styles.modal}
@@ -208,7 +208,6 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                 aria-modal="true"
                 aria-labelledby="create-pact-title"
                 onClick={(e) => e.stopPropagation()}
-                {...modalContent}
               >
               {/* Header */}
               <div className={styles.header}>
@@ -488,7 +487,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                   </div>
                 </form>
               )}
-              </motion.div>
+              </div>
             </div>
           )}
         </AnimatePresence>,

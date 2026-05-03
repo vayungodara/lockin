@@ -161,12 +161,14 @@
   flex-shrink: 0;
 }
 
-/* Rank chip — "Highlighter · 1280m". Hidden below 1024px. */
+/* Rank chip — "Highlighter · 1280m". Hidden below 1024px.
+   Height-locked to 32px so it aligns with Lock In CTA, ink swatch, avatar. */
 .rankChip {
   display: none;
   align-items: center;
   gap: 6px;
-  padding: 5px 10px;
+  padding: 0 10px;
+  height: 32px;
   border: 1px solid var(--ink-300);
   border-radius: 2px;
   background: transparent;
@@ -202,12 +204,14 @@
   color: var(--ink-500);
 }
 
-/* Lock In CTA — outline carbon-blue, low radius, pulse dot. Routes to /focus. */
+/* Lock In CTA — outline carbon-blue, low radius, pulse dot. Routes to /focus.
+   Height-locked to 32px to align horizontally with rank chip + ink + avatar. */
 .lockInBtn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  padding: 7px 14px;
+  padding: 0 14px;
+  height: 32px;
   border: 1px solid var(--stamp-blue);
   border-radius: 4px;
   background: transparent;
@@ -265,8 +269,8 @@
 
 .inkBtn {
   appearance: none;
-  width: 28px;
-  height: 28px;
+  width: 32px;
+  height: 32px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

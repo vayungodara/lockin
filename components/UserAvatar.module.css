@@ -33,9 +33,9 @@
 }
 
 .tileSm {
-  width: 28px;
-  height: 28px;
-  font-size: 10px;
+  width: 32px;
+  height: 32px;
+  font-size: 11px;
 }
 
 .tileMd {
@@ -58,10 +58,24 @@
 
 /* --- Photo --------------------------------------------------------------- */
 .photo {
+  position: relative;
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  /* Photo layers above the initials fallback so it covers them when loaded.
+     If the photo fails or is still loading, the initials layer underneath
+     remains visible — no "empty colored square" intermediate state. */
+  z-index: 1;
+}
+
+.initialsLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
 }
 
 /* --- Dark mode ----------------------------------------------------------- */

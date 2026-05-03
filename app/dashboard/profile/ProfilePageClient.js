@@ -9,7 +9,6 @@ import { getCurrentTier, TIERS } from '@/lib/tiers';
 import UserAvatar from '@/components/UserAvatar';
 import SectionHeader from '@/components/SectionHeader';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
-import { fadeInUp } from '@/lib/animations';
 import styles from './ProfilePageClient.module.css';
 
 /**
@@ -150,12 +149,7 @@ export default function ProfilePageClient({ user }) {
 
   return (
     <div className={styles.container}>
-      <motion.header
-        className={styles.header}
-        variants={fadeInUp}
-        initial="initial"
-        animate="animate"
-      >
+      <header className={styles.header}>
         <span className={styles.headerCaption}>§ Your record</span>
         <div className={styles.identityRow}>
           <UserAvatar user={avatarUser} size="lg" isSelf showPhoto />
@@ -166,7 +160,7 @@ export default function ProfilePageClient({ user }) {
             )}
           </div>
         </div>
-      </motion.header>
+      </header>
 
       <div className={styles.content}>
         {/* ─────────────── § 01 — Tier ─────────────── */}

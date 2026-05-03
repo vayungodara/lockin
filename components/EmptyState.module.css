@@ -29,14 +29,16 @@
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
-/* Illustration / icon area */
+/* Illustration / icon area
+   Flat ink color — no glow on dashboard surfaces (motion is meaning,
+   not decoration). Empty state icons are quiet marks, not loud signals. */
 .illustration {
   width: 120px;
   height: 120px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--accent-primary);
+  color: var(--ink-500);
   margin-bottom: var(--space-2);
 }
 
@@ -118,9 +120,9 @@
 }
 
 :global([data-theme="dark"]) .primaryAction {
-  box-shadow: 0 0 20px rgba(var(--accent-primary-rgb), 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 :global([data-theme="dark"]) .primaryAction:hover {
-  box-shadow: 0 0 28px rgba(var(--accent-primary-rgb), 0.35);
+  box-shadow: var(--shadow-md);
 }

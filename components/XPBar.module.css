@@ -9,15 +9,15 @@
   background: var(--surface-1);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-2xl);
-  box-shadow: 0 2px 8px -2px rgba(0, 0, 0, 0.05), 0 4px 16px -4px rgba(0, 0, 0, 0.02);
+  box-shadow: var(--shadow-sm);
   position: relative;
   overflow: hidden;
   transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .container:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.18);
-  box-shadow: 0 2px 16px rgba(var(--accent-primary-rgb), 0.06);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
 /* ── Level badge ── */
@@ -33,7 +33,7 @@
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--text-sm);
-  box-shadow: 0 2px 8px rgba(var(--accent-primary-rgb), 0.3);
+  box-shadow: var(--shadow-sm);
   white-space: nowrap;
 }
 
@@ -67,16 +67,19 @@
 }
 
 .xpCounter {
-  color: var(--accent-primary);
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-/* ── Track + fill ── */
+/* ── Track + fill ──
+   Track is warm-cream tinted via stamp-yellow at low alpha so the
+   user's chosen ink shows through subtly. Fill is solid stamp-yellow
+   (cascades with ink choice) — flat, no gradient, no glow. */
 .track {
   height: 12px;
   width: 100%;
-  background: rgba(var(--accent-primary-rgb), 0.08);
+  background: color-mix(in oklch, var(--stamp-yellow) 8%, var(--ink-100));
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
@@ -84,10 +87,9 @@
 
 .fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-secondary, #4A4CE1), var(--accent-primary));
+  background: var(--stamp-yellow);
   border-radius: var(--radius-full);
   position: relative;
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Highlight line for depth */
@@ -98,7 +100,7 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   border-radius: var(--radius-full);
 }
 
@@ -168,19 +170,20 @@
 :global([data-theme="dark"]) .container {
   background: rgba(20, 20, 23, 0.7);
   border-color: var(--border-default);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 :global([data-theme="dark"]) .container:hover {
-  box-shadow: var(--shadow-xl), 0 0 20px rgba(var(--accent-primary-rgb), 0.06);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
 }
 
 :global([data-theme="dark"]) .levelBadge {
-  box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.45);
+  box-shadow: var(--shadow-md);
 }
 
 :global([data-theme="dark"]) .track {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in oklch, var(--stamp-yellow) 6%, rgba(255, 255, 255, 0.06));
 }
 
 :global([data-theme="dark"]) .fill::after {

@@ -32,7 +32,7 @@ const STEPS = [
   },
   {
     field: 'has_joined_group',
-    title: 'Join the Squad',
+    title: 'Join a Group',
     description: 'Join or create a group',
     icon: '👥',
     actionLabel: 'Browse Groups',
@@ -135,7 +135,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
         setAllComplete(true);
         if (!prefersReducedMotion()) fireMilestoneConfetti();
         await unlockAchievement(supabase, userId, 'onboarding_complete');
-        toast.success('Achievement Unlocked: Challenge Accepted! 🏆');
+        toast.success('First Week Challenge complete. +XP earned.');
         setShowSuccess(true);
         fadeTimerRef.current = setTimeout(() => setShowSuccess(false), 5000);
       }
@@ -222,8 +222,8 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
             {...fadeInScale}
             exit={{ opacity: 0, scale: 0.97, transition: { duration: 0.3 } }}
           >
-            <div className={styles.successTitle}>You&apos;re all set! LockIn is yours. 🎉</div>
-            <div className={styles.successDesc}>First Week Challenge complete!</div>
+            <div className={styles.successTitle}>First Week Challenge complete</div>
+            <div className={styles.successDesc}>You&apos;re set up. Build the streak.</div>
           </motion.div>
         )}
       </AnimatePresence>
@@ -234,7 +234,7 @@ export default function OnboardingChecklist({ userId, onCreatePact }) {
 
   return (
     <motion.div
-      className={`${styles.card} ${completedCount === 0 ? styles.cardNew : ''}`}
+      className={styles.card}
       initial={{ y: 20, scale: 0.97 }}
       animate={{ y: 0, scale: 1 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}

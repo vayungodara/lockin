@@ -2,25 +2,9 @@
   background: var(--surface-1);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--accent-primary);
+  border-left: 3px solid var(--stamp-yellow);
   padding: var(--space-5);
   margin-bottom: var(--space-4);
-}
-
-/* First-visit attention pulse — runs once after entrance completes */
-.cardNew {
-  animation: cardPulse 2s cubic-bezier(0.22, 1, 0.36, 1) 0.7s;
-}
-
-@keyframes cardPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent-primary-rgb), 0); }
-  50% { box-shadow: 0 0 20px 4px rgba(var(--accent-primary-rgb), 0.15); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .cardNew {
-    animation: none;
-  }
 }
 
 .header {
@@ -57,7 +41,7 @@
 
 .progressFill {
   fill: none;
-  stroke: var(--accent-primary);
+  stroke: var(--stamp-yellow);
   stroke-width: 3;
   stroke-linecap: round;
   transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
@@ -135,9 +119,9 @@
 .actionBtn {
   font-size: var(--text-xs);
   font-weight: var(--font-medium);
-  color: var(--accent-primary);
+  color: var(--text-primary);
   background: none;
-  border: 1px solid var(--accent-primary);
+  border: 1px solid var(--stamp-yellow);
   border-radius: var(--radius-md);
   padding: 6px 12px;
   cursor: pointer;
@@ -145,8 +129,8 @@
 }
 
 .actionBtn:hover {
-  background: var(--accent-primary);
-  color: white;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
 }
 
 .xpBadge {
@@ -199,7 +183,7 @@
 /* ── Dark mode overrides ── */
 :global([data-theme="dark"]) .card {
   border-color: var(--border-default);
-  border-left-color: var(--accent-primary);
+  border-left-color: var(--stamp-yellow);
 }
 
 :global([data-theme="dark"]) .step:hover {
@@ -215,11 +199,7 @@
 }
 
 :global([data-theme="dark"]) .actionBtn {
-  border-color: rgba(var(--accent-primary-rgb), 0.5);
-}
-
-:global([data-theme="dark"]) .actionBtn:hover {
-  box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.25);
+  border-color: var(--stamp-yellow);
 }
 
 :global([data-theme="dark"]) .progressBg {

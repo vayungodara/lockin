@@ -16,8 +16,8 @@
 .toggle:hover {
   background: var(--surface-3);
   color: var(--text-primary);
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.12), 0 0 16px rgba(var(--accent-primary-rgb), 0.08);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 25%, transparent);
 }
 
 .toggle:active {
@@ -49,5 +49,5 @@
 
 :global([data-theme="dark"]) .toggle:hover {
   background: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.15), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }

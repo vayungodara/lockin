@@ -9,7 +9,7 @@
 }
 
 .card:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.3);
+  border-color: var(--border-strong);
   background: var(--surface-2);
 }
 
@@ -104,11 +104,14 @@
   cursor: pointer;
 }
 
+/* Heatmap intensity — cascades with the user's chosen ink so
+   the cells read as Highlighter / Red Pen / Carbon / Moss / Indigo
+   depending on identity. Level 4 is the full ink at face value. */
 .level0 { background: var(--surface-3); }
-.level1 { background: rgba(var(--accent-primary-rgb), 0.25); }
-.level2 { background: rgba(var(--accent-primary-rgb), 0.5); }
-.level3 { background: rgba(var(--accent-primary-rgb), 0.75); }
-.level4 { background: var(--accent-primary); }
+.level1 { background: color-mix(in oklch, var(--stamp-yellow) 25%, var(--surface-1)); }
+.level2 { background: color-mix(in oklch, var(--stamp-yellow) 50%, var(--surface-1)); }
+.level3 { background: color-mix(in oklch, var(--stamp-yellow) 75%, var(--surface-1)); }
+.level4 { background: var(--stamp-yellow); }
 
 /* Empty/padding cells - non-interactive */
 .emptyCell {
@@ -250,7 +253,7 @@
 }
 
 :global([data-theme="dark"]) .card:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.4);
+  border-color: var(--border-strong);
   background: var(--surface-2);
   box-shadow: var(--shadow-md);
 }
@@ -279,5 +282,5 @@
 }
 
 :global([data-theme="dark"]) .dayCell:hover {
-  box-shadow: 0 0 8px rgba(var(--accent-primary-rgb), 0.25);
+  box-shadow: 0 0 0 1px var(--stamp-yellow);
 }

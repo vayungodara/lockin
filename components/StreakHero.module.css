@@ -2,54 +2,59 @@
   position: relative;
   width: 100%;
   padding: var(--space-6) var(--space-8);
-  background: rgba(var(--accent-primary-rgb), 0.04);
-  border: 1px solid rgba(var(--accent-primary-rgb), 0.12);
-  border-radius: var(--radius-xl);
+  background: var(--surface-1);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-editorial-md, 4px);
   margin-bottom: var(--space-8);
   overflow: hidden;
-  transition: all var(--transition-base);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
 }
 
 .hero:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.2);
-  box-shadow: 0 0 24px rgba(var(--accent-primary-rgb), 0.06);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Tier-based background tints ── */
+/* ── Tier-based background tints ──
+   Warm-cream warmth via --ink-100 / --ink-200; tier intensity grows
+   subtly. No streak-color/accent rgba glows — dashboard motion is
+   meaning, not decoration. */
 .warm {
-  background: rgba(var(--accent-primary-rgb), 0.04);
-  border-color: rgba(var(--accent-primary-rgb), 0.1);
+  background: var(--ink-100);
+  border-color: var(--border-subtle);
 }
 
 .fire {
-  background: rgba(var(--streak-color-rgb), 0.06);
-  border-color: rgba(var(--streak-color-rgb), 0.18);
+  background: var(--ink-100);
+  border-color: var(--border-default);
 }
 
 .electric {
-  background: rgba(var(--streak-color-rgb), 0.06);
-  border-color: rgba(var(--streak-color-rgb), 0.2);
+  background: var(--ink-100);
+  border-color: var(--border-default);
 }
 
 .diamond {
-  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.06), rgba(var(--accent-primary-rgb), 0.04));
-  border-color: rgba(var(--streak-color-rgb), 0.22);
+  background: var(--ink-200);
+  border-color: var(--border-default);
 }
 
 .legendary {
-  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.08), rgba(var(--accent-primary-rgb), 0.06));
-  border-color: rgba(var(--streak-color-rgb), 0.28);
-  box-shadow: 0 0 32px rgba(var(--streak-color-rgb), 0.08);
+  background: var(--ink-200);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-md);
 }
 
-/* ── Background decoration ── */
+/* ── Background decoration ──
+   Replaced radial accent glow with a flat highlighter-yellow corner
+   wash at low opacity (cascades with user's chosen ink). */
 .bgDecoration {
   position: absolute;
   top: -40%;
   right: -10%;
   width: 200px;
   height: 200px;
-  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.06) 0%, transparent 70%);
+  background: color-mix(in oklch, var(--stamp-yellow) 6%, transparent);
   border-radius: var(--radius-full);
   pointer-events: none;
 }
@@ -71,25 +76,23 @@
   width: 64px;
   height: 64px;
   flex-shrink: 0;
-  background: rgba(var(--accent-primary-rgb), 0.08);
-  border-radius: var(--radius-xl);
+  background: color-mix(in oklch, var(--stamp-yellow) 10%, var(--surface-1));
+  border-radius: var(--radius-editorial-md, 4px);
 }
 
 .fire .iconWrapper,
 .electric .iconWrapper,
 .diamond .iconWrapper,
 .legendary .iconWrapper {
-  background: rgba(var(--streak-color-rgb), 0.12);
+  background: color-mix(in oklch, var(--stamp-yellow) 14%, var(--surface-1));
   animation: iconPulse 3s ease-in-out infinite;
 }
 
 @keyframes iconPulse {
   0%, 100% {
-    box-shadow: 0 0 0 rgba(var(--accent-primary-rgb), 0);
     transform: scale(1);
   }
   50% {
-    box-shadow: 0 0 16px rgba(var(--accent-primary-rgb), 0.1);
     transform: scale(1.03);
   }
 }
@@ -141,7 +144,7 @@
   margin-top: var(--space-2);
   font-size: var(--text-xs);
   color: var(--text-secondary);
-  background: rgba(var(--accent-primary-rgb), 0.06);
+  background: var(--ink-100);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
   width: fit-content;
@@ -210,57 +213,55 @@
   }
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   Dark-stationery: surface-1 is already dark in dark mode;
+   tier intensity steps up via --ink-200/300 lifts. */
 :global([data-theme="dark"]) .hero {
-  background: rgba(var(--accent-primary-rgb), 0.08);
-  border-color: rgba(var(--accent-primary-rgb), 0.2);
+  background: var(--ink-100);
+  border-color: var(--border-default);
 }
 
 :global([data-theme="dark"]) .hero:hover {
-  border-color: rgba(var(--accent-primary-rgb), 0.3);
-  box-shadow: 0 0 32px rgba(var(--accent-primary-rgb), 0.12);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
 }
 
 :global([data-theme="dark"]) .fire {
-  background: rgba(var(--streak-color-rgb), 0.12);
-  border-color: rgba(var(--streak-color-rgb), 0.3);
-  box-shadow: 0 0 24px rgba(var(--streak-color-rgb), 0.1);
+  background: var(--ink-100);
+  border-color: var(--border-default);
 }
 
 :global([data-theme="dark"]) .electric {
-  background: rgba(var(--streak-color-rgb), 0.14);
-  border-color: rgba(var(--streak-color-rgb), 0.35);
-  box-shadow: 0 0 32px rgba(var(--streak-color-rgb), 0.12);
+  background: var(--ink-100);
+  border-color: var(--border-strong);
 }
 
 :global([data-theme="dark"]) .diamond {
-  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.14), rgba(var(--accent-primary-rgb), 0.1));
-  border-color: rgba(var(--streak-color-rgb), 0.38);
-  box-shadow: 0 0 40px rgba(var(--streak-color-rgb), 0.15);
+  background: var(--ink-200);
+  border-color: var(--border-strong);
 }
 
 :global([data-theme="dark"]) .legendary {
-  background: linear-gradient(135deg, rgba(var(--streak-color-rgb), 0.18), rgba(var(--accent-primary-rgb), 0.14));
-  border-color: rgba(var(--streak-color-rgb), 0.45);
-  box-shadow: 0 0 50px rgba(var(--streak-color-rgb), 0.22);
+  background: var(--ink-200);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg);
 }
 
 :global([data-theme="dark"]) .iconWrapper {
-  background: rgba(var(--accent-primary-rgb), 0.14);
+  background: color-mix(in oklch, var(--stamp-yellow) 12%, var(--surface-2));
 }
 
 :global([data-theme="dark"]) .fire .iconWrapper,
 :global([data-theme="dark"]) .electric .iconWrapper,
 :global([data-theme="dark"]) .diamond .iconWrapper,
 :global([data-theme="dark"]) .legendary .iconWrapper {
-  background: rgba(var(--streak-color-rgb), 0.22);
-  box-shadow: 0 0 20px rgba(var(--streak-color-rgb), 0.15);
+  background: color-mix(in oklch, var(--stamp-yellow) 18%, var(--surface-2));
 }
 
 :global([data-theme="dark"]) .secondary {
-  background: rgba(var(--accent-primary-rgb), 0.1);
+  background: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .bgDecoration {
-  background: radial-gradient(circle, rgba(var(--accent-primary-rgb), 0.1) 0%, transparent 70%);
+  background: color-mix(in oklch, var(--stamp-yellow) 8%, transparent);
 }

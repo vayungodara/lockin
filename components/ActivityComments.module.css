@@ -134,8 +134,8 @@
 }
 
 .input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(var(--accent-primary-rgb), 0.1);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 2px color-mix(in oklch, var(--stamp-yellow) 25%, transparent);
 }
 
 .input::placeholder {
@@ -180,5 +180,5 @@
 }
 
 :global([data-theme="dark"]) .input:focus {
-  box-shadow: 0 0 0 3px rgba(var(--accent-primary-rgb), 0.2), 0 0 20px rgba(var(--accent-primary-rgb), 0.12);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }

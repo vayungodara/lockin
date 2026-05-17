@@ -28,6 +28,7 @@ export function createMockSupabase() {
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    limit: vi.fn(),
 
     // Set what the final awaited value resolves to
     mockReturnValue(value) {
@@ -58,7 +59,7 @@ export function createMockSupabase() {
   const chainMethods = [
     'select', 'eq', 'neq', 'in', 'not', 'gte',
     'order', 'range', 'single', 'maybeSingle',
-    'insert', 'update', 'delete',
+    'insert', 'update', 'delete', 'limit',
   ];
   chainMethods.forEach((method) => {
     builder[method].mockReturnValue(builder);

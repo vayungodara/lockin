@@ -2,14 +2,18 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { verifyCronSecret } from '@/lib/cronAuth';
 
 describe('verifyCronSecret', () => {
-  const originalEnv = { ...process.env };
+  const savedCronSecret = process.env.CRON_SECRET;
 
   beforeEach(() => {
     process.env.CRON_SECRET = 'test-secret-123';
   });
 
   afterEach(() => {
-    process.env = { ...originalEnv };
+    if (savedCronSecret !== undefined) {
+      process.env.CRON_SECRET = savedCronSecret;
+    } else {
+      delete process.env.CRON_SECRET;
+    }
   });
 
   function makeRequest(authHeader) {

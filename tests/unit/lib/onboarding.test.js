@@ -6,13 +6,15 @@ import {
 } from '@/lib/onboarding';
 import { createMockSupabase } from '../../setup/supabase-mock';
 
-vi.mock('@/lib/gamification', async () => {
-  const actual = await vi.importActual('@/lib/gamification');
-  return {
-    ...actual,
-    awardXP: vi.fn().mockResolvedValue({ success: true }),
-  };
-});
+vi.mock('@/lib/gamification', () => ({
+  XP_REWARDS: {
+    ONBOARDING_PACT: 10,
+    ONBOARDING_FOCUS: 10,
+    ONBOARDING_GROUP: 15,
+    ONBOARDING_MOMENTUM: 25,
+  },
+  awardXP: vi.fn().mockResolvedValue({ success: true }),
+}));
 
 describe('getOnboardingState', () => {
   it('returns null for null userId', async () => {

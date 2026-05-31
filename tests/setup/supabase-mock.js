@@ -21,6 +21,9 @@ export function createMockSupabase() {
     in: vi.fn(),
     not: vi.fn(),
     gte: vi.fn(),
+    lte: vi.fn(),
+    gt: vi.fn(),
+    lt: vi.fn(),
     order: vi.fn(),
     range: vi.fn(),
     single: vi.fn(),
@@ -28,6 +31,9 @@ export function createMockSupabase() {
     insert: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    or: vi.fn(),
+    limit: vi.fn(),
+    upsert: vi.fn(),
 
     // Set what the final awaited value resolves to
     mockReturnValue(value) {
@@ -56,9 +62,9 @@ export function createMockSupabase() {
 
   // Every method returns the builder for chaining
   const chainMethods = [
-    'select', 'eq', 'neq', 'in', 'not', 'gte',
+    'select', 'eq', 'neq', 'in', 'not', 'gte', 'lte', 'gt', 'lt',
     'order', 'range', 'single', 'maybeSingle',
-    'insert', 'update', 'delete',
+    'insert', 'update', 'delete', 'or', 'limit', 'upsert',
   ];
   chainMethods.forEach((method) => {
     builder[method].mockReturnValue(builder);

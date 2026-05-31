@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { formatUTCDate, calculateStreak } from '@/lib/streaks';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  formatUTCDate,
+  formatDateInTimezone,
+  getHourInTimezone,
+  calculateStreak,
+  getActivityHeatmap,
+} from '@/lib/streaks';
 import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatUTCDate', () => {
@@ -96,5 +102,181 @@ describe('calculateStreak', () => {
     const result = await calculateStreak(supabase, 'user-1');
     expect(result.currentStreak).toBe(0);
     expect(result.totalCompleted).toBe(2);
+  });
+
+  it('counts a streak ending yesterday as active', async () => {
+    const { supabase, builder } = createMockSupabase();
+
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const twoDaysAgo = new Date();
+    twoDaysAgo.setUTCDate(twoDaysAgo.getUTCDate() - 2);
+
+    builder.mockReturnValue({
+      data: [
+        { completed_at: yesterday.toISOString(), status: 'completed' },
+        { completed_at: twoDaysAgo.toISOString(), status: 'completed' },
+      ],
+      error: null,
+    });
+
+    const result = await calculateStreak(supabase, 'user-1');
+    expect(result.currentStreak).toBe(2);
+    expect(result.longestStreak).toBe(2);
+  });
+
+  it('returns a single-day streak for only today', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const today = new Date();
+
+    builder.mockReturnValue({
+      data: [{ completed_at: today.toISOString(), status: 'completed' }],
+      error: null,
+    });
+
+    const result = await calculateStreak(supabase, 'user-1');
+    expect(result.currentStreak).toBe(1);
+    expect(result.longestStreak).toBe(1);
+    expect(result.totalCompleted).toBe(1);
+  });
+});
+
+describe('formatDateInTimezone', () => {
+  it('formats a date in UTC', () => {
+    const date = new Date('2024-06-15T23:30:00Z');
+    expect(formatDateInTimezone(date, 'UTC')).toBe('2024-06-15');
+  });
+
+  it('defaults to UTC when no timezone provided', () => {
+    const date = new Date('2024-06-15T12:00:00Z');
+    expect(formatDateInTimezone(date)).toBe('2024-06-15');
+  });
+
+  it('formats a date in a specific timezone', () => {
+    const date = new Date('2024-06-16T03:00:00Z');
+    const result = formatDateInTimezone(date, 'America/New_York');
+    expect(result).toBe('2024-06-15');
+  });
+
+  it('falls back to UTC for invalid timezone', () => {
+    const date = new Date('2024-06-15T12:00:00Z');
+    const result = formatDateInTimezone(date, 'Invalid/Timezone');
+    expect(result).toBe('2024-06-15');
+  });
+});
+
+describe('getHourInTimezone', () => {
+  it('returns the UTC hour by default', () => {
+    const date = new Date('2024-06-15T14:30:00Z');
+    expect(getHourInTimezone(date)).toBe(14);
+  });
+
+  it('returns the hour in a specific timezone', () => {
+    const date = new Date('2024-06-15T14:00:00Z');
+    const hour = getHourInTimezone(date, 'America/New_York');
+    expect(hour).toBe(10);
+  });
+
+  it('falls back to UTC hours for invalid timezone', () => {
+    const date = new Date('2024-06-15T14:00:00Z');
+    const hour = getHourInTimezone(date, 'Invalid/Timezone');
+    expect(hour).toBe(14);
+  });
+
+  it('handles midnight correctly', () => {
+    const date = new Date('2024-06-15T00:00:00Z');
+    expect(getHourInTimezone(date, 'UTC')).toBe(0);
+  });
+});
+
+describe('getActivityHeatmap', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns empty heatmap when no data', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: [], error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1', 7);
+    expect(result.error).toBeNull();
+    expect(result.data).toHaveLength(7);
+    result.data.forEach(d => {
+      expect(d.count).toBe(0);
+      expect(d.level).toBe(0);
+    });
+  });
+
+  it('counts pact completions in heatmap', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      {
+        data: [{ completed_at: '2024-06-15T10:00:00Z', status: 'completed' }],
+        error: null,
+      },
+      { data: [], error: null },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1', 7);
+    expect(result.error).toBeNull();
+    const today = result.data.find(d => d.date === '2024-06-15');
+    expect(today).toBeTruthy();
+    expect(today.pactCount).toBe(1);
+    expect(today.focusCount).toBe(0);
+    expect(today.level).toBeGreaterThan(0);
+  });
+
+  it('counts focus sessions in heatmap', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: [], error: null },
+      {
+        data: [{ started_at: '2024-06-15T09:00:00Z', duration_minutes: 25 }],
+        error: null,
+      },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1', 7);
+    expect(result.error).toBeNull();
+    const today = result.data.find(d => d.date === '2024-06-15');
+    expect(today.focusCount).toBe(1);
+    expect(today.pactCount).toBe(0);
+  });
+
+  it('returns empty data and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('applies activity level thresholds correctly', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      {
+        data: [
+          { completed_at: '2024-06-15T08:00:00Z', status: 'completed' },
+          { completed_at: '2024-06-15T09:00:00Z', status: 'completed' },
+          { completed_at: '2024-06-15T10:00:00Z', status: 'completed' },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1', 7);
+    const today = result.data.find(d => d.date === '2024-06-15');
+    expect(today.count).toBe(3);
+    expect(today.level).toBe(4);
   });
 });

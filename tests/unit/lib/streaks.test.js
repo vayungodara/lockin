@@ -1,5 +1,11 @@
-import { describe, it, expect } from 'vitest';
-import { formatUTCDate, calculateStreak } from '@/lib/streaks';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import {
+  formatUTCDate,
+  formatDateInTimezone,
+  getHourInTimezone,
+  calculateStreak,
+  getActivityHeatmap,
+} from '@/lib/streaks';
 import { createMockSupabase } from '../../setup/supabase-mock';
 
 describe('formatUTCDate', () => {
@@ -96,5 +102,138 @@ describe('calculateStreak', () => {
     const result = await calculateStreak(supabase, 'user-1');
     expect(result.currentStreak).toBe(0);
     expect(result.totalCompleted).toBe(2);
+  });
+});
+
+describe('formatDateInTimezone', () => {
+  it('formats a date in UTC by default', () => {
+    const date = new Date('2024-06-15T23:30:00Z');
+    expect(formatDateInTimezone(date)).toBe('2024-06-15');
+  });
+
+  it('formats a date in a specific timezone', () => {
+    // 11:30pm UTC on June 15 is June 16 in Tokyo (UTC+9)
+    const date = new Date('2024-06-15T23:30:00Z');
+    expect(formatDateInTimezone(date, 'Asia/Tokyo')).toBe('2024-06-16');
+  });
+
+  it('formats a date in a negative offset timezone', () => {
+    // 3am UTC on June 16 is still June 15 in LA (UTC-7 during PDT)
+    const date = new Date('2024-06-16T03:00:00Z');
+    expect(formatDateInTimezone(date, 'America/Los_Angeles')).toBe('2024-06-15');
+  });
+
+  it('falls back to UTC for invalid timezone', () => {
+    const date = new Date('2024-06-15T12:00:00Z');
+    expect(formatDateInTimezone(date, 'Invalid/Zone')).toBe('2024-06-15');
+  });
+});
+
+describe('getHourInTimezone', () => {
+  it('returns UTC hour by default', () => {
+    const date = new Date('2024-06-15T14:30:00Z');
+    expect(getHourInTimezone(date)).toBe(14);
+  });
+
+  it('returns hour in a specific timezone', () => {
+    const date = new Date('2024-06-15T14:00:00Z');
+    // UTC+9 => 23:00
+    expect(getHourInTimezone(date, 'Asia/Tokyo')).toBe(23);
+  });
+
+  it('falls back to UTC hours for invalid timezone', () => {
+    const date = new Date('2024-06-15T14:30:00Z');
+    expect(getHourInTimezone(date, 'Invalid/Zone')).toBe(14);
+  });
+
+  it('handles midnight correctly', () => {
+    const date = new Date('2024-06-15T00:00:00Z');
+    expect(getHourInTimezone(date, 'UTC')).toBe(0);
+  });
+});
+
+describe('getActivityHeatmap', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns heatmap data for 365 days by default', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    expect(result.error).toBeNull();
+    expect(result.data).toHaveLength(365);
+  });
+
+  it('returns heatmap with correct counts for pacts', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      {
+        data: [
+          { completed_at: '2024-06-15T10:00:00Z', status: 'completed' },
+          { completed_at: '2024-06-15T11:00:00Z', status: 'completed' },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    expect(result.error).toBeNull();
+    const today = result.data.find(d => d.date === '2024-06-15');
+    expect(today.pactCount).toBe(2);
+    expect(today.focusCount).toBe(0);
+    expect(today.count).toBe(2);
+  });
+
+  it('returns heatmap with focus sessions counted', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: [], error: null },
+      {
+        data: [
+          { started_at: '2024-06-15T09:00:00Z', duration_minutes: 25 },
+        ],
+        error: null,
+      },
+    ]);
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    expect(result.error).toBeNull();
+    const today = result.data.find(d => d.date === '2024-06-15');
+    expect(today.focusCount).toBe(1);
+    expect(today.pactCount).toBe(0);
+  });
+
+  it('returns empty data and error on pacts query failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('assigns correct activity levels', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getActivityHeatmap(supabase, 'user-1');
+    const emptyDay = result.data[0];
+    expect(emptyDay.level).toBe(0);
+  });
+
+  it('respects custom days parameter', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getActivityHeatmap(supabase, 'user-1', 30);
+    expect(result.data).toHaveLength(30);
   });
 });

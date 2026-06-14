@@ -65,5 +65,7 @@ describe('sendNudge', () => {
 
     const result = await sendNudge(supabase, 'target-user');
     expect(result.success).toBe(true);
+    const notificationInsert = builder.insert.mock.calls[1]?.[0];
+    expect(notificationInsert.message).toContain('Someone nudged you');
   });
 });

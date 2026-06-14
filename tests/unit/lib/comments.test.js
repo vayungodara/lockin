@@ -145,6 +145,8 @@ describe('postComment', () => {
 
     const result = await postComment(supabase, 'a1', longText);
     expect(result.success).toBe(true);
+    const notificationInsert = builder.insert.mock.calls[1]?.[0];
+    expect(notificationInsert.message).toBe('A'.repeat(60) + '...');
   });
 });
 

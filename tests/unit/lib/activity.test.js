@@ -319,4 +319,159 @@ describe('getGroupStats', () => {
     expect(result.leaderboard).toEqual([]);
     expect(result.error).toBeNull();
   });
+
+  it('computes stats and leaderboard with real data', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T12:00:00Z'));
+
+    const { supabase } = createTableMock();
+
+    supabase.from('group_members').resolveWith({
+      data: [{ user_id: 'u1' }, { user_id: 'u2' }],
+      error: null,
+    });
+    supabase.from('activity_log').resolveWith({
+      data: [
+        { user_id: 'u1' },
+        { user_id: 'u1' },
+        { user_id: 'u2' },
+      ],
+      error: null,
+    });
+    supabase.from('tasks').resolveWith({
+      data: [
+        { id: 't1', status: 'done', owner_id: 'u1' },
+        { id: 't2', status: 'in_progress', owner_id: 'u2' },
+        { id: 't3', status: 'done', owner_id: 'u1' },
+        { id: 't4', status: 'todo', owner_id: 'u2' },
+      ],
+      error: null,
+    });
+    supabase.from('profiles').resolveWith({
+      data: [
+        { id: 'u1', full_name: 'Alice', avatar_url: 'alice.png' },
+        { id: 'u2', full_name: 'Bob', avatar_url: null },
+      ],
+      error: null,
+    });
+
+    const result = await getGroupStats(supabase, 'group-1');
+
+    expect(result.stats).toEqual({
+      totalTasks: 4,
+      completedTasks: 2,
+      completionRate: 50,
+      activeTasks: 2,
+    });
+    expect(result.leaderboard).toHaveLength(2);
+    expect(result.leaderboard[0].full_name).toBe('Alice');
+    expect(result.leaderboard[0].completions).toBe(2);
+    expect(result.leaderboard[1].full_name).toBe('Bob');
+    expect(result.leaderboard[1].completions).toBe(1);
+    expect(result.error).toBeNull();
+
+    vi.useRealTimers();
+  });
+
+  it('sorts leaderboard by completions descending', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T12:00:00Z'));
+
+    const { supabase } = createTableMock();
+
+    supabase.from('group_members').resolveWith({
+      data: [{ user_id: 'u1' }, { user_id: 'u2' }, { user_id: 'u3' }],
+      error: null,
+    });
+    supabase.from('activity_log').resolveWith({
+      data: [
+        { user_id: 'u3' },
+        { user_id: 'u3' },
+        { user_id: 'u3' },
+        { user_id: 'u1' },
+      ],
+      error: null,
+    });
+    supabase.from('tasks').resolveWith({ data: [], error: null });
+    supabase.from('profiles').resolveWith({
+      data: [
+        { id: 'u1', full_name: 'Alice', avatar_url: null },
+        { id: 'u2', full_name: 'Bob', avatar_url: null },
+        { id: 'u3', full_name: 'Charlie', avatar_url: null },
+      ],
+      error: null,
+    });
+
+    const result = await getGroupStats(supabase, 'group-1');
+
+    expect(result.leaderboard[0].full_name).toBe('Charlie');
+    expect(result.leaderboard[0].completions).toBe(3);
+    expect(result.leaderboard[1].full_name).toBe('Alice');
+    expect(result.leaderboard[1].completions).toBe(1);
+    expect(result.leaderboard[2].full_name).toBe('Bob');
+    expect(result.leaderboard[2].completions).toBe(0);
+
+    vi.useRealTimers();
+  });
+
+  it('uses "Unknown" for members without profiles', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T12:00:00Z'));
+
+    const { supabase } = createTableMock();
+
+    supabase.from('group_members').resolveWith({
+      data: [{ user_id: 'u1' }],
+      error: null,
+    });
+    supabase.from('activity_log').resolveWith({ data: [], error: null });
+    supabase.from('tasks').resolveWith({ data: [], error: null });
+    supabase.from('profiles').resolveWith({ data: [], error: null });
+
+    const result = await getGroupStats(supabase, 'group-1');
+
+    expect(result.leaderboard[0].full_name).toBe('Unknown');
+    expect(result.leaderboard[0].completions).toBe(0);
+
+    vi.useRealTimers();
+  });
 });
+
+/**
+ * Per-table mock builder for functions that query multiple Supabase tables.
+ * Each `from(table)` call returns an independent chainable builder.
+ */
+function createTableMock() {
+  function makeBuilder() {
+    const chainMethods = [
+      'select', 'eq', 'neq', 'in', 'not', 'gte', 'order', 'range',
+      'single', 'maybeSingle', 'insert', 'update', 'delete', 'limit',
+    ];
+    const b = {
+      resolveWith(value) {
+        b.then = (resolve) => resolve(value);
+      },
+    };
+    chainMethods.forEach((m) => {
+      b[m] = vi.fn(() => b);
+    });
+    b.resolveWith({ data: null, error: null });
+    return b;
+  }
+
+  const builders = {};
+  const supabase = {
+    from: vi.fn((table) => {
+      if (!builders[table]) builders[table] = makeBuilder();
+      return builders[table];
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'test-user-id' } },
+        error: null,
+      }),
+    },
+  };
+  return { supabase, builders };
+}

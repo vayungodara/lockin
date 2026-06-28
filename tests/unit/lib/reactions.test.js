@@ -143,6 +143,42 @@ describe('getBatchReactions', () => {
   });
 });
 
+describe('getBatchReactions — edge cases', () => {
+  it('creates entry for unknown activity_id found in reaction data', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: [
+        { activity_id: 'unknown-id', user_id: 'other-user', reaction: 'fire' },
+      ],
+      error: null,
+    });
+
+    const result = await getBatchReactions(supabase, ['a1']);
+    expect(result.reactionsMap.a1).toEqual({ counts: {}, userReactions: [], total: 0 });
+    expect(result.reactionsMap['unknown-id'].counts).toEqual({ fire: 1 });
+    expect(result.reactionsMap['unknown-id'].total).toBe(1);
+  });
+
+  it('handles auth error gracefully and still returns reactions', async () => {
+    const { supabase, builder } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({
+      data: null,
+      error: { message: 'auth expired' },
+    });
+    builder.mockReturnValue({
+      data: [
+        { activity_id: 'a1', user_id: 'some-user', reaction: 'clap' },
+      ],
+      error: null,
+    });
+
+    const result = await getBatchReactions(supabase, ['a1']);
+    expect(result.reactionsMap.a1.counts).toEqual({ clap: 1 });
+    expect(result.reactionsMap.a1.userReactions).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+});
+
 describe('toggleReaction', () => {
   it('returns "Not authenticated" when no user is signed in', async () => {
     const { supabase } = createMockSupabase();
@@ -189,6 +225,42 @@ describe('toggleReaction', () => {
   it('returns failure when auth call errors', async () => {
     const { supabase } = createMockSupabase();
     supabase.auth.getUser.mockResolvedValue({ data: null, error: { message: 'auth broken' } });
+
+    const result = await toggleReaction(supabase, 'a1', 'fire');
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('throws on real DB error during existence check (not PGRST116)', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: null,
+      error: { code: 'PGRST500', message: 'Internal server error' },
+    });
+
+    const result = await toggleReaction(supabase, 'a1', 'fire');
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('returns failure when delete fails after finding existing reaction', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: { id: 'reaction-123' }, error: null },
+      { data: null, error: { message: 'delete failed' } },
+    ]);
+
+    const result = await toggleReaction(supabase, 'a1', 'fire');
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('returns failure when insert fails for new reaction', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: null, error: { code: 'PGRST116' } },
+      { data: null, error: { message: 'insert failed' } },
+    ]);
 
     const result = await toggleReaction(supabase, 'a1', 'fire');
     expect(result.success).toBe(false);

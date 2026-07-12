@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   NOTIFICATION_TYPES,
   getNotificationIcon,
+  getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
@@ -74,6 +75,56 @@ describe('getNotificationIcon', () => {
       expect(typeof icon).toBe('string');
       expect(icon.length).toBeGreaterThan(0);
     });
+  });
+});
+
+describe('getNotifications', () => {
+  it('returns notifications on success', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const rows = [
+      { id: 'n-1', type: 'pact_reminder', title: 'Reminder', message: 'Do it', is_read: false, created_at: '2024-06-15T12:00:00Z' },
+      { id: 'n-2', type: 'streak_milestone', title: '7 days!', message: 'Keep going', is_read: true, created_at: '2024-06-14T12:00:00Z' },
+    ];
+    builder.mockReturnValue({ data: rows, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual(rows);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array when no notifications exist', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array when data is null', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'connection lost' } });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('respects custom limit parameter', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    await getNotifications(supabase, 5);
+    expect(builder.limit).toHaveBeenCalledWith(5);
   });
 });
 

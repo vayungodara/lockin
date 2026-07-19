@@ -272,6 +272,43 @@ describe('getGroupActivity', () => {
     const result = await getGroupActivity(supabase, 'group-1');
     expect(result.data).toEqual([]);
   });
+
+  it('attaches user profiles and reactions to activities', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const activities = [
+      { id: 'a-1', user_id: 'u-1', action: 'task_completed', group_id: 'group-1', created_at: '2024-06-15T10:00:00Z' },
+    ];
+    const profiles = [{ id: 'u-1', full_name: 'Alice', avatar_url: 'https://example.com/avatar.png' }];
+
+    builder.mockReturnValueSequence([
+      { data: activities, error: null },
+      { data: profiles, error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getGroupActivity(supabase, 'group-1');
+    expect(result.error).toBeNull();
+    expect(result.data.length).toBe(1);
+    expect(result.data[0].user.full_name).toBe('Alice');
+    expect(result.data[0]).toHaveProperty('reactions');
+  });
+
+  it('uses "Unknown" for users without a profile', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const activities = [
+      { id: 'a-1', user_id: 'u-missing', action: 'pact_created', group_id: 'group-1', created_at: '2024-06-15T10:00:00Z' },
+    ];
+
+    builder.mockReturnValueSequence([
+      { data: activities, error: null },
+      { data: [], error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getGroupActivity(supabase, 'group-1');
+    expect(result.data[0].user.full_name).toBe('Unknown');
+    expect(result.data[0].user.avatar_url).toBeNull();
+  });
 });
 
 describe('getAllActivity', () => {
@@ -291,6 +328,66 @@ describe('getAllActivity', () => {
     const result = await getAllActivity(supabase);
     expect(result.data).toEqual([]);
     expect(result.error).toBeTruthy();
+  });
+
+  it('filters out test data entries', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const activities = [
+      { id: 'a-1', user_id: 'u-1', action: 'pact_completed', metadata: { title: 'Real pact' }, created_at: '2024-06-15T10:00:00Z' },
+      { id: 'a-2', user_id: 'u-1', action: 'pact_completed', metadata: { title: 'Bulk Test item' }, created_at: '2024-06-15T09:00:00Z' },
+      { id: 'a-3', user_id: 'u-1', action: 'pact_completed', metadata: { title: 'Test #42' }, created_at: '2024-06-15T08:00:00Z' },
+      { id: 'a-4', user_id: 'u-1', action: 'pact_completed', metadata: { title: '[TEST] debug' }, created_at: '2024-06-15T07:00:00Z' },
+    ];
+    const profiles = [{ id: 'u-1', full_name: 'Alice', avatar_url: null }];
+
+    builder.mockReturnValueSequence([
+      { data: activities, error: null },
+      { data: profiles, error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getAllActivity(supabase);
+    expect(result.data.length).toBe(1);
+    expect(result.data[0].id).toBe('a-1');
+  });
+
+  it('trims results to the requested limit after filtering', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const activities = Array.from({ length: 15 }, (_, i) => ({
+      id: `a-${i}`,
+      user_id: 'u-1',
+      action: 'pact_completed',
+      metadata: { title: `Pact ${i}` },
+      created_at: `2024-06-15T${String(i).padStart(2, '0')}:00:00Z`,
+    }));
+    const profiles = [{ id: 'u-1', full_name: 'Bob', avatar_url: null }];
+
+    builder.mockReturnValueSequence([
+      { data: activities, error: null },
+      { data: profiles, error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getAllActivity(supabase, 5);
+    expect(result.data.length).toBe(5);
+  });
+
+  it('attaches user profile and reactions to each activity', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const activities = [
+      { id: 'a-1', user_id: 'u-1', action: 'focus_session_completed', metadata: {}, created_at: '2024-06-15T10:00:00Z' },
+    ];
+    const profiles = [{ id: 'u-1', full_name: 'Charlie', avatar_url: 'https://example.com/c.png' }];
+
+    builder.mockReturnValueSequence([
+      { data: activities, error: null },
+      { data: profiles, error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getAllActivity(supabase);
+    expect(result.data[0].user.full_name).toBe('Charlie');
+    expect(result.data[0].reactions).toEqual({ counts: {}, userReactions: [], total: 0 });
   });
 });
 
@@ -318,5 +415,92 @@ describe('getGroupStats', () => {
     });
     expect(result.leaderboard).toEqual([]);
     expect(result.error).toBeNull();
+  });
+
+  it('calculates completion rate and builds leaderboard', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const members = [{ user_id: 'u-1' }, { user_id: 'u-2' }];
+    const recentActivity = [
+      { user_id: 'u-1' },
+      { user_id: 'u-1' },
+      { user_id: 'u-2' },
+    ];
+    const tasks = [
+      { id: 't-1', status: 'done', owner_id: 'u-1' },
+      { id: 't-2', status: 'done', owner_id: 'u-2' },
+      { id: 't-3', status: 'in_progress', owner_id: 'u-1' },
+      { id: 't-4', status: 'todo', owner_id: 'u-2' },
+    ];
+    const profiles = [
+      { id: 'u-1', full_name: 'Alice', avatar_url: null },
+      { id: 'u-2', full_name: 'Bob', avatar_url: null },
+    ];
+
+    builder.mockReturnValueSequence([
+      { data: members, error: null },
+      { data: recentActivity, error: null },
+      { data: tasks, error: null },
+      { data: profiles, error: null },
+    ]);
+
+    const result = await getGroupStats(supabase, 'group-1');
+    expect(result.error).toBeNull();
+    expect(result.stats.totalTasks).toBe(4);
+    expect(result.stats.completedTasks).toBe(2);
+    expect(result.stats.completionRate).toBe(50);
+    expect(result.stats.activeTasks).toBe(2);
+    expect(result.leaderboard.length).toBe(2);
+    expect(result.leaderboard[0].full_name).toBe('Alice');
+    expect(result.leaderboard[0].completions).toBe(2);
+    expect(result.leaderboard[1].full_name).toBe('Bob');
+    expect(result.leaderboard[1].completions).toBe(1);
+  });
+
+  it('sorts leaderboard by completions descending', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const members = [{ user_id: 'u-1' }, { user_id: 'u-2' }, { user_id: 'u-3' }];
+    const recentActivity = [
+      { user_id: 'u-3' },
+      { user_id: 'u-3' },
+      { user_id: 'u-3' },
+      { user_id: 'u-1' },
+    ];
+    const tasks = [
+      { id: 't-1', status: 'done', owner_id: 'u-1' },
+    ];
+    const profiles = [
+      { id: 'u-1', full_name: 'Alice', avatar_url: null },
+      { id: 'u-2', full_name: 'Bob', avatar_url: null },
+      { id: 'u-3', full_name: 'Charlie', avatar_url: null },
+    ];
+
+    builder.mockReturnValueSequence([
+      { data: members, error: null },
+      { data: recentActivity, error: null },
+      { data: tasks, error: null },
+      { data: profiles, error: null },
+    ]);
+
+    const result = await getGroupStats(supabase, 'group-1');
+    expect(result.leaderboard[0].full_name).toBe('Charlie');
+    expect(result.leaderboard[0].completions).toBe(3);
+    expect(result.leaderboard[1].full_name).toBe('Alice');
+    expect(result.leaderboard[1].completions).toBe(1);
+    expect(result.leaderboard[2].full_name).toBe('Bob');
+    expect(result.leaderboard[2].completions).toBe(0);
+  });
+
+  it('handles null data arrays gracefully', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValueSequence([
+      { data: [{ user_id: 'u-1' }], error: null },
+      { data: null, error: null },
+      { data: null, error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getGroupStats(supabase, 'group-1');
+    expect(result.stats.totalTasks).toBe(0);
+    expect(result.stats.completionRate).toBe(0);
   });
 });

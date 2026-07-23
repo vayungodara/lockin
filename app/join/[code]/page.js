@@ -25,9 +25,9 @@ export default async function JoinPage({ params }) {
         </p>
         <Link href="/dashboard/groups" style={{
           padding: '0.75rem 1.5rem',
-          background: 'var(--accent-primary)',
-          color: 'white',
-          borderRadius: '8px',
+          background: 'var(--brand-ink, var(--ink-900))',
+          color: 'var(--ink-050)',
+          borderRadius: '4px',
           textDecoration: 'none',
           fontWeight: 500
         }}>
@@ -67,9 +67,9 @@ export default async function JoinPage({ params }) {
         </p>
         <Link href="/dashboard/groups" style={{
           padding: '0.75rem 1.5rem',
-          background: 'var(--accent-primary)',
-          color: 'white',
-          borderRadius: '8px',
+          background: 'var(--brand-ink, var(--ink-900))',
+          color: 'var(--ink-050)',
+          borderRadius: '4px',
           textDecoration: 'none',
           fontWeight: 500
         }}>

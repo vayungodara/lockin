@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client';
 import { calculateStreak } from '@/lib/streaks';
 import { getUserAchievements } from '@/lib/gamification';
 import { getCurrentTier, TIERS } from '@/lib/tiers';
+import { AchievementIcon } from '@/lib/achievementIcons';
 import UserAvatar from '@/components/UserAvatar';
 import SectionHeader from '@/components/SectionHeader';
 import { SkeletonCard, SkeletonText } from '@/components/Skeleton';
@@ -152,7 +153,7 @@ export default function ProfilePageClient({ user }) {
       <header className={styles.header}>
         <span className={styles.headerCaption}>§ Your record</span>
         <div className={styles.identityRow}>
-          <UserAvatar user={avatarUser} size="lg" isSelf showPhoto />
+          <UserAvatar user={avatarUser} size="lg" isSelf />
           <div className={styles.identityBody}>
             <h1 className={styles.displayName}>{displayName}</h1>
             {joinedDate && (
@@ -307,7 +308,7 @@ export default function ProfilePageClient({ user }) {
                     Achievement #{String(i + 1).padStart(2, '0')}
                   </span>
                   <span className={styles.achStamp} aria-hidden="true">
-                    <span className={styles.achStampGlyph}>{a.icon || '·'}</span>
+                    <AchievementIcon achievementKey={a.key} size={26} weight="duotone" />
                   </span>
                   <h3 className={styles.achName}>{a.name}</h3>
                   <p className={styles.achDesc}>{a.description}</p>
@@ -330,8 +331,12 @@ export default function ProfilePageClient({ user }) {
                     <span className={styles.achIndex}>
                       Achievement #{String(earnedAchievements.length + i + 1).padStart(2, '0')}
                     </span>
+                    <span className={`${styles.achStamp} ${styles.achStampLocked}`} aria-hidden="true">
+                      <AchievementIcon achievementKey={a.key} size={26} weight="regular" />
+                    </span>
                     <h3 className={styles.achName}>{a.name}</h3>
                     <p className={styles.achDesc}>{a.description}</p>
+                    <span className={styles.achLockedTag}>Not yet</span>
                   </li>
                 ))}
               </ul>

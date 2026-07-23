@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { fadeInUp, buttonHover, buttonTap } from '@/lib/animations';
+import { fadeIn, buttonHover, buttonTap } from '@/lib/animations';
 import styles from './ShareStreak.module.css';
 
 export default function ShareStreakClient({ user, profile, streakData }) {
@@ -51,7 +51,9 @@ export default function ShareStreakClient({ user, profile, streakData }) {
 
   return (
     <div className={styles.container}>
-      <motion.div className={styles.card} {...fadeInUp}>
+      {/* Opacity-only entrance: the card is the screenshottable hero, so no
+          vertical transform that a capture could freeze mid-slide. */}
+      <motion.div className={styles.card} {...fadeIn}>
         <div className={styles.header}>
           <div className={styles.logo}>LockIn</div>
         </div>
@@ -85,7 +87,7 @@ export default function ShareStreakClient({ user, profile, streakData }) {
         </div>
         
         <div className={styles.tagline}>
-          Locked in and crushing goals
+          Don&apos;t break the chain.
         </div>
       </motion.div>
       

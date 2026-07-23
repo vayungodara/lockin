@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useKeyboardShortcuts } from '@/lib/KeyboardShortcutsContext';
 import { useFocus } from '@/lib/FocusContext';
 import SectionHeader from '@/components/SectionHeader';
+import Stamp from '@/components/Stamp';
 import FocusTimer, { FocusControls, LockedInBadge } from '@/components/FocusTimer';
 import FocusWitnessesOfMe from '@/components/FocusWitnessesOfMe';
 import styles from './FocusPage.module.css';
@@ -44,11 +45,18 @@ export default function FocusPageClient({ user }) {
     toggleTimer,
     mode,
     isRunning,
+    isPaused,
     switchMode,
     WORK_DURATION,
     BREAK_DURATION,
     LONG_BREAK_DURATION,
   } = useFocus();
+
+  // A paused work session is still "locked in" — just on hold. Treat
+  // running and paused-work as the same in-progress state for the stamp,
+  // pulse dots and atmosphere copy so pausing doesn't revert to the idle
+  // render. Paused breaks read as idle (no locked-in framing).
+  const isWorkActive = mode === 'work' && (isRunning || isPaused);
 
   // Register Space-bar shortcut for timer toggle
   useEffect(() => {
@@ -119,7 +127,7 @@ export default function FocusPageClient({ user }) {
         <SectionHeader
           number="00"
           title="Focus session"
-          caption={isRunning ? 'LIVE · IN PROGRESS' : 'POMODORO'}
+          caption={isRunning ? 'LIVE · IN PROGRESS' : isWorkActive ? 'PAUSED' : 'POMODORO'}
         />
       </header>
 
@@ -131,16 +139,22 @@ export default function FocusPageClient({ user }) {
             <span
               className={`${styles.statusCaption} ${
                 isRunning ? styles.statusRunning : ''
-              }`}
+              } ${isWorkActive && !isRunning ? styles.statusPaused : ''}`.trim()}
             >
               {isRunning
                 ? '· LIVE · SESSION IN PROGRESS'
-                : mode === 'work'
-                  ? '§ READY'
-                  : '§ BREAK'}
+                : isWorkActive
+                  ? '§ PAUSED · STILL LOCKED IN'
+                  : mode === 'work'
+                    ? '§ READY'
+                    : '§ BREAK'}
             </span>
             <div className={styles.stampSlot}>
-              <LockedInBadge />
+              {isRunning ? (
+                <LockedInBadge />
+              ) : isWorkActive ? (
+                <Stamp kind="locked-in" size="md" />
+              ) : null}
             </div>
           </div>
 
@@ -176,11 +190,13 @@ export default function FocusPageClient({ user }) {
           {/* Controls */}
           <FocusControls targetMinutes={targetMinutes} />
 
-          {isRunning ? (
+          {isWorkActive ? (
             <>
               <div className={styles.ruleDotted} />
               <p className={styles.runningCopy}>
-                Your friends know you&apos;re working.
+                {isRunning
+                  ? 'Your friends know you’re working.'
+                  : 'Paused. Your friends still see you locked in — pick it back up.'}
               </p>
             </>
           ) : null}
@@ -191,10 +207,10 @@ export default function FocusPageClient({ user }) {
           <section className={styles.sideSection}>
             <SectionHeader
               number="01"
-              title="Witnesses of me"
-              caption="WHO SEES YOU"
+              title="Your friends"
+              caption="WHO SEES YOU LOCK IN"
             />
-            <FocusWitnessesOfMe userId={user.id} isRunning={isRunning} />
+            <FocusWitnessesOfMe userId={user.id} isRunning={isWorkActive} />
           </section>
 
           <section className={styles.sideSection}>

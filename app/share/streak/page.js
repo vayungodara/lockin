@@ -10,16 +10,42 @@ export async function generateMetadata({ searchParams }) {
   // key appears multiple times (e.g. `?name=a&name=b`). Coerce to a single
   // string before calling `.replace` to avoid a TypeError on arrays.
   const rawStreak = Array.isArray(params?.streak) ? params.streak[0] : params?.streak;
-  const streak = String(parseInt(rawStreak, 10) || 0);
+  const hasStreakParam = rawStreak != null && rawStreak !== '';
+  const paramStreak = parseInt(rawStreak, 10) || 0;
   const rawName = Array.isArray(params?.name) ? params.name[0] : params?.name;
-  const name = (rawName || 'Someone').replace(/[<>"'&]/g, '').slice(0, 50);
+
+  // The page is auth-gated and always renders the *viewer's own* calculated
+  // streak + name. So the title should match that card, not the URL param.
+  // Only fall back to the param for unauthenticated link-preview crawlers
+  // (where the param carries the sharer's numbers for the OG card).
+  let streakValue = paramStreak;
+  let nameValue = rawName;
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const [profileRes, streakData] = await Promise.all([
+        supabase.from('profiles').select('full_name').eq('id', user.id).single(),
+        calculateStreak(supabase, user.id),
+      ]);
+      streakValue = streakData?.currentStreak ?? streakValue;
+      if (!hasStreakParam) {
+        nameValue = profileRes.data?.full_name || nameValue;
+      }
+    }
+  } catch {
+    // Fall back to the sanitized param values below.
+  }
+
+  const streak = String(streakValue);
+  const name = (nameValue || 'Someone').replace(/[<>"'&]/g, '').slice(0, 50);
 
   return {
     title: `${name} is on a ${streak}-day streak! | LockIn`,
-    description: `${name} has been crushing their goals with LockIn. Join them!`,
+    description: `${name} hasn't broken the chain on LockIn. Join them.`,
     openGraph: {
       title: `${streak}-day streak on LockIn!`,
-      description: `${name} has been crushing their goals. Join them!`,
+      description: `${name} hasn't broken the chain. Join them.`,
     },
   };
 }

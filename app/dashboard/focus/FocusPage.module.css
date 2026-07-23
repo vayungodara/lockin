@@ -79,6 +79,15 @@
   color: var(--stamp-blue);
 }
 
+/* Paused work session — still a locked-in session, so it keeps the carbon
+   register of the running state but at the muted ink weight (the colon
+   stops blinking and the copy reads "on hold", so the caption shouldn't
+   shout LIVE). */
+.statusPaused {
+  color: var(--stamp-blue);
+  opacity: 0.78;
+}
+
 .stampSlot {
   display: inline-flex;
   align-items: center;

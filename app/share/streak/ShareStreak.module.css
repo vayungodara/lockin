@@ -9,44 +9,101 @@
   gap: var(--space-6);
 }
 
+/* The screenshottable hero — cream notebook paper, not gradient.
+   Editorial paper feel: tinted-cream card, hairline ink border, low radius,
+   soft drop shadow. The highlighter strip behind the streak number is the
+   brand signal; the rotated KEPT stamp is the accountability mechanic. */
 .card {
-  background: var(--gradient-primary);
-  border-radius: var(--radius-2xl);
+  position: relative;
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
   padding: var(--space-8);
+  padding-top: var(--space-10);
   max-width: 360px;
   width: 100%;
   text-align: center;
-  box-shadow: var(--shadow-xl);
-  color: white;
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.04), 0 18px 40px -16px oklch(0 0 0 / 0.22);
+  color: var(--ink-800);
+  overflow: hidden;
+}
+
+/* Rotated KEPT-style stamp, top-right. Moss green, semantic — does NOT
+   cascade with the user's ink. Built in CSS because the markup is fixed.
+   Sits fully inside the card padding so the card's overflow:hidden (which
+   clips the highlighter strip behind the streak number) never crops it. */
+.card::after {
+  content: 'KEPT';
+  position: absolute;
+  top: var(--space-5);
+  right: var(--space-5);
+  transform: rotate(-3deg);
+  font-family: var(--font-sans-editorial);
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--stamp-green);
+  border: 2px solid currentColor;
+  border-radius: var(--radius-editorial-sm);
+  padding: 4px 10px;
+  pointer-events: none;
 }
 
 .header {
   margin-bottom: var(--space-6);
 }
 
+/* Editorial masthead — § numeral spine in mono, the way dashboard/stats read. */
 .logo {
-  font-size: var(--text-lg);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  opacity: 0.9;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
 .streakSection {
+  position: relative;
+  isolation: isolate;
   margin-bottom: var(--space-6);
 }
 
+/* Monumental serif numeral — the moment. Flat highlighter strip sits behind
+   it (z-index trick from the landing hero), ink-dark digits on top. */
 .streakNumber {
-  font-size: 5rem;
-  font-weight: 800;
-  line-height: 1;
-  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-display-editorial);
+  font-size: 6.5rem;
+  font-weight: 400;
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+  color: var(--ink-900);
+}
+
+.streakNumber::after {
+  content: '';
+  position: absolute;
+  bottom: 0.16em;
+  left: -0.06em;
+  right: -0.06em;
+  height: 0.2em;
+  background: var(--stamp-yellow);
+  opacity: 1;
+  z-index: -1;
+  pointer-events: none;
 }
 
 .streakLabel {
-  font-size: var(--text-xl);
-  font-weight: 600;
-  opacity: 0.9;
-  margin-top: var(--space-2);
+  font-family: var(--font-sans-editorial);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-600);
+  margin-top: var(--space-3);
 }
 
 .userInfo {
@@ -57,28 +114,35 @@
   margin-bottom: var(--space-6);
 }
 
+/* Photo fallback only — keep the brand tile as the primary identity. */
 .avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-editorial-sm);
+  border: 1px solid var(--ink-300);
+  object-fit: cover;
 }
 
+/* WitnessTile feel — 2px-radius highlighter tile, dark ink initial. */
 .avatarPlaceholder {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-editorial-sm);
+  background: var(--stamp-yellow);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: var(--text-lg);
+  font-family: var(--font-sans-editorial);
+  font-weight: 700;
+  font-size: var(--text-base);
+  color: var(--stamp-yellow-ink);
 }
 
 .userName {
-  font-size: var(--text-lg);
+  font-family: var(--font-sans-editorial);
+  font-size: var(--text-base);
   font-weight: 600;
+  color: var(--ink-800);
 }
 
 .stats {
@@ -97,26 +161,35 @@
   gap: var(--space-1);
 }
 
+/* Tabular mono digits — stats read as a ledger row. */
 .statValue {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-2xl);
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-900);
 }
 
 .statLabel {
-  font-size: var(--text-sm);
-  opacity: 0.8;
+  font-family: var(--font-sans-editorial);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
 .statDivider {
   width: 1px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.3);
+  background: var(--ink-300);
 }
 
 .tagline {
-  font-size: var(--text-sm);
-  opacity: 0.8;
+  font-family: var(--font-display-editorial);
+  font-size: var(--text-base);
   font-style: italic;
+  color: var(--ink-600);
 }
 
 .actions {
@@ -127,6 +200,7 @@
   max-width: 360px;
 }
 
+/* Primary CTA — flat ink-dark on cream, cream label. No gradient. */
 .shareBtn {
   display: flex;
   align-items: center;
@@ -134,13 +208,19 @@
   gap: var(--space-2);
   width: 100%;
   padding: var(--space-4);
-  background: var(--gradient-primary);
-  border: none;
-  border-radius: var(--radius-lg);
-  color: white;
+  background: var(--brand-ink, var(--ink-900));
+  border: 1px solid var(--brand-ink, var(--ink-900));
+  border-radius: var(--radius-editorial-md);
+  color: var(--ink-050);
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-base);
   font-weight: 600;
   cursor: pointer;
+  transition: opacity var(--transition-fast);
+}
+
+.shareBtn:hover {
+  opacity: 0.9;
 }
 
 .backBtn {
@@ -149,59 +229,52 @@
   justify-content: center;
   width: 100%;
   padding: var(--space-3);
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  color: var(--ink-600);
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
 .backBtn:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
+  background: var(--ink-100);
+  color: var(--ink-900);
 }
 
 @media (max-width: 480px) {
   .card {
     padding: var(--space-6);
+    padding-top: var(--space-9);
   }
 
   .streakNumber {
-    font-size: 4rem;
+    font-size: 5rem;
   }
 }
 
-/* ── Dark Mode Overrides ── */
+/* ── Dark Mode Overrides ──
+   Inverted paper: ink tokens flip automatically, so the card stays warm-dark
+   stationery. Just soften the shadow + lift the border so the card separates
+   from the dark page. No glow accents (dark SaaS), no glass. */
 :global([data-theme="dark"]) .card {
-  box-shadow: var(--shadow-2xl), 0 0 40px rgba(var(--accent-primary-rgb), 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-:global([data-theme="dark"]) .streakNumber {
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5), 0 0 40px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.4), 0 20px 44px -16px oklch(0 0 0 / 0.6);
+  border-color: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .shareBtn {
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(var(--accent-primary-rgb), 0.3);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-}
-
-:global([data-theme="dark"]) .shareBtn:hover {
-  box-shadow: var(--shadow-xl), 0 0 28px rgba(var(--accent-primary-rgb), 0.4);
+  background: var(--stamp-yellow);
+  border-color: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
 }
 
 :global([data-theme="dark"]) .backBtn {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-xs);
+  border-color: var(--ink-300);
 }
 
 :global([data-theme="dark"]) .backBtn:hover {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.14);
-}
-
-:global([data-theme="dark"]) .statDivider {
-  background: rgba(255, 255, 255, 0.2);
+  background: var(--ink-200);
 }

@@ -477,7 +477,8 @@
   color: var(--ink-500);
 }
 
-/* Rotated yellow stamp glyph in top-right corner of earned cards. */
+/* Rotated highlighter stamp in top-right corner, seating a Phosphor icon.
+   Earned: filled yellow stamp, dark ink icon (inherits via currentColor). */
 .achStamp {
   position: absolute;
   top: 14px;
@@ -494,9 +495,13 @@
   box-shadow: 0 1px 0 rgba(20, 15, 5, 0.08);
 }
 
-.achStampGlyph {
-  font-size: 22px;
-  line-height: 1;
+/* Locked: no fill, dashed chip, muted ink — sits flat (no rotation). */
+.achStampLocked {
+  background: transparent;
+  border: 1px dashed var(--ink-300);
+  color: var(--ink-400);
+  transform: none;
+  box-shadow: none;
 }
 
 .achName {
@@ -513,7 +518,6 @@
 }
 
 .achCardLocked .achName {
-  padding-right: 0;
   color: var(--ink-700);
 }
 
@@ -523,6 +527,17 @@
   line-height: 1.4;
   color: var(--ink-600);
   margin: 0;
+}
+
+/* "Not yet" mono tag pinned to the foot of a locked card. */
+.achLockedTag {
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-400);
+  margin-top: auto;
 }
 
 .achDate {

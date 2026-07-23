@@ -1,5 +1,6 @@
 /* Skeleton for /share/streak — mirrors ShareStreakClient layout so the
- * transition from loading -> loaded feels designed, not jank. */
+ * transition from loading -> loaded feels designed, not jank.
+ * Cream notebook paper to match the editorial share card (no gradient). */
 
 .container {
   min-height: 100vh;
@@ -13,14 +14,15 @@
 }
 
 .card {
-  background: var(--gradient-primary);
-  border-radius: var(--radius-2xl);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
   padding: var(--space-8);
+  padding-top: var(--space-10);
   max-width: 360px;
   width: 100%;
   text-align: center;
-  box-shadow: var(--shadow-xl);
-  color: white;
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.04), 0 18px 40px -16px oklch(0 0 0 / 0.22);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
@@ -63,7 +65,7 @@
 .statDivider {
   width: 1px;
   height: 40px;
-  background: rgba(255, 255, 255, 0.18);
+  background: var(--ink-300);
 }
 
 .taglineRow {
@@ -79,10 +81,10 @@
   max-width: 360px;
 }
 
-/* Shimmer block — tuned for the translucent gradient card backdrop. */
+/* Shimmer block — tuned for the tinted-cream card backdrop. */
 .block {
-  background: rgba(255, 255, 255, 0.22);
-  border-radius: var(--radius-md);
+  background: var(--ink-200);
+  border-radius: var(--radius-editorial-sm);
   position: relative;
   overflow: hidden;
   animation: shimmerPulse 1.5s ease-in-out infinite;
@@ -95,7 +97,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.25),
+    oklch(1 0 0 / 0.35),
     transparent
   );
   transform: translateX(-100%);
@@ -103,16 +105,16 @@
 }
 
 .circle {
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   flex-shrink: 0;
 }
 
-/* Outside the gradient card — use neutral surface tone. */
+/* Action buttons sit outside the card on the page surface. */
 .buttonBlock {
   width: 100%;
   height: 52px;
-  background: var(--surface-2);
-  border-radius: var(--radius-lg);
+  background: var(--ink-200);
+  border-radius: var(--radius-editorial-md);
   position: relative;
   overflow: hidden;
   animation: shimmerPulse 1.5s ease-in-out infinite;
@@ -125,7 +127,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.08),
+    oklch(1 0 0 / 0.25),
     transparent
   );
   transform: translateX(-100%);
@@ -134,8 +136,8 @@
 
 .buttonBlockSecondary {
   height: 44px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
 }
 
 @keyframes shimmerPulse {
@@ -162,19 +164,34 @@
 @media (max-width: 480px) {
   .card {
     padding: var(--space-6);
+    padding-top: var(--space-9);
   }
 }
 
 :global([data-theme="dark"]) .card {
-  box-shadow: var(--shadow-2xl), 0 0 40px rgba(var(--accent-primary-rgb), 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 1px 2px oklch(0 0 0 / 0.4), 0 20px 44px -16px oklch(0 0 0 / 0.6);
+  border-color: var(--ink-200);
+}
+
+:global([data-theme="dark"]) .block {
+  background: var(--ink-300);
+}
+
+:global([data-theme="dark"]) .block::after,
+:global([data-theme="dark"]) .buttonBlock::after {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.08),
+    transparent
+  );
 }
 
 :global([data-theme="dark"]) .buttonBlock {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ink-300);
 }
 
 :global([data-theme="dark"]) .buttonBlockSecondary {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: var(--border-default);
+  background: var(--ink-200);
+  border-color: var(--ink-300);
 }

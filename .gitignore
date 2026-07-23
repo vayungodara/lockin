@@ -45,6 +45,12 @@ next-env.d.ts
 # playwright mcp logs
 .playwright-mcp/
 
+# playwright-cli artifacts (screenshots/snapshots/console logs from agent browser automation)
+.playwright-cli/
+
+# saved browser auth state (live cookies — never commit)
+.auth/
+
 # playwright test output
 /test-results/
 /playwright-report/
@@ -53,5 +59,18 @@ next-env.d.ts
 # claude code worktrees (transient agent workspaces)
 .claude/worktrees/
 
+# droid local settings (machine-specific overrides — committed settings.json travels with repo)
+.factory/settings.local.json
+
 # visual audit screenshots at repo root (logos/icons in /public are unaffected)
 /*.png
+
+# firecrawl CLI local auth cache + scraped output (project-scoped, never commit the API key)
+.firecrawl
+/design-references/
+
+# other AI tools' machine-local config + personal artifacts (not app code)
+.factory/
+.omp/
+.claude/settings.local.json.backup
+/*.pdf

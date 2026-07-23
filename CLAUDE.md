@@ -32,6 +32,14 @@ npx vitest run       # Unit tests (Vitest)
 npm run test:e2e     # Playwright e2e tests (auto-starts dev server)
 ```
 
+## Browser Automation
+
+Agent browser testing → use the **`browser-automation` skill** (`playwright-cli` drives; Chrome DevTools MCP profiles performance; the old Playwright MCP was removed). Dev server: `npm run dev` → http://localhost:3000. Login is Google OAuth — use a persistent session and log in once: `playwright-cli -s=lockin open http://localhost:3000 --persistent`. `.gitignore` any saved `.auth/`. The `@playwright/test` suite in `tests/` is the separate scripted e2e — don't conflate it with agent automation.
+
+- **Pact create** — `/dashboard/pacts` → click "New pact" → "Create New Pact" modal → fill title + deadline → submit → `snapshot` to confirm the new row.
+- **Focus-timer jank** — `/dashboard/focus` → Chrome DevTools MCP performance trace while the Framer-Motion timer/ring + confetti animate; check dropped frames / long tasks, throttle CPU 4–6×, confirm `prefers-reduced-motion` honored.
+- **Supabase errors** — `/dashboard` → `playwright-cli console error` + `requests`; flag non-2xx to `*.supabase.co` (`/rest/v1`, `/auth/v1`); 401/403 = RLS/policy, 400 = bad query.
+
 ## Tech Stack
 
 | Layer | Technology |

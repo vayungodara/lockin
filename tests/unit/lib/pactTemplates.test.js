@@ -6,13 +6,21 @@ const REQUIRED_TEMPLATE_FIELDS = [
   'id',
   'title',
   'description',
-  'emoji',
+  'Icon',
   'category',
   'isRecurring',
   'recurrenceType',
   'suggestedTime',
 ];
-const REQUIRED_CATEGORY_FIELDS = ['id', 'label', 'emoji'];
+const REQUIRED_CATEGORY_FIELDS = ['id', 'label', 'Icon'];
+// String-typed subset of the category contract. `Icon` is a Phosphor component
+// (function or forwardRef object), so it is validated separately below.
+const STRING_CATEGORY_FIELDS = ['id', 'label'];
+
+// A valid React element type is either a function component or an object
+// (e.g. a forwardRef/memo component like Phosphor's icons expose).
+const isRenderableComponent = (value) =>
+  value != null && (typeof value === 'function' || typeof value === 'object');
 
 describe('TEMPLATE_CATEGORIES', () => {
   it('exports an array', () => {
@@ -31,12 +39,21 @@ describe('TEMPLATE_CATEGORIES', () => {
     });
   });
 
-  it('each category field is a non-empty string', () => {
+  it('each string category field is a non-empty string', () => {
     TEMPLATE_CATEGORIES.forEach((category) => {
-      REQUIRED_CATEGORY_FIELDS.forEach((field) => {
+      STRING_CATEGORY_FIELDS.forEach((field) => {
         expect(typeof category[field], `category field "${field}" should be a string`).toBe('string');
         expect(category[field].length, `category field "${field}" should not be empty`).toBeGreaterThan(0);
       });
+    });
+  });
+
+  it('each category has a renderable Icon component', () => {
+    TEMPLATE_CATEGORIES.forEach((category) => {
+      expect(
+        isRenderableComponent(category.Icon),
+        `category "${category.id}" Icon should be a defined React component`
+      ).toBe(true);
     });
   });
 
@@ -96,10 +113,12 @@ describe('PACT_TEMPLATES', () => {
     });
   });
 
-  it('all emoji fields are non-empty strings', () => {
+  it('every template has a renderable Icon component', () => {
     PACT_TEMPLATES.forEach((template) => {
-      expect(typeof template.emoji, `template "${template.id}" emoji should be a string`).toBe('string');
-      expect(template.emoji.length, `template "${template.id}" emoji should not be empty`).toBeGreaterThan(0);
+      expect(
+        isRenderableComponent(template.Icon),
+        `template "${template.id}" Icon should be a defined React component`
+      ).toBe(true);
     });
   });
 

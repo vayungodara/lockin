@@ -10,7 +10,6 @@ export async function generateMetadata({ searchParams }) {
   // key appears multiple times (e.g. `?name=a&name=b`). Coerce to a single
   // string before calling `.replace` to avoid a TypeError on arrays.
   const rawStreak = Array.isArray(params?.streak) ? params.streak[0] : params?.streak;
-  const hasStreakParam = rawStreak != null && rawStreak !== '';
   const paramStreak = parseInt(rawStreak, 10) || 0;
   const rawName = Array.isArray(params?.name) ? params.name[0] : params?.name;
 
@@ -28,10 +27,12 @@ export async function generateMetadata({ searchParams }) {
         supabase.from('profiles').select('full_name').eq('id', user.id).single(),
         calculateStreak(supabase, user.id),
       ]);
+      // Authenticated viewers always see their *own* recalculated streak, so
+      // the name must come from their own profile too — otherwise a shared URL
+      // carrying someone else's `name` would pair the viewer's streak with the
+      // sharer's name. Fall back to the param only if the profile has no name.
       streakValue = streakData?.currentStreak ?? streakValue;
-      if (!hasStreakParam) {
-        nameValue = profileRes.data?.full_name || nameValue;
-      }
+      nameValue = profileRes.data?.full_name || nameValue;
     }
   } catch {
     // Fall back to the sanitized param values below.

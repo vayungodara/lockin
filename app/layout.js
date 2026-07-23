@@ -1,23 +1,14 @@
-import { Inter, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/ThemeProvider";
 import { ToastProvider } from "@/components/Toast";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
-const inter = Inter({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-inter",
-});
-
-const instrumentSans = Instrument_Sans({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-display',
-  weight: 'variable',
-});
-
+// Fonts load via the Google Fonts <link> in <head> below (Host Grotesk body +
+// JetBrains Mono). The display serif is system-only (ui-serif). Inter +
+// Instrument Sans next/font loaders are retired — see .impeccable.md font
+// history Pass 1; their old --font-display injection used to clobber the
+// CSS token on <body>, so removing them lets --font-display resolve to serif.
 
 export const viewport = {
   width: 'device-width',
@@ -141,7 +132,7 @@ export default function RootLayout({ children }) {
         />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className={`${inter.className} ${instrumentSans.variable}`}>
+      <body>
         {/* Global SVG filter defs — referenced by inline SVG underlines / highlighter strokes */}
         <svg
           aria-hidden

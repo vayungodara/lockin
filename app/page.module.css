@@ -1277,12 +1277,16 @@
   }
 
   .heroPact {
-    padding: 28px 24px;
+    /* Extra bottom padding lifts the witnesses row clear of the MISSED
+       stamp's overhang band so the stamp slams onto the lower-right corner
+       below the content instead of covering the avatar tiles (collision at
+       ≤430px). */
+    padding: 28px 24px 76px;
   }
 
   .heroStamp {
-    right: -8px;
-    bottom: -14px;
+    right: -6px;
+    bottom: -12px;
   }
 
   .howItWorks,

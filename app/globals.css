@@ -108,9 +108,14 @@
   --shadow-glow-lg: 0 0 60px rgba(var(--accent-primary-rgb), 0.25);
   --shadow-glow-celebration: 0 0 40px rgba(var(--accent-celebration-rgb), 0.3);
   
-  /* Typography */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-display: 'Instrument Sans', var(--font-sans);
+  /* Typography — base tokens repoint to the editorial families (2026-05-24).
+     Inter + Instrument Sans are retired (.impeccable.md font history Pass 1).
+     --font-sans → Host Grotesk so all unmigrated body/form/UI surfaces inherit
+     the right family; --font-display → the system serif stack (ui-serif → New
+     York on macOS, Charter/Cambria elsewhere, Georgia fallback — display is
+     system-only, no web-font load). --font-mono stays JetBrains Mono. */
+  --font-sans: 'Host Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: ui-serif, Georgia, 'Times New Roman', serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', monospace;
   
   /* Font sizes - Refined scale */
@@ -309,19 +314,25 @@
   --bg-elevated: #1C1C1F;
   --bg-hover: #252528;
 
-  /* Surface colors — gentle lift, translucent */
-  --surface-1: rgba(30, 30, 34, 0.95);
-  --surface-2: rgba(30, 30, 34, 0.8);
-  --surface-3: rgba(38, 38, 43, 0.75);
+  /* Surface colors — warm dark paper (OKLCH), matched to the editorial ink
+     ramp (--ink-100 dark = oklch(0.18 0.014 60)). Was cool blue-gray
+     rgba(30,30,34); brand is warm cream on warm dark ink, not dark SaaS.
+     Alpha preserved so the gentle translucent lift is unchanged. */
+  --surface-1: oklch(0.18 0.014 60 / 0.95);
+  --surface-2: oklch(0.18 0.014 60 / 0.8);
+  --surface-3: oklch(0.22 0.014 62 / 0.75);
   --surface-overlay: rgba(91, 94, 245, 0.04);
-  --surface-glass: rgba(20, 20, 23, 0.65);
+  --surface-glass: oklch(0.14 0.012 60 / 0.65);
 
-  /* Text colors — adjusted for WCAG AA contrast (4.5:1 min against #08090D) */
-  --text-primary: #F0F0FF;
-  --text-secondary: #A8A3C0;
-  --text-tertiary: #9590AD;
-  --text-muted: #7E79A0;
-  --text-inverse: #08090D;
+  /* Text colors — warm cream ink (OKLCH), matched to the editorial dark ink
+     ramp. Was blue-tinted (#F0F0FF etc.); brand is warm cream on warm dark.
+     Lightness preserved (~0.96 / 0.74 / 0.62 / 0.52) so AA contrast against
+     the warm dark base holds — see .impeccable.md dark-mode contrast (~16:1). */
+  --text-primary: oklch(0.96 0.012 85);
+  --text-secondary: oklch(0.74 0.012 80);
+  --text-tertiary: oklch(0.62 0.012 76);
+  --text-muted: oklch(0.52 0.014 72);
+  --text-inverse: oklch(0.14 0.012 60);
 
   /* Gradient adjustments — more luminous in dark */
   --gradient-subtle: linear-gradient(135deg, rgba(var(--accent-primary-rgb), 0.14) 0%, rgba(var(--accent-primary-rgb), 0.06) 100%);

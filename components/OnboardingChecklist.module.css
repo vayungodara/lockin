@@ -1,8 +1,15 @@
+/* ───────────────────────────────────────────────────────────────────────
+   OnboardingChecklist — "First Week Challenge" diary card.
+
+   Editorial pass: serif title, mono step counter + XP, Host Grotesk body,
+   ink surfaces, low editorial radii, stamp-yellow progress ring (ink
+   cascade). No side-stripe — a faint --stamp-yellow wash + full hairline
+   border tints the card so it reads as "yours". Voice stays direct-positive.
+   ─────────────────────────────────────────────────────────────────────── */
 .card {
-  background: var(--surface-1);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-subtle);
-  border-left: 3px solid var(--stamp-yellow);
+  background: color-mix(in oklch, var(--stamp-yellow) 5%, var(--ink-000));
+  border-radius: var(--radius-editorial-md);
+  border: 1px solid color-mix(in oklch, var(--stamp-yellow) 22%, var(--ink-300));
   padding: var(--space-5);
   margin-bottom: var(--space-4);
 }
@@ -21,21 +28,24 @@
 }
 
 .title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
-  letter-spacing: -0.02em;
+  font-family: var(--font-display-editorial);
+  font-size: var(--text-xl);
+  font-weight: 400;
+  color: var(--ink-900);
+  letter-spacing: -0.015em;
+  line-height: 1.1;
 }
 
 .progressRing {
   width: 40px;
   height: 40px;
   transform: rotate(-90deg);
+  flex-shrink: 0;
 }
 
 .progressBg {
   fill: none;
-  stroke: var(--border-subtle);
+  stroke: var(--ink-300);
   stroke-width: 3;
 }
 
@@ -47,12 +57,20 @@
   transition: stroke-dashoffset 0.6s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .progressFill {
+    transition: none;
+  }
+}
+
 .progressText {
+  font-family: var(--font-mono-editorial);
   font-size: 11px;
-  font-weight: var(--font-bold);
-  fill: var(--text-primary);
+  font-weight: 600;
+  fill: var(--ink-900);
   text-anchor: middle;
   dominant-baseline: central;
+  font-variant-numeric: tabular-nums;
 }
 
 .steps {
@@ -66,29 +84,30 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3);
-  border-radius: var(--radius-md);
-  transition: background var(--transition-fast);
+  border-radius: var(--radius-editorial-sm);
+  transition: background-color 0.15s ease;
 }
 
 .step:hover {
-  background: var(--bg-hover);
+  background: color-mix(in oklch, var(--ink-300) 14%, transparent);
 }
 
 .stepIcon {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: var(--text-base);
-  background: var(--bg-secondary);
+  background: var(--ink-100);
   flex-shrink: 0;
 }
 
 .stepIconDone {
-  background: var(--success-bg);
-  color: var(--success);
+  background: color-mix(in oklch, var(--stamp-green) 16%, transparent);
+  color: var(--stamp-green);
+  font-weight: 700;
 }
 
 .stepContent {
@@ -97,18 +116,20 @@
 }
 
 .stepTitle {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink-900);
 }
 
 .stepTitleDone {
-  color: var(--text-muted);
+  color: var(--ink-400);
 }
 
 .stepDesc {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: var(--ink-600);
   margin-top: 2px;
 }
 
@@ -117,15 +138,16 @@
 }
 
 .actionBtn {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink-900);
   background: none;
   border: 1px solid var(--stamp-yellow);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-editorial-sm);
   padding: 6px 12px;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .actionBtn:hover {
@@ -134,26 +156,31 @@
 }
 
 .xpBadge {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
-  font-weight: var(--font-semibold);
-  color: var(--success);
-  background: var(--success-bg);
-  border-radius: var(--radius-full);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--stamp-green);
+  background: color-mix(in oklch, var(--stamp-green) 14%, transparent);
+  border-radius: var(--radius-editorial-sm);
   padding: 4px 10px;
+  font-variant-numeric: tabular-nums;
 }
 
 .dismissBtn {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--ink-400);
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--space-1) var(--space-2);
   margin-top: var(--space-3);
+  transition: color 0.15s ease;
 }
 
 .dismissBtn:hover {
-  color: var(--text-secondary);
+  color: var(--ink-600);
 }
 
 .successCard {
@@ -162,46 +189,46 @@
 }
 
 .successTitle {
+  font-family: var(--font-display-editorial);
   font-size: var(--text-xl);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
   margin-bottom: var(--space-2);
 }
 
 .successDesc {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
+  color: var(--ink-600);
 }
 
 .loading {
   padding: var(--space-4);
   text-align: center;
-  color: var(--text-muted);
+  color: var(--ink-400);
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
 }
 
 /* ── Dark mode overrides ── */
 :global([data-theme="dark"]) .card {
-  border-color: var(--border-default);
-  border-left-color: var(--stamp-yellow);
+  background: color-mix(in oklch, var(--stamp-yellow) 7%, var(--ink-100));
+  border-color: color-mix(in oklch, var(--stamp-yellow) 26%, var(--ink-300));
 }
 
 :global([data-theme="dark"]) .step:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in oklch, var(--ink-200) 70%, transparent);
 }
 
 :global([data-theme="dark"]) .stepIcon {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .stepIconDone {
-  background: rgba(var(--success-rgb), 0.18);
-}
-
-:global([data-theme="dark"]) .actionBtn {
-  border-color: var(--stamp-yellow);
+  background: color-mix(in oklch, var(--stamp-green) 22%, transparent);
 }
 
 :global([data-theme="dark"]) .progressBg {
-  stroke: rgba(255, 255, 255, 0.08);
+  stroke: var(--ink-300);
 }

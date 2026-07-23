@@ -1,3 +1,16 @@
+/* ───────────────────────────────────────────────────────────────────────
+   NotificationBell — editorial diary dropdown.
+
+   Bell sits in the dashboard chrome; its panel floats as a fixed overlay.
+   Per .impeccable.md glass is modals-only, and the editorial siblings
+   (Toast, ActivityItem) use solid ink surfaces for floating overlays — so
+   the panel is solid --ink-000 (light) / --ink-100 (dark), not glass.
+
+   Rows are separated by 1px --ink-300 hairlines like ActivityItem. Copy is
+   Host Grotesk, timestamps JetBrains Mono. Unread tint + dot follow the
+   user's ink via --stamp-yellow. Low editorial radii throughout.
+   ─────────────────────────────────────────────────────────────────────── */
+
 .container {
   position: relative;
 }
@@ -10,21 +23,27 @@
   height: 36px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-md);
-  color: var(--text-tertiary);
+  border-radius: var(--radius-editorial-md);
+  color: var(--ink-500);
   cursor: pointer;
   position: relative;
-  transition: color 0.15s ease, background 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
   flex-shrink: 0;
 }
 
 .bellButton:hover {
-  background: var(--surface-2);
-  color: var(--text-primary);
+  background: color-mix(in oklch, var(--ink-300) 18%, transparent);
+  color: var(--ink-900);
 }
 
 .bellButton.wiggle svg {
   animation: bellWiggle 0.6s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bellButton.wiggle svg {
+    animation: none;
+  }
 }
 
 .badge {
@@ -34,18 +53,21 @@
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
-  background: var(--danger);
-  color: white;
+  background: var(--stamp-red);
+  color: oklch(0.99 0.005 60);
+  font-family: var(--font-mono-editorial);
   font-size: 10px;
   font-weight: 600;
+  font-variant-numeric: tabular-nums;
   border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   border: 2px solid var(--bg-primary);
-  animation: dotPulse 3s ease-in-out infinite;
 }
 
+/* Floating diary panel. Fixed-positioned over the dashboard; solid ink
+   surface (not glass) to match the editorial overlay siblings. */
 .dropdown {
   position: fixed;
   bottom: auto;
@@ -53,9 +75,9 @@
   top: auto;
   width: 360px;
   max-height: 480px;
-  background: var(--surface-1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-xl);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
   box-shadow: var(--shadow-xl);
   overflow: hidden;
   z-index: 9999;
@@ -63,32 +85,39 @@
 
 .header {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--space-3);
   padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--ink-300);
 }
 
 .header h3 {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
   margin: 0;
 }
 
 .markAllBtn {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-xs);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink-700);
   background: none;
   border: none;
   cursor: pointer;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-editorial-sm);
-  transition: background var(--transition-fast);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .markAllBtn:hover {
-  background: var(--ink-100);
+  background: color-mix(in oklch, var(--stamp-yellow) 22%, transparent);
+  color: var(--ink-900);
 }
 
 .notificationsList {
@@ -105,8 +134,8 @@
 }
 
 .notificationsList::-webkit-scrollbar-thumb {
-  background: var(--border-default);
-  border-radius: 3px;
+  background: var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
 }
 
 .empty {
@@ -116,7 +145,7 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-8);
-  color: var(--text-muted);
+  color: var(--ink-400);
   text-align: center;
 }
 
@@ -125,7 +154,9 @@
 }
 
 .empty p {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
+  color: var(--ink-500);
   margin: 0;
 }
 
@@ -133,29 +164,37 @@
   display: flex;
   align-items: flex-start;
   gap: var(--space-3);
+  width: 100%;
   padding: var(--space-3) var(--space-4);
+  background: transparent;
+  border: none;
+  text-align: left;
   cursor: pointer;
-  transition: background var(--transition-fast);
+  transition: background-color 0.15s ease;
   position: relative;
 }
 
 .notificationItem:not(:last-child) {
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--ink-300);
 }
 
 .notificationItem:hover {
-  background: var(--surface-2);
+  background: color-mix(in oklch, var(--ink-300) 14%, transparent);
 }
 
 .notificationItem.unread {
   background: color-mix(in oklch, var(--stamp-yellow) 10%, transparent);
 }
 
+.notificationItem.unread:hover {
+  background: color-mix(in oklch, var(--stamp-yellow) 16%, transparent);
+}
+
 .notificationIcon {
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full);
-  background: var(--surface-2);
+  border-radius: var(--radius-editorial-sm);
+  background: var(--ink-100);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -172,15 +211,17 @@
 }
 
 .notificationTitle {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink-900);
   line-height: 1.3;
 }
 
 .notificationMessage {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: var(--ink-600);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -189,15 +230,19 @@
 }
 
 .notificationTime {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-400);
+  font-variant-numeric: tabular-nums;
   margin-top: var(--space-1);
 }
 
 .unreadDot {
   width: 8px;
   height: 8px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--stamp-yellow);
   flex-shrink: 0;
   margin-top: 4px;
@@ -213,28 +258,31 @@
 
 /* ── Dark mode overrides ── */
 :global([data-theme="dark"]) .bellButton:hover {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in oklch, var(--ink-200) 60%, transparent);
 }
 
 :global([data-theme="dark"]) .dropdown {
-  background: var(--bg-elevated);
-  border-color: var(--border-strong);
+  background: var(--ink-100);
+  border-color: var(--ink-300);
   box-shadow: var(--shadow-2xl);
 }
 
 :global([data-theme="dark"]) .notificationItem:hover {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in oklch, var(--ink-200) 70%, transparent);
 }
 
 :global([data-theme="dark"]) .notificationItem.unread {
   background: color-mix(in oklch, var(--stamp-yellow) 14%, transparent);
 }
 
+:global([data-theme="dark"]) .notificationItem.unread:hover {
+  background: color-mix(in oklch, var(--stamp-yellow) 20%, transparent);
+}
+
 :global([data-theme="dark"]) .notificationIcon {
-  background: rgba(255, 255, 255, 0.06);
+  background: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .badge {
-  border-color: var(--bg-elevated);
-  box-shadow: 0 0 8px rgba(var(--danger-rgb), 0.4);
+  border-color: var(--ink-100);
 }

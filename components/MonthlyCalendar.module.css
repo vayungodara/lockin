@@ -1,17 +1,43 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   MonthlyCalendar — Editorial heatmap (ink system)
+
+   Matches the editorial surfaces around it (PactCard, ActivityItem, the
+   profile ledger, SectionHeader): cream paper card, hairline ink-300
+   borders, low editorial radii, serif/Host Grotesk/JetBrains Mono.
+
+   The activity-level heatmap fill follows the user's selected ink via the
+   --stamp-yellow cascade (Highlighter, Red Pen, Carbon, Moss, Indigo) —
+   correct per .impeccable.md §5. Day numerals + labels + dates are mono;
+   the section title is serif display.
+
+   Stripped from the previous (pre-editorial generic) revision:
+     - --surface-1/2/3, --border-subtle/-default chrome tokens
+     - --radius-lg / --radius-md / round --radius-full nav+share buttons
+     - --font-semibold / --font-bold sans on title/month/numbers/labels
+     - hardcoded rgba(255,255,255,…) dark overrides (now ink tokens)
+     - the global ringPulse keyframe (legacy --accent-primary-rgb, not the
+       ink cascade) — replaced with a local stamp-yellow inset pulse
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .container {
   --cell-size: 48px;
   --cell-gap: 4px;
-  --cell-radius: var(--radius-md);
+  --cell-radius: var(--radius-editorial-sm);
 
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.25);
   padding: var(--space-4);
+  color: var(--ink-800);
 }
 
 .loading {
   text-align: center;
-  color: var(--text-tertiary);
+  font-family: var(--font-mono-editorial);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
   padding: var(--space-8);
 }
 
@@ -25,32 +51,40 @@
   gap: var(--space-3);
 }
 
+/* Serif display title — matches SectionHeader / PactCard editorial anchor. */
 .title {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-base);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-family: var(--font-display-editorial);
+  font-size: clamp(20px, 2.6vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  line-height: 1.1;
+  color: var(--ink-900);
   margin: 0;
 }
 
 .title svg {
   color: var(--stamp-yellow);
+  flex-shrink: 0;
 }
 
+/* Share + nav buttons share the PactCard .completeBtn/.missBtn shape:
+   low-radius ink-bordered squares on paper, not round circles. */
 .shareBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  color: var(--text-tertiary);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-600);
   cursor: pointer;
-  transition: background-color var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color 120ms ease-out, color 120ms ease-out,
+    border-color 120ms ease-out;
 }
 
 .shareBtn:hover {
@@ -74,17 +108,19 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-full);
-  color: var(--text-secondary);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-600);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color 120ms ease-out, color 120ms ease-out,
+    border-color 120ms ease-out;
 }
 
 .navBtn:hover:not(.navBtnDisabled) {
-  background: var(--surface-3);
-  color: var(--text-primary);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
+  border-color: var(--ink-400);
+  color: var(--ink-900);
 }
 
 .navBtnDisabled {
@@ -92,10 +128,16 @@
   cursor: not-allowed;
 }
 
+/* Month label — JetBrains Mono, tabular. Tracked uppercase reads as an
+   editorial caption and keeps "May 2026" rhythmically aligned. */
 .monthTitle {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-800);
   min-width: 180px;
   text-align: center;
 }
@@ -114,11 +156,15 @@
   margin-bottom: var(--space-2);
 }
 
+/* Weekday labels — uppercase tracked mono caption, like editorial captions. */
 .weekdayLabel {
   text-align: center;
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  color: var(--text-tertiary);
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-500);
   padding: var(--space-1) 0;
 }
 
@@ -151,10 +197,13 @@
   z-index: 5;
 }
 
+/* Day numbers — JetBrains Mono tabular so the grid of figures stays even. */
 .dayNumber {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-800);
   line-height: 1;
 }
 
@@ -164,11 +213,11 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--text-primary);
+  background: var(--ink-700);
   opacity: 0.6;
 }
 
-/* Day Tooltip */
+/* Day Tooltip — ink-900 chip with paper text, mono label, editorial radius. */
 .dayCell[data-tooltip]::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -176,11 +225,13 @@
   left: 50%;
   transform: translateX(-50%);
   padding: 4px 8px;
-  background: var(--text-primary);
-  color: var(--text-inverse);
-  font-size: var(--text-xs);
-  font-weight: var(--font-medium);
-  border-radius: var(--radius-sm);
+  background: var(--ink-900);
+  color: var(--ink-000);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border-radius: var(--radius-editorial-sm);
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
@@ -202,7 +253,7 @@
 }
 
 .otherMonth .dayNumber {
-  color: var(--text-muted);
+  color: var(--ink-400);
 }
 
 .otherMonth .activityDot {
@@ -218,15 +269,35 @@
   transform: none;
 }
 
+/* Today ring — stamp-yellow inset, with a local pulse that expands the
+   ink (not the legacy global accent). Box-shadow only, so the cell never
+   reflows; reduced-motion drops the pulse below. */
 .today {
   box-shadow: inset 0 0 0 2px var(--stamp-yellow);
-  animation: ringPulse 2.5s ease-in-out infinite;
+  animation: calendarRingPulse 2.5s ease-in-out infinite;
 }
 
 .selected {
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--stamp-yellow);
+  box-shadow: 0 0 0 2px var(--ink-000), 0 0 0 4px var(--stamp-yellow);
   transform: scale(1.05);
   z-index: 10;
+}
+
+@keyframes calendarRingPulse {
+  0%, 100% {
+    box-shadow: inset 0 0 0 2px var(--stamp-yellow),
+      0 0 0 0 color-mix(in oklch, var(--stamp-yellow) 45%, transparent);
+  }
+  50% {
+    box-shadow: inset 0 0 0 2px var(--stamp-yellow),
+      0 0 0 6px color-mix(in oklch, var(--stamp-yellow) 0%, transparent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .today {
+    animation: none;
+  }
 }
 
 /* ── Activity Levels — ink-cascade fill via color-mix ────────────────
@@ -244,7 +315,7 @@
 }
 
 .level1 .dayNumber {
-  color: var(--text-primary);
+  color: var(--ink-800);
 }
 
 .level2 {
@@ -252,7 +323,7 @@
 }
 
 .level2 .dayNumber {
-  color: var(--text-primary);
+  color: var(--ink-800);
 }
 
 .level3 {
@@ -286,8 +357,9 @@
 }
 
 .detailContent {
-  background: var(--surface-2);
-  border-radius: var(--radius-lg);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
   padding: var(--space-4);
 }
 
@@ -298,10 +370,13 @@
   margin-bottom: var(--space-3);
 }
 
+/* Selected date — JetBrains Mono, tracked, reads as a dated ledger entry. */
 .detailDate {
-  font-size: var(--text-sm);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--ink-800);
 }
 
 .detailClose {
@@ -312,15 +387,15 @@
   height: 28px;
   background: transparent;
   border: none;
-  border-radius: var(--radius-sm);
-  color: var(--text-tertiary);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-500);
   cursor: pointer;
-  transition: background-color var(--transition-fast), color var(--transition-fast);
+  transition: background-color 120ms ease-out, color 120ms ease-out;
 }
 
 .detailClose:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
+  color: var(--ink-900);
 }
 
 .detailStats {
@@ -338,21 +413,26 @@
   font-size: var(--text-base);
 }
 
+/* Stat value — mono tabular so the figures read as ledger counts. */
 .detailValue {
-  font-size: var(--text-lg);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 18px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-900);
 }
 
 .detailLabel {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-tertiary);
+  color: var(--ink-500);
 }
 
 .detailEmpty {
   text-align: center;
   padding: var(--space-2);
-  color: var(--text-tertiary);
+  font-family: var(--font-sans-editorial);
+  color: var(--ink-500);
   font-size: var(--text-sm);
 }
 
@@ -363,14 +443,17 @@
   justify-content: flex-end;
   gap: 4px;
   margin-top: var(--space-4);
-  font-size: var(--text-xs);
-  color: var(--text-tertiary);
+  font-family: var(--font-mono-editorial);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
 .legendDay {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: var(--radius-editorial-sm);
 }
 
 .legendLabel {
@@ -391,7 +474,7 @@
   }
 
   .monthTitle {
-    font-size: var(--text-base);
+    font-size: 13px;
     min-width: 160px;
   }
 
@@ -409,7 +492,7 @@
   }
 
   .dayNumber {
-    font-size: var(--text-xs);
+    font-size: 11px;
   }
 
   .activityDot {
@@ -419,7 +502,7 @@
   }
 
   .title {
-    font-size: var(--text-sm);
+    font-size: 18px;
   }
 
   .monthNav {
@@ -432,7 +515,7 @@
   }
 
   .monthTitle {
-    font-size: var(--text-sm);
+    font-size: 12px;
     min-width: 140px;
   }
 
@@ -441,22 +524,22 @@
   }
 }
 
-/* ── Dark Mode Overrides ── */
+/* ── Dark Mode Overrides ──
+   ink-* tokens auto-invert in dark mode, so most surfaces carry over.
+   ink-000 in dark = the page base, so the card moves to ink-100 (warm
+   dark card) to lift off the page — same move PactCard makes. */
 :global([data-theme="dark"]) .container {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--ink-100);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
+:global([data-theme="dark"]) .shareBtn,
 :global([data-theme="dark"]) .navBtn {
-  border-color: var(--border-default);
+  background: var(--ink-100);
 }
 
 :global([data-theme="dark"]) .navBtn:hover:not(.navBtnDisabled) {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-:global([data-theme="dark"]) .shareBtn {
-  border-color: var(--border-default);
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
 }
 
 :global([data-theme="dark"]) .dayCell:hover:not(.future):not(.otherMonth) {
@@ -464,11 +547,11 @@
 }
 
 :global([data-theme="dark"]) .detailContent {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ink-200);
 }
 
 :global([data-theme="dark"]) .detailClose:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
 }
 
 /* Bump low-opacity tiers in dark mode so faint cells stay legible.
@@ -485,6 +568,8 @@
   background: color-mix(in oklch, var(--stamp-yellow) 65%, transparent);
 }
 
+/* In dark mode the selected ring sits against ink-100 card, not ink-000. */
 :global([data-theme="dark"]) .selected {
-  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--stamp-yellow), 0 0 12px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
+  box-shadow: 0 0 0 2px var(--ink-100), 0 0 0 4px var(--stamp-yellow),
+    0 0 12px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }

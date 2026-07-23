@@ -1,23 +1,40 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   NudgeButton — Editorial redesign (ink system)
+
+   A small attention chip, treated like StatusChip: low 2px radius,
+   bordered in current color, uppercase-ish 11px. The prompt state is the
+   highlighter "needs attention" signal and rides the --stamp-yellow ink
+   cascade. The confirmed "Nudged" state is a positive resolution →
+   moss green (--stamp-green, fixed semantic, does NOT cascade).
+
+   Migrated off --warning(-bg/-light/-rgb), --success(-bg/-rgb),
+   --radius-full, --font-medium and the rgba glow box-shadows (decoration
+   on a non-modal surface — removed, not propagated).
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .nudgeBtn {
   display: inline-flex;
   align-items: center;
   gap: 4px;
   padding: 2px 8px;
-  background: var(--warning-bg);
-  color: var(--warning);
-  border: 1px solid transparent;
-  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--stamp-yellow) 16%, transparent);
+  color: color-mix(in oklch, var(--stamp-yellow) 70%, var(--ink-900));
+  border: 1px solid color-mix(in oklch, var(--stamp-yellow) 40%, var(--ink-300));
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-mono-editorial);
   font-size: 11px;
-  font-weight: var(--font-medium);
+  font-weight: 600;
+  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: all 0.15s;
+  transition: background-color 0.15s ease-out, border-color 0.15s ease-out,
+    color 0.15s ease-out;
   white-space: nowrap;
 }
 
 .nudgeBtn:hover:not(:disabled) {
-  background: var(--warning-light);
-  border-color: var(--warning);
-  box-shadow: 0 0 12px rgba(var(--warning-rgb), 0.2);
+  background: color-mix(in oklch, var(--stamp-yellow) 28%, transparent);
+  border-color: var(--stamp-yellow);
+  color: var(--ink-900);
 }
 
 .nudgeBtn:disabled {
@@ -25,21 +42,26 @@
   opacity: 0.6;
 }
 
+/* Confirmed — moss green positive resolution (fixed semantic). */
 .nudgeBtn.nudged {
-  background: var(--success-bg);
-  color: var(--success);
+  background: color-mix(in oklch, var(--stamp-green) 14%, transparent);
+  border-color: color-mix(in oklch, var(--stamp-green) 35%, var(--ink-300));
+  color: var(--stamp-green);
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   ink-* + stamp-* tokens auto-invert; the color-mix recipes carry over,
+   so only the fill alphas need a small bump for legibility on warm dark
+   paper. */
 :global([data-theme="dark"]) .nudgeBtn {
-  background: rgba(var(--warning-rgb), 0.15);
+  background: color-mix(in oklch, var(--stamp-yellow) 22%, transparent);
+  color: color-mix(in oklch, var(--stamp-yellow) 80%, var(--ink-900));
 }
 
 :global([data-theme="dark"]) .nudgeBtn:hover:not(:disabled) {
-  background: rgba(var(--warning-rgb), 0.22);
-  box-shadow: 0 0 16px rgba(var(--warning-rgb), 0.3);
+  background: color-mix(in oklch, var(--stamp-yellow) 34%, transparent);
 }
 
 :global([data-theme="dark"]) .nudgeBtn.nudged {
-  background: rgba(var(--success-rgb), 0.15);
+  background: color-mix(in oklch, var(--stamp-green) 20%, transparent);
 }

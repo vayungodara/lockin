@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
-import Image from 'next/image';
 import { createClient } from '@/lib/supabase/client';
 import { logActivity } from '@/lib/activity';
 import { useToast } from '@/components/Toast';
+import UserAvatar from '@/components/UserAvatar';
 import styles from './TaskCard.module.css';
 
 const isTouchDevice = () => {
@@ -218,23 +218,16 @@ export default function TaskCard({ task, currentUser, userRole, onUpdate, onDele
 
       {/* Task Meta */}
       <div className={styles.meta}>
-        {/* Owner */}
+        {/* Owner — initial-tile is the primary avatar (brand identity);
+            the Google photo is a fallback, not the default. */}
         <div className={styles.owner}>
           {task.owner ? (
             <>
-              {task.owner.avatar_url ? (
-                <Image
-                  src={task.owner.avatar_url}
-                  alt={task.owner.full_name || 'Owner'}
-                  className={styles.ownerAvatar}
-                  width={22}
-                  height={22}
-                />
-              ) : (
-                <div className={styles.ownerAvatarPlaceholder}>
-                  {task.owner.full_name?.charAt(0)?.toUpperCase() || '?'}
-                </div>
-              )}
+              <UserAvatar
+                user={task.owner}
+                size="xs"
+                isSelf={task.owner.id === currentUser.id}
+              />
               <span className={styles.ownerName}>
                 {task.owner.id === currentUser.id ? 'You' : task.owner.full_name?.split(' ')[0]}
               </span>

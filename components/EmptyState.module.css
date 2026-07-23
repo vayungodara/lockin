@@ -1,6 +1,14 @@
-/* ============================================
-   Shared Empty State Component
-   ============================================ */
+/* ═══════════════════════════════════════════════════════════════════════
+   EmptyState — Editorial redesign (ink system)
+
+   Cream-paper card with a flat highlighter top-edge (the one bit of
+   earned color — rides the --stamp-yellow ink cascade). Title is serif
+   display, body is Host Grotesk, the CTA is flat highlighter on the
+   user's ink. No glow on the dashboard surface.
+
+   Migrated off --surface-1, --border-subtle/-default, --radius-xl/-lg,
+   --font-semibold and --text-primary/-tertiary.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .wrapper {
   display: flex;
@@ -9,14 +17,16 @@
   text-align: center;
   padding: var(--space-16) var(--space-6);
   gap: var(--space-4);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.25);
+  color: var(--ink-800);
   position: relative;
   overflow: hidden;
 }
 
-/* Subtle decorative top edge — flat highlighter (cascade-aware) */
+/* Decorative top edge — flat highlighter (cascade-aware), no gradient. */
 .wrapper::before {
   content: '';
   position: absolute;
@@ -26,7 +36,6 @@
   height: 3px;
   background: var(--stamp-yellow);
   opacity: 0.5;
-  border-radius: var(--radius-xl) var(--radius-xl) 0 0;
 }
 
 /* Illustration / icon area
@@ -42,19 +51,22 @@
   margin-bottom: var(--space-2);
 }
 
-/* Title */
+/* Title — serif display, editorial weight. */
 .title {
-  font-size: var(--text-lg);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-family: var(--font-display-editorial);
+  font-size: clamp(20px, 2.4vw, 24px);
+  font-weight: 400;
+  letter-spacing: -0.015em;
+  color: var(--ink-900);
   margin: 0;
-  line-height: 1.4;
+  line-height: 1.2;
 }
 
-/* Description text */
+/* Description — Host Grotesk body. */
 .description {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-tertiary);
+  color: var(--ink-600);
   margin: 0;
   max-width: 340px;
   line-height: 1.6;
@@ -70,27 +82,35 @@
   justify-content: center;
 }
 
-/* Primary CTA */
+/* Primary CTA — flat highlighter (ink-cascade), low radius, no gradient,
+   no glow. Host Grotesk label. */
 .primaryAction {
   padding: var(--space-3) var(--space-6);
-  background: var(--accent-primary);
-  color: white;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
   border: none;
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
   font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 .primaryAction:hover {
   opacity: 0.9;
   transform: translateY(-1px);
-  box-shadow: var(--shadow-md);
 }
 
 .primaryAction:active {
   transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .primaryAction:hover,
+  .primaryAction:active {
+    transform: none;
+  }
 }
 
 /* ── Responsive ── */
@@ -109,20 +129,14 @@
   }
 }
 
-/* ── Dark Mode ── */
+/* ── Dark Mode ──
+   ink-* tokens auto-invert; ink-000 in dark = page base, so the card
+   moves to ink-100 (warm dark card) to lift off the page. */
 :global([data-theme="dark"]) .wrapper {
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--ink-100);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .wrapper::before {
   opacity: 0.65;
-}
-
-:global([data-theme="dark"]) .primaryAction {
-  box-shadow: var(--shadow-sm);
-}
-
-:global([data-theme="dark"]) .primaryAction:hover {
-  box-shadow: var(--shadow-md);
 }

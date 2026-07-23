@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Bell, BellSlash } from '@phosphor-icons/react';
 import { useNotifications } from '@/lib/NotificationContext';
 import { getNotificationIcon } from '@/lib/notifications';
 import { buttonTap, fadeInScale, scaleIn } from '@/lib/animations';
@@ -133,10 +134,7 @@ export default function NotificationBell() {
         whileTap={buttonTap}
         aria-label={`Notifications${unreadCount > 0 ? ` (${unreadCount} unread)` : ''}`}
       >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
+        <Bell size={18} weight={unreadCount > 0 ? 'fill' : 'regular'} />
         {unreadCount > 0 && (
           <motion.span
             className={styles.badge}
@@ -171,10 +169,7 @@ export default function NotificationBell() {
                 <div className={styles.empty}>Loading...</div>
               ) : notifications.length === 0 ? (
                 <div className={styles.empty}>
-                  <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 8A6 6 0 106 8c0 7-3 9-3 9h18s-3-2-3-9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                    <path d="M13.73 21a2 2 0 01-3.46 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                  <BellSlash size={32} weight="regular" />
                   <p>No notifications yet</p>
                 </div>
               ) : (
@@ -183,7 +178,6 @@ export default function NotificationBell() {
                     key={notification.id}
                     className={`${styles.notificationItem} ${!notification.is_read ? styles.unread : ''}`}
                     onClick={() => handleNotificationClick(notification)}
-                    whileHover={{ backgroundColor: 'var(--surface-2)' }}
                   >
                     <div className={styles.notificationIcon}>
                       {getNotificationIcon(notification.type)}

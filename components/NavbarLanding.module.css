@@ -1,22 +1,36 @@
 /* ============================================= */
-/* NavbarLanding — floating editorial bar         */
-/* Full bar at every scroll position. Subtle      */
-/* shrink + soft shadow once past the hero.       */
-/* No collapse. No click-to-expand. Opaque        */
-/* background so body text never bleeds through.  */
+/* NavbarLanding — flush editorial masthead       */
+/* Full-width band flush to top. Seamless on the  */
+/* cream hero at rest; a hairline rule + soft      */
+/* shadow ease in once scrolled. Opaque background */
+/* so body text never bleeds through or beside it. */
 /* ============================================= */
 
 .navbar {
   position: fixed;
-  top: 16px;
+  top: 0;
   left: 0;
   right: 0;
   z-index: 400;
-  pointer-events: none;
-  padding: 0 24px;
+  pointer-events: auto;
+  background: var(--landing-bg);
+  border-bottom: 1px solid transparent;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0);
   box-sizing: border-box;
-  display: flex;
-  justify-content: center;
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+/* Scrolled past the hero: fade in the hairline rule + soft shadow.
+   Background stays --landing-bg the whole time. */
+.scrolled {
+  border-bottom-color: var(--landing-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar {
+    transition: none;
+  }
 }
 
 .inner {
@@ -26,12 +40,8 @@
   gap: 24px;
   width: 100%;
   max-width: 1280px;
+  margin: 0 auto;
   padding: 12px 24px;
-  background: var(--landing-bg);
-  border: 1px solid var(--landing-border);
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-  pointer-events: auto;
   box-sizing: border-box;
 }
 
@@ -267,14 +277,8 @@
 /* ---- Responsive ---- */
 
 @media (max-width: 768px) {
-  .navbar {
-    top: 12px;
-    padding: 0 16px;
-  }
-
   .inner {
     padding: 10px 16px;
-    border-radius: 14px;
     gap: 12px;
   }
 

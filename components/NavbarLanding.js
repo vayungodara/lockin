@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import NavMarker from './NavMarker';
@@ -17,8 +17,16 @@ const NAV_LINKS = [
 
 export default function NavbarLanding({ isAuthenticated = false }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
   const router = useRouter();
   const toast = useToast();
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const handleGetStarted = async () => {
     if (isAuthenticated) {
@@ -38,7 +46,7 @@ export default function NavbarLanding({ isAuthenticated = false }) {
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <header className={styles.navbar}>
+    <header className={`${styles.navbar}${scrolled ? ` ${styles.scrolled}` : ''}`}>
       <div className={styles.inner}>
         <Link href="/" className={styles.logo} aria-label="LockIn — home">
           <span className={styles.logoMark} aria-hidden="true" />

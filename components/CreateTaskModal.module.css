@@ -5,7 +5,9 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -26,10 +28,9 @@
   backdrop-filter: blur(20px) saturate(1.2);
   -webkit-backdrop-filter: blur(20px) saturate(1.2);
   border: 1px solid var(--border-default);
-  border-left: 3px solid var(--info);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  animation: slideUp 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: slideUp 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @keyframes slideUp {
@@ -59,17 +60,18 @@
 }
 
 .headerIcon {
-  color: var(--info);
+  color: var(--stamp-yellow-ink);
   flex-shrink: 0;
 }
 
 .header h2 {
-  font-size: var(--text-sm);
+  font-family: var(--font-mono-editorial);
+  font-size: 12px;
   font-weight: 600;
-  color: var(--text-secondary);
+  color: var(--ink-700);
   margin: 0;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.14em;
 }
 
 .closeBtn {
@@ -79,7 +81,7 @@
   width: 28px;
   height: 28px;
   color: var(--text-tertiary);
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   background: transparent;
   border: none;
   cursor: pointer;
@@ -105,7 +107,7 @@
   padding: var(--space-2) 0;
   background: transparent;
   border: none;
-  border-bottom: 2px solid var(--border-default);
+  border-bottom: 2px solid var(--ink-300);
   border-radius: 0;
   color: var(--text-primary);
   font-size: var(--text-lg);
@@ -121,7 +123,7 @@
 
 .titleInput:focus {
   outline: none;
-  border-bottom-color: var(--info);
+  border-bottom-color: var(--stamp-yellow);
 }
 
 .inputGroup {
@@ -154,8 +156,8 @@
   width: 100%;
   padding: var(--space-2) var(--space-3);
   background: var(--surface-1);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
   color: var(--text-primary);
   font-size: var(--text-sm);
   font-family: inherit;
@@ -171,8 +173,8 @@
 .textarea:focus,
 .select:focus {
   outline: none;
-  border-color: var(--info);
-  box-shadow: 0 0 0 2px color-mix(in oklch, var(--stamp-yellow) 25%, transparent);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
 }
 
 .textarea {
@@ -196,9 +198,48 @@
   padding: var(--space-2);
 }
 
-/* Date input styling */
+/* Date input styling — de-chrome the native field, re-skin the picker
+   indicator to the ledger, keep color-scheme for legible dark popups. */
 .input[type="date"] {
+  color-scheme: light;
+  -webkit-appearance: none;
+  appearance: none;
+  font-family: var(--font-mono-editorial);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.01em;
+}
+
+.input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 16px;
+  height: 16px;
+  padding: 2px;
+  margin-left: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+  opacity: 0.55;
+  filter: grayscale(1);
+  transition: opacity var(--transition-fast), background-color var(--transition-fast);
+}
+
+.input[type="date"]:hover::-webkit-calendar-picker-indicator,
+.input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+  background: color-mix(in oklch, var(--stamp-yellow) 28%, transparent);
+}
+
+.input[type="date"]::-webkit-inner-spin-button,
+.input[type="date"]::-webkit-clear-button {
+  display: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+:global([data-theme="dark"]) .input[type="date"] {
   color-scheme: dark;
+}
+
+:global([data-theme="dark"]) .input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: grayscale(1) invert(0.85);
 }
 
 /* Two-column row — tighter gap */
@@ -215,7 +256,7 @@
   padding: var(--space-2) var(--space-3);
   background: var(--danger-bg);
   color: var(--danger);
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   font-size: var(--text-xs);
 }
 
@@ -231,8 +272,8 @@
   padding: var(--space-2) var(--space-4);
   background: var(--surface-2);
   color: var(--text-secondary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  border: 1px solid var(--ink-300);
+  border-radius: 4px;
   font-size: var(--text-sm);
   font-weight: 500;
   cursor: pointer;
@@ -251,19 +292,20 @@
   justify-content: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  background: var(--info);
-  color: white;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
   border: none;
-  border-radius: var(--radius-md);
+  border-radius: 4px;
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all var(--transition-fast);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+  box-shadow: 0 0 24px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }
 
 .submitBtn:hover:not(:disabled) {
-  filter: brightness(1.1);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 0 40px color-mix(in oklch, var(--stamp-yellow) 40%, transparent);
 }
 
 .submitBtn:disabled {
@@ -295,8 +337,8 @@
 .spinner {
   width: 14px;
   height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: white;
+  border: 2px solid color-mix(in oklch, var(--stamp-yellow-ink) 30%, transparent);
+  border-top-color: var(--stamp-yellow-ink);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -305,6 +347,18 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Focus rings — stamp-yellow ink cascade, 2px offset (a11y) */
+.closeBtn:focus-visible,
+.titleInput:focus-visible,
+.input:focus-visible,
+.textarea:focus-visible,
+.select:focus-visible,
+.cancelBtn:focus-visible,
+.submitBtn:focus-visible {
+  outline: 2px solid var(--stamp-yellow);
+  outline-offset: 2px;
 }
 
 /* Responsive */
@@ -320,32 +374,44 @@
 
 /* ── Dark mode overrides ── */
 :global([data-theme="dark"]) .overlay {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .modal {
-  background: rgba(20, 20, 23, 0.88);
+  background: var(--surface-glass);
   backdrop-filter: blur(24px) saturate(1.4);
   -webkit-backdrop-filter: blur(24px) saturate(1.4);
-  border-color: var(--border-default);
+  border-color: var(--border-strong);
+}
+
+:global([data-theme="dark"]) .header h2 {
+  color: var(--ink-700);
 }
 
 :global([data-theme="dark"]) .input,
 :global([data-theme="dark"]) .textarea,
 :global([data-theme="dark"]) .select {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--surface-2);
+  border-color: var(--ink-300);
 }
 
 :global([data-theme="dark"]) .input:focus,
 :global([data-theme="dark"]) .textarea:focus,
 :global([data-theme="dark"]) .select:focus {
-  box-shadow: 0 0 0 2px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
+  border-color: var(--stamp-yellow);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
 }
 
 :global([data-theme="dark"]) .titleInput {
-  border-bottom-color: var(--border-default);
+  border-bottom-color: var(--ink-300);
+}
+
+:global([data-theme="dark"]) .cancelBtn {
+  background: var(--surface-2);
+  border-color: var(--ink-300);
 }
 
 :global([data-theme="dark"]) .cancelBtn:hover {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--surface-3);
+  color: var(--text-primary);
 }

@@ -1,16 +1,32 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   CompactActivityCard — Editorial redesign (ink system)
+
+   Sibling to MonthlyCalendar: cream-paper card, hairline ink-300 borders,
+   low editorial radii, serif/Host-Grotesk/JetBrains-Mono. The streak
+   count is a monumental moment → serif display. The heatmap intensity
+   rides the user's selected ink via the --stamp-yellow cascade
+   (Highlighter / Red Pen / Carbon / Moss / Indigo) — correct per
+   .impeccable §5. Day labels + tooltip are mono.
+
+   Migrated off --surface-1/2/3, --border-subtle/-default/-strong,
+   --bg-primary/-elevated, --radius-lg/-md/-sm/-full, --font-bold/-semibold/
+   -medium, --text-* and the hardcoded rgba(255,255,255,…) dark overrides.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .card {
   position: relative;
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.25);
   padding: var(--space-4);
   overflow: visible;
-  transition: all var(--transition-base);
+  color: var(--ink-800);
+  transition: border-color 120ms ease-out;
 }
 
 .card:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
+  border-color: var(--ink-400);
 }
 
 .header {
@@ -22,7 +38,7 @@
 
 .streakMain {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: var(--space-2);
 }
 
@@ -30,28 +46,36 @@
   font-size: 24px;
 }
 
+/* Streak count — monumental serif display moment. */
 .streakCount {
+  font-family: var(--font-display-editorial);
   font-size: var(--text-2xl);
-  font-weight: var(--font-bold);
-  color: var(--text-primary);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-900);
   line-height: 1;
 }
 
 .streakLabel {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-secondary);
-  font-weight: var(--font-medium);
+  color: var(--ink-600);
+  font-weight: 500;
 }
 
+/* Best-streak chip — low-radius mono caption, not a pill. */
 .streakBest {
   display: flex;
   align-items: center;
   gap: var(--space-1);
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
-  color: var(--text-tertiary);
-  background: var(--surface-2);
+  letter-spacing: 0.04em;
+  color: var(--ink-500);
+  background: color-mix(in oklch, var(--ink-300) 24%, transparent);
   padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
 }
 
 .trophyIcon {
@@ -71,11 +95,15 @@
   margin-bottom: var(--space-1);
 }
 
+/* Weekday labels — uppercase tracked mono caption. */
 .dayLabel {
   text-align: center;
+  font-family: var(--font-mono-editorial);
   font-size: 10px;
-  color: var(--text-tertiary);
-  font-weight: var(--font-medium);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-500);
+  font-weight: 500;
 }
 
 .grid {
@@ -93,9 +121,9 @@
 .dayCell {
   position: relative;
   aspect-ratio: 1;
-  border-radius: var(--radius-sm);
-  background: var(--surface-3);
-  transition: transform 0.2s cubic-bezier(0.22, 1, 0.36, 1);
+  border-radius: var(--radius-editorial-sm);
+  background: color-mix(in oklch, var(--ink-300) 30%, transparent);
+  transition: transform 0.2s ease-out;
 }
 
 .dayCell:hover {
@@ -104,13 +132,20 @@
   cursor: pointer;
 }
 
-/* Heatmap intensity — cascades with the user's chosen ink so
-   the cells read as Highlighter / Red Pen / Carbon / Moss / Indigo
-   depending on identity. Level 4 is the full ink at face value. */
-.level0 { background: var(--surface-3); }
-.level1 { background: color-mix(in oklch, var(--stamp-yellow) 25%, var(--surface-1)); }
-.level2 { background: color-mix(in oklch, var(--stamp-yellow) 50%, var(--surface-1)); }
-.level3 { background: color-mix(in oklch, var(--stamp-yellow) 75%, var(--surface-1)); }
+@media (prefers-reduced-motion: reduce) {
+  .dayCell:hover {
+    transform: none;
+  }
+}
+
+/* Heatmap intensity — cascades with the user's chosen ink so the cells
+   read as Highlighter / Red Pen / Carbon / Moss / Indigo depending on
+   identity. level0 is a faint paper tint; levels step the ink opacity.
+   Level 4 is the full ink at face value. */
+.level0 { background: color-mix(in oklch, var(--ink-300) 30%, transparent); }
+.level1 { background: color-mix(in oklch, var(--stamp-yellow) 30%, transparent); }
+.level2 { background: color-mix(in oklch, var(--stamp-yellow) 55%, transparent); }
+.level3 { background: color-mix(in oklch, var(--stamp-yellow) 75%, transparent); }
 .level4 { background: var(--stamp-yellow); }
 
 /* Empty/padding cells - non-interactive */
@@ -129,23 +164,27 @@
   align-items: center;
   justify-content: center;
   height: 160px;
-  color: var(--text-tertiary);
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-sm);
+  letter-spacing: 0.06em;
+  color: var(--ink-500);
 }
 
+/* Tooltip — ink-900 chip with paper text + mono label, like MonthlyCalendar. */
 .tooltip {
   position: absolute;
   bottom: calc(100% + 8px);
   left: 50%;
   transform: translateX(-50%);
-  background: var(--bg-primary);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-md);
+  background: var(--ink-900);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
   padding: var(--space-2) var(--space-3);
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
   white-space: nowrap;
-  z-index: 100;
-  box-shadow: var(--shadow-lg);
+  z-index: var(--z-tooltip);
+  box-shadow: 0 8px 20px -8px rgba(20, 15, 5, 0.4);
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -153,23 +192,23 @@
 }
 
 .tooltip strong {
-  color: var(--text-primary);
+  color: var(--ink-000);
 }
 
 .tooltip span {
-  color: var(--text-tertiary);
+  color: color-mix(in oklch, var(--ink-000) 65%, transparent);
 }
 
 .tooltipDate {
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--ink-000);
   margin-bottom: 4px;
   display: block;
 }
 
 .tooltipLine {
   font-size: var(--text-xs);
-  color: var(--text-secondary);
+  color: color-mix(in oklch, var(--ink-000) 75%, transparent);
   display: block;
 }
 
@@ -180,7 +219,7 @@
   left: 50%;
   transform: translateX(-50%);
   border: 5px solid transparent;
-  border-top-color: var(--bg-primary);
+  border-top-color: var(--ink-900);
 }
 
 /* Tooltip below for top row cells */
@@ -193,7 +232,7 @@
   top: auto;
   bottom: 100%;
   border-top-color: transparent;
-  border-bottom-color: var(--bg-primary);
+  border-bottom-color: var(--ink-900);
 }
 
 /* Left edge alignment - shift tooltip right */
@@ -234,53 +273,57 @@
   margin-bottom: var(--space-2);
 }
 
+/* Empty title — serif display, editorial weight. */
 .emptyTitle {
-  font-size: var(--text-base);
-  font-weight: var(--font-semibold);
-  color: var(--text-primary);
+  font-family: var(--font-display-editorial);
+  font-size: var(--text-lg);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink-900);
   margin: 0;
 }
 
 .emptySubtitle {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-tertiary);
+  color: var(--ink-600);
   margin: var(--space-1) 0 0;
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   ink-* tokens auto-invert; ink-000 in dark = page base, so the card
+   moves to ink-100. Bump the low-opacity heatmap tiers so faint cells
+   stay legible on warm dark paper — same move MonthlyCalendar makes. */
 :global([data-theme="dark"]) .card {
-  border-color: var(--border-default);
-}
-
-:global([data-theme="dark"]) .card:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-2);
-  box-shadow: var(--shadow-md);
+  background: var(--ink-100);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .streakBest {
-  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in oklch, var(--ink-300) 40%, transparent);
 }
 
-:global([data-theme="dark"]) .tooltip {
-  background: var(--bg-elevated);
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-xl);
-}
-
-:global([data-theme="dark"]) .tooltip::after {
-  border-top-color: var(--bg-elevated);
-}
-
-:global([data-theme="dark"]) .tooltipBelow::after {
-  border-top-color: transparent;
-  border-bottom-color: var(--bg-elevated);
+:global([data-theme="dark"]) .dayCell {
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
 }
 
 :global([data-theme="dark"]) .level0 {
-  background: rgba(255, 255, 255, 0.04);
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
+}
+
+:global([data-theme="dark"]) .level1 {
+  background: color-mix(in oklch, var(--stamp-yellow) 40%, transparent);
+}
+
+:global([data-theme="dark"]) .level2 {
+  background: color-mix(in oklch, var(--stamp-yellow) 65%, transparent);
 }
 
 :global([data-theme="dark"]) .dayCell:hover {
-  box-shadow: 0 0 0 1px var(--stamp-yellow);
+  box-shadow: 0 0 8px color-mix(in oklch, var(--stamp-yellow) 35%, transparent);
+}
+
+:global([data-theme="dark"]) .tooltip {
+  border-color: var(--ink-400);
+  box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.6);
 }

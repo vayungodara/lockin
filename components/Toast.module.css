@@ -48,8 +48,7 @@
 
 .success {
   --toast-type-color: var(--stamp-green);
-  border-color: color-mix(in oklch, var(--stamp-green) 24%, transparent);
-  border-left: 4px solid var(--stamp-green);
+  border-color: color-mix(in oklch, var(--stamp-green) 40%, var(--border-subtle));
   box-shadow: var(--shadow-md);
 }
 
@@ -61,8 +60,7 @@
 .error {
   --toast-type-color: var(--stamp-red);
   --toast-duration: 6s;
-  border-color: color-mix(in oklch, var(--stamp-red) 24%, transparent);
-  border-left: 4px solid var(--stamp-red);
+  border-color: color-mix(in oklch, var(--stamp-red) 40%, var(--border-subtle));
   box-shadow: var(--shadow-md);
 }
 
@@ -73,8 +71,7 @@
 
 .warning {
   --toast-type-color: var(--stamp-yellow);
-  border-color: color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
-  border-left: 4px solid var(--stamp-yellow);
+  border-color: color-mix(in oklch, var(--stamp-yellow) 48%, var(--border-subtle));
   box-shadow: var(--shadow-md);
 }
 
@@ -85,8 +82,7 @@
 
 .info {
   --toast-type-color: var(--stamp-blue);
-  border-color: color-mix(in oklch, var(--stamp-blue) 24%, transparent);
-  border-left: 4px solid var(--stamp-blue);
+  border-color: color-mix(in oklch, var(--stamp-blue) 40%, var(--border-subtle));
   box-shadow: var(--shadow-md);
 }
 

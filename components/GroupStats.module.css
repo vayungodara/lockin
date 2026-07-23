@@ -1,8 +1,29 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   GroupStats — Editorial redesign (ink system)
+
+   Cream-paper card matching PactCard / MonthlyCalendar: hairline ink-300
+   borders, low editorial radii, serif/Host-Grotesk/JetBrains-Mono.
+
+   Color is semantic, not personal-identity here:
+     - Completed tasks / completion rate / leaderboard score → --stamp-green
+       (these track KEPT work — moss green is fixed, does NOT cascade).
+     - Active tasks → --stamp-yellow (in-progress is the highlighter signal;
+       this one rides the ink cascade per .impeccable §5).
+   Witness-tile avatar fallback is a 2px-radius ink-cascade square, not a
+   round photo circle.
+
+   Migrated off --surface-1/2/3, --border-subtle/-default/-strong,
+   --radius-lg/-md/-full, --font-semibold/-bold, --text-* and the
+   hardcoded rgba(255,255,255,…) dark overrides.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .container {
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.25);
   overflow: hidden;
+  color: var(--ink-800);
   content-visibility: auto;
   contain-intrinsic-size: auto 300px;
 }
@@ -12,19 +33,21 @@
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-4);
-  border-bottom: 1px solid var(--border-subtle);
+  border-bottom: 1px solid var(--ink-300);
 }
 
 .header svg {
-  color: var(--text-tertiary);
+  color: var(--ink-500);
 }
 
+/* Section label — uppercase tracked mono caption, editorial spine. */
 .header h3 {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--ink-600);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
   margin: 0;
 }
 
@@ -37,15 +60,21 @@
 
 .skeleton {
   height: 60px;
-  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
+  background: color-mix(in oklch, var(--ink-300) 30%, transparent);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-editorial-sm);
 }
 
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
 }
 
 .statsGrid {
@@ -55,37 +84,46 @@
   padding: var(--space-4);
 }
 
+/* Stat tiles — elevated paper (ink-100), hairline edge, low radius. */
 .statCard {
-  background: var(--surface-2);
-  border-radius: var(--radius-lg);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
   padding: var(--space-3);
   text-align: center;
-  transition: all var(--transition-fast);
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
 .statCard:hover {
-  background: var(--surface-3);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
+  background: color-mix(in oklch, var(--ink-300) 24%, var(--ink-100));
+  border-color: var(--ink-400);
 }
 
+/* Stat figure — mono tabular ledger count. */
 .statValue {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-2xl);
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-  color: var(--text-primary);
+  color: var(--ink-900);
   line-height: 1;
   margin-bottom: var(--space-1);
 }
 
-.valueGreen { color: var(--success); }
-.valueYellow { color: var(--warning); }
+/* Completed → moss green (fixed semantic, does NOT cascade).
+   Active → the in-progress highlighter signal, tinted with the user's ink.
+   Mixing toward ink-900 keeps it legible when the ink is very light
+   (Highlighter yellow) while still reading as the accent. */
+.valueGreen { color: var(--stamp-green); }
+.valueYellow { color: color-mix(in oklch, var(--stamp-yellow) 80%, var(--ink-900)); }
 
+/* Stat label — uppercase tracked mono caption. */
 .statLabel {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  color: var(--ink-500);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.1em;
 }
 
 .progressSection {
@@ -97,26 +135,33 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-2);
-  font-size: var(--text-sm);
-  color: var(--text-secondary);
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-600);
 }
 
 .progressValue {
   font-weight: 600;
-  color: var(--accent-primary);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-800);
 }
 
 .progressBar {
   height: 8px;
-  background: var(--surface-2);
-  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--ink-300) 40%, transparent);
+  border-radius: var(--radius-editorial-sm);
   overflow: hidden;
 }
 
+/* Completion rate fill — moss green (KEPT work). Functional width
+   transition is progress feedback, not decorative layout animation. */
 .progressFill {
   height: 100%;
-  background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-  border-radius: var(--radius-full);
+  background: var(--stamp-green);
+  border-radius: var(--radius-editorial-sm);
   transition: width 0.5s ease;
   position: relative;
 }
@@ -128,7 +173,12 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklch, var(--ink-000) 35%, transparent),
+    transparent
+  );
   animation: shimmerBar 2s infinite;
 }
 
@@ -137,8 +187,15 @@
   100% { transform: translateX(100%); }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .progressFill::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
 .leaderboard {
-  border-top: 1px solid var(--border-subtle);
+  border-top: 1px solid var(--ink-300);
   padding: var(--space-4);
 }
 
@@ -146,11 +203,12 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
-  font-weight: 600;
-  color: var(--text-tertiary);
+  font-weight: 500;
+  color: var(--ink-500);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.14em;
   margin-bottom: var(--space-3);
 }
 
@@ -165,13 +223,15 @@
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
-  background: var(--surface-2);
-  border-radius: var(--radius-md);
-  transition: all var(--transition-fast);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  transition: background-color 120ms ease-out, border-color 120ms ease-out;
 }
 
 .leaderboardItem:hover {
-  background: var(--surface-3);
+  background: color-mix(in oklch, var(--ink-300) 24%, var(--ink-100));
+  border-color: var(--ink-400);
 }
 
 .rank {
@@ -186,10 +246,13 @@
   font-size: 16px;
 }
 
+/* Numeric rank — mono tabular. */
 .number {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-500);
 }
 
 .memberInfo {
@@ -203,26 +266,30 @@
 .avatar {
   width: 24px;
   height: 24px;
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   object-fit: cover;
 }
 
+/* Witness-tile fallback — 2px-radius ink-cascade square, not a round
+   photo circle. Initial sits on the user's ink. */
 .avatarPlaceholder {
   width: 24px;
   height: 24px;
-  border-radius: var(--radius-full);
-  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  border-radius: var(--radius-editorial-sm);
+  background: var(--stamp-yellow);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-mono-editorial);
   font-size: 10px;
-  font-weight: 600;
-  color: white;
+  font-weight: 700;
+  color: var(--stamp-yellow-ink);
 }
 
 .memberName {
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  color: var(--text-primary);
+  color: var(--ink-800);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -235,15 +302,21 @@
   flex-shrink: 0;
 }
 
+/* Score → moss green (completions = KEPT work, fixed semantic). */
 .scoreValue {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-base);
   font-weight: 700;
-  color: var(--success);
+  font-variant-numeric: tabular-nums;
+  color: var(--stamp-green);
 }
 
 .scoreLabel {
+  font-family: var(--font-mono-editorial);
   font-size: var(--text-xs);
-  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-500);
 }
 
 @media (max-width: 480px) {
@@ -252,32 +325,24 @@
   }
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   ink-* tokens auto-invert; ink-000 in dark = page base, so the card
+   moves to ink-100 and the elevated tiles move to ink-200. No glass. */
 :global([data-theme="dark"]) .container {
-  border-color: var(--border-default);
+  background: var(--ink-100);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
-:global([data-theme="dark"]) .statCard {
-  background: rgba(255, 255, 255, 0.04);
-}
-
-:global([data-theme="dark"]) .statCard:hover {
-  background: rgba(255, 255, 255, 0.07);
-  box-shadow: var(--shadow-lg);
-}
-
+:global([data-theme="dark"]) .statCard,
 :global([data-theme="dark"]) .leaderboardItem {
-  background: rgba(255, 255, 255, 0.04);
+  background: var(--ink-200);
 }
 
+:global([data-theme="dark"]) .statCard:hover,
 :global([data-theme="dark"]) .leaderboardItem:hover {
-  background: rgba(255, 255, 255, 0.07);
+  background: color-mix(in oklch, var(--ink-300) 40%, var(--ink-200));
 }
 
 :global([data-theme="dark"]) .progressBar {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-:global([data-theme="dark"]) .progressFill {
-  filter: brightness(1.1);
+  background: color-mix(in oklch, var(--ink-300) 50%, transparent);
 }

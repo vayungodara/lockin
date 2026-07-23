@@ -134,7 +134,10 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
         <div className={styles.overlay} onClick={handleClose}>
           <motion.div ref={modalRef} className={styles.modal} role="dialog" aria-modal="true" aria-labelledby="join-group-title" onClick={(e) => e.stopPropagation()} {...modalContent}>
             <div className={styles.header}>
-              <h2 id="join-group-title">Join a Group</h2>
+              <div className={styles.headerText}>
+                <h2 id="join-group-title">Join a Group</h2>
+                <p className={styles.subtitle}>Enter your crew&rsquo;s invite code</p>
+              </div>
               <motion.button
                 className={styles.closeBtn}
                 onClick={handleClose}
@@ -159,8 +162,7 @@ export default function JoinGroupModal({ isOpen, onClose, onGroupJoined }) {
                   value={inviteCode}
                   onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
                   placeholder="e.g., ABC123"
-                  className={styles.input}
-                  style={{ textTransform: 'uppercase', letterSpacing: '0.1em' }}
+                  className={`${styles.input} ${styles.codeInput}`}
                   maxLength={6}
                   autoFocus
                 />

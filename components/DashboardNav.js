@@ -38,7 +38,7 @@ const NAV_ITEMS = [
   { href: '/dashboard/groups', label: 'Groups' },
   { href: '/dashboard/focus', label: 'Focus' },
   { href: '/dashboard/stats', label: 'Stats' },
-  { href: '/dashboard/settings', label: 'Profile' },
+  { href: '/dashboard/settings', label: 'Settings' },
 ];
 
 const INK_LABELS = {
@@ -238,7 +238,7 @@ export default function DashboardNav({ user }) {
             className={styles.avatarLink}
             aria-label="Profile"
           >
-            <UserAvatar user={avatarUser} size="sm" isSelf showPhoto />
+            <UserAvatar user={avatarUser} size="sm" isSelf />
           </Link>
 
           <button

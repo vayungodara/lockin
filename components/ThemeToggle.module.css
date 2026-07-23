@@ -1,21 +1,36 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   ThemeToggle — Editorial redesign (ink system)
+
+   Settings chrome, not a stamp — so it drops the round --radius-full pill
+   for a low editorial radius and ink-bordered paper surface. The hover
+   ring is highlighter yellow (rides the --stamp-yellow ink cascade), the
+   one bit of earned color. Exponential ease-out, no bounce.
+
+   Migrated off --surface-2/3, --border-default, --radius-full,
+   --font-medium, --text-secondary/-primary and the rgba(255,255,255,…)
+   dark overrides.
+   ═══════════════════════════════════════════════════════════════════════ */
+
 .toggle {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
   padding: var(--space-2) var(--space-3);
-  background: var(--surface-2);
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-full);
-  color: var(--text-secondary);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-sm);
+  color: var(--ink-600);
+  font-family: var(--font-sans-editorial);
   font-size: var(--text-sm);
-  font-weight: var(--font-medium);
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.2s ease-out, color 0.2s ease-out,
+    border-color 0.2s ease-out, box-shadow 0.2s ease-out;
 }
 
 .toggle:hover {
-  background: var(--surface-3);
-  color: var(--text-primary);
+  background: color-mix(in oklch, var(--ink-300) 18%, var(--ink-000));
+  color: var(--ink-900);
   border-color: var(--stamp-yellow);
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 25%, transparent);
 }
@@ -24,30 +39,44 @@
   transform: scale(0.97);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .toggle:active {
+    transform: none;
+  }
+}
+
 .icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s ease-out;
 }
 
 .toggle:hover .icon {
   transform: rotate(15deg);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .toggle:hover .icon {
+    transform: none;
+  }
+}
+
 .label {
   min-width: 48px;
   text-align: left;
-  transition: color 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: color 0.2s ease-out;
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   ink-* tokens auto-invert; ink-000 in dark = page base, so the toggle
+   moves to ink-100 to lift off the page. */
 :global([data-theme="dark"]) .toggle {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: var(--border-default);
+  background: var(--ink-100);
+  border-color: var(--ink-300);
 }
 
 :global([data-theme="dark"]) .toggle:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: color-mix(in oklch, var(--ink-300) 40%, var(--ink-100));
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--stamp-yellow) 30%, transparent);
 }

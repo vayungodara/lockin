@@ -1,4 +1,17 @@
-/* ── XPBar: full-width card matching mockup ── */
+/* ═══════════════════════════════════════════════════════════════════════
+   XPBar — Editorial redesign (ink system)
+
+   Personal-identity surface: the level badge + XP fill are the user's
+   earned color, so they ride the --stamp-yellow ink cascade (.impeccable
+   §5: "XP progress ring", "Level badge accent", "Focus session progress
+   bar fill"). Highlighter / Red Pen / Carbon / Moss / Indigo all flow
+   through stamp-yellow. Flat fill — no gradient, no glow.
+
+   Migrated off the generic chrome tokens (--surface-1, --border-subtle,
+   --radius-2xl/-lg/-full, --font-display/-bold, --text-primary,
+   --urgency-amber, rgba white highlights, glassy dark background) onto
+   the editorial card vocabulary shared with PactCard / MonthlyCalendar.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 .container {
   display: flex;
@@ -6,34 +19,35 @@
   gap: var(--space-5);
   width: 100%;
   padding: var(--space-5);
-  background: var(--surface-1);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-2xl);
-  box-shadow: var(--shadow-sm);
+  background: var(--ink-000);
+  border: 1px solid var(--ink-300);
+  border-radius: var(--radius-editorial-md);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(20, 15, 5, 0.25);
   position: relative;
   overflow: hidden;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  transition: border-color 120ms ease-out;
+  color: var(--ink-800);
 }
 
 .container:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-md);
+  border-color: var(--ink-400);
 }
 
-/* ── Level badge ── */
+/* ── Level badge — earned-color identity, rides the ink cascade ── */
 .levelBadge {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
-  background: var(--accent-primary);
-  color: white;
+  background: var(--stamp-yellow);
+  color: var(--stamp-yellow-ink);
   padding: 6px 12px;
-  border-radius: var(--radius-lg);
-  font-family: var(--font-display);
+  border-radius: var(--radius-editorial-sm);
+  font-family: var(--font-mono-editorial);
   font-weight: 700;
-  font-size: var(--text-sm);
-  box-shadow: var(--shadow-sm);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -56,18 +70,25 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--text-sm);
 }
 
+/* Label — uppercase tracked editorial caption. */
 .progressLabel {
-  color: var(--text-primary);
-  letter-spacing: 0.01em;
+  font-family: var(--font-mono-editorial);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-600);
 }
 
+/* XP counter — mono tabular so the figures read as a ledger count. */
 .xpCounter {
-  color: var(--text-primary);
+  font-family: var(--font-mono-editorial);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-800);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -75,12 +96,13 @@
 /* ── Track + fill ──
    Track is warm-cream tinted via stamp-yellow at low alpha so the
    user's chosen ink shows through subtly. Fill is solid stamp-yellow
-   (cascades with ink choice) — flat, no gradient, no glow. */
+   (cascades with ink choice) — flat, no gradient, no glow.
+   The width transition is functional progress feedback, not decoration. */
 .track {
   height: 12px;
   width: 100%;
   background: color-mix(in oklch, var(--stamp-yellow) 8%, var(--ink-100));
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   overflow: hidden;
   position: relative;
 }
@@ -88,11 +110,11 @@
 .fill {
   height: 100%;
   background: var(--stamp-yellow);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-editorial-sm);
   position: relative;
 }
 
-/* Highlight line for depth */
+/* Highlight line for depth — paper-ink instead of hard white. */
 .fill::before {
   content: '';
   position: absolute;
@@ -100,11 +122,11 @@
   left: 0;
   right: 0;
   height: 4px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: var(--radius-full);
+  background: color-mix(in oklch, var(--ink-000) 30%, transparent);
+  border-radius: var(--radius-editorial-sm);
 }
 
-/* Shimmer glint sweep */
+/* Shimmer glint sweep — one pass on XP gain, paper-toned. */
 .fill::after {
   content: '';
   position: absolute;
@@ -115,7 +137,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.3),
+    color-mix(in oklch, var(--ink-000) 45%, transparent),
     transparent
   );
   animation: shimmerGlint 2s ease-in-out 1;
@@ -127,18 +149,25 @@
   100% { transform: translateX(350%); }
 }
 
-/* ── Floating XP indicator ── */
+@media (prefers-reduced-motion: reduce) {
+  .fill::after {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* ── Floating XP indicator — earned color, rides the ink cascade ── */
 .xpFloat {
   position: absolute;
   right: 15%;
   top: -4px;
-  font-family: var(--font-display);
+  font-family: var(--font-mono-editorial);
   font-weight: 700;
-  font-size: var(--text-sm);
-  color: var(--urgency-amber);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  color: var(--stamp-yellow);
   pointer-events: none;
   user-select: none;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
   animation: floatXP 2.5s ease-in-out 1 forwards;
 }
 
@@ -146,6 +175,12 @@
   0% { transform: translateY(0) scale(1); opacity: 0.8; }
   50% { transform: translateY(-8px) scale(1.1); opacity: 1; }
   100% { transform: translateY(0) scale(1); opacity: 0.8; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .xpFloat {
+    animation: none;
+  }
 }
 
 /* ── Responsive ── */
@@ -166,31 +201,33 @@
   }
 }
 
-/* ── Dark mode overrides ── */
+/* ── Dark mode overrides ──
+   ink-* tokens auto-invert; ink-000 in dark = page base, so the card
+   moves to ink-100 (warm dark card) to lift off the page — the move
+   PactCard / MonthlyCalendar make. No glass. */
 :global([data-theme="dark"]) .container {
-  background: rgba(20, 20, 23, 0.7);
-  border-color: var(--border-default);
-  box-shadow: var(--shadow-sm);
+  background: var(--ink-100);
+  border-color: var(--ink-300);
+  box-shadow: 0 1px 0 var(--ink-200), 0 10px 24px -18px rgba(0, 0, 0, 0.55);
 }
 
 :global([data-theme="dark"]) .container:hover {
-  border-color: var(--border-strong);
-  box-shadow: var(--shadow-lg);
-}
-
-:global([data-theme="dark"]) .levelBadge {
-  box-shadow: var(--shadow-md);
+  border-color: var(--ink-400);
 }
 
 :global([data-theme="dark"]) .track {
-  background: color-mix(in oklch, var(--stamp-yellow) 6%, rgba(255, 255, 255, 0.06));
+  background: color-mix(in oklch, var(--stamp-yellow) 6%, var(--ink-200));
+}
+
+:global([data-theme="dark"]) .fill::before {
+  background: color-mix(in oklch, var(--ink-900) 18%, transparent);
 }
 
 :global([data-theme="dark"]) .fill::after {
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.15),
+    color-mix(in oklch, var(--ink-900) 22%, transparent),
     transparent
   );
 }

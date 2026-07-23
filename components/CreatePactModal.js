@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, createElement } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
@@ -258,7 +258,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                         onClick={() => setActiveCategory(cat.id)}
                         aria-pressed={activeCategory === cat.id}
                       >
-                        {cat.emoji && <span>{cat.emoji}</span>}
+                        {cat.Icon && createElement(cat.Icon, { size: 14, weight: 'bold', 'aria-hidden': true })}
                         {cat.label}
                       </button>
                     ))}
@@ -271,7 +271,9 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                         className={styles.templateCard}
                         onClick={() => handleSelectTemplate(template)}
                       >
-                        <span className={styles.templateEmoji}>{template.emoji}</span>
+                        <span className={styles.templateIcon} aria-hidden="true">
+                          {template.Icon && createElement(template.Icon, { size: 22, weight: 'duotone' })}
+                        </span>
                         <span className={styles.templateTitle}>{template.title}</span>
                       </button>
                     ))}
@@ -297,7 +299,7 @@ export default function CreatePactModal({ isOpen, onClose, onPactCreated }) {
                 <form onSubmit={handleSubmit} className={styles.form}>
                   {selectedTemplate && (
                     <motion.div className={styles.templateBadge} {...fadeInUp}>
-                      <span>{selectedTemplate.emoji}</span>
+                      {selectedTemplate.Icon && createElement(selectedTemplate.Icon, { size: 14, weight: 'duotone', 'aria-hidden': true })}
                       Based on {selectedTemplate.title}
                     </motion.div>
                   )}

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { createClient } from '@/lib/supabase/client';
 import { getUserAchievements } from '@/lib/gamification';
+import { AchievementIcon } from '@/lib/achievementIcons';
 import { staggerContainer, staggerItem, prefersReducedMotion } from '@/lib/animations';
 import styles from './AchievementsRail.module.css';
 
@@ -11,9 +12,9 @@ import styles from './AchievementsRail.module.css';
  * AchievementsRail — § 05 of the dashboard.
  *
  * Renders the full achievement set as a rail of editorial-tile cards.
- * Earned tiles show full color + the original icon; locked tiles dim
- * back to a glassine-paper grey + dotted outline so they read as the
- * "yet to be earned" set without disappearing.
+ * Earned tiles seat a Phosphor line-icon on a rotated highlighter stamp;
+ * locked tiles dim to glassine-paper grey + a dashed outline and a muted
+ * icon so they read as the "yet to be earned" set without disappearing.
  *
  * Refreshes when the global `xp-updated` event fires (any pact completion
  * fans out to checkPactAchievements which can unlock a tile silently;
@@ -86,7 +87,7 @@ export default function AchievementsRail({ userId }) {
 }
 
 function AchievementTile({ achievement, reduced }) {
-  const { name, description, icon, unlocked } = achievement;
+  const { key, name, description, unlocked } = achievement;
   return (
     <motion.div
       className={`${styles.tile} ${unlocked ? styles.tileUnlocked : styles.tileLocked}`}
@@ -94,7 +95,7 @@ function AchievementTile({ achievement, reduced }) {
       title={`${name} — ${description}`}
     >
       <span className={styles.tileIcon} aria-hidden="true">
-        {unlocked ? icon : '·'}
+        <AchievementIcon achievementKey={key} size={22} weight={unlocked ? 'duotone' : 'regular'} />
       </span>
       <div className={styles.tileBody}>
         <div className={styles.tileName}>{name}</div>

@@ -91,28 +91,6 @@
   font-family: var(--font-sans-editorial);
 }
 
-.ownerAvatar {
-  width: 20px;
-  height: 20px;
-  border-radius: 2px;
-  object-fit: cover;
-  border: 1px solid var(--ink-300);
-}
-
-.ownerAvatarPlaceholder {
-  width: 20px;
-  height: 20px;
-  border-radius: 2px;
-  background: var(--stamp-yellow);
-  color: var(--stamp-yellow-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-
 .ownerName {
   font-size: 12px;
   color: var(--ink-700);
@@ -316,11 +294,6 @@
   background: var(--ink-100);
   border-color: var(--ink-400);
   color: var(--ink-700);
-}
-
-:global([data-theme="dark"]) .ownerAvatarPlaceholder {
-  background: var(--stamp-yellow);
-  color: var(--stamp-yellow-ink);
 }
 
 :global([data-theme="dark"]) .loadingOverlay {

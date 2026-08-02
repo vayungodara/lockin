@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import {
+  getNotifications,
   NOTIFICATION_TYPES,
   getNotificationIcon,
   getUnreadCount,
@@ -8,6 +9,39 @@ import {
   createNotification,
 } from '@/lib/notifications';
 import { createMockSupabase } from '../../setup/supabase-mock';
+
+describe('getNotifications', () => {
+  it('returns notification rows on success', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const rows = [
+      { id: 'n-1', type: 'pact_reminder', title: 'Reminder', message: 'Do it', is_read: false, created_at: '2024-06-15T10:00:00Z' },
+      { id: 'n-2', type: 'streak_milestone', title: 'Streak!', message: '7 days', is_read: true, created_at: '2024-06-14T10:00:00Z' },
+    ];
+    builder.mockReturnValue({ data: rows, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual(rows);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array when data is null', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB down' } });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+});
 
 describe('NOTIFICATION_TYPES', () => {
   it('is an object with string values', () => {

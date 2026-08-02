@@ -272,6 +272,58 @@ describe('getGroupActivity', () => {
     const result = await getGroupActivity(supabase, 'group-1');
     expect(result.data).toEqual([]);
   });
+
+  it('attaches user profiles and reactions to activities', async () => {
+    const { supabase, builder } = createMockSupabase();
+
+    builder.mockReturnValueSequence([
+      {
+        data: [
+          { id: 'a1', user_id: 'u1', group_id: 'g1', action: 'task_completed', created_at: '2024-06-15T10:00:00Z', metadata: {} },
+          { id: 'a2', user_id: 'u2', group_id: 'g1', action: 'task_created', created_at: '2024-06-15T09:00:00Z', metadata: {} },
+        ],
+        error: null,
+      },
+      {
+        data: [
+          { id: 'u1', full_name: 'Alice', avatar_url: 'https://example.com/alice.png' },
+          { id: 'u2', full_name: 'Bob', avatar_url: null },
+        ],
+        error: null,
+      },
+      {
+        data: [{ activity_id: 'a1', user_id: 'u2', reaction: 'fire' }],
+        error: null,
+      },
+    ]);
+
+    const result = await getGroupActivity(supabase, 'g1');
+
+    expect(result.error).toBeNull();
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0].user.full_name).toBe('Alice');
+    expect(result.data[1].user.full_name).toBe('Bob');
+    expect(result.data[0].reactions.total).toBe(1);
+    expect(result.data[1].reactions.total).toBe(0);
+  });
+
+  it('falls back to "Unknown" for users without matching profiles', async () => {
+    const { supabase, builder } = createMockSupabase();
+
+    builder.mockReturnValueSequence([
+      {
+        data: [{ id: 'a1', user_id: 'no-profile', group_id: 'g1', action: 'pact_created', created_at: '2024-06-15T10:00:00Z', metadata: {} }],
+        error: null,
+      },
+      { data: [], error: null },
+      { data: [], error: null },
+    ]);
+
+    const result = await getGroupActivity(supabase, 'g1');
+
+    expect(result.data[0].user.full_name).toBe('Unknown');
+    expect(result.data[0].user.avatar_url).toBeNull();
+  });
 });
 
 describe('getAllActivity', () => {
@@ -291,6 +343,37 @@ describe('getAllActivity', () => {
     const result = await getAllActivity(supabase);
     expect(result.data).toEqual([]);
     expect(result.error).toBeTruthy();
+  });
+
+  it('attaches profiles and filters out test-data entries', async () => {
+    const { supabase, builder } = createMockSupabase();
+
+    builder.mockReturnValueSequence([
+      {
+        data: [
+          { id: 'a1', user_id: 'u1', action: 'pact_completed', created_at: '2024-06-15T10:00:00Z', metadata: { title: 'Study math' } },
+          { id: 'a2', user_id: 'u1', action: 'task_created', created_at: '2024-06-15T09:00:00Z', metadata: { title: 'Bulk Test pact' } },
+          { id: 'a3', user_id: 'u2', action: 'pact_created', created_at: '2024-06-15T08:00:00Z', metadata: { title: 'Read chapter 5' } },
+        ],
+        error: null,
+      },
+      {
+        data: [
+          { id: 'u1', full_name: 'Alice', avatar_url: null },
+          { id: 'u2', full_name: 'Bob', avatar_url: null },
+        ],
+        error: null,
+      },
+      { data: [], error: null },
+    ]);
+
+    const result = await getAllActivity(supabase);
+
+    expect(result.error).toBeNull();
+    expect(result.data).toHaveLength(2);
+    expect(result.data.every(a => a.metadata.title !== 'Bulk Test pact')).toBe(true);
+    expect(result.data[0].user.full_name).toBe('Alice');
+    expect(result.data[1].user.full_name).toBe('Bob');
   });
 });
 
@@ -318,5 +401,44 @@ describe('getGroupStats', () => {
     });
     expect(result.leaderboard).toEqual([]);
     expect(result.error).toBeNull();
+  });
+
+  it('computes stats and leaderboard from members, tasks, and activity', async () => {
+    const { supabase, builder } = createMockSupabase();
+
+    builder.mockReturnValueSequence([
+      { data: [{ user_id: 'u1' }, { user_id: 'u2' }], error: null },
+      { data: [{ user_id: 'u1' }, { user_id: 'u1' }], error: null },
+      {
+        data: [
+          { id: 't1', status: 'done', owner_id: 'u1' },
+          { id: 't2', status: 'in_progress', owner_id: 'u2' },
+          { id: 't3', status: 'done', owner_id: 'u2' },
+        ],
+        error: null,
+      },
+      {
+        data: [
+          { id: 'u1', full_name: 'Alice', avatar_url: null },
+          { id: 'u2', full_name: 'Bob', avatar_url: null },
+        ],
+        error: null,
+      },
+    ]);
+
+    const result = await getGroupStats(supabase, 'group-1');
+
+    expect(result.error).toBeNull();
+    expect(result.stats).toEqual({
+      totalTasks: 3,
+      completedTasks: 2,
+      completionRate: 67,
+      activeTasks: 1,
+    });
+    expect(result.leaderboard).toHaveLength(2);
+    expect(result.leaderboard[0].full_name).toBe('Alice');
+    expect(result.leaderboard[0].completions).toBe(2);
+    expect(result.leaderboard[1].full_name).toBe('Bob');
+    expect(result.leaderboard[1].completions).toBe(0);
   });
 });

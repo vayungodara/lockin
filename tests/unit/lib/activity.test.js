@@ -405,6 +405,7 @@ describe('getGroupActivity — with data', () => {
     expect(result.data).toHaveLength(2);
     expect(result.data[0].user.full_name).toBe('Alice');
     expect(result.data[1].user.full_name).toBe('Alice');
+    expect(builder.in).toHaveBeenCalledWith('id', ['u1']);
   });
 });
 

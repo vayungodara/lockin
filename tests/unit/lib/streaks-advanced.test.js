@@ -4,7 +4,9 @@ import {
   checkStreakAtRisk,
   getStreakFreezeStatus,
   applyStreakFreeze,
+  awardStreakFreeze,
   updateStreakOnCompletion,
+  FREEZE_COOLDOWN_DAYS,
 } from '@/lib/streaks-advanced';
 import { formatUTCDate } from '@/lib/streaks';
 
@@ -437,5 +439,260 @@ describe('updateStreakOnCompletion — milestone freeze idempotency', () => {
     const rpcNames = supabase.rpc.mock.calls.map((c) => c[0]);
     expect(rpcNames).not.toContain('award_streak_freeze');
     expect(rpcNames).not.toContain('award_xp');
+  });
+
+  it('returns failure when update_streak_activity RPC fails', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { supabase } = createTableMock();
+
+    const profilesBuilder = supabase.from('profiles');
+    profilesBuilder.resolveWith({ data: { longest_streak: 5 }, error: null });
+
+    supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC timeout' } });
+
+    const result = await updateStreakOnCompletion(supabase, 'user-1', 5, 5);
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+    vi.restoreAllMocks();
+  });
+});
+
+describe('FREEZE_COOLDOWN_DAYS', () => {
+  it('is a positive number', () => {
+    expect(typeof FREEZE_COOLDOWN_DAYS).toBe('number');
+    expect(FREEZE_COOLDOWN_DAYS).toBeGreaterThan(0);
+  });
+
+  it('equals 3', () => {
+    expect(FREEZE_COOLDOWN_DAYS).toBe(3);
+  });
+});
+
+describe('awardStreakFreeze', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it('returns error when profile is not found', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await awardStreakFreeze(supabase, 'user-1', '7-day milestone');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Profile not found');
+  });
+
+  it('returns capped when already at max freezes (5)', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: { streak_freezes_remaining: 5 }, error: null });
+
+    const result = await awardStreakFreeze(supabase, 'user-1', '30-day milestone');
+    expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(5);
+    expect(result.capped).toBe(true);
+  });
+
+  it('awards a freeze successfully via RPC', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: { streak_freezes_remaining: 2 }, error: null });
+    supabase.rpc.mockResolvedValue({ data: { freezesRemaining: 3 }, error: null });
+
+    const result = await awardStreakFreeze(supabase, 'user-1', '7-day milestone');
+    expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(3);
+    expect(result.capped).toBe(false);
+  });
+
+  it('falls back to calculated remaining when RPC returns no data', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: { streak_freezes_remaining: 2 }, error: null });
+    supabase.rpc.mockResolvedValue({ data: null, error: null });
+
+    const result = await awardStreakFreeze(supabase, 'user-1', '7-day milestone');
+    expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(3);
+  });
+
+  it('handles RPC error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: { streak_freezes_remaining: 2 }, error: null });
+    supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC failed' } });
+
+    const result = await awardStreakFreeze(supabase, 'user-1', '7-day milestone');
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('RPC failed');
+  });
+});
+
+describe('applyStreakFreeze — RPC response handling', () => {
+  it('handles RPC returning success: false with error and freezesRemaining', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    supabase.rpc.mockResolvedValue({
+      data: { success: false, error: 'Race condition', freezesRemaining: 1 },
+      error: null,
+    });
+
+    const result = await applyStreakFreeze(supabase);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Race condition');
+    expect(result.freezesRemaining).toBe(1);
+  });
+
+  it('uses default error message when RPC returns success: false without error', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    supabase.rpc.mockResolvedValue({
+      data: { success: false },
+      error: null,
+    });
+
+    const result = await applyStreakFreeze(supabase);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Failed to use streak freeze.');
+    expect(result.freezesRemaining).toBe(2);
+  });
+
+  it('returns catch-block error when RPC throws', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 2,
+        streak_freeze_last_used: null,
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    supabase.rpc.mockResolvedValue({ data: null, error: { message: 'RPC timeout' } });
+
+    const result = await applyStreakFreeze(supabase);
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('Failed to use streak freeze. Please try again.');
+    expect(result.freezesRemaining).toBe(0);
+    vi.restoreAllMocks();
+  });
+
+  it('uses RPC-returned freezesRemaining when present', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: {
+        streak_freezes_remaining: 3,
+        streak_freeze_last_used: null,
+        current_streak: 5,
+      },
+      error: null,
+    });
+
+    supabase.rpc.mockResolvedValue({
+      data: { freezesRemaining: 2 },
+      error: null,
+    });
+
+    const result = await applyStreakFreeze(supabase);
+    expect(result.success).toBe(true);
+    expect(result.freezesRemaining).toBe(2);
+  });
+});
+
+describe('getStreakFreezeStatus — nextFreezeEarned hints', () => {
+  it('suggests 7-day streak when current streak is less than 7', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: { streak_freezes_remaining: 1, streak_freeze_last_used: null, current_streak: 3 },
+      error: null,
+    });
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.nextFreezeEarned).toBe('Reach a 7-day streak');
+  });
+
+  it('suggests 14-day streak when current streak is between 7 and 13', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: { streak_freezes_remaining: 2, streak_freeze_last_used: null, current_streak: 10 },
+      error: null,
+    });
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.nextFreezeEarned).toBe('Reach a 14-day streak');
+  });
+
+  it('suggests 30-day streak when current streak is between 14 and 29', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: { streak_freezes_remaining: 3, streak_freeze_last_used: null, current_streak: 20 },
+      error: null,
+    });
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.nextFreezeEarned).toBe('Reach a 30-day streak');
+  });
+
+  it('returns null when streak exceeds all freeze milestones', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: { streak_freezes_remaining: 4, streak_freeze_last_used: null, current_streak: 50 },
+      error: null,
+    });
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.nextFreezeEarned).toBeNull();
+  });
+
+  it('returns safe default on exception', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { supabase, builder } = createMockSupabase();
+    builder.then = () => { throw new Error('DB connection failed'); };
+
+    const result = await getStreakFreezeStatus(supabase, 'user-1');
+    expect(result.available).toBe(false);
+    expect(result.freezesRemaining).toBe(0);
+    expect(result.cooldownEnds).toBeNull();
+    expect(result.nextFreezeEarned).toBeNull();
+    vi.restoreAllMocks();
+  });
+});
+
+describe('checkStreakAtRisk — error handling', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2024-06-15T19:00:00Z'));
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
+
+  it('returns safe default when supabase query throws', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.then = () => { throw new Error('connection refused'); };
+
+    const result = await checkStreakAtRisk(supabase, 'user-1');
+    expect(result.atRisk).toBe(false);
+    expect(result.streak).toBe(0);
   });
 });

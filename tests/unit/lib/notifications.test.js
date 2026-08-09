@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest';
 import {
   NOTIFICATION_TYPES,
   getNotificationIcon,
+  getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
@@ -74,6 +75,55 @@ describe('getNotificationIcon', () => {
       expect(typeof icon).toBe('string');
       expect(icon.length).toBeGreaterThan(0);
     });
+  });
+});
+
+describe('getNotifications', () => {
+  it('returns notifications on success', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const notifications = [
+      { id: 'n1', type: 'streak_milestone', title: 'Milestone!', message: '7 days', is_read: false, created_at: '2024-06-15' },
+      { id: 'n2', type: 'pact_reminder', title: 'Reminder', message: 'Do it', is_read: true, created_at: '2024-06-14' },
+    ];
+    builder.mockReturnValue({ data: notifications, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual(notifications);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array when data is null', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB error' } });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('accepts a custom limit parameter', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    await getNotifications(supabase, 5);
+    expect(builder.limit).toHaveBeenCalledWith(5);
+  });
+
+  it('uses default limit of 20', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [], error: null });
+
+    await getNotifications(supabase);
+    expect(builder.limit).toHaveBeenCalledWith(20);
   });
 });
 

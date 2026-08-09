@@ -2,6 +2,8 @@
 
 > The app that makes sure tomorrow actually comes.
 
+**Status: alpha.** A new version, Ascends, is coming soon.
+
 Student accountability app that uses social pressure to combat procrastination. Create personal commitments, collaborate on group projects, and track focus sessions — all with visibility that keeps you honest.
 
 ## Features

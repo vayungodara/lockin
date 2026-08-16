@@ -384,15 +384,18 @@ describe('getAllActivity', () => {
     expect(result.data[0].id).toBe('act-1');
   });
 
-  it('trims results to the requested limit after filtering', async () => {
+  it('trims results to the requested limit after filtering out test data', async () => {
     const { supabase, builder } = createMockSupabase();
-    const activities = Array.from({ length: 10 }, (_, i) => ({
-      id: `act-${i}`,
-      user_id: 'user-1',
-      action: 'pact_completed',
-      metadata: { title: `Pact ${i}` },
-      created_at: `2024-06-15T${String(10 - i).padStart(2, '0')}:00:00Z`,
-    }));
+    const activities = [
+      { id: 'act-0', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Bulk Test Pact' }, created_at: '2024-06-15T10:00:00Z' },
+      { id: 'act-1', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Real pact A' }, created_at: '2024-06-15T09:00:00Z' },
+      { id: 'act-2', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Test #99' }, created_at: '2024-06-15T08:00:00Z' },
+      { id: 'act-3', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Real pact B' }, created_at: '2024-06-15T07:00:00Z' },
+      { id: 'act-4', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Real pact C' }, created_at: '2024-06-15T06:00:00Z' },
+      { id: 'act-5', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Real pact D' }, created_at: '2024-06-15T05:00:00Z' },
+      { id: 'act-6', user_id: 'user-1', action: 'pact_completed', metadata: { title: '[TEST] debug' }, created_at: '2024-06-15T04:00:00Z' },
+      { id: 'act-7', user_id: 'user-1', action: 'pact_completed', metadata: { title: 'Real pact E' }, created_at: '2024-06-15T03:00:00Z' },
+    ];
     builder.mockReturnValueSequence([
       { data: activities, error: null },
       { data: [{ id: 'user-1', full_name: 'Alice', avatar_url: null }], error: null },
@@ -401,6 +404,7 @@ describe('getAllActivity', () => {
 
     const result = await getAllActivity(supabase, 3);
     expect(result.data).toHaveLength(3);
+    expect(result.data.map(a => a.id)).toEqual(['act-1', 'act-3', 'act-4']);
   });
 });
 

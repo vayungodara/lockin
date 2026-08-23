@@ -2,12 +2,55 @@ import { describe, it, expect } from 'vitest';
 import {
   NOTIFICATION_TYPES,
   getNotificationIcon,
+  getNotifications,
   getUnreadCount,
   markAsRead,
   markAllAsRead,
   createNotification,
 } from '@/lib/notifications';
 import { createMockSupabase } from '../../setup/supabase-mock';
+
+describe('getNotifications', () => {
+  it('returns notifications on success', async () => {
+    const { supabase, builder } = createMockSupabase();
+    const rows = [
+      { id: 'n1', type: 'pact_reminder', title: 'Reminder', message: 'Due soon', is_read: false, created_at: '2024-06-15T12:00:00Z' },
+      { id: 'n2', type: 'streak_milestone', title: '7 days!', message: 'Keep going', is_read: true, created_at: '2024-06-14T12:00:00Z' },
+    ];
+    builder.mockReturnValue({ data: rows, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual(rows);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array when data is null', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: null });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeNull();
+  });
+
+  it('returns empty array and error on DB failure', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { message: 'DB down' } });
+
+    const result = await getNotifications(supabase);
+    expect(result.data).toEqual([]);
+    expect(result.error).toBeTruthy();
+  });
+
+  it('respects a custom limit', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: [{ id: 'n1' }], error: null });
+
+    const result = await getNotifications(supabase, 5);
+    expect(result.data).toHaveLength(1);
+    expect(builder.limit).toHaveBeenCalledWith(5);
+  });
+});
 
 describe('NOTIFICATION_TYPES', () => {
   it('is an object with string values', () => {

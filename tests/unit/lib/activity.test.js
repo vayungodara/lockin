@@ -319,4 +319,204 @@ describe('getGroupStats', () => {
     expect(result.leaderboard).toEqual([]);
     expect(result.error).toBeNull();
   });
+
+  it('computes stats and leaderboard from real data', async () => {
+    const { supabase, builders } = createActivityTableMock(['group_members', 'activity_log', 'tasks', 'profiles']);
+
+    builders['group_members'].resolveWith({
+      data: [{ user_id: 'u1' }, { user_id: 'u2' }],
+      error: null,
+    });
+
+    builders['activity_log'].resolveWith({
+      data: [
+        { user_id: 'u1' },
+        { user_id: 'u1' },
+        { user_id: 'u2' },
+      ],
+      error: null,
+    });
+
+    builders['tasks'].resolveWith({
+      data: [
+        { id: 't1', status: 'done', owner_id: 'u1' },
+        { id: 't2', status: 'done', owner_id: 'u2' },
+        { id: 't3', status: 'in_progress', owner_id: 'u1' },
+        { id: 't4', status: 'todo', owner_id: 'u2' },
+      ],
+      error: null,
+    });
+
+    builders['profiles'].resolveWith({
+      data: [
+        { id: 'u1', full_name: 'Alice', avatar_url: null },
+        { id: 'u2', full_name: 'Bob', avatar_url: null },
+      ],
+      error: null,
+    });
+
+    const result = await getGroupStats(supabase, 'group-1');
+
+    expect(result.error).toBeNull();
+    expect(result.stats).toEqual({
+      totalTasks: 4,
+      completedTasks: 2,
+      completionRate: 50,
+      activeTasks: 2,
+    });
+    expect(result.leaderboard).toHaveLength(2);
+    expect(result.leaderboard[0].full_name).toBe('Alice');
+    expect(result.leaderboard[0].completions).toBe(2);
+    expect(result.leaderboard[1].full_name).toBe('Bob');
+    expect(result.leaderboard[1].completions).toBe(1);
+  });
+});
+
+/**
+ * Multi-table mock: each from(table) call returns a distinct builder so
+ * sequential queries against different tables resolve independently.
+ */
+function createActivityTableMock(tables) {
+  function makeBuilder() {
+    const chainMethods = [
+      'select', 'eq', 'neq', 'in', 'not', 'gte', 'order', 'range',
+      'single', 'maybeSingle', 'insert', 'update', 'delete', 'limit',
+    ];
+    const b = {
+      resolveWith(value) {
+        b.then = (resolve) => resolve(value);
+      },
+    };
+    chainMethods.forEach((m) => {
+      b[m] = vi.fn(() => b);
+    });
+    b.resolveWith({ data: null, error: null });
+    return b;
+  }
+
+  const builders = {};
+  (tables || []).forEach((t) => { builders[t] = makeBuilder(); });
+
+  const supabase = {
+    from: vi.fn((table) => {
+      if (!builders[table]) builders[table] = makeBuilder();
+      return builders[table];
+    }),
+    rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: { id: 'test-user-id' } },
+        error: null,
+      }),
+    },
+  };
+  return { supabase, builders };
+}
+
+describe('getGroupActivity — happy path', () => {
+  it('attaches user profiles and reactions to activities', async () => {
+    const { supabase, builders } = createActivityTableMock(['activity_log', 'profiles', 'activity_reactions']);
+
+    builders['activity_log'].resolveWith({
+      data: [
+        { id: 'act-1', user_id: 'u1', action: 'task_completed', group_id: 'g1', metadata: {} },
+        { id: 'act-2', user_id: 'u2', action: 'pact_created', group_id: 'g1', metadata: {} },
+      ],
+      error: null,
+    });
+
+    builders['profiles'].resolveWith({
+      data: [
+        { id: 'u1', full_name: 'Alice', avatar_url: 'https://example.com/a.png' },
+        { id: 'u2', full_name: 'Bob', avatar_url: null },
+      ],
+      error: null,
+    });
+
+    builders['activity_reactions'].resolveWith({
+      data: [
+        { activity_id: 'act-1', user_id: 'test-user-id', reaction: 'fire' },
+      ],
+      error: null,
+    });
+
+    const result = await getGroupActivity(supabase, 'g1');
+
+    expect(result.error).toBeNull();
+    expect(result.data).toHaveLength(2);
+    expect(result.data[0].user.full_name).toBe('Alice');
+    expect(result.data[0].reactions.counts).toEqual({ fire: 1 });
+    expect(result.data[0].reactions.userReactions).toEqual(['fire']);
+    expect(result.data[1].user.full_name).toBe('Bob');
+    expect(result.data[1].reactions.total).toBe(0);
+  });
+
+  it('falls back to Unknown for missing profiles', async () => {
+    const { supabase, builders } = createActivityTableMock(['activity_log', 'profiles', 'activity_reactions']);
+
+    builders['activity_log'].resolveWith({
+      data: [{ id: 'act-1', user_id: 'deleted-user', action: 'task_completed', group_id: 'g1', metadata: {} }],
+      error: null,
+    });
+
+    builders['profiles'].resolveWith({ data: [], error: null });
+    builders['activity_reactions'].resolveWith({ data: [], error: null });
+
+    const result = await getGroupActivity(supabase, 'g1');
+
+    expect(result.data[0].user.full_name).toBe('Unknown');
+    expect(result.data[0].user.avatar_url).toBeNull();
+  });
+});
+
+describe('getAllActivity — happy path', () => {
+  it('filters out test-data entries and respects the limit', async () => {
+    const { supabase, builders } = createActivityTableMock(['activity_log', 'profiles', 'activity_reactions']);
+
+    builders['activity_log'].resolveWith({
+      data: [
+        { id: 'a1', user_id: 'u1', action: 'pact_completed', metadata: { title: 'Study math' } },
+        { id: 'a2', user_id: 'u1', action: 'pact_created', metadata: { title: 'Bulk Test Pact' } },
+        { id: 'a3', user_id: 'u1', action: 'task_completed', metadata: { title: '[TEST] ignore me' } },
+        { id: 'a4', user_id: 'u1', action: 'pact_completed', metadata: { title: 'Read chapter 5' } },
+      ],
+      error: null,
+    });
+
+    builders['profiles'].resolveWith({
+      data: [{ id: 'u1', full_name: 'Alice', avatar_url: null }],
+      error: null,
+    });
+
+    builders['activity_reactions'].resolveWith({ data: [], error: null });
+
+    const result = await getAllActivity(supabase, 2);
+
+    expect(result.error).toBeNull();
+    const titles = result.data.map((a) => a.metadata.title);
+    expect(titles).not.toContain('Bulk Test Pact');
+    expect(titles).not.toContain('[TEST] ignore me');
+    expect(result.data.length).toBeLessThanOrEqual(2);
+  });
+
+  it('attaches user profiles and default reactions', async () => {
+    const { supabase, builders } = createActivityTableMock(['activity_log', 'profiles', 'activity_reactions']);
+
+    builders['activity_log'].resolveWith({
+      data: [{ id: 'a1', user_id: 'u1', action: 'pact_completed', metadata: { title: 'Run 5k' } }],
+      error: null,
+    });
+
+    builders['profiles'].resolveWith({
+      data: [{ id: 'u1', full_name: 'Alice', avatar_url: null }],
+      error: null,
+    });
+
+    builders['activity_reactions'].resolveWith({ data: [], error: null });
+
+    const result = await getAllActivity(supabase);
+
+    expect(result.data[0].user.full_name).toBe('Alice');
+    expect(result.data[0].reactions).toEqual({ counts: {}, userReactions: [], total: 0 });
+  });
 });

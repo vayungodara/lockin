@@ -194,4 +194,46 @@ describe('toggleReaction', () => {
     expect(result.success).toBe(false);
     expect(result.error).toBeTruthy();
   });
+
+  it('throws on non-PGRST116 error from existence check', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({ data: null, error: { code: 'INTERNAL', message: 'unexpected' } });
+
+    const result = await toggleReaction(supabase, 'a1', 'fire');
+    expect(result.success).toBe(false);
+    expect(result.error).toBeTruthy();
+  });
+});
+
+describe('getBatchReactions — edge cases', () => {
+  it('handles reactions for activity IDs not in the original array', async () => {
+    const { supabase, builder } = createMockSupabase();
+    builder.mockReturnValue({
+      data: [
+        { activity_id: 'a1', user_id: 'test-user-id', reaction: 'fire' },
+        { activity_id: 'unknown-id', user_id: 'test-user-id', reaction: 'clap' },
+      ],
+      error: null,
+    });
+
+    const result = await getBatchReactions(supabase, ['a1']);
+    expect(result.reactionsMap.a1.counts).toEqual({ fire: 1 });
+    expect(result.reactionsMap['unknown-id'].counts).toEqual({ clap: 1 });
+    expect(result.reactionsMap['unknown-id'].total).toBe(1);
+  });
+
+  it('handles auth failure gracefully (no userReactions tracked)', async () => {
+    const { supabase, builder } = createMockSupabase();
+    supabase.auth.getUser.mockResolvedValue({ data: null, error: { message: 'auth down' } });
+    builder.mockReturnValue({
+      data: [
+        { activity_id: 'a1', user_id: 'test-user-id', reaction: 'fire' },
+      ],
+      error: null,
+    });
+
+    const result = await getBatchReactions(supabase, ['a1']);
+    expect(result.reactionsMap.a1.counts).toEqual({ fire: 1 });
+    expect(result.reactionsMap.a1.userReactions).toEqual([]);
+  });
 });

@@ -295,13 +295,19 @@ describe('FREEZE_COOLDOWN_DAYS', () => {
 });
 
 describe('checkStreakAtRisk — error handling', () => {
-  it('returns safe default when supabase throws', async () => {
-    const { supabase, builder } = createMockSupabase();
+  beforeEach(() => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date('2024-06-15T19:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('returns safe default when supabase throws', async () => {
+    const { supabase, builder } = createMockSupabase();
 
     builder.mockReturnValue({ data: null, error: { message: 'connection lost' } });
-    // Make the builder throw when awaited (simulating a real error)
     builder.then = (resolve, reject) => {
       if (reject) reject(new Error('connection lost'));
       else throw new Error('connection lost');
@@ -310,8 +316,6 @@ describe('checkStreakAtRisk — error handling', () => {
     const result = await checkStreakAtRisk(supabase, 'user-1');
     expect(result.atRisk).toBe(false);
     expect(result.streak).toBe(0);
-
-    vi.useRealTimers();
   });
 });
 

@@ -43,6 +43,7 @@ npm run test:e2e     # Playwright e2e tests (auto-starts dev server)
 | Auth | Google OAuth via @supabase/ssr |
 | Styling | CSS Modules (vanilla CSS) |
 | Animations | Framer Motion 12.x |
+| Icons | @phosphor-icons/react |
 | Email | Resend |
 | Celebrations | canvas-confetti |
 | Monitoring | Vercel Analytics + Speed Insights |
@@ -297,6 +298,32 @@ Design doc: `/docs/plans/2026-03-08-ios-app-design.md`
 Full design brief lives in [`.impeccable.md`](./.impeccable.md) — users, brand personality, aesthetic direction, references/anti-references, 5 design principles, component vocabulary, and intentional deviations from impeccable defaults (fonts, glassmorphism, brand gradient).
 
 For design work use impeccable skills (`/critique`, `/polish`, `/arrange`, `/animate`, `/audit`, etc.) — they read `.impeccable.md` automatically. Update via `/impeccable teach` when brand direction shifts.
+
+## Frontend Kit
+
+Project-scoped sources for restyling lockin UI. Do **not** copy this into global `~/.claude/CLAUDE.md` or `~/.codex/AGENTS.md` (that taxes other repos).
+
+**Gate:** no restyle PRs until Vayun names a specific screen. Then: inspect the source → pick what fits → copy the actual component code and customize it. Port into the existing stack. Do not add a component-library package.
+
+**Stack stays:** CSS Modules + Framer Motion (`@/lib/animations`) + Phosphor icons + Inter / Instrument Sans. No shadcn, no Tailwind, no Radix unless Vayun explicitly chooses a primitives change.
+
+**Motion:** purpose first (Emil Kowalski). Dashboard = calm (entrance fade, stagger, hover). Landing/celebrations = theatrical. High-frequency chrome and keyboard actions: no animation. UI motion generally under 300ms. Respect `prefers-reduced-motion`.
+
+**Sources** (copy-own the code; do not wrap as a dependency):
+
+| Source | Use when |
+| --- | --- |
+| https://beautifului.dev | AI-native primitives (streaming, approvals, prompt bar). Rarely needed here. |
+| https://beui.dev | Motion-rich React/Next controls; shadcn-compatible registry at `/r/{slug}`. Port into CSS modules. |
+| https://rareui.com | One-off standout animated pieces. Use sparingly. |
+| https://transitions.dev | Transition recipes to port into `@/lib/animations`, not whole components. |
+| https://ui.shadcn.com | Primitive patterns. Port; do not install the registry unless asked. |
+| https://ui-skills.com | Craft/audit skills and playbook. Plans, not widgets. |
+| https://coss.com/ui | Base UI primitives. Same rule as shadcn. |
+| https://designsystemchecklist.com | Design-system planning checklist. |
+| https://reui.io/components | Composed product UI (grids, filters, calendars). Port ideas, not the package. |
+| https://emilkowal.ski/ui/you-dont-need-animations | When *not* to animate. |
+| https://swagui.rohoswagger.com | Fixed-identity registry (radius/type/shadows/motion stay put; accent-only theming). Compact register for app interiors, generous for marketing. Port tokens/components into CSS modules. |
 
 ## Current Status
 

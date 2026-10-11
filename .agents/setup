@@ -21,14 +21,5 @@ fi
 
 [ -f .env.local ] || { cp -- .env.local.example .env.local && t "copied .env.local.example to .env.local"; }
 
-t "smoke: vitest"
-npx vitest run --reporter=dot 2>&1 | tail -3 || t "vitest reported failures (see above); setup continues"
-
-mkdir -p ~/.config/amp
-cat > ~/.config/amp/AGENTS.md <<'EOF'
-# Orb notes: lockin
-- `npm run dev` for the app (register it as a service: `amp orb service start dev --command 'npm run dev' --portal`).
-- Unit tests `npm test`; e2e `npm run test:e2e`.
-- `.env.local` is a copy of the example; Supabase keys are not present unless set as project secrets.
-EOF
+# Setup prepares dependencies only. Run checks separately with npm test / npm run test:e2e.
 t "done"

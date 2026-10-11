@@ -22,6 +22,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 If none of these fit the task, use whichever specialized agent you think is best. Use parallel agent dispatch when tasks are independent. Use skills proactively.
 
+### Amp mapping
+
+The policy above names Claude Code plugin agents, not Amp agents. It remains unchanged for Claude Code. In Amp, use the following skills when available; skills are guidance, not delegated agents. Do not claim that a Claude Code agent ran in Amp.
+
+| Claude Code role (agents listed above) | Amp equivalent |
+|--------------------------------------|----------------|
+| Bugs & implementation | `surgical-patch` for small fixes; `lean-build` for features; `impeccable` for frontend work |
+| Security | No equivalent security-auditor skill or agent |
+| Code review | No equivalent general code-reviewer skill or agent; `ponytail-review` covers over-engineering only |
+| Debugging | `investigate-first` |
+| Visual/design | `impeccable` |
+| iOS | No equivalent iOS-developer skill or agent |
+| Performance | `impeccable` covers frontend performance; no equivalent dedicated performance-optimizer agent |
+| Architecture | No equivalent code-architect skill or agent |
+
+For roles without an equivalent, do the work directly with available tools. Amp's own delegation rules apply; these Claude Code names do not require delegation in Amp.
+
 ## Commands
 
 ```bash

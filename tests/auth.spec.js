@@ -33,32 +33,26 @@ test.describe('Authentication', () => {
     await expect(logoText).toBeVisible();
   });
 
-  test('unauthenticated user visiting a protected sub-page gets redirected or shown sign-in', async ({ page }) => {
-    // Visiting /dashboard/pacts without auth should redirect to / via dashboard/layout.js
-    await page.goto('/dashboard/pacts');
+  for (const path of ['pacts', 'groups', 'focus', 'stats', 'settings']) {
+    test(`unauthenticated user cannot access /dashboard/${path}`, async ({ page }) => {
+      const response = await page.goto(`/dashboard/${path}`);
+      expect(response.status()).toBe(200);
+      await expect(page).toHaveURL('/');
+      await expect(page.getByRole('button', { name: /Start Locking In/i }).first()).toBeVisible();
+    });
+  }
 
-    // Should have been redirected to the landing page
-    const url = page.url();
-    expect(url).toMatch(/\/$/);
-
-    // The CTA button should be visible on the landing page
-    const ctaButton = page.getByRole('button', { name: /Start Locking In/i }).first();
-    const isCtaVisible = await ctaButton.isVisible().catch(() => false);
-
-    if (!isCtaVisible) {
-      // Fallback: confirm we are not on a dashboard sub-page
-      expect(url).not.toContain('/dashboard/pacts');
-    }
+  test('auth callback without a code redirects to the error route', async ({ request, baseURL }) => {
+    const response = await request.get('/auth/callback', { maxRedirects: 0 });
+    expect(response.status()).toBe(307);
+    expect(response.headers().location).toBe(new URL('/auth/auth-code-error', baseURL).href);
   });
 
-  test('auth callback route exists', async ({ page }) => {
-    // The auth callback route should exist and handle requests
-    // Without a valid code, it should redirect to an error page
-    await page.goto('/auth/callback');
-
-    // The callback without a code redirects to auth-code-error
-    // So the response URL should contain "auth" somewhere
-    const url = page.url();
-    expect(url).toContain('auth');
+  test('cron endpoints reject unauthenticated requests', async ({ request }) => {
+    for (const path of ['send-reminders', 'check-streak-risk', 'check-streak-breaks', 'cleanup']) {
+      const response = await request.get(`/api/cron/${path}`);
+      expect(response.status()).toBe(401);
+      expect(await response.json()).toEqual({ error: 'Unauthorized' });
+    }
   });
 });

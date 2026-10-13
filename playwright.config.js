@@ -1,6 +1,9 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 
+const deployedURL = process.env.E2E_BASE_URL;
+const localURL = 'http://localhost:3100';
+
 /**
  * Playwright configuration for LockIn e2e tests.
  * @see https://playwright.dev/docs/test-configuration
@@ -18,8 +21,9 @@ module.exports = defineConfig({
     timeout: 5_000,
   },
 
-  /* Run tests sequentially in CI, parallel locally */
+  /* Limit browser processes on small orbs and CI runners. */
   fullyParallel: true,
+  workers: 2,
 
   /* Fail the build on CI if you accidentally left test.only in the source code */
   forbidOnly: !!process.env.CI,
@@ -32,7 +36,7 @@ module.exports = defineConfig({
 
   /* Shared settings for all projects */
   use: {
-    baseURL: 'http://localhost:3000',
+    baseURL: deployedURL || localURL,
 
     /* Collect trace when retrying the failed test */
     trace: 'on-first-retry',
@@ -46,14 +50,19 @@ module.exports = defineConfig({
     },
   ],
 
-  /* Run the appropriate server before starting the tests.
-   * In CI we always run `next start` (serves the pre-built production bundle)
-   * because the dev compiler is too slow and non-deterministic on cold runners.
-   * Locally we use `next dev` so hot-reload works as expected. */
-  webServer: {
-    command: process.env.CI ? 'npm run start' : 'npm run dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+  /* Test the production build, never an unrelated dev server. These anonymous
+   * flows need a syntactically valid URL/key, not a running Supabase backend.
+   * Explicit overrides keep tests away from real Supabase projects and secrets.
+   * E2E_BASE_URL runs the same read-only smoke suite against a deployment. */
+  webServer: deployedURL ? undefined : {
+    command: 'npm run build && npm run start -- --hostname 127.0.0.1 --port 3100',
+    url: localURL,
+    reuseExistingServer: false,
+    timeout: 180_000,
+    env: {
+      NEXT_PUBLIC_SUPABASE_URL: 'http://127.0.0.1:54321',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'lockin-e2e-not-a-real-key',
+      NEXT_PUBLIC_APP_URL: localURL,
+    },
   },
 });

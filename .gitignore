@@ -42,6 +42,9 @@ yarn-error.log*
 next-env.d.ts
 .sisyphus/
 
+# Local Claude worktrees are not project submodules.
+/.claude/worktrees/
+
 # playwright mcp logs
 .playwright-mcp/
 
